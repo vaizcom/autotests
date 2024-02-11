@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "autotests"
+version = "0.1.0"
+description = ""
+authors = ["Marina Astretsova <mastretsova@ibitcy.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pytest = "^8.0.0"
+pytest-playwright = "^0.4.4"
+python-dotenv = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
