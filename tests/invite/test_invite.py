@@ -1,10 +1,10 @@
-import random
 import time
 
 import pytest
-from playwright.sync_api import expect, Page, Playwright, BrowserContext
+from playwright.sync_api import expect
 
 from core import settings
+
 
 #  playwright codegen https://app.vaiz.dev/
 # Пользователь логинется по инвайту
@@ -38,7 +38,7 @@ def test_invite_new_user(context, page, generated_string):
     time.sleep(5)
 
     expect(page.get_by_role('link', name='Home')).to_be_attached()
-    page.get_by_role("complementary").get_by_text("Team").click()
+    page.get_by_role('complementary').get_by_text('Team').click()
     page.get_by_role('link', name='Members').click()
     page.get_by_role('button', name='Invite').click()
     page.get_by_role('button', name='Create Invitation').click()
@@ -50,7 +50,9 @@ def test_invite_new_user(context, page, generated_string):
     page1 = context.new_page()
     page1.goto('https://www.google.com/gmail/')
     page1.get_by_label('Телефон или адрес эл. почты').or_(page1.get_by_label('Email or phone')).click()
-    page1.get_by_label('Телефон или адрес эл. почты').or_(page1.get_by_label('Email or phone')).fill('test.vaiz.by.email@gmail.com')
+    page1.get_by_label('Телефон или адрес эл. почты').or_(page1.get_by_label('Email or phone')).fill(
+        'test.vaiz.by.email@gmail.com'
+    )
     page1.get_by_label('Email or phone').press('Enter')
     page1.get_by_label('Enter your password').click()
     page1.get_by_label('Enter your password').fill('fJ529_/!o7T~wwn!*e|')
@@ -63,5 +65,3 @@ def test_invite_new_user(context, page, generated_string):
     page2.get_by_role('button', name='Enter space').click()
 
     expect(page.get_by_text('Active?')).to_be_attached()
-
-
