@@ -2,7 +2,7 @@ import random
 import string
 import pytest
 from requests import request
-from settings import API_URL
+from core.settings import API_URL
 
 
 @pytest.fixture

@@ -7,15 +7,15 @@ from core import settings
 
 def test_sign_in_with_email(page: Page, playwright: Playwright):
     # Создаем новый контекст браузера с учетными данными для базовой аутентификации
-    with allure.step("Launching the app"):
+    with allure.step('Launching the app'):
         page.goto(settings.BASE_URL)
-    with allure.step("Entering user credentials"):
-        page.get_by_label("Email").fill('mastretsovaone@gmail.com')
-        page.get_by_label("Password").fill('123456')
+    with allure.step('Entering user credentials'):
+        page.get_by_label('Email').fill('mastretsovaone@gmail.com')
+        page.get_by_label('Password').fill('123456')
     with allure.step("Entering the button 'Continue'"):
-        page.get_by_role("button", name="Continue with Email").click()
+        page.get_by_role('button', name='Continue with Email').click()
     expect(page.get_by_role('link', name='Home')).to_be_attached()
-    expect(page.get_by_role("heading", name="Hello")).to_be_visible()
+    expect(page.get_by_role('heading', name='Hello')).to_be_visible()
 
 
 @pytest.mark.skip
@@ -61,6 +61,7 @@ def test_sign_in_with_google(page: Page):
     # sign_out = page.locator('.nav-link', has_text='Sign out')
     # assert sign_out.is_visible()
     expect(page.get_by_role('link', name='Dashboard')).to_be_attached(timeout=100 * 1000)
+
 
 @pytest.mark.skip
 def test_sign_in_with_github(page: Page, context, browser_context_args):
