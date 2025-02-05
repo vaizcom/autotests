@@ -19,10 +19,21 @@ def open_task_drawer(browser_context_args, page):
 
 
 def test_1(open_task_drawer, page):
+    page.locator('.EditorView-module_TitleWrapper_SDiGQ > .CheckToggle-module_Root_yyxTW > span > .icon-icon').click()
     comment_block = page.locator("//p[@data-placeholder='Write a comment...']")
     comment_block.click()
     comment_block.fill('some comment')
     page.locator('.CommentToolbar-module_Right_Vhb8z > span:nth-child(3) > .IconButton-module_Root_R3Wk8').click()
+    page.get_by_placeholder('Link task').click()
+    page.get_by_placeholder('Link task').fill('Related task new')
+    page.get_by_placeholder('Link task').press('ArrowDown')
+    page.get_by_placeholder('Link task').press('Enter')
+    page.get_by_role('button', name='Related Tasks VZS-1139 Related').is_visible()
+    page.get_by_role('heading', name='Subtasks').click()
+    page.get_by_role('heading', name='Add 0 Subtasks...').click()
+    page.get_by_placeholder('Enter subtask name').click()
+    page.get_by_placeholder('Enter subtask name').fill('Subtaska')
+    page.get_by_placeholder('Enter subtask name').press('Enter')
 
 
 def test_create_task(page, browser_context_args):
@@ -115,7 +126,6 @@ def test_create_task(page, browser_context_args):
     # page.get_by_role("button", name="Favorite Favorite").click()
     # page.get_by_role("button", name="Favorite Favorite").click()
 
-    page.get_by_role('button', name='Related Tasks Link task').click()
     page.get_by_placeholder('Link task').click()
     page.get_by_placeholder('Link task').fill('Related task new')
     page.get_by_placeholder('Link task').press('ArrowDown')
@@ -142,7 +152,7 @@ def test_create_task(page, browser_context_args):
     page.get_by_role('menuitem', name='select1').click()
 
     page.get_by_role('heading', name='Subtasks').click()
-    page.get_by_role('heading', name='Add Subtasks...').click()
+    page.get_by_role('heading', name='Add 0 Subtasks...').click()
     page.get_by_placeholder('Enter subtask name').click()
     page.get_by_placeholder('Enter subtask name').fill('Subtaska')
     page.get_by_placeholder('Enter subtask name').press('Enter')
