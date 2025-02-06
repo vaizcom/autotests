@@ -1,7 +1,16 @@
 name: Automated tests
 
 on:
-  push
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: Choose target
+        required: true
+        default: first_test
+        type: choice
+        options:
+          - first_test
+          - second_test
 
 jobs:
   test:
@@ -18,8 +27,13 @@ jobs:
         run: sudo apt-get install google-chrome-stable
       - name: Install dependencies
         run: poetry install
-      - name: Run tests
+      - name: first_tests
+        if: "github.event.inputs.deployment_target == 'first_test'"
+        run: pytest tests
+      - name: second_test
+        if: "github.event.inputs.deployment_target == 'second_test'"
         run: pytest
+
 
 
 
