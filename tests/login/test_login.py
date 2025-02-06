@@ -4,8 +4,16 @@ import pytest
 from playwright.sync_api import expect, Page, Playwright
 from core import settings
 
+@pytest.fixture()
+def browser_context_args():
+    return {
+        'http_credentials': {
+            'username': 'mastretsova+2@ibitcy.com',
+            'password': '123456',
+        }
+    }
 
-def test_sign_in_with_email(page: Page, playwright: Playwright):
+def test_sign_in_with_email(page: Page, browser_context_args):
     # Создаем новый контекст браузера с учетными данными для базовой аутентификации
     with allure.step('Launching the app'):
         page.goto(settings.BASE_URL)

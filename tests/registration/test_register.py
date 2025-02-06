@@ -3,12 +3,20 @@ import pytest
 from core import settings
 from playwright.sync_api import Page, expect, Playwright
 
+@pytest.fixture()
+def browser_context_args(generated_string):
+    return {
+        'http_credentials': {
+            'username': 'mastretsovaone+' + generated_string + '@gmail.com',
+            'password': '123456'
+        }
+    }
 
-def test_register_with_email(page: Page, generated_string):
+def test_register_with_email(page: Page, generated_string, browser_context_args):
     with allure.step('Launching the app'):
         page.goto(settings.BASE_URL + 'auth/sign-up')
     with allure.step('Entering user credentials'):
-        page.get_by_label('Email').fill('mastretsovaone+' + generated_string + '@gmail.com')
+        page.get_by_label('Email').fill('mastretsova+2+' + generated_string + '@ibitcy.com')
         page.get_by_label('Password').fill('123456')
         page.get_by_label('What is your name?').fill(generated_string)
     with allure.step("Entering the button 'Continue'"):

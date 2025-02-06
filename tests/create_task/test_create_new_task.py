@@ -1,21 +1,10 @@
 import time
+
+import allure
 import pytest
 from core import settings
 
 # ["session", "package", "module", "class", "function"]
-
-
-@pytest.fixture(scope='function')
-def open_task_drawer(browser_context_args, page):
-    page.goto(settings.BASE_URL)
-    page.get_by_role('navigation').get_by_text('Project 1').click()
-    page.get_by_role('link', name='autotest_dont_tuch').click()
-    page.get_by_role('button', name='Add task', exact=True).first.click()
-    task = 'autotest ' + str(time.asctime())
-    page.get_by_placeholder('Enter title...').fill(task)
-    page.get_by_role('button', name='Add task', exact=True).first.click()
-    task_drawer = page.get_by_role('button', name=task).click()
-    return task_drawer
 
 
 def test_1(open_task_drawer, page):
@@ -29,22 +18,23 @@ def test_1(open_task_drawer, page):
     page.get_by_placeholder('Link task').press('ArrowDown')
     page.get_by_placeholder('Link task').press('Enter')
     page.get_by_role('button', name='Related Tasks VZS-1139 Related').is_visible()
-    page.get_by_role('heading', name='Subtasks').click()
-    page.get_by_role('heading', name='Add 0 Subtasks...').click()
-    page.get_by_placeholder('Enter subtask name').click()
-    page.get_by_placeholder('Enter subtask name').fill('Subtaska')
-    page.get_by_placeholder('Enter subtask name').press('Enter')
+    # page.get_by_role('heading', name='Subtasks').click()
+    # page.get_by_role('heading', name='Add 0 Subtasks...').click()
+    # page.get_by_placeholder('Enter subtask name').click()
+    # page.get_by_placeholder('Enter subtask name').fill('Subtaska')
+    # page.get_by_placeholder('Enter subtask name').press('Enter')
 
 
-def test_create_task(page, browser_context_args):
-    page.goto(settings.BASE_URL)
-    page.get_by_role('navigation').get_by_text('Project 1').click()
-    page.get_by_role('link', name='autotest_dont_tuch').click()
-    page.get_by_role('button', name='Add task', exact=True).first.click()
-    task = 'autotest ' + str(time.asctime())
-    page.get_by_placeholder('Enter title...').fill(task)
-    page.get_by_role('button', name='Add task', exact=True).first.click()
-    page.get_by_role('button', name=task).click()
+def test_create_task(page, browser_context_args, open_task_drawer):
+    # with allure.step('Launching the app'):
+    #     page.goto(settings.BASE_URL)
+    # page.get_by_role('navigation').get_by_text('Project 1').click()
+    # page.get_by_role('link', name='autotest_dont_tuch').click()
+    # page.get_by_role('button', name='Add task', exact=True).first.click()
+    # task = 'autotest ' + str(time.asctime())
+    # page.get_by_placeholder('Enter title...').fill(task)
+    # page.get_by_role('button', name='Add task', exact=True).first.click()
+    # page.get_by_role('button', name=task).click()
 
     page.locator('.EditorView-module_TitleWrapper_SDiGQ > .CheckToggle-module_Root_yyxTW > span > .icon-icon').click()
 

@@ -1,0 +1,25 @@
+name: Automated tests
+
+on:
+  push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: setup Python
+        uses: actions/checkout@v4
+        with:
+          python-version: "3.13"
+      - name: Install Chrome
+        run: sudo apt-get install google-chrome-stable
+      - name: Install dependencies
+        run: poetry install
+      - name: Run tests
+        run: pytest
+
+
+

@@ -1,7 +1,12 @@
 import random
 import string
+from datetime import time
+import time
+import allure
 import pytest
 from requests import request
+
+from core import settings
 from core.settings import API_URL
 
 
@@ -41,7 +46,21 @@ def browser_context_args(browser_context_args, browser_token):
         },
     }
 
-
+@pytest.fixture(scope='function')
+def open_task_drawer(browser_context_args, page):
+    with allure.step('Launching the app'):
+        page.goto(settings.BASE_URL)
+    with allure.step('Open Board'):
+        page.get_by_role('navigation').get_by_text('Project 1').click()
+        page.get_by_role('link', name='autotest_dont_tuch').click()
+    with allure.step('Add task'):
+        page.get_by_role('button', name='Add task', exact=True).first.click()
+        task = 'autotest ' + str(time.asctime())
+        page.get_by_placeholder('Enter title...').fill(task)
+        page.get_by_role('button', name='Add task', exact=True).first.click()
+    with allure.step('Open task_drawer'):
+        task_drawer = page.get_by_role('button', name=task).click()
+    return task_drawer
 
 # @pytest.fixture()
 # def browser_context_args():

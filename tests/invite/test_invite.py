@@ -47,6 +47,7 @@ def test_invite_new_user(context, page, generated_string):
     page.keyboard.press('Enter')
     page.get_by_role('button', name='Add members').click()
     page.get_by_role('button', name='Manage member').click()
+
     page1 = context.new_page()
     page1.goto('https://www.google.com/gmail/')
     page1.get_by_label('Телефон или адрес эл. почты').or_(page1.get_by_label('Email or phone')).click()
@@ -57,8 +58,7 @@ def test_invite_new_user(context, page, generated_string):
     page1.get_by_label('Enter your password').click()
     page1.get_by_label('Enter your password').fill('fJ529_/!o7T~wwn!*e|')
     page1.get_by_label('Enter your password').press('Enter')
-    page1.get_by_role('row', name='unread, , , , Join').last.get_by_role('link').click()
-    page1.get_by_role('link', name='Join to a new Space')
+    page1.get_by_role('link', name='Join to a new Space - Join to').click()
     with page1.expect_popup() as page2:
         page1.get_by_role('link', name='Accept invite').last.click()
     page2 = page2.value
