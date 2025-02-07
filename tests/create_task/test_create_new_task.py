@@ -1,9 +1,3 @@
-import time
-
-import allure
-import pytest
-from core import settings
-
 # ["session", "package", "module", "class", "function"]
 
 

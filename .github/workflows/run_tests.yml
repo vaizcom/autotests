@@ -1,5 +1,4 @@
 name: Automated tests
-
 on:
   workflow_dispatch:
     inputs:
@@ -26,14 +25,10 @@ jobs:
       - name: Install Chrome
         run: sudo apt-get install google-chrome-stable
       - name: Install dependencies
-        run: poetry install
+        run: pip install -r requirements.txt
       - name: first_tests
         if: "github.event.inputs.deployment_target == 'first_test'"
         run: pytest tests
       - name: second_test
         if: "github.event.inputs.deployment_target == 'second_test'"
         run: pytest
-
-
-
-

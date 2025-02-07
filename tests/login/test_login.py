@@ -1,8 +1,9 @@
 import time
 import allure
 import pytest
-from playwright.sync_api import expect, Page, Playwright
+from playwright.sync_api import expect, Page
 from core import settings
+
 
 @pytest.fixture()
 def browser_context_args():
@@ -12,6 +13,7 @@ def browser_context_args():
             'password': '123456',
         }
     }
+
 
 def test_sign_in_with_email(page: Page, browser_context_args):
     # Создаем новый контекст браузера с учетными данными для базовой аутентификации
