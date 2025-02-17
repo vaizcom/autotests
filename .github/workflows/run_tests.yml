@@ -20,6 +20,12 @@ jobs:
           pip install -r requirements.txt
       - name: Install Playwright Browsers
         run: python -m playwright install --with-deps
+      - name: Zero trust VPN connection
+        uses: Boostport/setup-cloudflare-warp@v1.6.0
+        with:
+          organization: vaiz
+          auth_client_id:  ${{ vars.CF_TOKEN_NAME }}
+          auth_client_secret: ${{ secrets.CF_TOKEN }}
       - name: Run Playwright tests
         run: pytest -s -v
       - uses: actions/upload-artifact@v4
