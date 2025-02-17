@@ -1,34 +1,27 @@
-name: Automated tests
+name: Playwright Tests
 on:
-  workflow_dispatch:
-    inputs:
-      deployment_target:
-        description: Choose target
-        required: true
-        default: first_test
-        type: choice
-        options:
-          - first_test
-          - second_test
-
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 jobs:
   test:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: setup Python
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.13"
-      - name: Install Chrome
-        run: sudo apt-get install google-chrome-stable
+          node-version: lts/*
       - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: first_tests
-        if: "github.event.inputs.deployment_target == 'first_test'"
-        run: pytest tests
-      - name: second_test
-        if: "github.event.inputs.deployment_target == 'second_test'"
-        run: pytest
+        run: npm ci
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
