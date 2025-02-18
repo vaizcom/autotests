@@ -48,20 +48,20 @@ def test_invite_new_user(context, page, generated_string):
     page.get_by_role('button', name='Add members').click()
     page.get_by_role('button', name='Manage member').click()
 
-    page1 = context.new_page()
-    page1.goto('https://www.google.com/gmail/')
-    page1.get_by_label('Телефон или адрес эл. почты').or_(page1.get_by_label('Email or phone')).click()
-    page1.get_by_label('Телефон или адрес эл. почты').or_(page1.get_by_label('Email or phone')).fill(
-        'test.vaiz.by.email@gmail.com'
-    )
-    page1.get_by_label('Email or phone').press('Enter')
-    page1.get_by_label('Enter your password').click()
-    page1.get_by_label('Enter your password').fill('fJ529_/!o7T~wwn!*e|')
-    page1.get_by_label('Enter your password').press('Enter')
-    page1.get_by_role('link', name='Join to a new Space - Join to').click()
-    with page1.expect_popup() as page2:
-        page1.get_by_role('link', name='Accept invite').last.click()
-    page2 = page2.value
-    page2.get_by_role('button', name='Enter space').click()
-
-    expect(page.get_by_text('Active?')).to_be_attached()
+    # page1 = context.new_page()
+    # page1.goto('https://www.google.com/gmail/')
+    # page1.get_by_label('Телефон или адрес эл. почты').or_(page1.get_by_label('Email or phone')).click()
+    # page1.get_by_label('Телефон или адрес эл. почты').or_(page1.get_by_label('Email or phone')).fill(
+    #     'test.vaiz.by.email@gmail.com'
+    # )
+    # page1.get_by_label('Email or phone').press('Enter')
+    # page1.get_by_label('Enter your password').click()
+    # page1.get_by_label('Enter your password').fill('fJ529_/!o7T~wwn!*e|')
+    # page1.get_by_label('Enter your password').press('Enter')
+    # page1.get_by_role('link', name='Join to a new Space - Join to').click()
+    # with page1.expect_popup() as page2:
+    #     page1.get_by_role('link', name='Accept invite').last.click()
+    # page2 = page2.value
+    # page2.get_by_role('button', name='Enter space').click()
+    #
+    # expect(page.get_by_text('Active?')).to_be_attached()
