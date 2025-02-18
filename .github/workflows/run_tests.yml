@@ -27,7 +27,9 @@ jobs:
           auth_client_id:  ${{ vars.CF_TOKEN_NAME }}
           auth_client_secret: ${{ secrets.CF_TOKEN }}
       - name: Adding static DNS
-        run: echo "10.114.16.5 app.vaiz.dev api.vaiz.dev | sudo tee -a /etc/hosts"
+        run: echo "10.114.16.5 app.vaiz.dev api.vaiz.dev >> /etc/hosts"
+      - name: Check static DNS
+        run: cat /etc/hosts
       - name: Check availability
         run: curl -k https://app.vaiz.dev
       - name: Check DNS
