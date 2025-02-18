@@ -26,9 +26,9 @@ jobs:
           organization: vaiz
           auth_client_id:  ${{ vars.CF_TOKEN_NAME }}
           auth_client_secret: ${{ secrets.CF_TOKEN }}
-      - name: Check availability
-        run: curl https://app.vaiz.dev
-      - uses: actions/upload-artifact@v4
+      - name: Adding static DNS
+        run: |
+          sudo echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
       - name: Run Playwright tests
         run: pytest -s -v
       - uses: actions/upload-artifact@v4
