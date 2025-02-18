@@ -29,7 +29,7 @@ jobs:
       - name: Adding static DNS
         run: echo "10.114.16.5 app.vaiz.dev api.vaiz.dev | sudo tee -a /etc/hosts"
       - name: Check availability
-        run: curl -k https://app.vaiz.dev'
+        run: curl -k https://app.vaiz.dev
       - name: Check DNS
         run: nslookup app.vaiz.dev
     #  - uses: actions/upload-artifact@v4
