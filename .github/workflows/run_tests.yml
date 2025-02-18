@@ -9,17 +9,17 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-    #  - uses: actions/checkout@v4
-    #  - name: Set up Python
-    #    uses: actions/setup-python@v4
-    #    with:
-    #      python-version: '3.11'
-    #  - name: Install dependencies
-    #    run: |
-    #      python -m pip install --upgrade pip
-    #      pip install -r requirements.txt
-    #  - name: Install Playwright Browsers
-    #    run: python -m playwright install --with-deps
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Install Playwright Browsers
+        run: python -m playwright install --with-deps
       - name: Zero trust VPN connection
         uses: Boostport/setup-cloudflare-warp@v1.6.0
         with:
@@ -29,38 +29,32 @@ jobs:
       - name: Adding static DNS
         run: |
           sudo echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
-      - name: Check static DNS
-        run: cat /etc/hosts
-      - name: Check availability
-        run: curl -k https://app.vaiz.dev
-      - name: Check DNS
-        run: nslookup app.vaiz.dev
-    #  - uses: actions/upload-artifact@v4
-    #  - name: Run Playwright tests
-    #    run: pytest -s -v
-    #  - uses: actions/upload-artifact@v4
-    #    if: ${{ !cancelled() }}
-    #    with:
-    #      name: allure-report
-    #      path: ./logs/allure-result
-    #  - name: Get Allure history
-    #    uses: actions/checkout@v2
-    #    if: always()
-    #    continue-on-error: true
-    #    with:
-    #      ref: gh-pages
-    #      path: gh-pages
-    #  - uses: simple-elf/allure-report-action@master
-    #    if: always()
-    #    id: allure-report
-    #    with:
-    #      allure_results: reports
-    #      gh_pages: gh-pages
-    #      allure_report: allure-report
-    #      allure_history: allure-history
-    #  - uses: peaceiris/actions-gh-pages@v2
-    #    if: always()
-    #    env:
-    #      PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #      PUBLISH_BRANCH: gh-pages
-    #      PUBLISH_DIR: allure-history
+      - uses: actions/upload-artifact@v4
+      - name: Run Playwright tests
+        run: pytest -s -v
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: allure-report
+          path: ./logs/allure-result
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+      - uses: simple-elf/allure-report-action@master
+        if: always()
+        id: allure-report
+        with:
+          allure_results: reports
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+      - uses: peaceiris/actions-gh-pages@v2
+        if: always()
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history
