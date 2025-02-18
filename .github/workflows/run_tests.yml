@@ -28,7 +28,7 @@ jobs:
           auth_client_secret: ${{ secrets.CF_TOKEN }}
       - name: Adding static DNS
         run: |
-          sudo echo "127.0.0.1 postgres.dolphin.com" | sudo tee -a /etc/hosts
+          sudo echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
       - name: Check static DNS
         run: cat /etc/hosts
       - name: Check availability
