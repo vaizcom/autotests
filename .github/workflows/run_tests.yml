@@ -1,34 +1,70 @@
-name: Automated tests
+name: Playwright Tests
 on:
-  workflow_dispatch:
-    inputs:
-      deployment_target:
-        description: Choose target
-        required: true
-        default: first_test
-        type: choice
-        options:
-          - first_test
-          - second_test
-
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: 
 jobs:
   test:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: setup Python
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.13"
-      - name: Install Chrome
-        run: sudo apt-get install google-chrome-stable
+          python-version: '3.11'
       - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: first_tests
-        if: "github.event.inputs.deployment_target == 'first_test'"
-        run: pytest tests
-      - name: second_test
-        if: "github.event.inputs.deployment_target == 'second_test'"
-        run: pytest
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Install Playwright Browsers
+        run: python -m playwright install --with-deps
+      - name: Zero trust VPN connection
+        uses: Boostport/setup-cloudflare-warp@v1.6.0
+        with:
+          organization: vaiz
+          auth_client_id:  ${{ vars.CF_TOKEN_NAME }}
+          auth_client_secret: ${{ secrets.CF_TOKEN }}
+      - name: Adding static DNS
+        run: |
+          sudo echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
+      - name: Run Playwright tests
+        run: pytest -s -v
+      - name: Upload artifacts to eoadm.com
+        run: |
+          REPORT_NAME=https://github.com/vaizcom/autotests/actions/runs/${GITHUB_RUN_ID}
+          wget https://github.com/allure-framework/allurectl/releases/latest/download/allurectl_linux_amd64 -O ./allurectl
+          chmod +x ./allurectl
+          ./allurectl upload --endpoint https://testops.eoadm.com \
+            --token ${{ secrets.ALLURE_TOKEN }} \
+            --project-id 2 \
+            --launch-name "${REPORT_NAME}" \
+            ./logs/allure-result
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: allure-report
+          path: ./logs/allure-result
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+      - uses: simple-elf/allure-report-action@master
+        if: always()
+        id: allure-report
+        with:
+          allure_results: logs/allure-result
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+      - uses: peaceiris/actions-gh-pages@v2
+        if: always()
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history

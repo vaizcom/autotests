@@ -17,6 +17,20 @@ def test_1(open_task_drawer, page):
     # page.get_by_placeholder('Enter subtask name').click()
     # page.get_by_placeholder('Enter subtask name').fill('Subtaska')
     # page.get_by_placeholder('Enter subtask name').press('Enter')
+    page.get_by_role('heading', name='Subtasks').click()
+    page.get_by_role('heading', name='Add Subtasks').click()
+    page.get_by_placeholder('Enter subtask name').click()
+    page.get_by_placeholder('Enter subtask name').fill('Subtaska')
+    page.get_by_placeholder('Enter subtask name').press('Enter')
+
+    description_block = page.locator("//div[@class='DocumentEditor UniversalEditor']/div/p")
+    description_block.click()
+    description_block.fill('some text')
+
+    comment_block = page.locator("//p[@data-placeholder='Write a comment...']")
+    comment_block.click()
+    comment_block.fill('some comment')
+    page.locator('.CommentToolbar-module_Right_Vhb8z > span:nth-child(3) > .IconButton-module_Root_R3Wk8').click()
 
 
 def test_create_task(page, browser_context_args, open_task_drawer):
@@ -136,7 +150,7 @@ def test_create_task(page, browser_context_args, open_task_drawer):
     page.get_by_role('menuitem', name='select1').click()
 
     page.get_by_role('heading', name='Subtasks').click()
-    page.get_by_role('heading', name='Add 0 Subtasks...').click()
+    page.get_by_role('heading', name='Add Subtasks').click()
     page.get_by_placeholder('Enter subtask name').click()
     page.get_by_placeholder('Enter subtask name').fill('Subtaska')
     page.get_by_placeholder('Enter subtask name').press('Enter')
