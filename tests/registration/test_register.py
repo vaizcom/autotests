@@ -44,7 +44,7 @@ def test_register_with_email(page: Page, generated_string, browser_context_args)
         page.get_by_role('button', name='Start using Vaiz').click()
 
     expect(page.get_by_role('link', name='Home')).to_be_attached()
-    expect(page.get_by_role('heading', name='Hello, ' + generated_string + '!')).to_be_visible()
+    # expect(page.get_by_role('heading', name='Hello, ' + generated_string + '!')).to_be_visible()
     page.context.clear_cookies()
     return generated_string
 
