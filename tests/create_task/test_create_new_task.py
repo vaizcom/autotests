@@ -6,6 +6,18 @@ def test_1(open_task_drawer, page):
     comment_block = page.locator("//p[@data-placeholder='Write a comment...']")
     comment_block.click()
     comment_block.fill('some comment')
+
+    page.get_by_role('button', name='Select milestones').click()
+    page.get_by_text('Create milestone').click()
+    page.get_by_placeholder('Type name').click()
+    page.get_by_placeholder('Type name').fill('11')
+    page.get_by_role('menuitem', name='milestone 1').click()
+    # page.get_by_role('button', name='Milestone milestone').click()
+    # page.get_by_text('No milestone').click()
+    # page.get_by_role('button', name='Milestone No milestone').click()
+    # page.get_by_role('menu').get_by_text('milestone 1').click()
+    page.get_by_role('menu').get_by_text('milestone 1').is_visible()
+
     page.locator('.CommentToolbar-module_Right_Vhb8z > span:nth-child(3) > .IconButton-module_Root_R3Wk8').click()
     page.get_by_placeholder('Link task').click()
     page.get_by_placeholder('Link task').fill('Related task new')
@@ -48,16 +60,11 @@ def test_create_task(page, browser_context_args, open_task_drawer):
 
     page.get_by_role('button', name='Location Project 1').is_visible()
 
-    page.get_by_role('button', name='Milestone No milestone').click()
+    page.get_by_role('button', name='Select milestones').click()
     page.get_by_text('Create milestone').click()
     page.get_by_placeholder('Type name').click()
     page.get_by_placeholder('Type name').fill('11')
     page.get_by_role('menuitem', name='milestone 1').click()
-    page.get_by_role('button', name='Milestone milestone').click()
-    page.get_by_text('No milestone').click()
-    page.get_by_role('button', name='Milestone No milestone').click()
-    page.get_by_role('menu').get_by_text('milestone 1').click()
-    page.get_by_role('menu').get_by_text('milestone 1').is_visible()
 
     page.get_by_role('button', name='Types Select type').click()
     page.get_by_role('menuitem', name='Green').click()
