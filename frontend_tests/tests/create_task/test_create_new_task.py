@@ -1,4 +1,3 @@
-import pyautogui
 import pytest
 
 
@@ -8,7 +7,7 @@ def test_1(open_task_drawer, page):
     comment_block = page.locator("//p[@data-placeholder='Write a comment...']")
     comment_block.click()
     comment_block.fill('some comment')
-    pyautogui.hotkey('ctrl', 's')
+    # pyautogui.hotkey('ctrl', 's')
 
 @pytest.mark.skip
 def test_create_task(page, browser_context_args, open_task_drawer):
