@@ -32,21 +32,6 @@ jobs:
           sudo echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
       - name: Run Playwright tests
         run: pytest -s -v
-      - name: Upload artifacts to eoadm.com
-        run: |
-          REPORT_NAME=https://github.com/vaizcom/autotests/actions/runs/${GITHUB_RUN_ID}
-          wget https://github.com/allure-framework/allurectl/releases/latest/download/allurectl_linux_amd64 -O ./allurectl
-          chmod +x ./allurectl
-          ./allurectl upload --endpoint https://testops.eoadm.com \
-            --token ${{ secrets.ALLURE_TOKEN }} \
-            --project-id 2 \
-            --launch-name "${REPORT_NAME}" \
-            ./logs/allure-result
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: allure-report
-          path: ./logs/allure-result
       - name: Get Allure history
         uses: actions/checkout@v2
         if: always()
