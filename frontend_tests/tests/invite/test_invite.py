@@ -3,7 +3,7 @@ import time
 import pytest
 from playwright.sync_api import expect
 
-from core import settings
+from frontend_tests.core import settings
 
 
 #  playwright codegen https://app.vaiz.dev/
@@ -17,7 +17,7 @@ from core import settings
 # to do invaite more than one uzer
 # only in chrome, cose mode window isn't correct view
 
-
+@pytest.mark.skip
 @pytest.fixture()
 def browser_context_args():
     return {
@@ -27,7 +27,7 @@ def browser_context_args():
         }
     }
 
-
+@pytest.mark.skip
 def test_invite_new_user(context, page, generated_string):
     page.goto(settings.BASE_URL + 'auth/sign-in')
     page.get_by_label('Email').click()

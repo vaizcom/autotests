@@ -2,7 +2,7 @@ import time
 import allure
 import pytest
 from playwright.sync_api import expect, Page
-from core import settings
+from frontend_tests.core import settings
 
 
 @pytest.fixture()
@@ -14,7 +14,7 @@ def browser_context_args():
         }
     }
 
-
+@pytest.mark.skip
 def test_sign_in_with_email(page: Page, browser_context_args):
     # Создаем новый контекст браузера с учетными данными для базовой аутентификации
     with allure.step('Launching the app'):

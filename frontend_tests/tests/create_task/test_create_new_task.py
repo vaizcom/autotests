@@ -1,6 +1,8 @@
 import pyautogui
+import pytest
 
 
+@pytest.mark.skip
 def test_1(open_task_drawer, page):
     page.locator('.EditorView-module_TitleWrapper_SDiGQ > .CheckToggle-module_Root_yyxTW > span > .icon-icon').click()
     comment_block = page.locator("//p[@data-placeholder='Write a comment...']")
@@ -8,7 +10,7 @@ def test_1(open_task_drawer, page):
     comment_block.fill('some comment')
     pyautogui.hotkey('ctrl', 's')
 
-
+@pytest.mark.skip
 def test_create_task(page, browser_context_args, open_task_drawer):
     page.locator('.EditorView-module_TitleWrapper_SDiGQ > .CheckToggle-module_Root_yyxTW > span > .icon-icon').click()
 

@@ -6,8 +6,8 @@ import allure
 import pytest
 from requests import request
 
-from core import settings
-from core.settings import API_URL
+from frontend_tests.core import settings
+from frontend_tests.core.settings import API_URL
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def browser_context_args(browser_context_args, browser_token):
                 {
                     'name': '_t',
                     'value': browser_token,
-                    'url': 'https://app.vaiz.dev',
+                    'url': 'https://vaiz-app-ms.vaiz.dev/',
                 },
             ]
         },

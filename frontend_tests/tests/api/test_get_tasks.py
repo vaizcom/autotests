@@ -1,6 +1,6 @@
 import pytest
 from requests import request
-from core.settings import API_URL
+from frontend_tests.core.settings import API_URL
 
 
 @pytest.mark.skip

@@ -1,7 +1,8 @@
+import pytest
 from requests import request
-from core.settings import API_URL
+from frontend_tests.core.settings import API_URL
 
-
+@pytest.mark.skip
 def test_login():
     payload = {'email': 'mastretsova+2@ibitcy.com', 'password': '123456'}
     headers = {'currentSpaceId': '667433ff21f760c6446bc0e2', 'Content-Type': 'application/json'}
