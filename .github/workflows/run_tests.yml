@@ -31,8 +31,9 @@ jobs:
       - name: Adding static DNS
         run: |
           sudo echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
-      - name: Run Playwright tests
-        run: pytest -s -v
+      - name: Run Playwright tests with Allure
+        run: pytest -s -v --alluredir=allure-results
+
       - name: Get Allure history
         uses: actions/checkout@v2
         if: always()
@@ -54,10 +55,6 @@ jobs:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: allure-history
-      - name: 🔬 Run tests with Allure
-        run: |
-          pytest backend_tests/ --alluredir=allure-results
-
       - name: 📊 Generate Allure Report and Deploy to Pages
         uses: simple-elf/allure-report-action@v1.7
         with:
