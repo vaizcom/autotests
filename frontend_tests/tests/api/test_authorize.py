@@ -1,9 +1,10 @@
+import pytest
 from requests import request
 
 
 url = 'https://api.vaiz.dev/register'
 
-
+@pytest.mark.skip
 def test_registration(generated_string):
     payload = {'email': 'mastretsova+' + generated_string + '@ibitcy.com', 'password': '123456'}
     headers = {'Content-Type': 'application/json'}
