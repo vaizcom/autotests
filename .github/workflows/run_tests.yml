@@ -82,14 +82,12 @@ jobs:
           script: |
             const sha = context.payload.pull_request.head.sha.substring(0, 7);
             const time = new Date().toISOString();
-            const link = `https://vaizcom.github.io/autotests/`;
+            const link = "https://vaizcom.github.io/autotests/";
+            const passed = process.env.TEST_RESULT === "success";
+            const status = passed ? "✅ Tests passed" : "❌ Tests failed";
             github.rest.issues.createComment({
               issue_number: context.payload.pull_request.number,
               owner: context.repo.owner,
               repo: context.repo.name,
-              body: `🧪 **Allure Report for Commit \`${sha}\`**
-
-📄 [Click to view Allure Report](${link})
-
-🕒 Generated at: \`${time}\``
+              body: `${status}\n\n🧪 **Allure Report for Commit \`${sha}\`**\n\n📄 [Click to view Allure Report](${link})\n\n🕒 Generated at: \`${time}\``
             });
