@@ -55,7 +55,7 @@ jobs:
           PUBLISH_DIR: allure-history
       - name: 🔬 Run tests with Allure
         run: |
-          pytest tests/backend_tests/ --alluredir=allure-results
+          pytest tests --alluredir=allure-results
 
       - name: 🌐 Generate HTML report
         uses: actions/setup-java@v3  # Java нужен для allure CLI
