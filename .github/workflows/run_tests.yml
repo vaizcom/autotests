@@ -1,4 +1,4 @@
-name: Playwright Tests
+name: Tests with Allure Report
 on:
   push:
     branches: [ main, master ]
@@ -31,7 +31,7 @@ jobs:
       - name: Adding static DNS
         run: |
           sudo echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
-      - name: Run Playwright tests with Allure
+      - name: Run tests with Allure
         run: pytest -s -v --alluredir=allure-results
 
       - name: Get Allure history
