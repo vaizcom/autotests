@@ -53,3 +53,29 @@ jobs:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: allure-history
+      - name: 🔬 Run tests with Allure
+        run: |
+          pytest tests/backend_tests/ --alluredir=allure-results
+
+      - name: 🌐 Generate HTML report
+        uses: actions/setup-java@v3  # Java нужен для allure CLI
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: 🛠️ Install Allure CLI
+        run: |
+          curl -o allure.zip -L https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.zip
+          unzip allure.zip -d allure-cli
+          sudo mv allure-cli/allure-2.27.0/bin/allure /usr/local/bin/allure
+          allure --version
+
+      - name: 📊 Generate HTML from results
+        run: |
+          allure generate allure-results -o allure-report --clean
+
+      - name: 🚀 Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-report
