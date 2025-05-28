@@ -53,6 +53,7 @@ jobs:
 
       - name: ✅ Run tests with Allure
         run: |
+          rm -rf allure-results
           if [[ "${{ github.event.inputs.test_scope }}" == "backend" ]]; then
             pytest backend_tests/ --alluredir=allure-results
           elif [[ "${{ github.event.inputs.test_scope }}" == "frontend" ]]; then
