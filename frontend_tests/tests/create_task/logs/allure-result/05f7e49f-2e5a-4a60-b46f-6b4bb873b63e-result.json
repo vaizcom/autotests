@@ -1,0 +1,1 @@
+{"name": "test_1[chromium]", "status": "passed", "parameters": [{"name": "browser_name", "value": "'chromium'"}], "start": 1748335837532, "stop": 1748335890210, "uuid": "ba1a982d-b023-402e-b7e9-2c6dfed11805", "testCaseId": "4fa15f0e17406372e5ab205bfcf58911", "fullName": "tests.create_task.test_create_new_task#test_1"}
