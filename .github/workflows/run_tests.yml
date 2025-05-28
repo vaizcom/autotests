@@ -39,7 +39,8 @@ jobs:
       - name: Install Playwright Browsers
         run: python -m playwright install --with-deps
 
-      - name: Zero trust VPN connection
+      - name: ☁️ Setup VPN (only for frontend or all)
+        if: github.event.inputs.test_scope == 'frontend' || github.event.inputs.test_scope == 'all'
         uses: Boostport/setup-cloudflare-warp@v1.6.0
         with:
           organization: vaiz
@@ -52,7 +53,13 @@ jobs:
 
       - name: ✅ Run tests with Allure
         run: |
-          pytest -s -v --alluredir=allure-results
+          if [[ "${{ github.event.inputs.test_scope }}" == "backend" ]]; then
+            pytest backend_tests/ --alluredir=allure-results
+          elif [[ "${{ github.event.inputs.test_scope }}" == "frontend" ]]; then
+            pytest frontend_tests/ --alluredir=allure-results
+          else
+            pytest -s -v --alluredir=allure-results
+          fi
 
       - name: Check allure-results content
         run: ls -lah allure-results
