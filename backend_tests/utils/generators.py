@@ -34,3 +34,10 @@ def generate_slug(min_len: int = 4, max_len: int = 8) -> str:
     """
     length = random.randint(min_len, max_len)
     return ''.join(random.choices(string.ascii_letters, k=length))
+
+def generate_board_name() -> str:
+    """
+    Генерирует уникальное имя для Project.
+    Пример: project_abc123
+    """
+    return f"project_{uuid.uuid4().hex[:12]}"

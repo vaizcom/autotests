@@ -1,8 +1,10 @@
+import pytest
 from backend_tests.core.client import APIClient
 from backend_tests.core.auth import get_token
 from backend_tests.config.settings import API_URL
+from backend_tests.data.endpoints.Project.project_endpoints import create_project_endpoint
 from backend_tests.utils.generators import generate_space_name
-import pytest
+from backend_tests.utils.generators import generate_project_name, generate_slug
 from backend_tests.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
     remove_space_endpoint
@@ -23,13 +25,15 @@ def manager_client():
 
 
 # Фикстура: возвращает авторизованного API клиента с токеном владельца
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def owner_client():
     token = get_token("owner")
-    return APIClient(base_url=API_URL, token=token)
+    client = APIClient(base_url=API_URL)
+    client.set_auth_header(token)
+    return client
 
 # Фикстура: создает временный спейс и после прохождения тестов удаляет этот временный спейс
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def temp_space(owner_client):
     client = owner_client
     name = generate_space_name()
@@ -41,11 +45,13 @@ def temp_space(owner_client):
 
     client.post(**remove_space_endpoint(space_id=space_id))
 
-# # Фикстура: Возвращает заранее известный ID space
-# @pytest.fixture(scope="module")
-# def temp_space1():
-#     """
-#     Возвращает заранее известный ID space, например для интеграционных тестов.
-#     """
-#     return "681b18bd0305fa9c5f83fd85"
 
+@pytest.fixture(scope='function')
+def created_project_id(owner_client, temp_space):
+    """Создаёт проект, который используется во всех тестах модуля."""
+    name = generate_project_name()
+    slug = generate_slug()
+    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': temp_space}
+    response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+    assert response.status_code == 200
+    return response.json()['payload']['project']['_id']

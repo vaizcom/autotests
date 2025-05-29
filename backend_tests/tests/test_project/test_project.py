@@ -1,17 +1,18 @@
 import allure
-import pytest
 from backend_tests.utils.generators import generate_project_name, generate_slug
-from backend_tests.data.endpoints.Project.project_endpoints import create_project_endpoint, edit_project_endpoint, get_project_endpoint, get_projects_endpoint, archive_project_endpoint, unarchive_project_endpoint, is_project_slug_unique_endpoint, MAX_PROJECT_NAME_LENGTH, MAX_PROJECT_DESCRIPTION_LENGTH, MAX_PROJECT_SLUG_LENGTH
+from backend_tests.data.endpoints.Project.project_endpoints import (
+    create_project_endpoint,
+    edit_project_endpoint,
+    get_project_endpoint,
+    get_projects_endpoint,
+    archive_project_endpoint,
+    unarchive_project_endpoint,
+    is_project_slug_unique_endpoint,
+    MAX_PROJECT_NAME_LENGTH,
+    MAX_PROJECT_DESCRIPTION_LENGTH,
+    MAX_PROJECT_SLUG_LENGTH
+)
 
-@pytest.fixture(scope='module')
-def created_project_id(owner_client, temp_space):
-    """Создаёт проект, который используется во всех тестах модуля."""
-    name = generate_project_name()
-    slug = generate_slug()
-    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': temp_space}
-    response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
-    assert response.status_code == 200
-    return response.json()['payload']['project']['_id']
 
 @allure.title('Тест: Проверка slug: уникальность до создания, неуникальность после создания, и ошибка при дубликате')
 def test_project_slug_unique(owner_client, temp_space):
