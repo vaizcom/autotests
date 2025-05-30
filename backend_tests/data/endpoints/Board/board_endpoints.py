@@ -21,17 +21,28 @@ def get_board_endpoint(name: str, project_id: str, space_id: str):
         }
     }
 
-def create_board_endpoint(name: str, temp_project: str, space_id: str, groups: list,
-                          typesList: list, customFields: list):
-    return {
-        'path': '/CreateBoard',
-        'json': {
+def create_board_endpoint(
+    name: str,
+    temp_project: str,
+    space_id: str,
+    groups: list = None,
+    typesList: list = None,
+    customFields: list = None,
+    description: str = None
+):
+    payload = {
         "name": name,
         "project": temp_project,
         "groups": groups,
         "typesList": typesList,
-        "customFields": customFields
-    },
+        "customFields": customFields,
+    }
+    if description is not None:
+        payload["description"] = description
+
+    return {
+        'path': '/CreateBoard',
+        'json': payload,
         'headers': {
             'Content-Type': 'application/json',
             "Current-Space-Id": space_id

@@ -2,7 +2,13 @@ MAX_PROJECT_NAME_LENGTH = 25
 MAX_PROJECT_SLUG_LENGTH = 8
 MAX_PROJECT_DESCRIPTION_LENGTH = 1024
 
-def create_project_endpoint(name: str, color: str, icon: str, description: str, slug: str, space_id: str):
+def create_project_endpoint(
+        name: str,
+        color: str,
+        icon: str,
+        description: str,
+        slug: str,
+        space_id: str):
     return {
         "path": "/CreateProject",
         "json": {
@@ -18,6 +24,35 @@ def create_project_endpoint(name: str, color: str, icon: str, description: str, 
             "Current-Space-Id": space_id
         }
     }
+
+def create_board_endpoint(
+    name: str,
+    temp_project: str,
+    space_id: str,
+    groups: list = None,
+    typesList: list = None,
+    customFields: list = None,
+    description: str = None
+):
+    payload = {
+        "name": name,
+        "project": temp_project,
+        "groups": groups,
+        "typesList": typesList,
+        "customFields": customFields,
+    }
+    if description is not None:
+        payload["description"] = description
+
+    return {
+        'path': '/CreateBoard',
+        'json': payload,
+        'headers': {
+            'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
+        }
+    }
+
 
 def edit_project_endpoint(project_id: str, name: str, space_id: str):
     return {

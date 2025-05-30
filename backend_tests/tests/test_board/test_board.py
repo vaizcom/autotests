@@ -1,8 +1,10 @@
 import allure
 from backend_tests.data.endpoints.Board.board_endpoints import create_board_endpoint
 from backend_tests.utils.generators import generate_board_name
-from backend_tests.data.endpoints.Board.constants import MAX_BOARD_NAME_LENGTH
-
+from backend_tests.data.endpoints.Board.constants import (
+    MAX_BOARD_NAME_LENGTH,
+    BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH
+)
 
 
 @allure.title("Создание борды в существующем проекте и корректность возвращаемого имени")
@@ -32,7 +34,7 @@ def test_create_board(owner_client, temp_project, temp_space):
         )
 
 
-@allure.title("Создание борды с пустым именем")
+@allure.title("Ошибка при создание борды с пустым именем")
 def test_create_board_empty_name(owner_client, temp_project, temp_space):
     name = ""
 
@@ -97,3 +99,42 @@ def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
 
     with allure.step("Проверка, что API вернул 400 – ошибка валидации типов"):
         assert response.status_code == 400
+
+@allure.title("Создание борды с именем максимальной длины (50 символов)")
+def test_create_board_with_max_name_length(owner_client, temp_project, temp_space):
+    name = "B" * MAX_BOARD_NAME_LENGTH  # Ровно 50 символов
+
+    with allure.step("Отправка запроса на создание борды с максимальной длиной имени"):
+        response = owner_client.post(**create_board_endpoint(
+            name,
+            temp_project,
+            temp_space,
+            [],
+            [],
+            []
+        ))
+
+    with allure.step("Проверка, что API вернул 200 и борда создана"):
+        assert response.status_code == 200
+        assert response.json()["payload"]["board"]["name"] == name, (
+            f"Ожидалось имя борды '{name}', а получено '{response['payload']['board']['name']}'"
+        )
+
+@allure.title("Создание борды с описанием максимальной длины")
+def test_create_board_with_max_description(owner_client, temp_project, temp_space):
+    name = generate_board_name()
+    description = "D" * BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH
+
+    with allure.step(f"Отправка запроса на создание борды с описанием длиной {BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH} символов"):
+        response = owner_client.post(**create_board_endpoint(
+            name=name,
+            temp_project=temp_project,
+            space_id=temp_space,
+            groups=[],
+            typesList=[],
+            customFields=[],
+            description=description
+        ))
+
+    with allure.step("Проверка, что API вернул 200 и описание корректно сохранено"):
+        assert response.status_code == 200
