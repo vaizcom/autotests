@@ -47,7 +47,7 @@ def temp_space(owner_client):
 
 
 @pytest.fixture(scope='function')
-def created_project_id(owner_client, temp_space):
+def temp_project(owner_client, temp_space):
     """Создаёт проект, который используется во всех тестах модуля."""
     name = generate_project_name()
     slug = generate_slug()

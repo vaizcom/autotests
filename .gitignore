@@ -1,0 +1,6 @@
+# Allure results (raw report files)
+allure-results/
+
+# Optional: generated HTML reports
+allure-report/
+/.gitignore

@@ -108,41 +108,41 @@ def test_project_description_empty(owner_client, temp_space):
         assert response.status_code == 200
 
 @allure.title('Тест: Проверка получения проекта по ID')
-def test_get_project(owner_client, created_project_id, temp_space):
+def test_get_project(owner_client, temp_project, temp_space):
     client = owner_client
-    response = client.post(**get_project_endpoint(project_id=created_project_id, space_id=temp_space))
+    response = client.post(**get_project_endpoint(project_id=temp_project, space_id=temp_space))
     assert response.status_code == 200
     payload = response.json()['payload']
     assert 'project' in payload
 
 @allure.title('Тест: Проверка списка проектов')
-def test_get_projects(owner_client, created_project_id, temp_space):
+def test_get_projects(owner_client, temp_project, temp_space):
     client = owner_client
     response = client.post(**get_projects_endpoint(space_id=temp_space))
     assert response.status_code == 200
     projects = response.json()['payload']['projects']
     project_ids = [p['_id'] for p in projects]
-    assert created_project_id in project_ids
+    assert temp_project in project_ids
 
 @allure.title('Тест: Проверка редактирования имени проекта')
-def test_edit_project_name(owner_client, created_project_id, temp_space):
+def test_edit_project_name(owner_client, temp_project, temp_space):
     client = owner_client
     new_name = generate_project_name()
-    edit_response = client.post(**edit_project_endpoint(project_id=created_project_id, name=new_name, space_id=temp_space))
+    edit_response = client.post(**edit_project_endpoint(project_id=temp_project, name=new_name, space_id=temp_space))
     assert edit_response.status_code == 200
     assert edit_response.json()['payload']['project']['name'] == new_name
 
 @allure.title('Тест: Проверка архивации проекта')
-def test_archive_project(owner_client, created_project_id, temp_space):
+def test_archive_project(owner_client, temp_project, temp_space):
     client = owner_client
-    archive_response = client.post(**archive_project_endpoint(project_id=created_project_id, space_id=temp_space))
+    archive_response = client.post(**archive_project_endpoint(project_id=temp_project, space_id=temp_space))
     assert archive_response.status_code == 200
     assert archive_response.json()['payload']['project'].get('archivedAt')
 
 @allure.title('Тест: Проверка разархивации проекта')
-def test_unarchive_project(owner_client, created_project_id, temp_space):
+def test_unarchive_project(owner_client, temp_project, temp_space):
     client = owner_client
-    client.post(**archive_project_endpoint(project_id=created_project_id, space_id=temp_space))
-    unarchive_response = client.post(**unarchive_project_endpoint(project_id=created_project_id, space_id=temp_space))
+    client.post(**archive_project_endpoint(project_id=temp_project, space_id=temp_space))
+    unarchive_response = client.post(**unarchive_project_endpoint(project_id=temp_project, space_id=temp_space))
     assert unarchive_response.status_code == 200
-    assert unarchive_response.json()['payload'].get('itemId') == created_project_id
+    assert unarchive_response.json()['payload'].get('itemId') == temp_project

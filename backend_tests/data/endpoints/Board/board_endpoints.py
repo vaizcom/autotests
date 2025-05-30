@@ -1,13 +1,14 @@
-def get_boards_endpoint(name=None, project_id=None):
+def get_boards_endpoint(space_id: str):
     return {
         'path': '/GetBoards',
         'json': {},
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def get_board_endpoint(name=None, project_id=None):
+def get_board_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/GetBoard',
         'json': {
@@ -16,15 +17,17 @@ def get_board_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def create_board_endpoint(name: str, project_id: str, space_id: str, groups: list, typesList: list, customFields: list):
+def create_board_endpoint(name: str, temp_project: str, space_id: str, groups: list,
+                          typesList: list, customFields: list):
     return {
         'path': '/CreateBoard',
         'json': {
         "name": name,
-        "project": project_id,
+        "project": temp_project,
         "groups": groups,
         "typesList": typesList,
         "customFields": customFields
@@ -35,7 +38,7 @@ def create_board_endpoint(name: str, project_id: str, space_id: str, groups: lis
         }
     }
 
-def edit_board_endpoint(name=None, project_id=None):
+def edit_board_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/EditBoard',
         'json': {
@@ -44,10 +47,11 @@ def edit_board_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def import_board_file_endpoint(name=None, project_id=None):
+def import_board_file_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/ImportBoardFile',
         'json': {
@@ -56,10 +60,11 @@ def import_board_file_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def import_board_text_endpoint(name=None, project_id=None):
+def import_board_text_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/ImportBoardText',
         'json': {
@@ -68,10 +73,11 @@ def import_board_text_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def create_board_type_endpoint(name=None, project_id=None):
+def create_board_type_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/CreateBoardType',
         'json': {
@@ -82,10 +88,11 @@ def create_board_type_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def edit_board_type_endpoint(name=None, project_id=None):
+def edit_board_type_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/EditBoardType',
         'json': {
@@ -97,10 +104,11 @@ def edit_board_type_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def remove_board_type_endpoint(name=None, project_id=None):
+def remove_board_type_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/RemoveBoardType',
         'json': {
@@ -108,10 +116,11 @@ def remove_board_type_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def create_board_group_endpoint(name=None, project_id=None):
+def create_board_group_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/CreateBoardGroup',
         'json': {
@@ -120,10 +129,11 @@ def create_board_group_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def edit_board_group_endpoint(name=None, project_id=None):
+def edit_board_group_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/EditBoardGroup',
         'json': {
@@ -133,10 +143,11 @@ def edit_board_group_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def remove_board_group_endpoint(name=None, project_id=None):
+def remove_board_group_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/RemoveBoardGroup',
         'json': {
@@ -144,10 +155,11 @@ def remove_board_group_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def reorder_board_groups_endpoint(name=None, project_id=None):
+def reorder_board_groups_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/ReorderBoardGroups',
         'json': {
@@ -155,10 +167,11 @@ def reorder_board_groups_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def create_board_custom_field_endpoint(name=None, project_id=None):
+def create_board_custom_field_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/CreateBoardCustomField',
         'json': {
@@ -168,10 +181,11 @@ def create_board_custom_field_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def edit_board_custom_field_endpoint(name=None, project_id=None):
+def edit_board_custom_field_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/EditBoardCustomField',
         'json': {
@@ -182,10 +196,11 @@ def edit_board_custom_field_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def remove_board_custom_field_endpoint(name=None, project_id=None):
+def remove_board_custom_field_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/RemoveBoardCustomField',
         'json': {
@@ -193,10 +208,11 @@ def remove_board_custom_field_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }
 
-def broadcast_board_endpoint(name=None, project_id=None):
+def broadcast_board_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/BroadcastBoard',
         'json': {
@@ -204,5 +220,6 @@ def broadcast_board_endpoint(name=None, project_id=None):
     },
         'headers': {
             'Content-Type': 'application/json',
+            "Current-Space-Id": space_id
         }
     }

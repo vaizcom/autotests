@@ -1,7 +1,7 @@
 import uuid
 import random
 import string
-
+from backend_tests.data.endpoints.Board.constants import MAX_BOARD_NAME_LENGTH
 
 def generate_space_name() -> str:
     """
@@ -35,9 +35,10 @@ def generate_slug(min_len: int = 4, max_len: int = 8) -> str:
     length = random.randint(min_len, max_len)
     return ''.join(random.choices(string.ascii_letters, k=length))
 
-def generate_board_name() -> str:
+def generate_board_name(min_len: int = 1, max_len = MAX_BOARD_NAME_LENGTH):
     """
     Генерирует уникальное имя для Project.
     Пример: project_abc123
     """
-    return f"project_{uuid.uuid4().hex[:12]}"
+    length = random.randint(min_len, max_len)
+    return ''.join(random.choices(string.ascii_letters, k=length))
