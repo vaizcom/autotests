@@ -197,20 +197,35 @@ def create_board_custom_field_endpoint(board_id: str, name: str, type: str, spac
     }
 
 
-def edit_board_custom_field_endpoint(name: str, project_id: str, space_id: str):
+def edit_board_custom_field_endpoint(board_id: str, field_id: str,
+                                     name: str = None,
+                                     description: str = None,
+                                     hidden: bool = None,
+                                     options: list = None,
+                                     space_id: str = None):
+    payload = {
+        "boardId": board_id,
+        "fieldId": field_id
+    }
+
+    if name is not None:
+        payload["name"] = name
+    if description is not None:
+        payload["description"] = description
+    if hidden is not None:
+        payload["hidden"] = hidden
+    if options is not None:
+        payload["options"] = options
+
     return {
-        'path': '/EditBoardCustomField',
-        'json': {
-        "id": "field_id",
-        "label": "Updated Priority",
-        "type": "string",
-        "required": True
-    },
-        'headers': {
-            'Content-Type': 'application/json',
+        "path": "/EditBoardCustomField",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
             "Current-Space-Id": space_id
         }
     }
+
 
 def remove_board_custom_field_endpoint(name: str, project_id: str, space_id: str):
     return {

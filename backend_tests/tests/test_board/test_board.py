@@ -1,13 +1,14 @@
 import allure
 import pytest
 
-from backend_tests.data.endpoints.Board.board_endpoints import create_board_endpoint, create_board_custom_field_endpoint
+from backend_tests.data.endpoints.Board.board_endpoints import create_board_endpoint, \
+    create_board_custom_field_endpoint, edit_board_custom_field_endpoint
 from backend_tests.data.endpoints.Board.custom_field_types import CustomFieldType
-from backend_tests.utils.generators import generate_board_name
+from backend_tests.utils.generators import generate_board_name, generate_custom_field_description, \
+    generate_custom_field_title
 from backend_tests.data.endpoints.Board.constants import (
     MAX_BOARD_NAME_LENGTH,
-    BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH, DEFAULT_BOARD_GROUP_NAME, BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH,
-    generate_custom_field_title
+    BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH, DEFAULT_BOARD_GROUP_NAME, BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH
 )
 
 
@@ -183,4 +184,79 @@ def test_create_custom_field_of_each_type(owner_client, temp_board, field_type, 
         assert response.status_code == 200
         assert response.json()["payload"]["customField"]["name"] == title
         assert response.json()["payload"]["customField"]["type"] == field_type
+
+
+
+
+@pytest.mark.parametrize("field_type", [t.value for t in CustomFieldType if t.value != "Select"])
+@allure.title("Редактирование кастомного поля типа: {field_type}")
+def test_edit_custom_field_common_fields(owner_client, temp_board, temp_space, field_type):
+    original_title = generate_custom_field_title()
+
+    with allure.step(f"Создание поля типа '{field_type}'"):
+        create_response = owner_client.post(**create_board_custom_field_endpoint(
+            board_id=temp_board,
+            name=original_title,
+            type=field_type,
+            space_id=temp_space
+        ))
+        assert create_response.status_code == 200
+        field_id = create_response.json()["payload"]["customField"]["_id"]
+
+    new_name = "Обновлённое имя"
+    new_description = "Обновлённое описание"
+    hidden = True
+
+    with allure.step("Редактирование поля: обновление name, description и hidden"):
+        edit_response = owner_client.post(**edit_board_custom_field_endpoint(
+            board_id=temp_board,
+            field_id=field_id,
+            name=new_name,
+            description=new_description,
+            hidden=hidden,
+            space_id=temp_space
+        ))
+
+    with allure.step("Проверка успешного редактирования"):
+        assert edit_response.status_code == 200
+        updated_field = edit_response.json()["payload"]["customField"]
+        assert updated_field["name"] == new_name
+        assert updated_field["description"] == new_description
+        assert updated_field["hidden"] is True
+
+
+@allure.title("Редактирование поля типа Select: название, описание, скрытость и опции")
+def test_edit_select_custom_field(owner_client, temp_board, temp_space):
+    title = generate_custom_field_title()
+    description = generate_custom_field_description()
+
+    with allure.step("Создание поля типа 'Select'"):
+        create_response = owner_client.post(**create_board_custom_field_endpoint(
+            board_id=temp_board,
+            space_id=temp_space,
+            name=title,
+            type=CustomFieldType.SELECT.value
+        ))
+        assert create_response.status_code == 200
+        field_id = create_response.json()["payload"]["customField"]["_id"]
+
+    new_title = "Обновлённое имя"
+    new_description = "Обновлённое описание"
+
+    with allure.step("Редактирование поля: новое имя, описание, скрытость и список опций"):
+        edit_response = owner_client.post(**edit_board_custom_field_endpoint(
+            board_id=temp_board,
+            space_id=temp_space,
+            field_id=field_id,
+            name=new_title,
+            description=new_description,
+            hidden=True
+        ))
+        assert edit_response.status_code == 200
+
+    with allure.step("Проверка, что изменения были применены"):
+        updated = edit_response.json()["payload"]["customField"]
+        assert updated["name"] == new_title
+        assert updated["description"] == new_description
+        assert updated["hidden"] is True
 
