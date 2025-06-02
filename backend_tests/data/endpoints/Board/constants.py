@@ -1,3 +1,5 @@
+import random
+import string
 # backend_tests/constants/board_limits.py
 
 # Максимальная длина названия борды
@@ -25,3 +27,15 @@ BOARD_CUSTOM_FIELD_OPTION_MAX_DESCRIPTION_LENGTH = 1024
 BOARD_GROUP_LIMIT_MAX_VALUE = 999
 
 DEFAULT_BOARD_GROUP_NAME = 'Empty group'
+
+
+def generate_custom_field_title(length: int = 10) -> str:
+    """
+    Генерирует строку указанной длины, состоящую из латинских букв и цифр.
+    Используется для поля title в кастомных полях борды.
+
+    :param length: Длина генерируемого заголовка.
+    :return: Случайная строка.
+    """
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.choices(chars, k=length))

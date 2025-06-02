@@ -2,8 +2,8 @@ import pytest
 from backend_tests.core.client import APIClient
 from backend_tests.core.auth import get_token
 from backend_tests.config.settings import API_URL
-from backend_tests.data.endpoints.Project.project_endpoints import create_project_endpoint
-from backend_tests.utils.generators import generate_space_name
+from backend_tests.data.endpoints.Project.project_endpoints import create_project_endpoint, create_board_endpoint
+from backend_tests.utils.generators import generate_space_name, generate_board_name
 from backend_tests.utils.generators import generate_project_name, generate_slug
 from backend_tests.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
@@ -55,3 +55,23 @@ def temp_project(owner_client, temp_space):
     response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
     assert response.status_code == 200
     return response.json()['payload']['project']['_id']
+
+
+@pytest.fixture(scope='function')
+def temp_board(owner_client, temp_project, temp_space):
+    """
+    Создаёт временную борду в указанном проекте и пространстве.
+    """
+    board_name = generate_board_name()
+    payload = create_board_endpoint(
+        name=board_name,
+        temp_project=temp_project,
+        space_id=temp_space,
+        groups=[],
+        typesList=[],
+        customFields=[]
+    )
+    response = owner_client.post(**payload)
+    assert response.status_code == 200
+
+    return response.json()["payload"]["board"]["_id"]

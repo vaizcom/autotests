@@ -1,11 +1,13 @@
 import allure
 import pytest
 
-from backend_tests.data.endpoints.Board.board_endpoints import create_board_endpoint
+from backend_tests.data.endpoints.Board.board_endpoints import create_board_endpoint, create_board_custom_field_endpoint
+from backend_tests.data.endpoints.Board.custom_field_types import CustomFieldType
 from backend_tests.utils.generators import generate_board_name
 from backend_tests.data.endpoints.Board.constants import (
     MAX_BOARD_NAME_LENGTH,
-    BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH, DEFAULT_BOARD_GROUP_NAME, BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH
+    BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH, DEFAULT_BOARD_GROUP_NAME, BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH,
+    generate_custom_field_title
 )
 
 
@@ -162,3 +164,23 @@ def test_create_board_with_long_custom_field_title(owner_client, temp_project, t
 
     with allure.step("Проверка, что API вернул 400 – ошибка валидации длины заголовка"):
         assert response.status_code == 400
+
+
+@pytest.mark.parametrize("field_type", CustomFieldType.list())
+@allure.title("Создание кастомного поля типа: {field_type}")
+def test_create_custom_field_of_each_type(owner_client, temp_board, field_type, temp_space):
+    title = generate_custom_field_title()
+
+    with allure.step(f"Создание поля типа '{field_type}' с валидным заголовком"):
+        response = owner_client.post(**create_board_custom_field_endpoint(
+            board_id=temp_board,
+            name=title,
+            type=field_type,
+            space_id=temp_space
+        ))
+
+    with allure.step("Проверка, что API вернул 200"):
+        assert response.status_code == 200
+        assert response.json()["payload"]["customField"]["name"] == title
+        assert response.json()["payload"]["customField"]["type"] == field_type
+

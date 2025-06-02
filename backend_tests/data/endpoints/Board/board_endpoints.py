@@ -182,19 +182,20 @@ def reorder_board_groups_endpoint(name: str, project_id: str, space_id: str):
         }
     }
 
-def create_board_custom_field_endpoint(name: str, project_id: str, space_id: str):
+def create_board_custom_field_endpoint(board_id: str, name: str, type: str, space_id: str):
     return {
-        'path': '/CreateBoardCustomField',
-        'json': {
-        "label": "Priority",
-        "type": "string",
-        "required": False
-    },
-        'headers': {
-            'Content-Type': 'application/json',
+        "path": "/CreateBoardCustomField",
+        "json": {
+            "boardId": board_id,
+            "name": name,
+            "type": type
+        },
+        "headers": {
+            "Content-Type": "application/json",
             "Current-Space-Id": space_id
         }
     }
+
 
 def edit_board_custom_field_endpoint(name: str, project_id: str, space_id: str):
     return {
