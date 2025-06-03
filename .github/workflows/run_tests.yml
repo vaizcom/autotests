@@ -99,11 +99,24 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const fs = require('fs');
+            const summaryPath = './allure-report/widgets/summary.json';
+
+            let status = "✅ Tests passed";
+            try {
+              const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+              const { failed, broken } = summary.statistic;
+              if (failed > 0 || broken > 0) {
+                status = "❌ Tests failed";
+              }
+            } catch (e) {
+              status = "⚠️ Could not read test results";
+            }
+
             const sha = context.payload.pull_request.head.sha.substring(0, 7);
             const time = new Date().toISOString();
             const link = "https://vaizcom.github.io/autotests/";
-            const passed = process.env.TEST_RESULT === "success";
-            const status = passed ? "✅ Tests passed" : "❌ Tests failed";
+
             github.rest.issues.createComment({
               issue_number: context.payload.pull_request.number,
               owner: context.repo.owner,
