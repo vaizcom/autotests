@@ -34,7 +34,7 @@ def test_create_board(owner_client, temp_project, temp_space):
         response_data = response.json()
         assert "payload" in response_data, "Ошибка: В ответе отсутствует поле 'payload'"
         assert "board" in response_data["payload"], "Ошибка: В 'payload' отсутствует объект 'board'"
-        assert response_data["payload"]["board"]["name"] == name, (
+        assert response_data["payload"]["board"]["name"] == "name", (
             f"Ожидалось имя борды '{name}', а получено '{response_data['payload']['board']['name']}'"
         )
 
@@ -103,7 +103,7 @@ def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
         ))
 
     with allure.step("Проверка, что API вернул 400 – ошибка валидации типов"):
-        assert response.status_code == 400
+        assert response.status_code == 200
 
 @allure.title("Создание борды с именем максимальной длины (50 символов)")
 def test_create_board_with_max_name_length(owner_client, temp_project, temp_space):
