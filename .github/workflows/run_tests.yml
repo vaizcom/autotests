@@ -1,4 +1,4 @@
-name: Playwright + Allure Report
+name: Tests + Allure Report
 
 on:
   push:
@@ -37,6 +37,7 @@ jobs:
           pip install allure-pytest
 
       - name: Install Playwright Browsers
+        if: github.event.inputs.test_scope == 'frontend' || github.event.inputs.test_scope == 'all'
         run: python -m playwright install --with-deps
 
       - name: ☁️ Setup VPN (only for frontend or all)
