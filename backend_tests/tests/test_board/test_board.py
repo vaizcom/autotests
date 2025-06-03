@@ -1,11 +1,11 @@
 import allure
 import pytest
-
+import json
 from backend_tests.data.endpoints.Board.board_endpoints import create_board_endpoint, \
     create_board_custom_field_endpoint, edit_board_custom_field_endpoint
 from backend_tests.data.endpoints.Board.custom_field_types import CustomFieldType
 from backend_tests.utils.generators import generate_board_name, generate_custom_field_description, \
-    generate_custom_field_title
+    generate_custom_field_title, generate_object_id
 from backend_tests.data.endpoints.Board.constants import (
     MAX_BOARD_NAME_LENGTH,
     BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH, DEFAULT_BOARD_GROUP_NAME, BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH
@@ -225,38 +225,47 @@ def test_edit_custom_field_common_fields(owner_client, temp_board, temp_space, f
         assert updated_field["hidden"] is True
 
 
-@allure.title("Редактирование поля типа Select: название, описание, скрытость и опции")
+@allure.title("Редактирование поля Select: добавление новых опций с валидным _id")
 def test_edit_select_custom_field(owner_client, temp_board, temp_space):
     title = generate_custom_field_title()
-    description = generate_custom_field_description()
 
-    with allure.step("Создание поля типа 'Select'"):
+    with allure.step("Создание поля типа 'Select' без опций"):
         create_response = owner_client.post(**create_board_custom_field_endpoint(
             board_id=temp_board,
             space_id=temp_space,
             name=title,
             type=CustomFieldType.SELECT.value
         ))
-        assert create_response.status_code == 200
+        assert create_response.status_code == 200, f"Create failed: {create_response.json()}"
         field_id = create_response.json()["payload"]["customField"]["_id"]
 
     new_title = "Обновлённое имя"
-    new_description = "Обновлённое описание"
+    new_options = [
+        {
+            "_id": generate_object_id(),
+            "title": "Опция 1",
+            "color": "red",
+            "icon": "Thumb"
+        },
+        {
+            "_id": generate_object_id(),
+            "title": "Опция 2",
+            "color": "Cursor"
+        }
+    ]
 
-    with allure.step("Редактирование поля: новое имя, описание, скрытость и список опций"):
+    with allure.step("Редактирование поля: добавление опций"):
         edit_response = owner_client.post(**edit_board_custom_field_endpoint(
             board_id=temp_board,
             space_id=temp_space,
             field_id=field_id,
             name=new_title,
-            description=new_description,
-            hidden=True
+            hidden=True,
+            options=new_options
         ))
-        assert edit_response.status_code == 200
+        assert edit_response.status_code == 200, f"Edit failed: {edit_response.json()}"
 
-    with allure.step("Проверка, что изменения были применены"):
-        updated = edit_response.json()["payload"]["customField"]
-        assert updated["name"] == new_title
-        assert updated["description"] == new_description
-        assert updated["hidden"] is True
-
+        data = edit_response.json()["payload"]["customField"]
+        assert data["name"] == new_title
+        assert len(data["options"]) == 2
+        assert data["options"][0]["title"] == "Опция 1"

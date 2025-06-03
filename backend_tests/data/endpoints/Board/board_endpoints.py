@@ -182,27 +182,47 @@ def reorder_board_groups_endpoint(name: str, project_id: str, space_id: str):
         }
     }
 
-def create_board_custom_field_endpoint(board_id: str, name: str, type: str, space_id: str):
+
+def create_board_custom_field_endpoint(
+    board_id: str,
+    space_id: str,
+    name: str,
+    type: str,
+    hidden: bool = False,
+    options: list = None,
+    description: str = None
+):
+    payload = {
+        "boardId": board_id,
+        "name": name,
+        "type": type,
+        "hidden": hidden
+    }
+
+    if options is not None:
+        payload["options"] = options
+
+    if description is not None:
+        payload["description"] = description
+
     return {
         "path": "/CreateBoardCustomField",
-        "json": {
-            "boardId": board_id,
-            "name": name,
-            "type": type
-        },
         "headers": {
             "Content-Type": "application/json",
             "Current-Space-Id": space_id
-        }
+        },
+        "json": payload
     }
 
-
-def edit_board_custom_field_endpoint(board_id: str, field_id: str,
-                                     name: str = None,
-                                     description: str = None,
-                                     hidden: bool = None,
-                                     options: list = None,
-                                     space_id: str = None):
+def edit_board_custom_field_endpoint(
+    board_id: str,
+    space_id: str,
+    field_id: str,
+    name: str = None,
+    description: str = None,
+    hidden: bool = None,
+    options: list = None
+):
     payload = {
         "boardId": board_id,
         "fieldId": field_id
@@ -210,20 +230,23 @@ def edit_board_custom_field_endpoint(board_id: str, field_id: str,
 
     if name is not None:
         payload["name"] = name
+
     if description is not None:
         payload["description"] = description
+
     if hidden is not None:
         payload["hidden"] = hidden
+
     if options is not None:
         payload["options"] = options
 
     return {
         "path": "/EditBoardCustomField",
-        "json": payload,
         "headers": {
             "Content-Type": "application/json",
             "Current-Space-Id": space_id
-        }
+        },
+        "json": payload
     }
 
 

@@ -1,4 +1,5 @@
 import uuid
+import secrets
 import random
 import string
 from backend_tests.data.endpoints.Board.constants import MAX_BOARD_NAME_LENGTH, \
@@ -63,3 +64,8 @@ def generate_custom_field_description(min_len: int = 1, max_len = BOARD_CUSTOM_F
     """Генерирует описание кастомного поля максимальной длины (по умолчанию)."""
     length = random.randint(min_len, max_len)
     return ''.join(random.choices(string.ascii_letters + string.digits + ' ', k=length))
+
+
+
+def generate_object_id() -> str:
+    return secrets.token_hex(12)
