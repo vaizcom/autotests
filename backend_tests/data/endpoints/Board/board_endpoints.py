@@ -8,18 +8,18 @@ def get_boards_endpoint(space_id: str):
         }
     }
 
-def get_board_endpoint(name: str, project_id: str, space_id: str):
+def get_board_endpoint(board_id: str, space_id: str):
     return {
         'path': '/GetBoard',
         'json': {
-        "name": name,
-        "project": project_id
-    },
+            "boardId": board_id
+        },
         'headers': {
             'Content-Type': 'application/json',
             "Current-Space-Id": space_id
         }
     }
+
 
 def create_board_endpoint(
     name: str,
