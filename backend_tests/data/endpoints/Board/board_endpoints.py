@@ -49,18 +49,19 @@ def create_board_endpoint(
         }
     }
 
-def edit_board_endpoint(name: str, project_id: str, space_id: str):
+def edit_board_endpoint(board_id: str, name: str, space_id: str):
     return {
         'path': '/EditBoard',
         'json': {
-        "name": name,
-        "project": project_id
-    },
+            "boardId": board_id,
+            "name": name
+        },
         'headers': {
             'Content-Type': 'application/json',
             "Current-Space-Id": space_id
         }
     }
+
 
 def import_board_file_endpoint(name: str, project_id: str, space_id: str):
     return {
@@ -131,18 +132,20 @@ def remove_board_type_endpoint(name: str, project_id: str, space_id: str):
         }
     }
 
-def create_board_group_endpoint(name: str, project_id: str, space_id: str):
+def create_board_group_endpoint(board_id: str, space_id: str, name: str, description: str = ""):
     return {
         'path': '/CreateBoardGroup',
         'json': {
-        "name": "New Group",
-        "description": "Group description"
-    },
+            "boardId": board_id,
+            "name": name,
+            "description": description
+        },
         'headers': {
             'Content-Type': 'application/json',
             "Current-Space-Id": space_id
         }
     }
+
 
 def edit_board_group_endpoint(name: str, project_id: str, space_id: str):
     return {

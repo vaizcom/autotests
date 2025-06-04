@@ -28,4 +28,9 @@ BOARD_GROUP_LIMIT_MAX_VALUE = 999
 
 DEFAULT_BOARD_GROUP_NAME = 'Empty group'
 
-
+DEFAULT_BOARD_GROUPS = [
+    {"name": "Backlog"},
+    {"name": "Todo"},
+    {"name": "In Progress"},
+    {"name": "Done"}
+]
