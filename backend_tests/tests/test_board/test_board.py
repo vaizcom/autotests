@@ -2,7 +2,7 @@ import allure
 import pytest
 import json
 from backend_tests.data.endpoints.Board.board_endpoints import create_board_endpoint, \
-    create_board_custom_field_endpoint, edit_board_custom_field_endpoint
+    create_board_custom_field_endpoint, edit_board_custom_field_endpoint, get_boards_endpoint
 from backend_tests.data.endpoints.Board.custom_field_types import CustomFieldType
 from backend_tests.utils.generators import generate_board_name, generate_custom_field_description, \
     generate_custom_field_title, generate_object_id
@@ -34,7 +34,7 @@ def test_create_board(owner_client, temp_project, temp_space):
         response_data = response.json()
         assert "payload" in response_data, "Ошибка: В ответе отсутствует поле 'payload'"
         assert "board" in response_data["payload"], "Ошибка: В 'payload' отсутствует объект 'board'"
-        assert response_data["payload"]["board"]["name"] == "name", (
+        assert response_data["payload"]["board"]["name"] == name, (
             f"Ожидалось имя борды '{name}', а получено '{response_data['payload']['board']['name']}'"
         )
 
@@ -103,7 +103,7 @@ def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
         ))
 
     with allure.step("Проверка, что API вернул 400 – ошибка валидации типов"):
-        assert response.status_code == 200
+        assert response.status_code == 400
 
 @allure.title("Создание борды с именем максимальной длины (50 символов)")
 def test_create_board_with_max_name_length(owner_client, temp_project, temp_space):
@@ -143,6 +143,57 @@ def test_create_board_with_max_description(owner_client, temp_project, temp_spac
 
     with allure.step("Проверка, что API вернул 200 и описание корректно сохранено"):
         assert response.status_code == 200
+
+
+@allure.title("Получение списка борд: проверка, что все созданные борды присутствуют в ответе")
+def test_get_boards_returns_multiple_created_boards(owner_client, temp_project, temp_space):
+    board_names = [generate_board_name() for _ in range(3)]
+
+    with allure.step("Создание трёх борд"):
+        for name in board_names:
+            response = owner_client.post(**create_board_endpoint(
+                name, temp_project, temp_space, [], [], []
+            ))
+            assert response.status_code == 200, f"Не удалось создать борду '{name}'"
+
+    with allure.step("Запрос всех борд в текущем пространстве"):
+        get_response = owner_client.post(**get_boards_endpoint(temp_space))
+        assert get_response.status_code == 200
+
+    boards = get_response.json()["payload"]["boards"]
+    board_names_in_response = [b["name"] for b in boards]
+
+    with allure.step("Проверка, что все созданные борды присутствуют в ответе"):
+        for name in board_names:
+            assert name in board_names_in_response, f"Борда '{name}' не найдена в списке"
+
+
+@allure.title("Получение списка борд: проверка созданных борд и их обязательных полей")
+def test_get_boards_returns_multiple_created_boards_with_fields(owner_client, temp_project, temp_space):
+    board_names = [generate_board_name() for _ in range(3)]
+
+    with allure.step("Создание трёх борд"):
+        for name in board_names:
+            response = owner_client.post(**create_board_endpoint(
+                name, temp_project, temp_space, [], [], []
+            ))
+            assert response.status_code == 200, f"Не удалось создать борду '{name}'"
+
+    with allure.step("Запрос всех борд в текущем пространстве"):
+        get_response = owner_client.post(**get_boards_endpoint(temp_space))
+        assert get_response.status_code == 200
+
+    boards = get_response.json()["payload"]["boards"]
+    board_map = {b["name"]: b for b in boards if b["name"] in board_names}
+
+    with allure.step("Проверка, что все созданные борды присутствуют в ответе и содержат нужные поля"):
+        for name in board_names:
+            assert name in board_map, f"Борда '{name}' не найдена в списке"
+            board = board_map[name]
+            assert board.get("project") == temp_project, f"projectId борды '{name}' не совпадает"
+            assert "createdAt" in board, f"У борды '{name}' отсутствует поле createdAt"
+            assert isinstance(board["createdAt"], str), f"Поле createdAt должно быть строкой (ISO формат)"
+
 
 
 @pytest.mark.xfail(reason="Известный баг: длинный заголовок custom field без пробелов не влезает в тултип (APP-2763)")
