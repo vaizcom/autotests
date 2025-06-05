@@ -34,7 +34,7 @@ def owner_client():
     return client
 
 # Фикстура: создает временный спейс и после прохождения тестов удаляет этот временный спейс
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def temp_space(owner_client):
     client = owner_client
     name = generate_space_name()
@@ -47,7 +47,7 @@ def temp_space(owner_client):
     client.post(**remove_space_endpoint(space_id=space_id))
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def temp_project(owner_client, temp_space):
     """Создаёт проект, который используется во всех тестах модуля."""
     name = generate_project_name()
@@ -58,7 +58,7 @@ def temp_project(owner_client, temp_space):
     return response.json()['payload']['project']['_id']
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def temp_board(owner_client, temp_project, temp_space):
     """
     Создаёт временную борду в указанном проекте и спейсе.

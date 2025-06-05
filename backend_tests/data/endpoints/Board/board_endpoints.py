@@ -20,7 +20,6 @@ def get_board_endpoint(board_id: str, space_id: str):
         }
     }
 
-
 def create_board_endpoint(
     name: str,
     temp_project: str,
@@ -147,19 +146,40 @@ def create_board_group_endpoint(board_id: str, space_id: str, name: str, descrip
     }
 
 
-def edit_board_group_endpoint(name: str, project_id: str, space_id: str):
+def edit_board_group_endpoint(
+    board_id: str,
+    board_group_id: str,
+    space_id: str,
+    name: str = None,
+    description: str = None,
+    hidden: bool = None,
+    limit: int = None
+):
+    # Собираем payload с обязательными полями
+    payload = {
+        "boardId": board_id,
+        "boardGroupId": board_group_id,
+    }
+
+    # Добавляем только переданные параметры (Partial DTO)
+    if name is not None:
+        payload["name"] = name
+    if description is not None:
+        payload["description"] = description
+    if hidden is not None:
+        payload["hidden"] = hidden
+    if limit is not None:
+        payload["limit"] = limit
+
     return {
-        'path': '/EditBoardGroup',
-        'json': {
-        "id": "group_id",
-        "name": "Edited Group",
-        "description": "Edited description"
-    },
-        'headers': {
-            'Content-Type': 'application/json',
+        "path": "/EditBoardGroup",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
             "Current-Space-Id": space_id
         }
     }
+
 
 def remove_board_group_endpoint(name: str, project_id: str, space_id: str):
     return {

@@ -34,3 +34,11 @@ DEFAULT_BOARD_GROUPS = [
     {"name": "In Progress"},
     {"name": "Done"}
 ]
+
+typesList = [
+      { "label": 'Green', "icon": 'Circle', "color": 'mint' },
+      { "label": 'Blue', "icon": 'Square', "color": 'blue' },
+      { "label": 'Cobalt', "icon": 'Hexagon', "color": 'violet' },
+      { "label": 'Pink', "icon": 'Rhombus', "color": 'magenta' },
+      { "label": 'Orange', "icon": 'Triangle', "color": 'orange' },
+    ]

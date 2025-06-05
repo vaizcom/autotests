@@ -8,7 +8,7 @@ from backend_tests.data.endpoints.Board.board_endpoints import (
     get_boards_endpoint,
     get_board_endpoint, \
     edit_board_endpoint,
-    create_board_group_endpoint
+    create_board_group_endpoint, edit_board_group_endpoint
 )
 from backend_tests.data.endpoints.Board.custom_field_types import CustomFieldType
 from backend_tests.utils.generators import (
@@ -19,7 +19,6 @@ from backend_tests.utils.generators import (
 from backend_tests.data.endpoints.Board.constants import (
     MAX_BOARD_NAME_LENGTH,
     BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH,
-    DEFAULT_BOARD_GROUP_NAME,
     BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH
 )
 
@@ -181,7 +180,7 @@ def test_get_boards_returns_multiple_created_boards(owner_client, temp_project, 
 
 
 @allure.title("Получение списка борд: проверка созданных борд и их обязательных полей(name, projectId, createdAt)")
-def test_get_boards_returns_multiple_created_boards_with_fields(owner_client, temp_project, temp_space):
+def test_get_boards_required_fields(owner_client, temp_project, temp_space):
     board_names = [generate_board_name() for _ in range(3)]
 
     with allure.step("Создание трёх борд"):
@@ -191,7 +190,7 @@ def test_get_boards_returns_multiple_created_boards_with_fields(owner_client, te
             ))
             assert response.status_code == 200, f"Не удалось создать борду '{name}'"
 
-    with allure.step("Запрос всех борд в текущем пространстве"):
+    with allure.step("Запрос всех борд в текущем спейсе"):
         get_response = owner_client.post(**get_boards_endpoint(temp_space))
         assert get_response.status_code == 200
 
@@ -299,11 +298,11 @@ def test_create_board_group(owner_client, temp_board, temp_space):
             f"Ожидалось {count_before + 1} групп, но получено {count_after}"
         )
 
-    with allure.step("Шаг 5: Проверяем, что новая группа действительно добавлена"):
+    with allure.step("Шаг 5: Проверяем, что новая группа (new_group_name) действительно добавлена"):
         names_after = [group["name"] for group in groups_after]
         assert new_group_name in names_after, f"Группа '{new_group_name}' не найдена среди {names_after}"
 
-    with allure.step("Шаг 6: Проверяем описание новой группы"):
+    with allure.step("Шаг 6: Проверяем описание (new_group_description) новой группы"):
         created_group = None
         for group in groups_after:
             if group["name"] == new_group_name:
@@ -316,22 +315,81 @@ def test_create_board_group(owner_client, temp_board, temp_space):
         )
 
 
+@allure.title("Редактирование группы через /EditBoardGroup: проверка обновления имени, описания, лимита и скрытия")
+def test_edit_board_group_updates_fields(owner_client, temp_board, temp_space):
+    original_name = "Группа для редактирования"
+    original_description = "Исходное описание"
+
+    with allure.step("Шаг 1: Создание новой группы, которую затем будем редактировать"):
+        create_response = owner_client.post(**create_board_group_endpoint(
+            board_id=temp_board,
+            space_id=temp_space,
+            name=original_name,
+            description=original_description
+        ))
+        assert create_response.status_code == 200, "Ошибка при создании группы"
+
+        groups = create_response.json()["payload"]["boardGroups"]
+        group_to_edit = None
+        for group in groups:
+            if group["name"] == original_name:
+                group_to_edit = group
+                break
+
+        assert group_to_edit is not None, f"Группа '{original_name}' не найдена после создания"
+        group_id = group_to_edit["_id"]
+
+    updated_name = "Новое имя"
+    updated_description = "Новое описание"
+    updated_limit = 5
+    updated_hidden = True
+
+    with allure.step("Шаг 2: Редактирование группы через /EditBoardGroup"):
+        edit_response = owner_client.post(**edit_board_group_endpoint(
+            board_id=temp_board,
+            board_group_id=group_id,
+            space_id=temp_space,
+            name=updated_name,
+            description=updated_description,
+            limit=updated_limit,
+            hidden=updated_hidden
+        ))
+        assert edit_response.status_code == 200, "Редактирование завершилось с ошибкой"
+
+    with allure.step("Шаг 3: Получение борды и проверка обновлённых данных группы"):
+        get_response = owner_client.post(**get_board_endpoint(temp_board, temp_space))
+        assert get_response.status_code == 200, "Ошибка при получении борды"
+
+        updated_groups = get_response.json()["payload"]["board"]["groups"]
+        updated_group = None
+        for group in updated_groups:
+            if group["_id"] == group_id:
+                updated_group = group
+                break
+
+        assert updated_group is not None, "Обновлённая группа не найдена"
+
+        assert updated_group["name"] == updated_name, f"Имя не обновлено: ожидалось '{updated_name}', получено '{updated_group['name']}'"
+        assert updated_group.get("description") == updated_description, f"Описание не совпадает"
+        assert updated_group.get("limit") == updated_limit, f"Лимит не обновлён"
+        assert updated_group.get("hidden") is True, "Поле 'hidden' не обновлено на True"
+
+
+
 @pytest.mark.xfail(reason="Известный баг: длинный заголовок custom field без пробелов не влезает в тултип (APP-2763)")
 @allure.label("bug", "APP-2763")
 @allure.title("Ошибка при создании борды с заголовком custom field длиннее 25 символов (Баг: до 50 символов - APP-2763 )")
-def test_create_board_with_long_custom_field_title(owner_client, temp_project, temp_space):
-    name = generate_board_name()
+@pytest.mark.parametrize("field_type", CustomFieldType.list())
+def test_create_board_with_long_custom_field_title(owner_client, temp_board, field_type, temp_project, temp_space):
 
-    custom_field = "T" * (BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH + 1)
+    custom_field = "T" * (BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH+1)
 
     with allure.step(f"Отправка запроса с custom field title длиннее {BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH} символов"):
-        response = owner_client.post(**create_board_endpoint(
-            name=name,
-            temp_project=temp_project,
-            space_id=temp_space,
-            groups=[],
-            typesList=[],
-            customFields=[custom_field]
+        response = owner_client.post(**create_board_custom_field_endpoint(
+            board_id=temp_board,
+            name=custom_field,
+            type=field_type,
+            space_id=temp_space
         ))
 
     with allure.step("Проверка, что API вернул 400 – ошибка валидации длины заголовка"):
