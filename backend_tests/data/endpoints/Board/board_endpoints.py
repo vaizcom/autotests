@@ -131,19 +131,37 @@ def remove_board_type_endpoint(name: str, project_id: str, space_id: str):
         }
     }
 
-def create_board_group_endpoint(board_id: str, space_id: str, name: str, description: str = ""):
+def create_board_group_endpoint(
+    board_id: str,
+    space_id: str,
+    name: str,
+    description: str = None,
+    limit: int = None,
+    hidden: bool = False
+):
+    payload = {
+        "boardId": board_id,
+        "name": name
+    }
+
+    if description is not None:
+        payload["description"] = description
+
+    if limit is not None:
+        payload["limit"] = limit
+
+    if hidden:
+        payload["hidden"] = hidden
+
     return {
-        'path': '/CreateBoardGroup',
-        'json': {
-            "boardId": board_id,
-            "name": name,
-            "description": description
-        },
-        'headers': {
-            'Content-Type': 'application/json',
+        "path": "/CreateBoardGroup",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
             "Current-Space-Id": space_id
         }
     }
+
 
 
 def edit_board_group_endpoint(
