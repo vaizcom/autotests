@@ -50,22 +50,6 @@ def test_create_board(owner_client, temp_project, temp_space):
         )
 
 
-@allure.title("Ошибка при создание борды с пустым именем")
-def test_create_board_empty_name(owner_client, temp_project, temp_space):
-    name = ""
-
-    with allure.step("Отправка запроса на создание борды с пустым именем"):
-        response = owner_client.post(**create_board_endpoint(
-            name,
-            temp_project,
-            temp_space,
-            [],
-            [],
-            []
-        ))
-
-    with allure.step("Проверка, что вернулась ошибка 400 – ошибка валидации"):
-        assert response.status_code == 400
 
 
 @allure.title("Создание нескольких борд с одинаковым именем в одном проекте")
@@ -87,18 +71,6 @@ def test_create_board_with_duplicate_name_allowed(owner_client, temp_project, te
         assert response2.status_code == 200
 
 
-@allure.title("Ошибка при создании борды с именем длиннее допустимого")
-def test_create_board_name_too_long(owner_client, temp_project, temp_space):
-    long_name = "X" * (MAX_BOARD_NAME_LENGTH+1)
-
-    with allure.step(f"Попытка создать борду с именем из {len(long_name)} символов"):
-        response = owner_client.post(**create_board_endpoint(
-            long_name, temp_project, temp_space, [], [], []
-        ))
-
-    with allure.step("Проверка, что API вернул 400 – ошибка валидации"):
-        assert response.status_code == 400
-
 @allure.title("Ошибка при создании борды с None вместо списков в полях groups/typesList/customFields")
 def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
     name = generate_board_name()
@@ -116,25 +88,38 @@ def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
     with allure.step("Проверка, что API вернул 400 – ошибка валидации типов"):
         assert response.status_code == 400
 
-@allure.title("Создание борды с именем максимальной длины (50 символов)")
-def test_create_board_with_max_name_length(owner_client, temp_project, temp_space):
-    name = "B" * MAX_BOARD_NAME_LENGTH  # Ровно 50 символов
+@pytest.mark.parametrize(
+    "name, expected_status",
+    [
+        ("", 400),
+        (None, 400),
+        ("A" * (MAX_BOARD_NAME_LENGTH + 1), 400),
+        ("Валидное имя", 200),
+        (123, 400),
+        ("A" * MAX_BOARD_NAME_LENGTH, 200)
+    ],
+    ids=[
+        "empty string",
+        "none",
+        "length > 50",
+        "valid name",
+        "number instead of string",
+        "exactly 50 chars"
+    ]
+)
+@allure.title("Валидация: создание борды с именем — ожидаемый статус {expected_status}")
+def test_create_board_name_validation(owner_client, temp_project, temp_space, name, expected_status):
+    response = owner_client.post(**create_board_endpoint(
+        name=name,
+        temp_project=temp_project,
+        space_id=temp_space,
+        groups=[],
+        typesList=[],
+        customFields=[]
+    ))
 
-    with allure.step("Отправка запроса на создание борды с максимальной длиной имени"):
-        response = owner_client.post(**create_board_endpoint(
-            name,
-            temp_project,
-            temp_space,
-            [],
-            [],
-            []
-        ))
-
-    with allure.step("Проверка, что API вернул 200 и борда создана"):
-        assert response.status_code == 200
-        assert response.json()["payload"]["board"]["name"] == name, (
-            f"Ожидалось имя борды '{name}', а получено '{response['payload']['board']['name']}'"
-        )
+    with allure.step(f"Проверка, что API вернул статус {expected_status} при name = {repr(name)}"):
+        assert response.status_code == expected_status
 
 @allure.title("Создание борды с описанием максимальной длины(Поле отсутствует на фронте)")
 def test_create_board_with_max_description(owner_client, temp_project, temp_space):
