@@ -71,6 +71,7 @@ def test_create_board_with_duplicate_name_allowed(owner_client, temp_project, te
         assert response2.status_code == 200
 
 
+
 @allure.title("Ошибка при создании борды с None вместо списков в полях groups/typesList/customFields")
 def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
     name = generate_board_name()
