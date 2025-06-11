@@ -21,14 +21,6 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [Cuberdev, dev]
-        include:
-          - environment: CuberDev
-            API_URL: https://vaiz-api-ms.vaiz.dev/v3/
-          - environment: dev
-            API_URL: https://api.vaiz.dev/v4/
 
     steps:
       - uses: actions/checkout@v4
