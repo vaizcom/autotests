@@ -9,13 +9,12 @@ on:
     inputs:
       test_scope:
         description: 'Which tests to run?'
-        required: true
         default: 'backend'
         type: choice
         options:
-          - all
           - backend
           - frontend
+          - all
 
 jobs:
   test:
