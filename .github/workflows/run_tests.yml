@@ -16,14 +16,6 @@ on:
           - all
           - backend
           - frontend
-      environment:
-        description: 'Environment to test against'
-        required: true
-        default: 'CuberDev'
-        type: choice
-        options:
-          - CuberDev
-          - dev
 
 jobs:
   test:
@@ -37,12 +29,6 @@ jobs:
             API_URL: https://vaiz-api-ms.vaiz.dev/v3/
           - environment: dev
             API_URL: https://api.vaiz.dev/v4/
-
-    env:
-      API_URL: ${{ 
-        github.event.inputs.environment == 'CuberDev' && 'https://vaiz-api-ms.vaiz.dev/v3/' ||
-        github.event.inputs.environment == 'dev' && 'https://api.vaiz.dev/v4/'
-      }}
 
     steps:
       - uses: actions/checkout@v4
@@ -76,8 +62,6 @@ jobs:
 
       - name: ✅ Run tests with Allure
         run: |
-          echo "Running on environment: ${{ github.event.inputs.environment }}"
-          echo "Using API_URL: $API_URL"
           rm -rf allure-results
           if [[ "${{ github.event.inputs.test_scope }}" == "backend" ]]; then
             pytest backend_tests/ --alluredir=allure-results
