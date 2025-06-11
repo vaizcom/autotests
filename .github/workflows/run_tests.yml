@@ -27,19 +27,17 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Set API_URL based on environment
         run: |
-          ENVIRONMENT="${{ github.event.inputs.environment || 'CuberDev' }}"
-
-          if [ "$ENVIRONMENT" = "CuberDev" ]; then
+          if [ "${{ github.event.inputs.environment }}" = "CuberDev" ]; then
             echo "API_URL=https://vaiz-api-ms.vaiz.dev/v3/" >> $GITHUB_ENV
-          elif [ "$ENVIRONMENT" = "dev" ]; then
+          elif [ "${{ github.event.inputs.environment }}" = "dev" ]; then
             echo "API_URL=https://api.vaiz.dev/v4/" >> $GITHUB_ENV
           fi
 
@@ -71,11 +69,11 @@ jobs:
 
       - name: ✅ Run tests with Allure
         run: |
-          echo "Running on environment: ${{ github.event.inputs.environment || 'CuberDev' }}"
+          echo "Running on environment: ${{ github.event.inputs.environment }}"
           echo "Using API_URL: $API_URL"
 
           mkdir -p allure-results
-          echo "Environment=${{ github.event.inputs.environment || 'CuberDev' }}" > allure-results/environment.properties
+          echo "Environment=${{ github.event.inputs.environment }}" > allure-results/environment.properties
           echo "API_URL=$API_URL" >> allure-results/environment.properties
 
           if [[ "${{ github.event.inputs.test_scope }}" == "backend" ]]; then
