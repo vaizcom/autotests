@@ -1,4 +1,3 @@
-
 name: Tests + Allure Report
 
 on:
@@ -29,6 +28,14 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [CuberDev, dev]
+        include:
+          - environment: CuberDev
+            API_URL: https://vaiz-api-ms.vaiz.dev/v3/
+          - environment: dev
+            API_URL: https://api.vaiz.dev/v4/
 
     env:
       API_URL: ${{ 
