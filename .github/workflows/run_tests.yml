@@ -118,9 +118,9 @@ jobs:
             const time = new Date().toISOString();
             const link = "https://vaizcom.github.io/autotests/";
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.payload.pull_request.number,
-              owner: context.repo.owner,
-              repo: context.repo.name,
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
               body: `${status}\n\n🧪 **Allure Report for Commit \`${sha}\`**\n\n📄 [Click to view Allure Report](${link})\n\n🕒 Generated at: \`${time}\``
             });
