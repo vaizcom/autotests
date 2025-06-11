@@ -56,6 +56,8 @@ jobs:
           rm -rf allure-results
           if [[ "${{ github.event.inputs.test_scope }}" == "backend" ]]; then
             pytest . --alluredir=allure-results -m backend
+          elif [[ "${{ github.event.inputs.test_scope }}" == "" ]]; then
+            pytest . --alluredir=allure-results -m backend
           elif [[ "${{ github.event.inputs.test_scope }}" == "frontend" ]]; then
             pytest . --alluredir=allure-results -m frontend
           else
