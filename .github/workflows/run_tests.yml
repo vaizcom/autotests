@@ -68,6 +68,12 @@ jobs:
         run: |
           echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
 
+      - name: 📋 Set Allure Environment Info
+        run: |
+          mkdir -p allure-results
+          echo "Environment=${{ github.event.inputs.environment }}" > allure-results/environment.properties
+          echo "API_URL=$API_URL" >> allure-results/environment.properties
+
       - name: ✅ Run tests with Allure
         run: |
           echo "Running on environment: ${{ github.event.inputs.environment }}"
