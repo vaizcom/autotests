@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment: [CuberDev, dev]
+        environment: [Cuberdev, dev]
         include:
           - environment: CuberDev
             API_URL: https://vaiz-api-ms.vaiz.dev/v3/
@@ -42,6 +42,7 @@ jobs:
         github.event.inputs.environment == 'CuberDev' && 'https://vaiz-api-ms.vaiz.dev/v3/' ||
         github.event.inputs.environment == 'dev' && 'https://api.vaiz.dev/v4/'
       }}
+
     steps:
       - uses: actions/checkout@v4
 
