@@ -27,8 +27,8 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
     timeout-minutes: 60
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -65,23 +65,24 @@ jobs:
           auth_client_secret: ${{ secrets.CF_TOKEN }}
 
       - name: Adding static DNS
-        run: echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
+        run: |
+          echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
 
       - name: ✅ Run tests with Allure
         run: |
           echo "Running on environment: ${{ github.event.inputs.environment }}"
           echo "Using API_URL: $API_URL"
-
+          rm -rf allure-results
           mkdir -p allure-results
           echo "Environment=${{ github.event.inputs.environment }}" > allure-results/environment.properties
           echo "API_URL=$API_URL" >> allure-results/environment.properties
 
           if [[ "${{ github.event.inputs.test_scope }}" == "backend" ]]; then
-            pytest backend_tests --api-url="$API_URL" --alluredir=allure-results
+            pytest backend_tests/ --alluredir=allure-results --api-url="$API_URL"
           elif [[ "${{ github.event.inputs.test_scope }}" == "frontend" ]]; then
-            pytest frontend_tests --api-url="$API_URL" --alluredir=allure-results
+            pytest frontend_tests/ --alluredir=allure-results --api-url="$API_URL"
           else
-            pytest --api-url="$API_URL" --alluredir=allure-results
+            pytest -s -v --alluredir=allure-results --api-url="$API_URL"
           fi
 
       - name: Check allure-results content
