@@ -1,3 +1,4 @@
+
 name: Tests + Allure Report
 
 on:
@@ -24,22 +25,17 @@ on:
         options:
           - CuberDev
           - dev
-
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
+    env:
+      API_URL: ${{github.event.inputs.environment == 'CuberDev' && 'https://vaiz-api-ms.vaiz.dev/v3/' ||
+        github.event.inputs.environment == 'dev' && 'https://api.vaiz.dev/v4/'
+      }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set API_URL based on environment
-        run: |
-          if [ "${{ github.event.inputs.environment }}" = "CuberDev" ]; then
-            echo "API_URL=https://vaiz-api-ms.vaiz.dev/v3/" >> $GITHUB_ENV
-          elif [ "${{ github.event.inputs.environment }}" = "dev" ]; then
-            echo "API_URL=https://api.vaiz.dev/v4/" >> $GITHUB_ENV
-          fi
 
       - name: Set up Python
         uses: actions/setup-python@v4
