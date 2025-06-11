@@ -1,9 +1,13 @@
 import requests
+import os
 from backend_tests.config.settings import USERS, API_URL
 
 _token_cache = {}
 
 def get_token(role: str = "guest") -> str:
+    # Отключаем логин в CI (например, GitHub Actions)
+    if os.getenv("CI") == "true":
+        return ""
     if role in _token_cache:
         return _token_cache[role]
 
