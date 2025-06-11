@@ -31,7 +31,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      API_URL: ${{github.event.inputs.environment == 'CuberDev' && 'https://vaiz-api-ms.vaiz.dev/v3/' ||
+      API_URL: ${{ 
+        github.event.inputs.environment == 'CuberDev' && 'https://vaiz-api-ms.vaiz.dev/v3/' ||
         github.event.inputs.environment == 'dev' && 'https://api.vaiz.dev/v4/'
       }}
     steps:
