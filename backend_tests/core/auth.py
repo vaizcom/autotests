@@ -1,12 +1,13 @@
 import requests
-from backend_tests.config.settings import USERS
+import os
+from backend_tests.config.settings import USERS, API_URL
 
 _token_cache = {}
 
-def get_token(role: str = "guest", api_url: str = "") -> str:
-    if not api_url:
-        raise ValueError("API URL must be provided")
-
+def get_token(role: str = "guest") -> str:
+    # Отключаем логин в CI (например, GitHub Actions)
+    if os.getenv("CI") == "true":
+        return os.getenv("GUEST_TOKEN", "")
     if role in _token_cache:
         return _token_cache[role]
 
@@ -14,27 +15,15 @@ def get_token(role: str = "guest", api_url: str = "") -> str:
     if not credentials:
         raise ValueError(f"Unknown role: {role}")
 
-    login_url = f"{api_url.rstrip('/')}/Login"
+    login_url = f"{API_URL.rstrip('/')}/Login"
     headers = {"Content-Type": "application/json"}
-
-    #  ВАЖНО: отладка
-    print(f"[LOGIN] LOGIN_URL: {login_url}")
-    print(f"[LOGIN] CREDENTIALS: {credentials}")
-
     response = requests.post(login_url, headers=headers, json=credentials)
-
-    # Посмотрим ответ, если что-то пошло не так
-    if response.status_code != 202:
-        print(f"[LOGIN] STATUS: {response.status_code}")
-        print(f"[LOGIN] RESPONSE TEXT: {response.text}")
 
     assert response.status_code == 202, f"Login failed ({response.status_code}): {response.text}"
 
     token = response.json()["payload"]["token"]
     _token_cache[role] = token
     return token
-
-
 
 def reset_token_cache(role: str = None):
     """Очистка кэша токенов — для одной роли или всех."""
