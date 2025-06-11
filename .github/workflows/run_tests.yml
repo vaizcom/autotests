@@ -106,7 +106,6 @@ jobs:
           allure_report: allure-report
           allure_history: allure-history
           gh_pages: gh-pages
-          generate_executor_info: false
           keep_reports: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
