@@ -106,7 +106,7 @@ jobs:
           gh_pages: gh-pages
           keep_reports: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GUEST_TOKEN: ${{ secrets.GUEST_TOKEN }}
 
       - name: 🚀 Publish Allure Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v2
