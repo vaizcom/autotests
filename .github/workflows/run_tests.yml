@@ -76,13 +76,13 @@ jobs:
           mkdir -p allure-results
           echo "Environment=${{ github.event.inputs.environment }}" > allure-results/environment.properties
           echo "API_URL=$API_URL" >> allure-results/environment.properties
-          
+
           if [[ "${{ github.event.inputs.test_scope }}" == "backend" ]]; then
-            pytest backend_tests/ --alluredir=allure-results
+            pytest backend_tests/ --alluredir=allure-results --api-url="$API_URL"
           elif [[ "${{ github.event.inputs.test_scope }}" == "frontend" ]]; then
-            pytest frontend_tests/ --alluredir=allure-results
+            pytest frontend_tests/ --alluredir=allure-results --api-url="$API_URL"
           else
-            pytest -s -v --alluredir=allure-results
+            pytest -s -v --alluredir=allure-results --api-url="$API_URL"
           fi
 
       - name: Check allure-results content
@@ -106,7 +106,7 @@ jobs:
           gh_pages: gh-pages
           keep_reports: true
         env:
-          GUEST_TOKEN: ${{ secrets.GUEST_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🚀 Publish Allure Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v2
@@ -136,7 +136,7 @@ jobs:
               status = "⚠️ Could not read test results";
             }
 
-            const sha = context.payload.pull_request.head.sha.substring(0, 7);e
+            const sha = context.payload.pull_request.head.sha.substring(0, 7);
             const time = new Date().toISOString();
             const link = "https://vaizcom.github.io/autotests/";
 

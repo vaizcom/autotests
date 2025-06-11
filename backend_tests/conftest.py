@@ -1,7 +1,6 @@
 import pytest
 from backend_tests.core.client import APIClient
 from backend_tests.core.auth import get_token
-from backend_tests.config.settings import API_URL
 from backend_tests.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
 from backend_tests.data.endpoints.Project.project_endpoints import create_project_endpoint, create_board_endpoint
 from backend_tests.utils.generators import generate_space_name, generate_board_name
@@ -11,27 +10,44 @@ from backend_tests.data.endpoints.Space.space_endpoints import (
     remove_space_endpoint
 )
 
+# ⬇️ Дефолтный API URL задается здесь
+DEFAULT_API_URL = "https://vaiz-api-ms.vaiz.dev/v3/"
+# DEFAULT_API_URL = "https://vaiz-api-ms.vaiz.dev/v3/"
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--api-url",
+        action="store",
+        default=DEFAULT_API_URL,
+        help="Base API URL to test against"
+    )
+
+@pytest.fixture(scope="session")
+def api_url(pytestconfig):
+    return pytestconfig.getoption("api_url").rstrip("/")
+
 
 @pytest.fixture
 def guest_client():
-    return APIClient(base_url=API_URL, token=get_token("guest"))
+    return APIClient(base_url=api_url, token=get_token("guest"))
 
 @pytest.fixture
 def member_client():
-    return APIClient(base_url=API_URL, token=get_token("member"))
+    return APIClient(base_url=api_url, token=get_token("member"))
 
 @pytest.fixture
 def manager_client():
-    return APIClient(base_url=API_URL, token=get_token("manager"))
+    return APIClient(base_url=api_url, token=get_token("manager"))
 
 
 # Фикстура: возвращает авторизованного API клиента с токеном владельца
 @pytest.fixture(scope="session")
-def owner_client():
-    token = get_token("owner")
-    client = APIClient(base_url=API_URL)
+def owner_client(api_url):
+    token = get_token("owner", api_url)
+    client = APIClient(base_url=api_url)
     client.set_auth_header(token)
     return client
+
 
 # Фикстура: создает временный спейс и после прохождения тестов удаляет этот временный спейс
 @pytest.fixture(scope="session")
