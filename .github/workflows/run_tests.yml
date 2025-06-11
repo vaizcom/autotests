@@ -24,6 +24,7 @@ on:
         options:
           - CuberDev
           - dev
+
 jobs:
   test:
     timeout-minutes: 60
