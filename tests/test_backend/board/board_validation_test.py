@@ -2,7 +2,7 @@ import allure
 import pytest
 from tests.test_backend.data.endpoints.Board.board_endpoints import (
     create_board_custom_field_endpoint,
-    create_board_group_endpoint
+    create_board_group_endpoint,
 )
 from tests.test_backend.data.endpoints.Board.custom_field_types import CustomFieldType
 from tests.test_backend.utils.generators import generate_board_name
@@ -17,6 +17,7 @@ from tests.test_backend.data.endpoints.Board.constants import (
 )
 
 pytestmark = [pytest.mark.backend]
+
 
 @pytest.mark.parametrize(
     'name, expected_status',
@@ -89,17 +90,22 @@ def test_create_board_group_name_validation(owner_client, temp_board, temp_space
     ids=['too long (1025 chars)', 'max valid (1024 chars)', 'regular description', 'None (optional)'],
 )
 @allure.title('Валидация поля description: {description}')
-def test_create_board_group_description_validation(owner_client, temp_board, temp_space, description, expected_status, request):
+def test_create_board_group_description_validation(
+    owner_client,
+    temp_board,
+    temp_space,
+    description,
+    expected_status,
+    request,
+):
     response = owner_client.post(
         **create_board_group_endpoint(
             board_id=temp_board, space_id=temp_space, name='Группа с описанием', description=description
         )
     )
-    with allure.step(
-        f"Проверка, что API вернул {expected_status} при {request.node.callspec.id}"
-    ):
+    with allure.step(f'Проверка, что API вернул {expected_status} при {request.node.callspec.id}'):
         assert response.status_code == expected_status
-        print(f"Проверка, что API вернул {expected_status} при {request.node.callspec.id}")
+        print(f'Проверка, что API вернул {expected_status} при {request.node.callspec.id}')
 
 
 @pytest.mark.parametrize(
@@ -141,9 +147,7 @@ def test_create_board_with_long_custom_field_title(owner_client, temp_board, fie
     custom_field = 'T' * (BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH + 1)
 
     # Явно указываем тип поля в заголовке
-    allure.dynamic.title(
-        f'APP-2763: Ошибка при создании борды с длинным заголовком custom field: {field_type}'
-    )
+    allure.dynamic.title(f'APP-2763: Ошибка при создании борды с длинным заголовком custom field: {field_type}')
 
     with allure.step(f'Отправка запроса с custom field title длиннее {BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH} символов'):
         response = owner_client.post(
