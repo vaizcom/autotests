@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TEST_STAND_NAME: github.event.inputs.test_stand
+      TEST_STAND_NAME: ${{ github.event.inputs.test_stand }}
 
     steps:
       - uses: actions/checkout@v4
