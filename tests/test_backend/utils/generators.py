@@ -2,7 +2,7 @@ import uuid
 import secrets
 import random
 import string
-from tests.backend.data.endpoints.Board.constants import (
+from tests.test_backend.data.endpoints.Board.constants import (
     MAX_BOARD_NAME_LENGTH,
     BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH,
     BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH,

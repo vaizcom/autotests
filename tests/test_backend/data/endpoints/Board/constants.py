@@ -1,4 +1,4 @@
-# backend/constants/board_limits.py
+# test_backend/constants/board_limits.py
 
 # Максимальная длина названия борды
 MAX_BOARD_NAME_LENGTH = 50

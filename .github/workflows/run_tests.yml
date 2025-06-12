@@ -9,11 +9,11 @@ on:
     inputs:
       test_scope:
         description: 'Which tests to run?'
-        default: 'backend'
+        default: 'test_backend'
         type: choice
         options:
-          - backend
-          - frontend
+          - test_backend
+          - test_frontend
           - all
 
 jobs:
@@ -36,11 +36,11 @@ jobs:
           pip install allure-pytest
 
       - name: Install Playwright Browsers
-        if: github.event.inputs.test_scope == 'frontend' || github.event.inputs.test_scope == 'all'
+        if: github.event.inputs.test_scope == 'test_frontend' || github.event.inputs.test_scope == 'all'
         run: python -m playwright install --with-deps
 
-      - name: ☁️ Setup VPN (only for frontend or all)
-        if: github.event.inputs.test_scope == 'frontend' || github.event.inputs.test_scope == 'all'
+      - name: ☁️ Setup VPN (only for test_frontend or all)
+        if: github.event.inputs.test_scope == 'test_frontend' || github.event.inputs.test_scope == 'all'
         uses: Boostport/setup-cloudflare-warp@v1.6.0
         with:
           organization: vaiz

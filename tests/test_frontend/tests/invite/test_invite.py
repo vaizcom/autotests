@@ -3,7 +3,7 @@ import time
 import pytest
 from playwright.sync_api import expect
 
-from tests.frontend.core import settings
+from tests.test_frontend.core import settings
 
 
 #  playwright codegen https://app.vaiz.dev/
