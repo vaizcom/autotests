@@ -31,14 +31,15 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TEST_STAND_NAME: ${{ github.event.inputs.test_stand }}
+      TEST_STAND_NAME: ${{ github.event.inputs.test_stand || 'kuber_dev' }}
+      TEST_SCOPE: ${{ github.event.inputs.test_scope || 'test_backend' }}
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Display selected options
         run: |
-          echo "Test scope: ${{ github.event.inputs.test_scope }}"
+          echo "Test scope: $TEST_SCOPE
           echo "Test stand: $TEST_STAND_NAME"
 
       - name: Set up Python
@@ -53,11 +54,11 @@ jobs:
           pip install allure-pytest
 
       - name: Install Playwright Browsers
-        if: github.event.inputs.test_scope == 'test_frontend' || github.event.inputs.test_scope == 'all'
+        if: $TEST_SCOPE == 'test_frontend' || $TEST_SCOPE == 'all'
         run: python -m playwright install --with-deps
 
       - name: ☁️ Setup VPN (only for test_frontend or all)
-        if: github.event.inputs.test_scope == 'test_frontend' || github.event.inputs.test_scope == 'all'
+        if: $TEST_SCOPE == 'test_frontend' || $TEST_SCOPE == 'all'
         uses: Boostport/setup-cloudflare-warp@v1.6.0
         with:
           organization: vaiz
@@ -71,15 +72,7 @@ jobs:
       - name: ✅ Run tests with Allure
         run: |
           rm -rf allure-results
-          if [[ "${{ github.event.inputs.test_scope }}" == "backend" ]]; then
-            pytest . --alluredir=allure-results -m backend
-          elif [[ "${{ github.event.inputs.test_scope }}" == "" ]]; then
-            pytest . --alluredir=allure-results -m backend
-          elif [[ "${{ github.event.inputs.test_scope }}" == "frontend" ]]; then
-            pytest . --alluredir=allure-results -m frontend
-          else
-            pytest . --alluredir=allure-results
-          fi
+          pytest . --alluredir=allure-results -m "$TEST_SCOPE"
 
       - name: Check allure-results content
         run: ls -lah allure-results
