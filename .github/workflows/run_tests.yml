@@ -33,6 +33,8 @@ jobs:
     env:
       TEST_STAND_NAME: ${{ github.event.inputs.test_stand || 'kuber_dev' }}
       TEST_SCOPE: ${{ github.event.inputs.test_scope || 'backend' }}
+      ALLURE_LAUNCH_NAME: >-
+        Test: ${{ github.event.inputs.test_scope || 'backend' }} | Stand: ${{ github.event.inputs.test_stand || 'kuber_dev' }} | URL: https://${{ github.event.inputs.test_stand || 'kuber_dev' }}.vaiz.dev
 
     steps:
       - uses: actions/checkout@v4
