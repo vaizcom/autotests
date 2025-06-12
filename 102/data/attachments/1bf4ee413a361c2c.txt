@@ -1,2 +1,0 @@
-[LOGIN] LOGIN_URL: https://api.vaiz.dev/v4/Login
-[LOGIN] CREDENTIALS: {'email': 'mastretsovaone+owner@gmail.com', 'password': '123456'}
