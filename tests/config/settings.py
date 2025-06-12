@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import os
 
-API_URL = os.getenv('API_URL')
+API_URL = os.getenv('API_URL', 'https://api.vaiz.dev/v4')
 print('Loaded API_URL:', API_URL)
 
 URL = os.getenv('URL')
