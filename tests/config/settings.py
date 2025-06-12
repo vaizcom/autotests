@@ -15,7 +15,7 @@ USERS = {
     'owner': {'email': os.getenv('OWNER_EMAIL'), 'password': os.getenv('PASSWORD')},
 }
 
-TEST_STAND_NAME = os.getenv('TEST_STAND_NAME', 'kuber_dev')
+TEST_STAND_NAME = os.getenv('TEST_STAND_NAME')
 
 API_URL = {
     'dev': "https://api.vaiz.dev/v4",
