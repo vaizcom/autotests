@@ -22,6 +22,4 @@ API_URL = {
     'uat': "https://uat--api.vaiz.dev/v4",
     'kuber_dev': "https://vaiz-api-ms.vaiz.dev/v4",
     'kuber_uat': "https://vaiz-api-uat.vaiz.dev/v4",
-}.get(TEST_STAND_NAME, os.getenv('API_URL'))
-print('Loaded API_URL:', API_URL)
-assert API_URL, 'API_URL не выставлен!'
+}[TEST_STAND_NAME]
