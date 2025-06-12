@@ -36,6 +36,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Display selected options
+        run: |
+          echo "Test scope: ${{ github.event.inputs.test_scope }}"
+          echo "Test stand: $TEST_STAND_NAME"
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
