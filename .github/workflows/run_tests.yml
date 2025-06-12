@@ -39,7 +39,7 @@ jobs:
 
       - name: Display selected options
         run: |
-          echo "Test scope: $TEST_SCOPE
+          echo "Test scope: $TEST_SCOPE"
           echo "Test stand: $TEST_STAND_NAME"
 
       - name: Set up Python
@@ -54,11 +54,11 @@ jobs:
           pip install allure-pytest
 
       - name: Install Playwright Browsers
-        if: $TEST_SCOPE == 'test_frontend' || $TEST_SCOPE == 'all'
+        if: ${{ env.TEST_SCOPE == 'test_frontend' || env.TEST_SCOPE == 'all' }}
         run: python -m playwright install --with-deps
 
       - name: ☁️ Setup VPN (only for test_frontend or all)
-        if: $TEST_SCOPE == 'test_frontend' || $TEST_SCOPE == 'all'
+        if: ${{ env.TEST_SCOPE == 'test_frontend' || env.TEST_SCOPE == 'all' }}
         uses: Boostport/setup-cloudflare-warp@v1.6.0
         with:
           organization: vaiz
