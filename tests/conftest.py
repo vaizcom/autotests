@@ -7,6 +7,11 @@ from tests.test_backend.data.endpoints.Project.project_endpoints import create_p
 from tests.test_backend.utils.generators import generate_space_name, generate_board_name
 from tests.test_backend.utils.generators import generate_project_name, generate_slug
 from tests.test_backend.data.endpoints.Space.space_endpoints import create_space_endpoint, remove_space_endpoint
+from config import settings
+
+def pytest_configure(config):
+    print(f"\n🧪 Running on stand: {settings.TEST_STAND_NAME}")
+    print(f"🔗 API URL: {settings.API_URL}\n")
 
 
 @pytest.fixture

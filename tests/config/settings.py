@@ -1,7 +1,7 @@
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
-import os
 
 URL = os.getenv('URL')
 print('Loaded URL:', URL)
@@ -27,3 +27,4 @@ API_URL = {
 if os.getenv("GITHUB_ENV"):
     with open(os.getenv("GITHUB_ENV"), "a") as f:
         f.write(f"API_URL={API_URL}\n")
+
