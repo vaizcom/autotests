@@ -71,9 +71,17 @@ jobs:
         run: |
           echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
 
+      - name: Set Allure metadata
+        run: |
+          mkdir -p allure-results
+          echo "TEST_SCOPE=$TEST_SCOPE" >> allure-results/environment.properties
+          echo "TEST_STAND=$TEST_STAND_NAME" >> allure-results/environment.properties
+          echo "URL=https://${TEST_STAND_NAME}.vaiz.dev" >> allure-results/environment.properties
+
       - name: ✅ Run tests with Allure
         run: |
           rm -rf allure-results
+          mkdir -p allure-results
           pytest . --alluredir=allure-results -m "$TEST_SCOPE"
 
       - name: Check allure-results content
