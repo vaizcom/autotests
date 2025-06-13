@@ -31,11 +31,24 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TEST_STAND_NAME: ${{ github.event.inputs.test_stand || 'kuber_dev' }}
       TEST_SCOPE: ${{ github.event.inputs.test_scope || 'backend' }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: 🧠 Determine test stand from branch (non-dispatch)
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: |
+          BRANCH="${GITHUB_REF##*/}"
+          if [[ "$BRANCH" == "main" || "$BRANCH" == "uat" ]]; then
+            echo "TEST_STAND_NAME=kuber_uat" >> $GITHUB_ENV
+          else
+            echo "TEST_STAND_NAME=kuber_dev" >> $GITHUB_ENV
+          fi
+
+      - name: 🧠 Set test stand from input (manual dispatch)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: echo "TEST_STAND_NAME=${{ github.event.inputs.test_stand }}" >> $GITHUB_ENV
 
       - name: Display selected options
         run: |
@@ -69,19 +82,17 @@ jobs:
         run: |
           echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
 
-      # 👇 Удаляем старые результаты
-      - name: ❌ Clean old allure-results
+      - name: ❌ Clean old Allure results
         run: rm -rf allure-results
 
-      # 👇 Создаём переменные окружения для Allure
       - name: 🏷 Set Allure metadata
         run: |
           mkdir -p allure-results
           echo "TEST_SCOPE=$TEST_SCOPE" >> allure-results/environment.properties
           echo "TEST_STAND=$TEST_STAND_NAME" >> allure-results/environment.properties
           echo "URL=https://${TEST_STAND_NAME}.vaiz.dev" >> allure-results/environment.properties
+          echo "API_URL=https://api.${TEST_STAND_NAME}.vaiz.dev" >> allure-results/environment.properties
 
-      # 👇 Запускаем тесты
       - name: ✅ Run tests with Allure
         run: |
           pytest . --alluredir=allure-results -m "$TEST_SCOPE"
