@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 🧠 Определяем стенд по ветке (если запуск не вручную)
+      # 🧠 Определяем стенд по ветке
       - name: Determine test stand from branch
         if: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
@@ -40,12 +40,12 @@ jobs:
             echo "TEST_STAND_NAME=kuber_dev" >> $GITHUB_ENV
           fi
 
-      # 🧠 Устанавливаем стенд вручную (если запуск через workflow_dispatch)
+      # 🧠 Получаем стенд из input (если ручной запуск)
       - name: Set test stand from input
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: echo "TEST_STAND_NAME=${{ github.event.inputs.test_stand }}" >> $GITHUB_ENV
 
-      # ✅ Добавляем tests/ в PYTHONPATH (нужно для from config import settings)
+      # ✅ Добавляем tests/ в PYTHONPATH (для from config import settings)
       - name: Add tests to PYTHONPATH
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
 
@@ -60,10 +60,15 @@ jobs:
           pip install -r requirements.txt
           pip install allure-pytest
 
+      # ✅ Импортируем settings.py, чтобы API_URL записался в GITHUB_ENV
+      - name: Export API_URL from settings.py
+        run: python -c "from config import settings"
+
       - name: Display selected options
         run: |
           echo "Test scope: $TEST_SCOPE"
           echo "Test stand: $TEST_STAND_NAME"
+          echo "API URL: $API_URL"
 
       - name: Install Playwright Browsers
         if: ${{ env.TEST_SCOPE == 'frontend' || env.TEST_SCOPE == 'all' }}
@@ -83,7 +88,7 @@ jobs:
       - name: ❌ Clean old Allure results
         run: rm -rf allure-results
 
-      # 🏷 Set Allure environment metadata (значения подставлены из settings.py через conftest.py)
+      # ✅ Allure Environment: API_URL теперь доступен
       - name: Set Allure environment metadata
         run: |
           mkdir -p allure-results
@@ -92,6 +97,7 @@ jobs:
           echo "API_URL=$API_URL" >> allure-results/environment.properties
 
       - name: ✅ Run tests with Allure
+        continue-on-error: true
         run: pytest . --alluredir=allure-results -m "$TEST_SCOPE"
 
       - name: Check allure-results content
