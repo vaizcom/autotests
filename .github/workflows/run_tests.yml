@@ -33,8 +33,6 @@ jobs:
     env:
       TEST_STAND_NAME: ${{ github.event.inputs.test_stand || 'kuber_dev' }}
       TEST_SCOPE: ${{ github.event.inputs.test_scope || 'backend' }}
-      ALLURE_LAUNCH_NAME: >-
-        Test: ${{ github.event.inputs.test_scope || 'backend' }} | Stand: ${{ github.event.inputs.test_stand || 'kuber_dev' }} | URL: https://${{ github.event.inputs.test_stand || 'kuber_dev' }}.vaiz.dev
 
     steps:
       - uses: actions/checkout@v4
@@ -71,17 +69,21 @@ jobs:
         run: |
           echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
 
-      - name: Set Allure metadata
+      # 👇 Удаляем старые результаты
+      - name: ❌ Clean old allure-results
+        run: rm -rf allure-results
+
+      # 👇 Создаём переменные окружения для Allure
+      - name: 🏷 Set Allure metadata
         run: |
           mkdir -p allure-results
           echo "TEST_SCOPE=$TEST_SCOPE" >> allure-results/environment.properties
           echo "TEST_STAND=$TEST_STAND_NAME" >> allure-results/environment.properties
           echo "URL=https://${TEST_STAND_NAME}.vaiz.dev" >> allure-results/environment.properties
 
+      # 👇 Запускаем тесты
       - name: ✅ Run tests with Allure
         run: |
-          rm -rf allure-results
-          mkdir -p allure-results
           pytest . --alluredir=allure-results -m "$TEST_SCOPE"
 
       - name: Check allure-results content
