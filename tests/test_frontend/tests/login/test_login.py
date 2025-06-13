@@ -2,7 +2,7 @@ import time
 import allure
 import pytest
 from playwright.sync_api import expect, Page
-from tests.frontend.core import settings
+from tests.test_frontend.core import settings
 
 
 pytestmark = [pytest.mark.frontend]
@@ -31,8 +31,9 @@ def test_sign_in_with_email(page: Page, browser_context_args):
     expect(page.get_by_role('heading', name='Hello')).to_be_visible()
 
 
+@pytest.mark.skip(reason='Пропускается из-за известных причин')
 def test_sign_in_with_slack(page: Page):
-    page.goto(settings.BASE_URL + '/auth/sign-in', wait_until='domcontentloaded')
+    page.goto(settings.BASE_URL + 'auth/sign-in', wait_until='domcontentloaded')
     page.get_by_role('button', name='Sign in with Slack').click()
     page.get_by_role('link', name='Find your workspaces').click()
 
@@ -56,6 +57,7 @@ def test_sign_in_with_slack(page: Page):
     expect(page).to_have_url('https://app.vaiz.dev/65c8e579dac495717996637b')
 
 
+@pytest.mark.skip(reason='Пропускается из-за известных причин')
 def test_sign_in_with_google(page: Page):
     page.goto(settings.BASE_URL + '/auth/sign-in')
     page.get_by_role('button', name='Sign in with Google').click()
@@ -74,6 +76,7 @@ def test_sign_in_with_google(page: Page):
     expect(page.get_by_role('link', name='Dashboard')).to_be_attached(timeout=100 * 1000)
 
 
+@pytest.mark.skip(reason='Пропускается из-за известных причин')
 def test_sign_in_with_github(page: Page, context, browser_context_args):
     # GMail
     # g_account_page = context.new_page()

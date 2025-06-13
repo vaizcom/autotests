@@ -5,8 +5,8 @@ import allure
 import pytest
 from requests import request
 
-from tests.frontend.core import settings
-from tests.frontend.core.settings import URL
+from tests.test_frontend.core import settings
+from tests.test_frontend.core.settings import URL
 
 
 @pytest.fixture
@@ -20,8 +20,8 @@ def generated_string():
 # ["session", "package", "module", "class", "function"]
 @pytest.fixture(scope='session')
 def browser_token():
-    payload = {'email': 'mastretsova+2@ibitcy.com', 'password': '123456'}
-    headers = {'currentSpaceId': '667433ff21f760c6446bc0e2', 'Content-Type': 'application/json'}
+    payload = {'email': 'mastretsovaone@gmail.com', 'password': '123456'}
+    headers = {'Content-Type': 'application/json'}
     response = request('POST', URL + '/Login', headers=headers, json=payload)
     payload = response.json()['payload']
     return payload['token']
@@ -36,7 +36,7 @@ def browser_context_args(browser_context_args, browser_token):
                 {
                     'name': '_t',
                     'value': browser_token,
-                    'url': 'https://vaiz-app-ms.vaiz.dev/',
+                    'url': URL,
                 },
             ]
         },

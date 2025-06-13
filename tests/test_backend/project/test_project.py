@@ -1,6 +1,6 @@
 import allure
-from tests.backend.utils.generators import generate_project_name, generate_slug
-from tests.backend.data.endpoints.Project.project_endpoints import (
+from tests.test_backend.utils.generators import generate_project_name, generate_slug
+from tests.test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint,
     edit_project_endpoint,
     get_project_endpoint,
