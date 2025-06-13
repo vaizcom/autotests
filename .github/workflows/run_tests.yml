@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 🧠 Определяем стенд по ветке (если не ручной запуск)
+      # 🧠 Определяем стенд по ветке (если запуск не вручную)
       - name: Determine test stand from branch
         if: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
@@ -40,10 +40,14 @@ jobs:
             echo "TEST_STAND_NAME=kuber_dev" >> $GITHUB_ENV
           fi
 
-      # 🧠 Получаем стенд из input при ручном запуске
+      # 🧠 Устанавливаем стенд вручную (если запуск через workflow_dispatch)
       - name: Set test stand from input
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: echo "TEST_STAND_NAME=${{ github.event.inputs.test_stand }}" >> $GITHUB_ENV
+
+      # ✅ Добавляем tests/ в PYTHONPATH (нужно для from config import settings)
+      - name: Add tests to PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -56,19 +60,10 @@ jobs:
           pip install -r requirements.txt
           pip install allure-pytest
 
-      # ✅ Добавляем путь к settings.py (tests/config)
-      - name: Add settings path to PYTHONPATH
-        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests/config" >> $GITHUB_ENV
-
-      # ✅ Запускаем settings.py для экспорта API_URL
-      - name: Load settings and export API_URL
-        run: python -c "import settings"
-
       - name: Display selected options
         run: |
           echo "Test scope: $TEST_SCOPE"
           echo "Test stand: $TEST_STAND_NAME"
-          echo "API URL: $API_URL"
 
       - name: Install Playwright Browsers
         if: ${{ env.TEST_SCOPE == 'frontend' || env.TEST_SCOPE == 'all' }}
@@ -88,7 +83,8 @@ jobs:
       - name: ❌ Clean old Allure results
         run: rm -rf allure-results
 
-      - name: 🏷 Set Allure environment metadata
+      # 🏷 Set Allure environment metadata (значения подставлены из settings.py через conftest.py)
+      - name: Set Allure environment metadata
         run: |
           mkdir -p allure-results
           echo "TEST_SCOPE=$TEST_SCOPE" >> allure-results/environment.properties
