@@ -31,10 +31,8 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['empty string', 'none', 'length > 50', 'valid name', 'number instead of string', 'exactly 50 chars'],
 )
-@allure.title('Валидация: создание борды с именем — ожидаемый статус {expected_status}')
 def test_create_board_name_validation(owner_client, temp_project, temp_space, name, expected_status, request):
     allure.dynamic.title(f'Валидация имени борды: {request.node.callspec.id} → ожидали {expected_status}')
-
     response = owner_client.post(
         **create_board_endpoint(
             name=name, temp_project=temp_project, space_id=temp_space, groups=[], typesList=[], customFields=[]
@@ -75,8 +73,8 @@ def test_create_board_with_max_description(owner_client, temp_project, temp_spac
     [('', 400), (None, 400), ('A' * 51, 400), ('A' * 50, 200)],
     ids=['empty string', 'None value', 'too long (51 chars)', 'valid name'],
 )
-@allure.title('Валидация поля name: {name}')
 def test_create_board_group_name_validation(owner_client, temp_board, temp_space, name, expected_status, request):
+    allure.dynamic.title(f'Валидация поля group name: {request.node.callspec.id} → ожидали {expected_status}')
     response = owner_client.post(
         **create_board_group_endpoint(
             board_id=temp_board, space_id=temp_space, name=name, description='Описание группы'
@@ -91,7 +89,6 @@ def test_create_board_group_name_validation(owner_client, temp_board, temp_space
     [('D' * 1025, 400), ('D' * BOARD_GROUP_MAX_DESCRIPTION_LENGTH, 200), ('Обычное описание', 200), (None, 200)],
     ids=['too long (1025 chars)', 'max valid (1024 chars)', 'regular description', 'None (optional)'],
 )
-@allure.title('Валидация поля description: {description}')
 def test_create_board_group_description_validation(
     owner_client,
     temp_board,
@@ -100,6 +97,7 @@ def test_create_board_group_description_validation(
     expected_status,
     request,
 ):
+    allure.dynamic.title(f'Валидация поля group description: {request.node.callspec.id} → ожидали {expected_status}')
     response = owner_client.post(
         **create_board_group_endpoint(
             board_id=temp_board, space_id=temp_space, name='Группа с описанием', description=description
