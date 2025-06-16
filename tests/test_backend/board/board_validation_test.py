@@ -89,7 +89,9 @@ def test_board_group_name_validation(owner_client, temp_board, temp_space, name,
     [('D' * 1025, 400), ('D' * BOARD_GROUP_MAX_DESCRIPTION_LENGTH, 200), ('Обычное описание', 200), (None, 200)],
     ids=['too long (1025 chars)', 'max valid (1024 chars)', 'regular description', 'None (optional)'],
 )
-def test_board_group_description_validation(owner_client,temp_board,temp_space,description,expected_status,request):
+def test_board_group_description_validation(
+    owner_client, temp_board, temp_space, description, expected_status, request
+):
     allure.dynamic.title(f'Валидация поля group description: {request.node.callspec.id} → ожидали {expected_status}')
     response = owner_client.post(
         **create_board_group_endpoint(
