@@ -1,11 +1,12 @@
 import allure
 import pytest
+
+from config.generators import generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import (
     create_board_custom_field_endpoint,
     create_board_group_endpoint,
 )
 from tests.test_backend.data.endpoints.Board.custom_field_types import CustomFieldType
-from tests.test_backend.utils.generators import generate_board_name
 
 from tests.test_backend.data.endpoints.Board.board_endpoints import create_board_endpoint
 from tests.test_backend.data.endpoints.Board.constants import (
@@ -31,8 +32,8 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['empty string', 'none', 'length > 50', 'valid name', 'number instead of string', 'exactly 50 chars'],
 )
-@allure.title('Валидация: создание борды с именем — ожидаемый статус {expected_status}')
-def test_create_board_name_validation(owner_client, temp_project, temp_space, name, expected_status, request):
+def test_board_name_validation(owner_client, temp_project, temp_space, name, expected_status, request):
+    allure.dynamic.title(f'Валидация имени борды: {request.node.callspec.id} → ожидали {expected_status}')
     response = owner_client.post(
         **create_board_endpoint(
             name=name, temp_project=temp_project, space_id=temp_space, groups=[], typesList=[], customFields=[]
@@ -41,11 +42,10 @@ def test_create_board_name_validation(owner_client, temp_project, temp_space, na
 
     with allure.step(f'Проверка, что API вернул статус {expected_status} при {request.node.callspec.id}'):
         assert response.status_code == expected_status
-        print(f'Проверка, что API вернул статус {expected_status} при {request.node.callspec.id}')
 
 
 @allure.title('Создание борды с описанием максимальной длины(Поле отсутствует на фронте)')
-def test_create_board_with_max_description(owner_client, temp_project, temp_space):
+def test_board_with_max_description(owner_client, temp_project, temp_space):
     name = generate_board_name()
     description = 'D' * BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH
 
@@ -73,8 +73,8 @@ def test_create_board_with_max_description(owner_client, temp_project, temp_spac
     [('', 400), (None, 400), ('A' * 51, 400), ('A' * 50, 200)],
     ids=['empty string', 'None value', 'too long (51 chars)', 'valid name'],
 )
-@allure.title('Валидация поля name: {name}')
-def test_create_board_group_name_validation(owner_client, temp_board, temp_space, name, expected_status, request):
+def test_board_group_name_validation(owner_client, temp_board, temp_space, name, expected_status, request):
+    allure.dynamic.title(f'Валидация поля group name: {request.node.callspec.id} → ожидали {expected_status}')
     response = owner_client.post(
         **create_board_group_endpoint(
             board_id=temp_board, space_id=temp_space, name=name, description='Описание группы'
@@ -89,15 +89,10 @@ def test_create_board_group_name_validation(owner_client, temp_board, temp_space
     [('D' * 1025, 400), ('D' * BOARD_GROUP_MAX_DESCRIPTION_LENGTH, 200), ('Обычное описание', 200), (None, 200)],
     ids=['too long (1025 chars)', 'max valid (1024 chars)', 'regular description', 'None (optional)'],
 )
-@allure.title('Валидация поля description: {description}')
-def test_create_board_group_description_validation(
-    owner_client,
-    temp_board,
-    temp_space,
-    description,
-    expected_status,
-    request,
+def test_board_group_description_validation(
+    owner_client, temp_board, temp_space, description, expected_status, request
 ):
+    allure.dynamic.title(f'Валидация поля group description: {request.node.callspec.id} → ожидали {expected_status}')
     response = owner_client.post(
         **create_board_group_endpoint(
             board_id=temp_board, space_id=temp_space, name='Группа с описанием', description=description
@@ -105,7 +100,6 @@ def test_create_board_group_description_validation(
     )
     with allure.step(f'Проверка, что API вернул {expected_status} при {request.node.callspec.id}'):
         assert response.status_code == expected_status
-        print(f'Проверка, что API вернул {expected_status} при {request.node.callspec.id}')
 
 
 @pytest.mark.parametrize(
@@ -129,8 +123,8 @@ def test_create_board_group_description_validation(
         "limit = '123' (xfail - wrong type)",
     ],
 )
-@allure.title('Валидация поля limit: {limit}')
-def test_create_board_group_limit_validation(owner_client, temp_board, temp_space, limit, expected_status):
+@allure.title('Валидация поля limit для board group: {limit}')
+def test_board_group_limit_validation(owner_client, temp_board, temp_space, limit, expected_status):
     response = owner_client.post(
         **create_board_group_endpoint(
             board_id=temp_board, space_id=temp_space, name='Группа с лимитом', description='Описание', limit=limit
@@ -143,7 +137,7 @@ def test_create_board_group_limit_validation(owner_client, temp_board, temp_spac
 @pytest.mark.xfail(reason='Известный баг: длинный заголовок custom field без пробелов не влезает в тултип (APP-2763)')
 @allure.label('bug', 'APP-2763')
 @pytest.mark.parametrize('field_type', CustomFieldType.list())
-def test_create_board_with_long_custom_field_title(owner_client, temp_board, field_type, temp_project, temp_space):
+def test_board_with_long_custom_field_title(owner_client, temp_board, field_type, temp_project, temp_space):
     custom_field = 'T' * (BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH + 1)
 
     # Явно указываем тип поля в заголовке
