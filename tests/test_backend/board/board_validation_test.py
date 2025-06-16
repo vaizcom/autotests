@@ -33,6 +33,8 @@ pytestmark = [pytest.mark.backend]
 )
 @allure.title('Валидация: создание борды с именем — ожидаемый статус {expected_status}')
 def test_create_board_name_validation(owner_client, temp_project, temp_space, name, expected_status, request):
+    allure.dynamic.title(f'Валидация имени борды: {request.node.callspec.id} → ожидали {expected_status}')
+
     response = owner_client.post(
         **create_board_endpoint(
             name=name, temp_project=temp_project, space_id=temp_space, groups=[], typesList=[], customFields=[]
