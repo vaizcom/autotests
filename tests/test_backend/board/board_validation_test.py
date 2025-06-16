@@ -41,7 +41,6 @@ def test_create_board_name_validation(owner_client, temp_project, temp_space, na
 
     with allure.step(f'Проверка, что API вернул статус {expected_status} при {request.node.callspec.id}'):
         assert response.status_code == expected_status
-        print(f'Проверка, что API вернул статус {expected_status} при {request.node.callspec.id}')
 
 
 @allure.title('Создание борды с описанием максимальной длины(Поле отсутствует на фронте)')
@@ -105,7 +104,6 @@ def test_create_board_group_description_validation(
     )
     with allure.step(f'Проверка, что API вернул {expected_status} при {request.node.callspec.id}'):
         assert response.status_code == expected_status
-        print(f'Проверка, что API вернул {expected_status} при {request.node.callspec.id}')
 
 
 @pytest.mark.parametrize(
@@ -129,7 +127,7 @@ def test_create_board_group_description_validation(
         "limit = '123' (xfail - wrong type)",
     ],
 )
-@allure.title('Валидация поля limit: {limit}')
+@allure.title('Валидация поля limit для board group: {limit}')
 def test_create_board_group_limit_validation(owner_client, temp_board, temp_space, limit, expected_status):
     response = owner_client.post(
         **create_board_group_endpoint(
