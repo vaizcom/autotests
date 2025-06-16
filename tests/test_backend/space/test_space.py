@@ -1,4 +1,6 @@
 import allure
+
+from config.generators import generate_project_name, generate_space_name
 from tests.test_backend.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
     get_space_endpoint,
@@ -6,7 +8,6 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
     edit_space_endpoint,
     remove_space_endpoint,
 )
-from tests.test_backend.utils.generators import generate_space_name, generate_project_name
 
 MAX_SPACE_NAME_LENGTH = 30
 import pytest

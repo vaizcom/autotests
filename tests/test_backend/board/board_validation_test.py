@@ -1,11 +1,12 @@
 import allure
 import pytest
+
+from config.generators import generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import (
     create_board_custom_field_endpoint,
     create_board_group_endpoint,
 )
 from tests.test_backend.data.endpoints.Board.custom_field_types import CustomFieldType
-from tests.test_backend.utils.generators import generate_board_name
 
 from tests.test_backend.data.endpoints.Board.board_endpoints import create_board_endpoint
 from tests.test_backend.data.endpoints.Board.constants import (
