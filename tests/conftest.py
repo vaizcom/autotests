@@ -1,6 +1,7 @@
 import pytest
 from config import settings
 from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
+from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from tests.core.client import APIClient
 from tests.core.auth import get_token
 from tests.config.settings import API_URL
@@ -38,6 +39,18 @@ def owner_client():
     return client
 
 
+# Фикстура: создает временный спейс и возвращает member_id после прохождения тестов удаляет этот временный спейс
+@pytest.fixture(scope='session')
+def temp_member(owner_client, temp_space):
+    response = owner_client.post(**get_space_members_endpoint(space_id=temp_space))
+    response.raise_for_status()
+
+    data = response.json()['payload']
+    member_id = data['members'][0]['_id']
+
+    yield member_id
+
+
 # Фикстура: создает временный спейс и после прохождения тестов удаляет этот временный спейс
 @pytest.fixture(scope='session')
 def temp_space(owner_client):
@@ -60,7 +73,7 @@ def temp_project(owner_client, temp_space):
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': temp_space}
     response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
     assert response.status_code == 200
-    return response.json()['payload']['project']['_id']
+    yield response.json()['payload']['project']['_id']
 
 
 @pytest.fixture(scope='session')
@@ -80,4 +93,4 @@ def temp_board(owner_client, temp_project, temp_space):
     response = owner_client.post(**payload)
     assert response.status_code == 200
 
-    return response.json()['payload']['board']['_id']
+    yield response.json()['payload']['board']['_id']
