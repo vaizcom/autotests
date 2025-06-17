@@ -41,8 +41,10 @@ def test_create_document(owner_client, temp_space, temp_project, temp_member, ki
 )
 @allure.title('Создание документа с различными значениями title — ожидаемый статус {expected_status}')
 def test_create_document_with_various_titles(
-    owner_client, temp_space, temp_project, title, expected_status, expected_actual_title
+    owner_client, temp_space, temp_project, title, expected_status, expected_actual_title, request
 ):
+    allure.dynamic.title(f'Создание документа — кейс: [{request.node.callspec.id}] (ожидается {expected_status})')
+
     with allure.step(f'Отправка запроса с title={repr(title)} (ожидается {expected_status})'):
         response = owner_client.post(
             **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title=title)
