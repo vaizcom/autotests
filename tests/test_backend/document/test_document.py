@@ -71,7 +71,7 @@ def test_document_title_validation(
 ):
     allure.dynamic.title(f'Создание документа — кейс: [{request.node.callspec.id}] (ожидается {expected_status})')
 
-    with allure.step(f'Отправка запроса с title={repr(title)} (ожидается {expected_status})'):
+    with allure.step(f'Отправка запроса [{request.node.callspec.id}] (ожидается {expected_status})'):
         response = owner_client.post(
             **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title=title)
         )
