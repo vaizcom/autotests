@@ -160,7 +160,6 @@ def test_create_child_document(owner_client, temp_space, temp_project):
 
 
 @pytest.mark.skip('BUG: APP-2842 CreateDocument не возвращает index и parentDocumentId в ответе')
-@allure.title('Валидация поля index')
 @pytest.mark.parametrize(
     'index, expected_status',
     [
@@ -172,6 +171,7 @@ def test_create_child_document(owner_client, temp_space, temp_project):
     ids=['zero', 'none', 'negative', 'too large'],
 )
 def test_document_index_validation(owner_client, temp_space, temp_project, index, expected_status):
+    allure.dynamic.title(f'Валидация поля index — значение: {index} (ожидается {expected_status})')
     title = f'Document with index {index}'
 
     with allure.step(f'Создание документа с index={index} (ожидается {expected_status})'):
@@ -186,7 +186,6 @@ def test_document_index_validation(owner_client, temp_space, temp_project, index
 
 
 @pytest.mark.skip('BUG: APP-2842 CreateDocument не возвращает index и parentDocumentId в ответе')
-@allure.title('Валидация parentDocumentId')
 @pytest.mark.parametrize(
     'parent_id, expected_status',
     [
@@ -197,6 +196,7 @@ def test_document_index_validation(owner_client, temp_space, temp_project, index
     ids=['no parent', 'invalid id', 'nonexistent'],
 )
 def test_document_parent_validation(owner_client, temp_space, temp_project, parent_id, expected_status):
+    allure.dynamic.title(f'Валидация parentDocumentId — кейс: {parent_id} (ожидается {expected_status})')
     title = 'Document with parent'
 
     with allure.step(f'Создание документа с parentDocumentId={parent_id} (ожидается {expected_status})'):
@@ -210,9 +210,8 @@ def test_document_parent_validation(owner_client, temp_space, temp_project, pare
         assert response.status_code == expected_status
 
 
-@allure.title('Создание документа с разными kind и kindId')
 @pytest.mark.parametrize(
-    'kind, get_id_fixture, expected_status',
+    'kind, get_fixture, expected_status',
     [
         ('Project', 'temp_project', 200),
         ('Space', 'temp_space', 200),
@@ -222,8 +221,10 @@ def test_document_parent_validation(owner_client, temp_space, temp_project, pare
     ],
     ids=['project', 'space', 'member', 'wrong kind', 'wrong id'],
 )
-def test_document_kind_and_id(owner_client, temp_space, request, kind, get_id_fixture, expected_status):
-    kind_id = request.getfixturevalue(get_id_fixture) if get_id_fixture != 'nonexistent_id' else 'invalid_id'
+def test_document_kind_and_id(owner_client, temp_space, request, kind, get_fixture, expected_status):
+    allure.dynamic.title(f'Создание документа с kind={kind} и kindId (ожидается {expected_status})')
+
+    kind_id = request.getfixturevalue(get_fixture) if get_fixture != 'nonexistent_id' else 'invalid_id'
 
     with allure.step(f'Создание документа kind={kind}, kindId={kind_id} (ожидается {expected_status})'):
         response = owner_client.post(
