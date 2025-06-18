@@ -32,7 +32,6 @@ def test_create_document(owner_client, temp_space, temp_project, temp_member, ki
 
 MAX_DOC_NAME_LENGTH = 2048
 
-
 @pytest.mark.parametrize(
     'title, expected_status, expected_actual_title',
     [
@@ -85,6 +84,34 @@ def test_document_title_validation(
             assert document['_id']
             actual_title = document.get('title')
             assert actual_title == expected_actual_title
+
+    elif response.status_code == 400:
+        with allure.step('Проверка ошибки валидации по полю "title"'):
+            body = response.json()
+            error = body.get('error', {})
+
+            with allure.step('Проверка, что error.code == "InvalidForm"'):
+                assert (
+                    error.get('code') == 'InvalidForm'
+                ), f'Ожидался код "InvalidForm", но получен: {error.get("code")}'
+
+            title_codes = []
+            with allure.step('Поиск ошибок по полю "title" в error.fields'):
+                for field in error.get('fields', []):
+                    if field.get('name') == 'title':
+                        title_codes = field.get('codes', [])
+                        break
+                assert title_codes, 'Поле "title" не найдено в error.fields или отсутствуют коды ошибок'
+
+            with allure.step('Проверка конкретного кода ошибки в зависимости от значения title'):
+                if title == '':
+                    assert (
+                        'title should not be empty' in title_codes
+                    ), f'Ожидался код "TitleShouldNotBeEmpty", получены: {title_codes}'
+                elif isinstance(title, str) and len(title) > MAX_DOC_NAME_LENGTH:
+                    assert (
+                        'FieldTooLong' in title_codes
+                    ), f'Ожидался код "FieldTooLong" при длине > {MAX_DOC_NAME_LENGTH}, получены: {title_codes}'
 
 
 @allure.title('Создание дочерних документов, Проверка status_code и title')
