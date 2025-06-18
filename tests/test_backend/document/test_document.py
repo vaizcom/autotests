@@ -222,7 +222,7 @@ def test_document_parent_validation(owner_client, temp_space, temp_project, pare
     ids=['project', 'space', 'member', 'wrong kind', 'wrong id'],
 )
 def test_document_kind_and_id(owner_client, temp_space, request, kind, get_fixture, expected_status):
-    allure.dynamic.title(f'Создание документа с kind={kind} и kindId (ожидается {expected_status})')
+    allure.dynamic.title(f'Создание документа - кейс с kind={kind} и kindId (ожидается {expected_status})')
 
     kind_id = request.getfixturevalue(get_fixture) if get_fixture != 'nonexistent_id' else 'invalid_id'
 
