@@ -32,6 +32,7 @@ def test_create_document(owner_client, temp_space, temp_project, temp_member, ki
 
 MAX_DOC_NAME_LENGTH = 2048
 
+
 @pytest.mark.parametrize(
     'title, expected_status, expected_actual_title',
     [
@@ -115,7 +116,6 @@ def test_document_title_validation(
 
 
 @allure.title('Создание дочерних документов, Проверка status_code и title')
-@allure.title('BUG: APP-2842 CreateDocument не возвращает index и parentDocumentId в ответе')
 def test_create_child_document(owner_client, temp_space, temp_project):
     with allure.step('1. Создание родительского документа'):
         parent_title = 'Parent Doc'
@@ -157,3 +157,131 @@ def test_create_child_document(owner_client, temp_space, temp_project):
         assert second_resp.status_code == 200
         second_doc = second_resp.json()['payload']['document']
         assert second_doc['title'] == second_title
+
+
+@pytest.mark.skip('BUG: APP-2842 CreateDocument не возвращает index и parentDocumentId в ответе')
+@allure.title('Валидация поля index')
+@pytest.mark.parametrize(
+    'index, expected_status',
+    [
+        (0, 200),
+        (None, 200),
+        (-1, 400),
+        (9999, 400),
+    ],
+    ids=['zero', 'none', 'negative', 'too large'],
+)
+def test_document_index_validation(owner_client, temp_space, temp_project, index, expected_status):
+    title = f'Document with index {index}'
+
+    with allure.step(f'Создание документа с index={index} (ожидается {expected_status})'):
+        response = owner_client.post(
+            **create_document_endpoint(
+                kind='Project', kind_id=temp_project, space_id=temp_space, title=title, index=index
+            )
+        )
+
+    with allure.step('Проверка статус-кода ответа'):
+        assert response.status_code == expected_status
+
+
+@pytest.mark.skip('BUG: APP-2842 CreateDocument не возвращает index и parentDocumentId в ответе')
+@allure.title('Валидация parentDocumentId')
+@pytest.mark.parametrize(
+    'parent_id, expected_status',
+    [
+        (None, 200),
+        ('nonexistent_id', 400),
+        ('000000000000000000000000', 400),
+    ],
+    ids=['no parent', 'invalid id', 'nonexistent'],
+)
+def test_document_parent_validation(owner_client, temp_space, temp_project, parent_id, expected_status):
+    title = 'Document with parent'
+
+    with allure.step(f'Создание документа с parentDocumentId={parent_id} (ожидается {expected_status})'):
+        response = owner_client.post(
+            **create_document_endpoint(
+                kind='Project', kind_id=temp_project, space_id=temp_space, title=title, parent_document_id=parent_id
+            )
+        )
+
+    with allure.step('Проверка статус-кода ответа'):
+        assert response.status_code == expected_status
+
+
+@allure.title('Создание документа с разными kind и kindId')
+@pytest.mark.parametrize(
+    'kind, get_id_fixture, expected_status',
+    [
+        ('Project', 'temp_project', 200),
+        ('Space', 'temp_space', 200),
+        ('Member', 'temp_member', 200),
+        ('WrongKind', 'temp_project', 400),
+        ('Project', 'nonexistent_id', 400),
+    ],
+    ids=['project', 'space', 'member', 'wrong kind', 'wrong id'],
+)
+def test_document_kind_and_id(owner_client, temp_space, request, kind, get_id_fixture, expected_status):
+    kind_id = request.getfixturevalue(get_id_fixture) if get_id_fixture != 'nonexistent_id' else 'invalid_id'
+
+    with allure.step(f'Создание документа kind={kind}, kindId={kind_id} (ожидается {expected_status})'):
+        response = owner_client.post(
+            **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title='Kind Test')
+        )
+
+    with allure.step('Проверка статус-кода ответа'):
+        assert response.status_code == expected_status
+
+
+@allure.title('Создание документа с дублирующимся title')
+def test_document_title_duplicates(owner_client, temp_space, temp_project):
+    title = 'Duplicate Title'
+
+    with allure.step('Создание первого документа с одинаковым title'):
+        resp1 = owner_client.post(
+            **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title=title)
+        )
+        assert resp1.status_code == 200
+
+    with allure.step('Создание второго документа с тем же title'):
+        resp2 = owner_client.post(
+            **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title=title)
+        )
+        assert resp2.status_code == 200, 'Поведение зависит от бизнес-логики: разрешены ли дубликаты'
+
+
+@allure.title('Проверка структуры ответа при создании документа')
+def test_document_response_structure(owner_client, temp_space, temp_project):
+    with allure.step('Создание документа'):
+        response = owner_client.post(
+            **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space)
+        )
+        assert response.status_code == 200
+
+    with allure.step('Проверка обязательных полей в ответе'):
+        document = response.json()['payload']['document']
+        for field in ['_id', 'kind']:
+            assert field in document, f'Поле {field} отсутствует в payload'
+
+
+@allure.title('Создание документа без авторизации')
+def test_create_document_without_auth(foreign_client, temp_space, temp_project):
+    with allure.step('Создание документа гостем'):
+        response = foreign_client.post(
+            **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title='Guest test')
+        )
+    with allure.step('Ожидаем 400 Unauthorized'):
+        assert response.status_code == 400
+
+
+@allure.title('Создание документа в чужом space')
+def test_create_document_in_foreign_space(owner_client, foreign_space, temp_project):
+    with allure.step('Попытка создать документ в чужом space'):
+        response = owner_client.post(
+            **create_document_endpoint(
+                kind='Project', kind_id=temp_project, space_id=foreign_space, title='Wrong space'
+            )
+        )
+    with allure.step('Ожидаем 400'):
+        assert response.status_code == 400

@@ -15,17 +15,17 @@ def pytest_configure(config):
     print(f'🔗 API URL: {settings.API_URL}\n')
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def guest_client():
     return APIClient(base_url=API_URL, token=get_token('guest'))
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def member_client():
     return APIClient(base_url=API_URL, token=get_token('member'))
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def manager_client():
     return APIClient(base_url=API_URL, token=get_token('manager'))
 
@@ -33,10 +33,12 @@ def manager_client():
 # Фикстура: возвращает авторизованного API клиента с токеном владельца
 @pytest.fixture(scope='session')
 def owner_client():
-    token = get_token('owner')
-    client = APIClient(base_url=API_URL)
-    client.set_auth_header(token)
-    return client
+    return APIClient(base_url=API_URL, token=get_token('owner'))
+
+
+@pytest.fixture(scope='session')
+def foreign_client():
+    return APIClient(base_url=API_URL, token=get_token('guest'))
 
 
 # Фикстура: создает временный спейс и возвращает member_id после прохождения тестов удаляет этот временный спейс
@@ -63,6 +65,19 @@ def temp_space(owner_client):
     yield space_id
 
     client.post(**remove_space_endpoint(space_id=space_id))
+
+
+@pytest.fixture(scope='session')
+def foreign_space(guest_client):
+    """Создаёт space от имени другого пользователя"""
+    response = guest_client.post(**create_space_endpoint(name='foreign space'))
+    assert response.status_code == 200
+    space_id = response.json()['payload']['space']['_id']
+
+    yield space_id
+
+    # Очистка
+    guest_client.post(**remove_space_endpoint(space_id=space_id))
 
 
 @pytest.fixture(scope='session')
