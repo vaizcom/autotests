@@ -84,9 +84,7 @@ def test_document_title_validation(
             document = response.json()['payload']['document']
             assert document['_id']
             actual_title = document.get('title')
-            assert actual_title == expected_actual_title, (
-                f'Ожидался title: {repr(expected_actual_title)}, ' f'но получен: {repr(actual_title)}'
-            )
+            assert actual_title == expected_actual_title
 
 
 @allure.title('Создание дочерних документов, Проверка status_code и title')
