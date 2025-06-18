@@ -30,17 +30,43 @@ def test_create_document(owner_client, temp_space, temp_project, temp_member, ki
     assert payload['document']['title'] == title
 
 
+MAX_DOC_NAME_LENGTH = 2048
+
+
 @pytest.mark.parametrize(
     'title, expected_status, expected_actual_title',
     [
         (None, 200, 'Untitled document'),
         ('', 400, None),
         (' ', 200, ' '),
+        ('A' * MAX_DOC_NAME_LENGTH, 200, 'A' * MAX_DOC_NAME_LENGTH),
+        ('A' * (MAX_DOC_NAME_LENGTH + 1), 400, None),
+        # Дополнительно:
+        (123, 400, None),
+        (True, 400, None),
+        ([], 400, None),
+        ('Документ', 200, 'Документ'),
+        ('😊📄✨', 200, '😊📄✨'),
+        ('<script>alert(1)</script>', 200, '<script>alert(1)</script>'),
+        ('Title with & < > " \'', 200, 'Title with & < > " \''),
     ],
-    ids=['None', 'empty string', 'single space'],
+    ids=[
+        'None',
+        'empty string',
+        'single space',
+        'title = MAX length (2048)',
+        'title > MAX length (2049)',
+        'int as title',
+        'bool as title',
+        'list as title',
+        'cyrillic',
+        'emoji',
+        'html injection',
+        'special chars',
+    ],
 )
 @allure.title('Создание документа с различными значениями title — ожидаемый статус {expected_status}')
-def test_create_document_with_various_titles(
+def test_document_title_validation(
     owner_client, temp_space, temp_project, title, expected_status, expected_actual_title, request
 ):
     allure.dynamic.title(f'Создание документа — кейс: [{request.node.callspec.id}] (ожидается {expected_status})')
