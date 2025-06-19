@@ -272,8 +272,9 @@ def test_create_document_without_auth(foreign_client, temp_space, temp_project):
         response = foreign_client.post(
             **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title='Guest test')
         )
-    with allure.step('Ожидаем 400 Unauthorized'):
+    with allure.step('Ожидаем 400 Unauthorized, проверяем текст ошибки SpaceIdNotSpecified'):
         assert response.status_code == 400
+        assert response.json()['error']['code'] == 'SpaceIdNotSpecified'
 
 
 @allure.title('Создание документа в чужом space')
@@ -284,5 +285,6 @@ def test_create_document_in_foreign_space(owner_client, foreign_space, temp_proj
                 kind='Project', kind_id=temp_project, space_id=foreign_space, title='Wrong space'
             )
         )
-    with allure.step('Ожидаем 400'):
+    with allure.step('Ожидаем 400, проверяем текст ошибки SpaceIdNotSpecified'):
         assert response.status_code == 400
+        assert response.json()['error']['code'] == 'SpaceIdNotSpecified'
