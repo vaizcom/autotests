@@ -18,6 +18,9 @@ on:
         type: choice
         options: [ dev, uat, kuber_dev, kuber_uat ]
 
+permissions:
+  contents: write 
+
 jobs:
   test:
     runs-on: ubuntu-latest
