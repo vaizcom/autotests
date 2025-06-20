@@ -59,9 +59,32 @@ def test_get_documents_invalid_inputs(owner_client, temp_space, temp_project, ki
     if kind_id == 'valid_project_id':
         kind_id = temp_project
 
-    with allure.step(f'Отправка запроса и проверка статуса {expected_status}, '):
+    with allure.step(f'Отправка запроса и проверка статуса {expected_status}, проверка ошибки "InvalidForm"'):
         response = owner_client.post(
             **get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space)
         )
         assert response.status_code == expected_status, f'Ожидался статус {expected_status}, но получен {response.status_code}'
         assert response.json()['error']['code'] == 'InvalidForm'
+
+
+
+@pytest.mark.parametrize('kind, fixture_name', [
+    ('Project', 'temp_project'),
+    ('Space', 'temp_space'),
+    ('Member', 'temp_member'),
+], ids=['project', 'space', 'member'])
+def test_get_documents_empty_list(owner_client, temp_space, request, kind, fixture_name):
+    kind_id = request.getfixturevalue(fixture_name)
+    allure.dynamic.title(f'Пустой результат при отсутствии документов (kind={kind})')
+
+    with allure.step(f'Запрос документов без предварительного создания (kind={kind}, kindId={kind_id})'):
+        response = owner_client.post(
+            **get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space)
+        )
+
+    with allure.step('Проверка успешного ответа и пустого списка'):
+        assert response.status_code == 200
+        payload = response.json().get('payload', {})
+        documents = payload.get('documents')
+        assert isinstance(documents, list), f'Ожидался список, но получили: {type(documents)}'
+        assert len(documents) == 0, f'Ожидался пустой список документов, но получено: {documents}'
