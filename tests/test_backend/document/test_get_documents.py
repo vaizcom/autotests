@@ -14,8 +14,10 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import create
     ],
     ids=['project', 'space', 'member']
 )
-@allure.title('Получение документов для kind — проверка количества')
+
 def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
+    allure.dynamic.title(f'Получение документов — кейс: [{request.node.callspec.id}] kind={kind}')
+
     kind_id = request.getfixturevalue(fixture_name)
     count = random.randint(1, 5)
     titles = [f'Random doc для kind={kind} #{i}' for i in range(count)]
@@ -47,5 +49,6 @@ def test_get_documents_with_wrong_kind(owner_client, temp_space, temp_project):
             **get_documents_endpoint(kind='WrongKind', kind_id=temp_project, space_id=temp_space)
         )
 
-    with allure.step('Ожидаем ошибку валидации'):
+    with allure.step('Ожидаем 400 ошибку валидации, codes: InvalidKind'):
         assert response.status_code == 400
+        assert response.json()['error']['code'] == 'InvalidKind'
