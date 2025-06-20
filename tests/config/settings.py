@@ -9,6 +9,7 @@ print('Loaded URL:', URL)
 CURRENT_SPACE_ID = os.getenv('CURRENT_SPACE_ID')
 
 USERS = {
+    'foreign_client': {'email': os.getenv('FOREIGN_CLIENT'), 'password': os.getenv('PASSWORD')},
     'guest': {'email': os.getenv('GUEST_EMAIL'), 'password': os.getenv('PASSWORD')},
     'member': {'email': os.getenv('MEMBER_EMAIL'), 'password': os.getenv('PASSWORD')},
     'manager': {'email': os.getenv('MANAGER_EMAIL'), 'password': os.getenv('PASSWORD')},
