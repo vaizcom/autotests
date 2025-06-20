@@ -4,6 +4,7 @@ import random
 
 from tests.test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, get_documents_endpoint
 
+pytestmark = [pytest.mark.backend]
 
 @pytest.mark.parametrize(
     'kind, fixture_name',
