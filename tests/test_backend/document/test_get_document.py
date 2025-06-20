@@ -5,6 +5,7 @@ from test_backend.data.endpoints.Document.document_endpoints import get_document
 
 pytestmark = [pytest.mark.backend]
 
+
 @allure.title('Ошибка при запросе документов с некорректным kind')
 def test_get_documents_with_wrong_kind(owner_client, temp_space, temp_project):
     with allure.step('Отправка запроса с несуществующим kind'):
