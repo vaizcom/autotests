@@ -17,13 +17,13 @@ pytestmark = [pytest.mark.backend]
 )
 
 def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
-    allure.dynamic.title(f'Получение документов — кейс: [{request.node.callspec.id}] kind={kind}')
+    allure.dynamic.title(f'Получение документов — кейс: kind={kind}')
 
     kind_id = request.getfixturevalue(fixture_name)
     count = random.randint(1, 5)
     titles = [f'Random doc для kind={kind} #{i}' for i in range(count)]
 
-    with allure.step(f'Создание {count} документов с kind={kind}'):
+    with allure.step(f'Создание {count} (Random[1,5]) документов с kind={kind}'):
         for title in titles:
             response = owner_client.post(
                 **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title=title)
@@ -43,13 +43,25 @@ def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
             assert title in doc_titles, f'Документ "{title}" не найден в списке'
 
 
-@allure.title('Ошибка при запросе документов с некорректным kind')
-def test_get_documents_with_wrong_kind(owner_client, temp_space, temp_project):
-    with allure.step('Отправка запроса с несуществующим kind'):
-        response = owner_client.post(
-            **get_documents_endpoint(kind='WrongKind', kind_id=temp_project, space_id=temp_space)
-        )
+@pytest.mark.parametrize(
+    'kind, kind_id, space_id, expected_status, case_id',
+    [
+        ('Project', 'nonexistent-id', 'valid_space_id', 400, 'invalid kindId'),
+        ('WrongKind', 'valid_project_id', 'valid_space_id', 400, 'invalid kind'),
+        (None, 'valid_project_id', 'valid_space_id', 400, 'missing kind'),
+        ('Project', None, 'valid_space_id', 400, 'missing kindId'),
+    ],
+    ids=['invalid kindId', 'invalid kind', 'missing kind', 'missing kindId']
+)
+def test_get_documents_invalid_inputs(owner_client, temp_space, temp_project, kind, kind_id, space_id, expected_status, case_id):
+    allure.dynamic.title(f'Негативный кейс: {case_id}')
 
-    with allure.step('Ожидаем 400 ошибку валидации, codes: InvalidForm'):
-        assert response.status_code == 400
+    if kind_id == 'valid_project_id':
+        kind_id = temp_project
+
+    with allure.step(f'Отправка запроса и проверка статуса {expected_status}, '):
+        response = owner_client.post(
+            **get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space)
+        )
+        assert response.status_code == expected_status, f'Ожидался статус {expected_status}, но получен {response.status_code}'
         assert response.json()['error']['code'] == 'InvalidForm'
