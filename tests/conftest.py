@@ -80,6 +80,39 @@ def foreign_space(guest_client):
     guest_client.post(**remove_space_endpoint(space_id=space_id))
 
 
+@pytest.fixture(scope='module')
+def space_id_module(owner_client):
+    response = owner_client.post(**create_space_endpoint(name='isolated space'))
+    assert response.status_code == 200
+    space_id = response.json()['payload']['space']['_id']
+
+    yield space_id
+
+    # Удаление после теста
+    response = owner_client.post(**remove_space_endpoint(space_id=space_id))
+    assert response.status_code == 200
+
+
+@pytest.fixture(scope='module')
+def project_id_module(owner_client, space_id_module):
+    name = generate_project_name()
+    slug = generate_slug()
+    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': space_id_module}
+    response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+    assert response.status_code == 200
+    return response.json()['payload']['project']['_id']
+
+
+@pytest.fixture(scope='module')
+def member_id_module(owner_client, space_id_module):
+    response = owner_client.post(**get_space_members_endpoint(space_id=space_id_module))
+
+    data = response.json()['payload']
+    member_id = data['members'][0]['_id']
+
+    yield member_id
+
+
 @pytest.fixture(scope='session')
 def temp_project(owner_client, temp_space):
     """Создаёт проект, который используется во всех тестах модуля."""

@@ -75,18 +75,18 @@ def test_get_documents_invalid_inputs(
 @pytest.mark.parametrize(
     'kind, fixture_name',
     [
-        ('Project', 'temp_project'),
-        ('Space', 'temp_space'),
-        ('Member', 'temp_member'),
+        ('Project', 'project_id_module'),
+        ('Space', 'space_id_module'),
+        ('Member', 'member_id_module'),
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_documents_empty_list(owner_client, temp_space, request, kind, fixture_name):
+def test_get_documents_empty_list(owner_client, space_id_module, request, kind, fixture_name):
     kind_id = request.getfixturevalue(fixture_name)
     allure.dynamic.title(f'Пустой результат при отсутствии документов (kind={kind})')
 
     with allure.step(f'Запрос документов без предварительного создания (kind={kind}, kindId={kind_id})'):
-        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
+        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=space_id_module))
 
     with allure.step('Проверка успешного ответа и пустого списка'):
         assert response.status_code == 200
@@ -134,3 +134,59 @@ def test_get_documents_filtered_by_kind_id(owner_client, temp_space, temp_projec
     with allure.step('Проверка, что вернулся только нужный документ'):
         assert doc1_id in doc_ids
         assert doc2_id not in doc_ids
+
+
+def test_get_documents_cross_kind_isolation(owner_client, temp_space, temp_project, temp_member):
+    allure.dynamic.title('Документы разных kind не попадают в результаты других kindId')
+    with allure.step('Создание документа с kind=Member'):
+        response = owner_client.post(
+            **create_document_endpoint(kind='Member', kind_id=temp_member, space_id=temp_space, title='Member doc')
+        )
+        assert response.status_code == 200
+
+    with allure.step('Запрос документов по kind=Project'):
+        response = owner_client.post(
+            **get_documents_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space)
+        )
+        assert response.status_code == 200
+        titles = [doc['title'] for doc in response.json()['payload']['documents']]
+        assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
+
+
+@allure.title('Доступ к чужому пространству запрещён — 403 AccessDenied')
+def test_get_documents_foreign_space_access_denied(foreign_client, foreign_space, temp_project):
+    allure.dynamic.title('Ошибка доступа при запросе документов в чужом пространстве')
+
+    with allure.step('Формирование запроса с корректным kindId, но чужим spaceId'):
+        response = foreign_client.post(
+            **get_documents_endpoint(kind='Project', kind_id=temp_project, space_id=foreign_space)
+        )
+
+    with allure.step('Проверка, что доступ запрещён'):
+        assert response.status_code == 403, f'Ожидался статус 403, но получен {response.status_code}'
+        error = response.json().get('error', {})
+        assert (
+            error.get('code') == 'AccessDenied'
+        ), f"Ожидался код ошибки 'AccessDenied', но получен: {error.get('code')}"
+
+
+def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, temp_member):
+    allure.dynamic.title('Несоответствие kind и kindId приводит к ошибке')
+    with allure.step('Запрос документов с kind=Project, но kindId от Member'):
+        response = owner_client.post(**get_documents_endpoint(kind='Project', kind_id=temp_member, space_id=temp_space))
+
+    with allure.step('Ожидаем статус 403 или ошибку NotFound'):
+        assert response.status_code == 403
+        assert response.json().get('error', {}).get('code') == 'AccessDenied'
+
+
+def test_get_documents_member_in_foreign_space(owner_client, foreign_space, temp_member):
+    allure.dynamic.title('Member из другого space недоступен для owner')
+    with allure.step('Запрос документов с корректным member, но чужим spaceId'):
+        response = owner_client.post(
+            **get_documents_endpoint(kind='Member', kind_id=temp_member, space_id=foreign_space)
+        )
+
+    with allure.step('Ожидаем статус 403 и ошибку AccessDenied'):
+        assert response.status_code == 403
+        assert response.json().get('error', {}).get('code') == 'AccessDenied'
