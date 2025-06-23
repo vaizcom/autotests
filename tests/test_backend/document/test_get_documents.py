@@ -93,8 +93,8 @@ def test_get_documents_empty_list(owner_client, space_id_module, request, kind, 
         assert len(documents) == 0, f'Ожидался пустой список документов, но получено: {documents}'
 
 
-@allure.title('Фильтрация документов по kindId')
-def test_get_documents_filtered_by_kind_id(owner_client, temp_space, temp_project):
+@allure.title('Project: изолированность документов по kindId проектов')
+def test_get_documents_isolation_by_kind_id(owner_client, temp_space, temp_project):
     other_project = owner_client.post(
         **create_project_endpoint(
             name='Other project',
@@ -148,9 +148,10 @@ def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_membe
         assert response.status_code == 200
         titles = [doc['title'] for doc in response.json()['payload']['documents']]
         assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
+
     with allure.step('Запрос документов по kind=Space'):
         response = owner_client.post(
-            **get_documents_endpoint(kind='Space', kind_id=temp_project, space_id=temp_space)
+            **get_documents_endpoint(kind='Space', kind_id=temp_space, space_id=temp_space)
         )
         assert response.status_code == 200
         titles = [doc['title'] for doc in response.json()['payload']['documents']]
@@ -182,9 +183,9 @@ def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, temp_mem
         assert response.json().get('error', {}).get('code') == 'AccessDenied'
 
 
-def test_get_documents_member_in_foreign_space(owner_client, foreign_space, temp_member):
+def test_get_documents_in_foreign_space(owner_client, foreign_space, temp_member):
     allure.dynamic.title('Member из другого space недоступен для owner')
-    with allure.step('Запрос документов с корректным member, но чужим spaceId'):
+    with allure.step('Запрос документов с корректным kind_id, но чужим spaceId'):
         response = owner_client.post(
             **get_documents_endpoint(kind='Member', kind_id=temp_member, space_id=foreign_space)
         )
