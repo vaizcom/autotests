@@ -4,7 +4,10 @@ import random
 
 from config.generators import generate_slug
 from test_backend.data.endpoints.Project.project_endpoints import create_project_endpoint
-from tests.test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, get_documents_endpoint
+from tests.test_backend.data.endpoints.Document.document_endpoints import (
+    create_document_endpoint,
+    get_documents_endpoint,
+)
 
 
 @pytest.mark.parametrize(
@@ -14,7 +17,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import create
         ('Space', 'temp_space'),
         ('Member', 'temp_member'),
     ],
-    ids=['project', 'space', 'member']
+    ids=['project', 'space', 'member'],
 )
 def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
     allure.dynamic.title(f'Получение документов — кейс: kind={kind}')
@@ -31,9 +34,7 @@ def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
             assert response.status_code == 200
 
     with allure.step(f'Получение списка документов по kind={kind}'):
-        response = owner_client.post(
-            **get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space)
-        )
+        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
         assert response.status_code == 200
         docs = response.json()['payload']['documents']
 
@@ -150,9 +151,7 @@ def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_membe
         assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
 
     with allure.step('Запрос документов по kind=Space'):
-        response = owner_client.post(
-            **get_documents_endpoint(kind='Space', kind_id=temp_space, space_id=temp_space)
-        )
+        response = owner_client.post(**get_documents_endpoint(kind='Space', kind_id=temp_space, space_id=temp_space))
         assert response.status_code == 200
         titles = [doc['title'] for doc in response.json()['payload']['documents']]
         assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
