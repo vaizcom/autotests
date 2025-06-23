@@ -9,6 +9,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
     get_documents_endpoint,
 )
 
+pytestmark = [pytest.mark.backend]
 
 @pytest.mark.parametrize(
     'kind, fixture_name',
