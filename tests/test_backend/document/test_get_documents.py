@@ -136,14 +136,14 @@ def test_get_documents_isolation_by_kind_id(owner_client, temp_space, temp_proje
 
 
 def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_member):
-    allure.dynamic.title('Документы разных kind не попадают в результаты других kindId')
+    allure.dynamic.title('Документы разных kind не попадают в результаты других kind')
     with allure.step('Создание документа с kind=Member'):
         response = owner_client.post(
             **create_document_endpoint(kind='Member', kind_id=temp_member, space_id=temp_space, title='Member doc')
         )
         assert response.status_code == 200
 
-    with allure.step('Запрос документов по kind=Project'):
+    with allure.step('Запрос документов по kind=Project, Документ Member doc не попал в результат'):
         response = owner_client.post(
             **get_documents_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space)
         )
@@ -151,18 +151,29 @@ def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_membe
         titles = [doc['title'] for doc in response.json()['payload']['documents']]
         assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
 
-    with allure.step('Запрос документов по kind=Space'):
+    with allure.step('Запрос документов по kind=Space, Документ Member doc не попал в результат'):
         response = owner_client.post(**get_documents_endpoint(kind='Space', kind_id=temp_space, space_id=temp_space))
         assert response.status_code == 200
         titles = [doc['title'] for doc in response.json()['payload']['documents']]
         assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
 
 
-def test_foreign_space_access_denied(owner_client, foreign_space, temp_project):
-    allure.dynamic.title('Ошибка доступа при запросе документов в чужом space')
-    with allure.step('Запрос документов в чужом пространстве'):
+@pytest.mark.parametrize(
+    'kind, fixture_name',
+    [
+        ('Project', 'temp_project'),
+        ('Space', 'temp_space'),
+        ('Member', 'temp_member'),
+    ],
+    ids=['project', 'space', 'member']
+)
+def test_foreign_space_access_denied(owner_client, request, kind, fixture_name, foreign_space):
+    kind_id = request.getfixturevalue(fixture_name)
+    allure.dynamic.title(f'Запрос документов с kind={kind}, но с чужим spaceId')
+
+    with allure.step(f'Попытка запроса с kindId от {kind}, но с чужим spaceId'):
         response = owner_client.post(
-            **get_documents_endpoint(kind='Project', kind_id=temp_project, space_id=foreign_space)
+            **get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=foreign_space)
         )
 
     with allure.step('Проверка, что доступ запрещён'):
@@ -173,23 +184,27 @@ def test_foreign_space_access_denied(owner_client, foreign_space, temp_project):
         ), f"Ожидался код ошибки 'AccessDenied', но получен: {error.get('code')}"
 
 
-def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, temp_member):
-    allure.dynamic.title('Несоответствие kind и kindId приводит к ошибке')
-    with allure.step('Запрос документов с kind=Project, но kindId от Member'):
-        response = owner_client.post(**get_documents_endpoint(kind='Project', kind_id=temp_member, space_id=temp_space))
+@pytest.mark.parametrize(
+    'kind, wrong_fixture, case_title',
+    [
+        ('Project', 'temp_member', 'kind=Project с kindId от Member'),
+        ('Member', 'temp_project', 'kind=Member с kindId от Project'),
+        ('Space', 'temp_member', 'kind=Space с kindId от Member'),
+    ],
+    ids=['project-wrong-id', 'member-wrong-id', 'space-wrong-id']
+)
+def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, request, kind, wrong_fixture, case_title):
+    kind_id = request.getfixturevalue(wrong_fixture)
+    allure.dynamic.title(f'Несоответствие kind и kindId — {case_title}')
 
-    with allure.step('Ожидаем статус 403 или ошибку NotFound'):
-        assert response.status_code == 403
-        assert response.json().get('error', {}).get('code') == 'AccessDenied'
-
-
-def test_get_documents_in_foreign_space(owner_client, foreign_space, temp_member):
-    allure.dynamic.title('Member из другого space недоступен для owner')
-    with allure.step('Запрос документов с корректным kind_id, но чужим spaceId'):
+    with allure.step(f'Отправка запроса с kind={kind} и kindId от {wrong_fixture}'):
         response = owner_client.post(
-            **get_documents_endpoint(kind='Member', kind_id=temp_member, space_id=foreign_space)
+            **get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space)
         )
 
-    with allure.step('Ожидаем статус 403 и ошибку AccessDenied'):
+    with allure.step('Ожидаем ошибку 403'):
         assert response.status_code == 403
-        assert response.json().get('error', {}).get('code') == 'AccessDenied'
+        error_code = response.json().get('error', {}).get('code')
+        assert error_code == "AccessDenied", f"Неожиданный код ошибки: {error_code}"
+
+
