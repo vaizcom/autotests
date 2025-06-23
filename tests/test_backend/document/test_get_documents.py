@@ -4,12 +4,7 @@ import random
 
 from config.generators import generate_slug
 from test_backend.data.endpoints.Project.project_endpoints import create_project_endpoint
-from tests.test_backend.data.endpoints.Document.document_endpoints import (
-    create_document_endpoint,
-    get_documents_endpoint,
-)
-
-pytestmark = [pytest.mark.backend]
+from tests.test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, get_documents_endpoint
 
 
 @pytest.mark.parametrize(
@@ -19,7 +14,7 @@ pytestmark = [pytest.mark.backend]
         ('Space', 'temp_space'),
         ('Member', 'temp_member'),
     ],
-    ids=['project', 'space', 'member'],
+    ids=['project', 'space', 'member']
 )
 def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
     allure.dynamic.title(f'Получение документов — кейс: kind={kind}')
@@ -36,7 +31,9 @@ def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
             assert response.status_code == 200
 
     with allure.step(f'Получение списка документов по kind={kind}'):
-        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
+        response = owner_client.post(
+            **get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space)
+        )
         assert response.status_code == 200
         docs = response.json()['payload']['documents']
 
@@ -136,7 +133,7 @@ def test_get_documents_filtered_by_kind_id(owner_client, temp_space, temp_projec
         assert doc2_id not in doc_ids
 
 
-def test_get_documents_cross_kind_isolation(owner_client, temp_space, temp_project, temp_member):
+def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_member):
     allure.dynamic.title('Документы разных kind не попадают в результаты других kindId')
     with allure.step('Создание документа с kind=Member'):
         response = owner_client.post(
@@ -151,14 +148,19 @@ def test_get_documents_cross_kind_isolation(owner_client, temp_space, temp_proje
         assert response.status_code == 200
         titles = [doc['title'] for doc in response.json()['payload']['documents']]
         assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
+    with allure.step('Запрос документов по kind=Space'):
+        response = owner_client.post(
+            **get_documents_endpoint(kind='Space', kind_id=temp_project, space_id=temp_space)
+        )
+        assert response.status_code == 200
+        titles = [doc['title'] for doc in response.json()['payload']['documents']]
+        assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
 
 
-@allure.title('Доступ к чужому пространству запрещён — 403 AccessDenied')
-def test_get_documents_foreign_space_access_denied(foreign_client, foreign_space, temp_project):
-    allure.dynamic.title('Ошибка доступа при запросе документов в чужом пространстве')
-
-    with allure.step('Формирование запроса с корректным kindId, но чужим spaceId'):
-        response = foreign_client.post(
+def test_foreign_space_access_denied(owner_client, foreign_space, temp_project):
+    allure.dynamic.title('Ошибка доступа при запросе документов в чужом space')
+    with allure.step('Запрос документов в чужом пространстве'):
+        response = owner_client.post(
             **get_documents_endpoint(kind='Project', kind_id=temp_project, space_id=foreign_space)
         )
 
