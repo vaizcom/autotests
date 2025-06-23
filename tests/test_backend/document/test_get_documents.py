@@ -11,6 +11,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
+
 @pytest.mark.parametrize(
     'kind, fixture_name',
     [
@@ -165,16 +166,14 @@ def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_membe
         ('Space', 'temp_space'),
         ('Member', 'temp_member'),
     ],
-    ids=['project', 'space', 'member']
+    ids=['project', 'space', 'member'],
 )
 def test_foreign_space_access_denied(owner_client, request, kind, fixture_name, foreign_space):
     kind_id = request.getfixturevalue(fixture_name)
     allure.dynamic.title(f'Запрос документов с kind={kind}, но с чужим spaceId')
 
     with allure.step(f'Попытка запроса с kindId от {kind}, но с чужим spaceId'):
-        response = owner_client.post(
-            **get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=foreign_space)
-        )
+        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=foreign_space))
 
     with allure.step('Проверка, что доступ запрещён'):
         assert response.status_code == 403, f'Ожидался статус 403, но получен {response.status_code}'
@@ -191,20 +190,16 @@ def test_foreign_space_access_denied(owner_client, request, kind, fixture_name, 
         ('Member', 'temp_project', 'kind=Member с kindId от Project'),
         ('Space', 'temp_member', 'kind=Space с kindId от Member'),
     ],
-    ids=['project-wrong-id', 'member-wrong-id', 'space-wrong-id']
+    ids=['project-wrong-id', 'member-wrong-id', 'space-wrong-id'],
 )
 def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, request, kind, wrong_fixture, case_title):
     kind_id = request.getfixturevalue(wrong_fixture)
     allure.dynamic.title(f'Несоответствие kind и kindId — {case_title}')
 
     with allure.step(f'Отправка запроса с kind={kind} и kindId от {wrong_fixture}'):
-        response = owner_client.post(
-            **get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space)
-        )
+        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
 
     with allure.step('Ожидаем ошибку 403'):
         assert response.status_code == 403
         error_code = response.json().get('error', {}).get('code')
-        assert error_code == "AccessDenied", f"Неожиданный код ошибки: {error_code}"
-
-
+        assert error_code == 'AccessDenied', f'Неожиданный код ошибки: {error_code}'
