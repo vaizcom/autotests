@@ -100,7 +100,7 @@ jobs:
         continue-on-error: true
         run: |
           export PYTHONPATH=tests
-          pytest . --alluredir=allure-results -m "$TEST_SCOPE"
+          pytest . --alluredir=allure-results
 
       - name: Check allure-results content
         run: ls -lah allure-results
