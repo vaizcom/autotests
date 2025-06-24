@@ -1,7 +1,7 @@
 import secrets
 import random
 import string
-import uuid
+from datetime import datetime
 
 from tests.test_backend.data.endpoints.Board.constants import (
     MAX_BOARD_NAME_LENGTH,
@@ -15,7 +15,7 @@ def generate_space_name() -> str:
     Генерирует уникальное имя для Space.
     Пример: space_1a2b3c
     """
-    return f'space_{uuid.uuid4().hex[:12]}'
+    return f'space_{datetime.now().strftime('%d%m%Y_%H%M%S')}'
 
 
 def generate_project_name() -> str:
@@ -23,7 +23,7 @@ def generate_project_name() -> str:
     Генерирует уникальное имя для Project.
     Пример: project_abc123
     """
-    return f'project_{uuid.uuid4().hex[:12]}'
+    return f'project_{datetime.now().strftime('%d%m%Y_%H%M%S')}'
 
 
 def generate_slug(min_len: int = 4, max_len: int = 8) -> str:
