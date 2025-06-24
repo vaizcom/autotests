@@ -98,7 +98,7 @@ jobs:
 
       - name: ✅ Run tests with Allure
         continue-on-error: true
-        run: pytest . --alluredir=allure-results -m "$TEST_SCOPE"
+        run: pytest . --alluredir=allure-results
 
       - name: Check allure-results content
         run: ls -lah allure-results
