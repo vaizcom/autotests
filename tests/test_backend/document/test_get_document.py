@@ -5,6 +5,7 @@ from test_backend.data.endpoints.Document.document_endpoints import get_document
 
 pytestmark = [pytest.mark.backend]
 
+
 @pytest.mark.parametrize(
     'kind, fixture_name',
     [
@@ -35,7 +36,6 @@ def test_get_document_success(owner_client, request, temp_space, kind, fixture_n
         expected_fields = ['_id', 'title', 'kind', 'kindId', 'creator', 'createdAt', 'updatedAt']
         missing_fields = [field for field in expected_fields if field not in data]
         assert not missing_fields, f'В ответе отсутствуют обязательные поля: {missing_fields}'
-
 
 
 @pytest.mark.parametrize(
@@ -86,11 +86,10 @@ def test_get_document_foreign_access_denied(owner_client, request, temp_space, f
         document_id = resp.json()['payload']['document']['_id']
 
     with allure.step('Попытка получить этот документ через чужой spaceId'):
-        resp = owner_client.post(
-            **get_document_endpoint(document_id=document_id, space_id=foreign_space)
-        )
+        resp = owner_client.post(**get_document_endpoint(document_id=document_id, space_id=foreign_space))
         assert resp.status_code == 403
         assert resp.json().get('error', {}).get('code') == 'AccessDenied'
+
 
 @pytest.mark.parametrize(
     'kind, fixture_name',

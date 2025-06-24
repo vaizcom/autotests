@@ -1,8 +1,11 @@
 import pytest
 import allure
 
-from test_backend.data.endpoints.Document.document_endpoints import get_documents_endpoint, create_document_endpoint, \
-    get_document_endpoint
+from test_backend.data.endpoints.Document.document_endpoints import (
+    get_documents_endpoint,
+    create_document_endpoint,
+    get_document_endpoint,
+)
 
 pytestmark = [pytest.mark.backend]
 
@@ -28,6 +31,7 @@ def test_documents_access_denied_for_foreign_user(foreign_client, request, space
         error = response.json().get('error', {})
         assert error.get('code') == 'AccessDenied', f"Ожидался код 'AccessDenied', но получен: {error.get('code')}"
 
+
 @pytest.mark.parametrize(
     'kind, fixture_name',
     [
@@ -37,7 +41,9 @@ def test_documents_access_denied_for_foreign_user(foreign_client, request, space
     ],
     ids=['project', 'space', 'member'],
 )
-def test_document_foreign_access_denied_for_foreign_space(owner_client, request, temp_space, kind, fixture_name, space_id_module):
+def test_document_foreign_access_denied_for_foreign_space(
+    owner_client, request, temp_space, kind, fixture_name, space_id_module
+):
     kind_id = request.getfixturevalue(fixture_name)
     allure.dynamic.title(f'Попытка получить документ из чужого space (kind={kind}) — должен вернуться AccessDenied')
 

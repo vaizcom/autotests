@@ -44,3 +44,11 @@ def get_document_endpoint(document_id: str, space_id: str):
         'json': {'documentId': document_id},
         'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
     }
+
+
+def get_document_siblings_endpoint(document_id: str, space_id: str):
+    return {
+        'path': '/GetDocumentSiblings',
+        'json': {'documentId': document_id},
+        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+    }
