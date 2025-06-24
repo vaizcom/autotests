@@ -1,3 +1,5 @@
+import time
+
 import pytest
 import allure
 import random
@@ -203,3 +205,35 @@ def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, request,
         assert response.status_code == 403
         error_code = response.json().get('error', {}).get('code')
         assert error_code == 'AccessDenied', f'Неожиданный код ошибки: {error_code}'
+
+
+@pytest.mark.parametrize(
+    'kind, fixture_name',
+    [
+        ('Project', 'temp_project'),
+        ('Space', 'temp_space'),
+        ('Member', 'temp_member'),
+    ],
+    ids=['project', 'space', 'member'],
+)
+def test_documents_sorted_by_created_at(owner_client, request, temp_space, kind, fixture_name):
+    kind_id = request.getfixturevalue(fixture_name)
+    allure.dynamic.title(f'Сортировка документов по createdAt (kind={kind})')
+
+    with allure.step('Создание документов с небольшими задержками'):
+        titles = ['Doc A', 'Doc B', 'Doc C']
+        for title in titles:
+            response = owner_client.post(
+                **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title=title)
+            )
+            assert response.status_code == 200
+            time.sleep(1)
+
+    with allure.step('Получение документов'):
+        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
+        assert response.status_code == 200
+        documents = response.json()['payload']['documents']
+        created_ats = [doc['createdAt'] for doc in documents]
+
+    with allure.step('Проверка сортировки по createdAt'):
+        assert created_ats == sorted(created_ats), 'Документы не отсортированы по createdAt'
