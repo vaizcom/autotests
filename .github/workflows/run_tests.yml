@@ -49,6 +49,12 @@ jobs:
       - name: Add tests to PYTHONPATH
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
 
+      - name: Set default TEST_SCOPE if not defined
+        run: |
+          if [ -z "$TEST_SCOPE" ]; then
+            echo "TEST_SCOPE=backend" >> $GITHUB_ENV
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -98,7 +104,9 @@ jobs:
 
       - name: ✅ Run tests with Allure
         continue-on-error: true
-        run: pytest . --alluredir=allure-results -m "$TEST_SCOPE"
+        run: |
+          export PYTHONPATH=tests
+          pytest . --alluredir=allure-results -m "$TEST_SCOPE"
 
       - name: Check allure-results content
         run: ls -lah allure-results
