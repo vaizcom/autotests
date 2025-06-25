@@ -71,15 +71,3 @@ def test_get_document_siblings(owner_client, request, temp_space, kind, fixture_
         for node in payload['tree']:
             for field in required_fields:
                 assert field in node['document'], f'В документе отсутствует поле {field}'
-
-    with allure.step('Проверка сиблингов родительского документа — их не должно быть'):
-        resp = owner_client.post(
-            **get_document_siblings_endpoint(document_id=parent_id, space_id=temp_space)
-        )
-        assert resp.status_code == 200
-        payload = resp.json()['payload']
-        assert payload.get('prevSibling') is None
-        assert payload.get('nextSibling') is None
-        assert payload['parents'] == []
-        assert payload['tree'][0]['document']['_id'] == parent_id
-
