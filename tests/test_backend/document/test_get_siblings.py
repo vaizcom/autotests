@@ -50,9 +50,7 @@ def test_get_document_siblings(owner_client, request, temp_space, kind, fixture_
 
     with allure.step('Запрос сиблингов для среднего дочернего документа'):
         target_id = child_ids[1]
-        resp = owner_client.post(
-            **get_document_siblings_endpoint(document_id=target_id, space_id=temp_space)
-        )
+        resp = owner_client.post(**get_document_siblings_endpoint(document_id=target_id, space_id=temp_space))
         assert resp.status_code == 200
         payload = resp.json()['payload']
 
