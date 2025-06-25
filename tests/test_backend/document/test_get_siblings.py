@@ -29,10 +29,10 @@ def test_get_document_siblings(owner_client, request, temp_space, kind, fixture_
         assert resp.status_code == 200
         parent_id = resp.json()['payload']['document']['_id']
 
-    with allure.step('Создание дочерних документов с разными индексами'):
-        titles = ['Sibling A', 'Sibling B', 'Sibling C']
+    with allure.step('Создание дочерних документов'):
+        titles = ['Child A', 'Child B', 'Child C']
         indices = [0, 1, 2]
-        sibling_ids = []
+        child_ids = []
 
         for title, index in zip(titles, indices):
             resp = owner_client.post(
@@ -46,16 +46,40 @@ def test_get_document_siblings(owner_client, request, temp_space, kind, fixture_
                 )
             )
             assert resp.status_code == 200
-            sibling_ids.append(resp.json()['payload']['document']['_id'])
+            child_ids.append(resp.json()['payload']['document']['_id'])
 
-    with allure.step('Запрос сиблингов для среднего документа (index=1)'):
-        child_id = sibling_ids[1]
-        resp = owner_client.post(**get_document_siblings_endpoint(document_id=child_id, space_id=temp_space))
+    with allure.step('Запрос сиблингов для среднего дочернего документа'):
+        target_id = child_ids[1]
+        resp = owner_client.post(
+            **get_document_siblings_endpoint(document_id=target_id, space_id=temp_space)
+        )
         assert resp.status_code == 200
         payload = resp.json()['payload']
 
     with allure.step('Проверка корректности сиблингов'):
-        assert payload['prevSibling']['_id'] == sibling_ids[0]
-        assert payload['nextSibling']['_id'] == sibling_ids[2]
+        assert payload['prevSibling']['_id'] == child_ids[0]
+        assert payload['nextSibling']['_id'] == child_ids[2]
         assert payload['parents'][0]['_id'] == parent_id
-        assert any(node['document']['_id'] == child_id for node in payload['tree'])
+        assert any(node['document']['_id'] == target_id for node in payload['tree'])
+
+    with allure.step('Проверка структуры дерева'):
+        for node in payload['tree']:
+            assert 'document' in node, 'В узле дерева отсутствует поле document'
+
+    with allure.step('Проверка наличия обязательных полей в document'):
+        required_fields = ['_id', 'title', 'kind', 'kindId']
+        for node in payload['tree']:
+            for field in required_fields:
+                assert field in node['document'], f'В документе отсутствует поле {field}'
+
+    with allure.step('Проверка сиблингов родительского документа — их не должно быть'):
+        resp = owner_client.post(
+            **get_document_siblings_endpoint(document_id=parent_id, space_id=temp_space)
+        )
+        assert resp.status_code == 200
+        payload = resp.json()['payload']
+        assert payload.get('prevSibling') is None
+        assert payload.get('nextSibling') is None
+        assert payload['parents'] == []
+        assert payload['tree'][0]['document']['_id'] == parent_id
+
