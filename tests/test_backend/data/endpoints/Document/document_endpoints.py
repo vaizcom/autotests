@@ -36,3 +36,19 @@ def get_documents_endpoint(kind: str, kind_id: str, space_id: str):
         'json': {'kind': kind, 'kindId': kind_id},
         'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
     }
+
+
+def get_document_endpoint(document_id: str, space_id: str):
+    return {
+        'path': '/GetDocument',
+        'json': {'documentId': document_id},
+        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+    }
+
+
+def get_document_siblings_endpoint(document_id: str, space_id: str):
+    return {
+        'path': '/GetDocumentSiblings',
+        'json': {'documentId': document_id},
+        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+    }
