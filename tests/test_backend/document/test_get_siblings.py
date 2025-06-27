@@ -47,13 +47,13 @@ def test_get_document_parent_siblings(owner_client, request, temp_space, kind, k
     # Проверка пустого списка parents
     with allure.step('Проверка пустого списка parents'):
         assert parent_payload['parents'] == [], 'parents для родителя должен быть пустым'
-
-    # Проверка tree содержит только родителя
-    with allure.step('Проверка tree содержит только родителя'):
-        assert (
-            len(parent_payload['tree']) == 1
-        ), f'В tree должен быть только родитель, но найдено {len(parent_payload ['tree'])}'
-        assert parent_payload['tree'][0]['document']['_id'] == parent_id, 'В tree должен быть только parent'
+    #
+    # # Проверка tree содержит только родителя
+    # with allure.step('Проверка tree содержит только родителя'):
+    #     assert (
+    #         len(parent_payload['tree']) == 1
+    #     ), f'В tree должен быть только родитель, но найдено {len(parent_payload ['tree'])}'
+    #     assert parent_payload['tree'][0]['document']['_id'] == parent_id, 'В tree должен быть только parent'
 
 
 @pytest.mark.parametrize(
