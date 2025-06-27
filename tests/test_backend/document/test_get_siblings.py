@@ -116,43 +116,103 @@ def test_root_level_siblings(owner_client, request, kind, kind_id_fixture, space
     ],
     ids=['project', 'space', 'member'],
 )
+def test_deeply_nested_parents(owner_client, request, kind, kind_id_fixture, space_id_function):
+    """
+    Глубокая вложенность: проверяем цепочку parents.
+    """
+    allure.dynamic.title(
+        f'Проверяем глубокую вложенность для Grandchild = [root_id, parent_id, child_id] (kind={kind})'
+    )
+    kind_id = request.getfixturevalue(kind_id_fixture)
+
+    with allure.step('Создаём цепочку вложенности'):
+        # Level 1
+        r = owner_client.post(
+            **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id_function, title='Root')
+        )
+        assert r.status_code == 200
+        root_id = r.json()['payload']['document']['_id']
+        # Level 2
+        p = owner_client.post(
+            **create_document_endpoint(
+                kind=kind, kind_id=kind_id, space_id=space_id_function, title='Parent', parent_document_id=root_id
+            )
+        )
+        assert p.status_code == 200
+        parent_id = p.json()['payload']['document']['_id']
+        # Level 3
+        c = owner_client.post(
+            **create_document_endpoint(
+                kind=kind, kind_id=kind_id, space_id=space_id_function, title='Child', parent_document_id=parent_id
+            )
+        )
+        assert c.status_code == 200
+        child_id = c.json()['payload']['document']['_id']
+        # Level 4
+        g = owner_client.post(
+            **create_document_endpoint(
+                kind=kind, kind_id=kind_id, space_id=space_id_function, title='Grandchild', parent_document_id=child_id
+            )
+        )
+        assert g.status_code == 200
+        grand_id = g.json()['payload']['document']['_id']
+
+    with allure.step('Проверяем цепочку parents'):
+        resp = owner_client.post(**get_document_siblings_endpoint(document_id=grand_id, space_id=space_id_function))
+        assert resp.status_code == 200
+        parents_list = resp.json()['payload']['parents']
+        ids = [node['_id'] for node in parents_list]
+        assert ids == [root_id, parent_id, child_id], f'Неверный порядок parents: {ids}'
+
+    with allure.step('Проверяем tree содержит только Grandchild'):
+        tree = resp.json()['payload']['tree']
+        assert len(tree) == 1, f'Ожидался один элемент в tree, но получено {len(tree)}'
+        assert (
+            tree[0]['document']['_id'] == grand_id
+        ), f"tree должен содержать только Grandchild, но найден {tree[0]['document']['_id']}"
+
+
+@allure.feature('Document Siblings')
+@pytest.mark.parametrize(
+    'kind, kind_id_fixture',
+    [
+        ('Project', 'project_id_function'),
+        ('Space', 'space_id_function'),
+        ('Member', 'member_id_function'),
+    ],
+    ids=['project', 'space', 'member'],
+)
 def test_single_child_siblings(owner_client, request, kind, kind_id_fixture, space_id_function):
     """
     Единственный ребёнок: нет prevSibling/nextSibling, parents содержит родителя.
     """
-    allure.dynamic.title(f'Сиблинги одного ребёнка для {kind}')
+    allure.dynamic.title(f'Проверяем siblins для единственного SoloChild (kind={kind})')
     kind_id = request.getfixturevalue(kind_id_fixture)
 
     with allure.step('Создаём родителя'):
-        r = owner_client.post(**create_document_endpoint(
-            kind=kind,
-            kind_id=kind_id,
-            space_id=space_id_function,
-            title='OnlyParent'
-        ))
+        r = owner_client.post(
+            **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id_function, title='OnlyParent')
+        )
         assert r.status_code == 200
         parent_id = r.json()['payload']['document']['_id']
 
     with allure.step('Создаём единственного ребёнка'):
-        c = owner_client.post(**create_document_endpoint(
-            kind=kind,
-            kind_id=kind_id,
-            space_id=space_id_function,
-            title='SoloChild',
-            parent_document_id=parent_id
-        ))
+        c = owner_client.post(
+            **create_document_endpoint(
+                kind=kind, kind_id=kind_id, space_id=space_id_function, title='SoloChild', parent_document_id=parent_id
+            )
+        )
         assert c.status_code == 200
         child_id = c.json()['payload']['document']['_id']
 
     with allure.step('Проверяем сиблинги единственного ребёнка'):
-        resp = owner_client.post(**get_document_siblings_endpoint(
-            document_id=child_id, space_id=space_id_function
-        ))
+        resp = owner_client.post(**get_document_siblings_endpoint(document_id=child_id, space_id=space_id_function))
         assert resp.status_code == 200
         payload = resp.json()['payload']
         assert 'prevSibling' not in payload or payload.get('prevSibling') is None
         assert 'nextSibling' not in payload or payload.get('nextSibling') is None
         assert payload['parents'][0]['_id'] == parent_id
+
 
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
