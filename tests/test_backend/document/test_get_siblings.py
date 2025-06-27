@@ -22,7 +22,7 @@ def test_get_document_parent_siblings(owner_client, request, space_id_module, ki
     """Тест проверки siblins и родителей для родительского документа"""
     kind_id = request.getfixturevalue(kind_id_fixture)
     space_id = space_id_module
-    allure.dynamic.title(f'Проверка siblins родителя (kind={kind})')
+    allure.dynamic.title(f'Проверка отсутствия siblins для одного корневого документа (kind={kind}')
 
     # Создаем родительский документ
     resp = owner_client.post(**create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id, title='Parent'))
@@ -68,6 +68,7 @@ def test_root_level_siblings(owner_client, request, kind, kind_id_fixture, space
     """
     Проверяем сиблинги для нескольких корневых документов (без parent_document_id).
     """
+    allure.dynamic.title(f'Проверяем сиблинги для нескольких корневых документов (kind={kind}')
     kind_id = request.getfixturevalue(kind_id_fixture)
     titles = ['Root A', 'Root B', 'Root C']
     doc_ids = []
