@@ -54,6 +54,57 @@ def test_get_document_parent_siblings(owner_client, request, space_id_module, ki
         assert parent_payload['tree'][0]['document']['_id'] == parent_id, 'В tree должен быть только parent'
 
 
+@allure.feature('Document Siblings')
+@pytest.mark.parametrize(
+    'kind, kind_id_fixture',
+    [
+        ('Project', 'project_id_function'),
+        ('Space', 'space_id_function'),
+        ('Member', 'member_id_function'),
+    ],
+    ids=['project', 'space', 'member'],
+)
+def test_root_level_siblings(owner_client, request, kind, kind_id_fixture, space_id_function):
+    """
+    Проверяем сиблинги для нескольких корневых документов (без parent_document_id).
+    """
+    kind_id = request.getfixturevalue(kind_id_fixture)
+    titles = ['Root A', 'Root B', 'Root C']
+    doc_ids = []
+
+    with allure.step('Создаем корневые документы'):
+        for title in titles:
+            resp = owner_client.post(
+                **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id_function, title=title)
+            )
+            assert resp.status_code == 200, f'Не удалось создать документ {title}: {resp.text}'
+            doc_ids.append(resp.json()['payload']['document']['_id'])
+
+    with allure.step('Проверка сиблингов для первого документа'):
+        resp1 = owner_client.post(**get_document_siblings_endpoint(document_id=doc_ids[0], space_id=space_id_function))
+        assert resp1.status_code == 200
+        p1 = resp1.json()['payload']
+        assert 'prevSibling' not in p1 or p1.get('prevSibling') is None
+        assert p1['nextSibling']['_id'] == doc_ids[1]
+        assert p1['parents'] == []
+
+    with allure.step('Проверка сиблингов для среднего документа'):
+        resp2 = owner_client.post(**get_document_siblings_endpoint(document_id=doc_ids[1], space_id=space_id_function))
+        assert resp2.status_code == 200
+        p2 = resp2.json()['payload']
+        assert p2['prevSibling']['_id'] == doc_ids[0]
+        assert p2['nextSibling']['_id'] == doc_ids[2]
+        assert p2['parents'] == []
+
+    with allure.step('Проверка сиблингов для последнего документа'):
+        resp3 = owner_client.post(**get_document_siblings_endpoint(document_id=doc_ids[2], space_id=space_id_function))
+        assert resp3.status_code == 200
+        p3 = resp3.json()['payload']
+        assert p3['prevSibling']['_id'] == doc_ids[1]
+        assert 'nextSibling' not in p3 or p3.get('nextSibling') is None
+        assert p3['parents'] == []
+
+
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
