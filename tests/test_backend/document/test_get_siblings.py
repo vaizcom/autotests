@@ -50,24 +50,22 @@ def test_get_document_parent_siblings(owner_client, request, space_id_module, ki
 
     # Проверка tree содержит только родителя
     with allure.step('Проверка tree содержит только родителя'):
-        assert (
-            len(parent_payload['tree']) == 1
-        ), f'В tree должен быть только parent'
+        assert len(parent_payload['tree']) == 1, 'В tree должен быть только parent'
         assert parent_payload['tree'][0]['document']['_id'] == parent_id, 'В tree должен быть только parent'
 
 
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
-        ('Project', 'temp_project'),
-        ('Space', 'temp_space'),
-        ('Member', 'temp_member'),
+        ('Project', 'project_id_module'),
+        ('Space', 'space_id_module'),
+        ('Member', 'member_id_module'),
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_document_siblings(owner_client, request, temp_space, kind, kind_id_fixture):
+def test_get_document_siblings(owner_client, request, space_id_module, kind, kind_id_fixture):
     kind_id = request.getfixturevalue(kind_id_fixture)
-    space_id = temp_space
+    space_id = space_id_module
     allure.dynamic.title(f'Получение сиблингов документа (kind={kind})')
 
     with allure.step('Создание родительского документа'):

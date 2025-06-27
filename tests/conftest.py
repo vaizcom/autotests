@@ -82,15 +82,15 @@ def foreign_space(guest_client):
 
 @pytest.fixture(scope='module')
 def space_id_module(owner_client):
-    response = owner_client.post(**create_space_endpoint(name='isolated space'))
+    client = owner_client
+    name = generate_space_name()
+    response = client.post(**create_space_endpoint(name=name))
     assert response.status_code == 200
     space_id = response.json()['payload']['space']['_id']
 
     yield space_id
 
-    # Удаление после теста
-    response = owner_client.post(**remove_space_endpoint(space_id=space_id))
-    assert response.status_code == 200
+    client.post(**remove_space_endpoint(space_id=space_id))
 
 
 @pytest.fixture(scope='module')
@@ -100,12 +100,15 @@ def project_id_module(owner_client, space_id_module):
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': space_id_module}
     response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
     assert response.status_code == 200
-    return response.json()['payload']['project']['_id']
+    project_id = response.json()['payload']['project']['_id']
+
+    yield project_id
 
 
 @pytest.fixture(scope='module')
 def member_id_module(owner_client, space_id_module):
     response = owner_client.post(**get_space_members_endpoint(space_id=space_id_module))
+    response.raise_for_status()
 
     data = response.json()['payload']
     member_id = data['members'][0]['_id']
