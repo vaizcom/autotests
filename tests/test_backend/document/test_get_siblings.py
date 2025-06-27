@@ -8,19 +8,20 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
+
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
-        ('Project', 'temp_project'),
-        ('Space', 'temp_space'),
-        ('Member', 'temp_member'),
+        ('Project', 'project_id_module'),
+        ('Space', 'space_id_module'),
+        ('Member', 'member_id_module'),
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_document_parent_siblings(owner_client, request, temp_space, kind, kind_id_fixture):
+def test_get_document_parent_siblings(owner_client, request, space_id_module, kind, kind_id_fixture):
     """Тест проверки siblins и родителей для родительского документа"""
     kind_id = request.getfixturevalue(kind_id_fixture)
-    space_id = temp_space
+    space_id = space_id_module
     allure.dynamic.title(f'Проверка siblins родителя (kind={kind})')
 
     # Создаем родительский документ
@@ -43,14 +44,16 @@ def test_get_document_parent_siblings(owner_client, request, temp_space, kind, k
         assert 'prevSibling' not in parent_payload, 'prevSibling не должен присутствовать в ответе'
         assert 'nextSibling' not in parent_payload, 'nextSibling не должен присутствовать в ответе'
 
-    # Проверка пустого parents и одного узла в tree
-    with allure.step('Проверка пустого parents и одного узла в tree'):
-        assert parent_payload['parents'] == []
-        # дереве должен быть только один узел
-        assert len(parent_payload['tree']) == 1, f"Expected tree length 1, but found {len(parent_payload['tree'])}"
-        node = parent_payload['tree'][0]
-        assert node['document']['_id'] == parent_id, f"Ожидалось, что document._id == {parent_id}, но получен {node['document']['_id']}"
+    # Проверка пустого списка parents
+    with allure.step('Проверка пустого списка parents'):
+        assert parent_payload['parents'] == [], 'parents для родителя должен быть пустым'
 
+    # Проверка tree содержит только родителя
+    with allure.step('Проверка tree содержит только родителя'):
+        assert (
+            len(parent_payload['tree']) == 1
+        ), f'В tree должен быть только parent'
+        assert parent_payload['tree'][0]['document']['_id'] == parent_id, 'В tree должен быть только parent'
 
 
 @pytest.mark.parametrize(
