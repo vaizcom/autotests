@@ -106,6 +106,54 @@ def test_root_level_siblings(owner_client, request, kind, kind_id_fixture, space
         assert p3['parents'] == []
 
 
+@allure.feature('Document Siblings')
+@pytest.mark.parametrize(
+    'kind, kind_id_fixture',
+    [
+        ('Project', 'project_id_function'),
+        ('Space', 'space_id_function'),
+        ('Member', 'member_id_function'),
+    ],
+    ids=['project', 'space', 'member'],
+)
+def test_single_child_siblings(owner_client, request, kind, kind_id_fixture, space_id_function):
+    """
+    Единственный ребёнок: нет prevSibling/nextSibling, parents содержит родителя.
+    """
+    allure.dynamic.title(f'Сиблинги одного ребёнка для {kind}')
+    kind_id = request.getfixturevalue(kind_id_fixture)
+
+    with allure.step('Создаём родителя'):
+        r = owner_client.post(**create_document_endpoint(
+            kind=kind,
+            kind_id=kind_id,
+            space_id=space_id_function,
+            title='OnlyParent'
+        ))
+        assert r.status_code == 200
+        parent_id = r.json()['payload']['document']['_id']
+
+    with allure.step('Создаём единственного ребёнка'):
+        c = owner_client.post(**create_document_endpoint(
+            kind=kind,
+            kind_id=kind_id,
+            space_id=space_id_function,
+            title='SoloChild',
+            parent_document_id=parent_id
+        ))
+        assert c.status_code == 200
+        child_id = c.json()['payload']['document']['_id']
+
+    with allure.step('Проверяем сиблинги единственного ребёнка'):
+        resp = owner_client.post(**get_document_siblings_endpoint(
+            document_id=child_id, space_id=space_id_function
+        ))
+        assert resp.status_code == 200
+        payload = resp.json()['payload']
+        assert 'prevSibling' not in payload or payload.get('prevSibling') is None
+        assert 'nextSibling' not in payload or payload.get('nextSibling') is None
+        assert payload['parents'][0]['_id'] == parent_id
+
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
