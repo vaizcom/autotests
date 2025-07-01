@@ -226,7 +226,7 @@ def test_single_child_siblings(owner_client, request, kind, kind_id_fixture, spa
 def test_get_document_siblings(owner_client, request, space_id_module, kind, kind_id_fixture):
     kind_id = request.getfixturevalue(kind_id_fixture)
     space_id = space_id_module
-    allure.dynamic.title(f'Получение сиблингов документа (kind={kind})')
+    allure.dynamic.title(f'Проверяем siblins для нескольктих Child (kind={kind})')
 
     with allure.step('Создание родительского документа'):
         resp = owner_client.post(
@@ -310,3 +310,62 @@ def test_get_document_siblings(owner_client, request, space_id_module, kind, kin
     with allure.step('Проверка состава tree'):
         tree_ids = [node['document']['_id'] for node in payload['tree']]
         assert tree_ids == [target_id], f'В tree должен быть только запрошенный документ, но получено: {tree_ids}'
+
+
+@pytest.mark.parametrize(
+    'fake_id, expected_status',
+    [
+        ('000000000000000000000000', 400),  # valid ObjectId format but not found
+        ('', 400),  # empty string invalid format
+        ('123', 400),  # too short, invalid format
+        ('notAnObjectId1234567890', 400),  # non-hex characters
+        (None, 400),  # null value
+    ],
+    ids=['not_found', 'empty', 'short', 'non_hex', 'null'],
+)
+def test_invalid_document_id(owner_client, space_id_function, fake_id, expected_status):
+    """
+    Негативные сценарии: разные варианты некорректного document_id.
+    """
+    allure.dynamic.title(f'Негативный: некорректный document_id={fake_id}')
+    with allure.step('Запрос сиблингов с некорректным ID'):
+        # Подготовка параметров
+        params = {'document_id': fake_id, 'space_id': space_id_function}
+        # Выполняем запрос
+        resp = owner_client.post(**get_document_siblings_endpoint(**params))
+        # Проверяем код ответа
+        assert (
+            resp.status_code == expected_status
+        ), f'Ожидался статус {expected_status} для fake_id={fake_id}, но получен {resp.status_code}'
+        # Проверяем отсутствие полезной нагрузки
+        body = resp.json()
+        assert not body.get('payload'), 'payload не должен присутствовать для некорректного ID'
+
+
+@pytest.mark.parametrize(
+    'kind, kind_id_fixture',
+    [
+        ('Project', 'project_id_function'),
+        ('Space', 'space_id_function'),
+        ('Member', 'member_id_function'),
+    ],
+    ids=['project', 'space', 'member'],
+)
+def test_siblings_unauthorized_guest(owner_client, guest_client, request, kind, kind_id_fixture, space_id_function):
+
+    allure.dynamic.title(f'Негативный сценарий: гостевой пользователь не может получить siblings (kind={kind})')
+    kind_id = request.getfixturevalue(kind_id_fixture)
+
+    with allure.step('Создаём документ владельцем'):
+        create_resp = owner_client.post(
+            **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id_function, title='UnauthorizedDoc')
+        )
+        assert create_resp.status_code == 200, f'Не удалось создать документ: {create_resp.text}'
+        doc_id = create_resp.json()['payload']['document']['_id']
+
+    with allure.step('Пытаемся получить сиблинги как гость'):
+        resp = guest_client.post(**get_document_siblings_endpoint(document_id=doc_id, space_id=space_id_function))
+        assert resp.status_code == 403, f'Ожидался 403, но получен {resp.status_code}'
+
+    with allure.step('Проверяем отсутствие payload в ответе'):
+        assert not resp.json().get('payload'), 'У гостя не должно быть payload'
