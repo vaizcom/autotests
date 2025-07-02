@@ -6,7 +6,6 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.suite('Документы')
-@allure.epic('Дублирование документа')
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
@@ -80,7 +79,7 @@ def test_duplicate_document_forbidden_no_membership(
 
     # Создаём оригинал temp_document
     # Гость пытается дублировать
-    with allure.step('Non-member duplicate attempt'):
+    with allure.step('Гость пытается дублировать, ошибка SpaceIdNotSpecified'):
         dup_resp = guest_client.post(
             **duplicate_document_endpoint(
                 document_id=temp_document['_id'],
