@@ -85,3 +85,17 @@ def edit_document_endpoint(document_id: str, title: str, icon: str, space_id: st
             'Current-Space-Id': space_id,
         },
     }
+
+def duplicate_document_endpoint(document_id: str, space_id: str):
+    payload = {
+        "documentId": document_id,
+    }
+
+    return {
+        "path": "/DuplicateDocument",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
