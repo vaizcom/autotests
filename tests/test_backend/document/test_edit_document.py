@@ -20,10 +20,7 @@ pytestmark = [pytest.mark.backend]
     ids=['project', 'space', 'member'],
 )
 def test_edit_document_success(owner_client, request, kind, kind_id_fixture, space_id_function):
-    """
-    Успешное редактирование полей title и icon.
-    """
-    allure.dynamic.title(f'EditDocument success for {kind}')
+    allure.dynamic.title(f'Успешное редактирование полей title и icon. {kind}')
     kind_id = request.getfixturevalue(kind_id_fixture)
 
     # Создаем документ
@@ -72,10 +69,7 @@ def test_edit_document_success(owner_client, request, kind, kind_id_fixture, spa
     ids=['not_found', 'empty', 'null', 'bad_format'],
 )
 def test_edit_document_invalid_id(owner_client, space_id_function, fake_id, expected_status):
-    """
-    Негативные сценарии: некорректный documentId.
-    """
-    allure.dynamic.title(f'EditDocument invalid id={fake_id}')
+    allure.dynamic.title(f'Негативные сценарии: некорректный documentId. id={fake_id}')
     with allure.step('Attempt edit with invalid id'):
         resp = owner_client.post(
             **edit_document_endpoint(

@@ -89,11 +89,11 @@ def test_get_ydocument_invalid_id(owner_client, space_id_function, fake_id, expe
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_ydocument_unauthorized(owner_client, guest_client, request, kind, kind_id_fixture, space_id_function):
-    """
-    Негативный сценарий: гость не может экспортировать Y-Doc.
-    """
-    allure.dynamic.title(f'Гость пытается экспортировать Y-Doc для {kind}')
+def test_get_ydocument_foreign_space(owner_client, guest_client, request, kind, kind_id_fixture, space_id_function):
+    """ """
+    allure.dynamic.title(
+        f'Попытка экспортировать Y-Doc из чужого space(kind={kind})— должен вернуться SpaceIdNotSpecified'
+    )
     kind_id = request.getfixturevalue(kind_id_fixture)
 
     with allure.step('Создаем документ владельцем'):
@@ -107,6 +107,7 @@ def test_get_ydocument_unauthorized(owner_client, guest_client, request, kind, k
         endpoint = get_ydocument_endpoint(document_id=doc_id, space_id=space_id_function)
         resp2 = guest_client.post(**endpoint)
         assert resp2.status_code == 400, f'Ожидался 400 получен {resp2.status_code}'
+        assert resp2.json()['error']['code'] == 'SpaceIdNotSpecified'
         body2 = resp2.json()
         payload2 = body2.get('payload')
         if payload2:

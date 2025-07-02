@@ -351,7 +351,7 @@ def test_invalid_document_id(owner_client, space_id_function, fake_id, expected_
     ],
     ids=['project', 'space', 'member'],
 )
-def test_siblings_unauthorized_guest(owner_client, guest_client, request, kind, kind_id_fixture, space_id_function):
+def test_get_document_siblings_foreign_space(owner_client, guest_client, request, kind, kind_id_fixture, space_id_function):
     allure.dynamic.title(f'Негативный сценарий: гостевой пользователь не может получить siblings (kind={kind})')
     kind_id = request.getfixturevalue(kind_id_fixture)
 
