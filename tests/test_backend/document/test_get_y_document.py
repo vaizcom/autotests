@@ -12,28 +12,25 @@ pytestmark = [pytest.mark.backend]
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
-        ('Project', 'project_id_function'),
-        ('Space', 'space_id_function'),
-        ('Member', 'member_id_function'),
+        ('Project', 'temp_project'),
+        ('Space', 'temp_space'),
+        ('Member', 'temp_member'),
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_ydocument_success(owner_client, request, kind, kind_id_fixture, space_id_function):
-    """
-    Позитивный сценарий: успешный экспорт Y-Doc для документа.
-    """
-    allure.dynamic.title(f'Успешный экспорт Y-Doc для {kind}')
+def test_get_ydocument_success(owner_client, request, kind, kind_id_fixture, temp_space):
+    allure.dynamic.title(f'Позитивный сценарий: успешный экспорт Y-Doc для документа. {kind}')
     kind_id = request.getfixturevalue(kind_id_fixture)
 
     with allure.step('Создаем документ'):
         resp = owner_client.post(
-            **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id_function, title='TestYDoc')
+            **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title='TestYDoc')
         )
         assert resp.status_code == 200, f'Не удалось создать документ: {resp.text}'
         doc_id = resp.json()['payload']['document']['_id']
 
     with allure.step('Запрашиваем Y-Doc без till_commit_id'):
-        endpoint = get_ydocument_endpoint(document_id=doc_id, space_id=space_id_function)
+        endpoint = get_ydocument_endpoint(document_id=doc_id, space_id=temp_space)
         resp2 = owner_client.post(**endpoint)
         assert resp2.status_code == 200, f'Ожидался 200, получен {resp2.status_code}'
         body = resp2.json()
@@ -45,7 +42,7 @@ def test_get_ydocument_success(owner_client, request, kind, kind_id_fixture, spa
         commits = payload.get('commits') or []
         if commits:
             till = commits[-1]['_id']
-            endpoint2 = get_ydocument_endpoint(document_id=doc_id, space_id=space_id_function, till_commit_id=till)
+            endpoint2 = get_ydocument_endpoint(document_id=doc_id, space_id=temp_space, till_commit_id=till)
             resp3 = owner_client.get(**endpoint2)
             assert resp3.status_code == 200, f'Ожидался 200, получен {resp3.status_code}'
             body3 = resp3.json()
@@ -63,13 +60,13 @@ def test_get_ydocument_success(owner_client, request, kind, kind_id_fixture, spa
     ],
     ids=['not_found', 'empty', 'null', 'bad_format'],
 )
-def test_get_ydocument_invalid_id(owner_client, space_id_function, fake_id, expected_status):
+def test_get_ydocument_invalid_id(owner_client, temp_space, fake_id, expected_status):
     """
     Негативный сценарий: разные некорректные document_id.
     """
     allure.dynamic.title(f'Негативный экспорт Y-Doc для document_id={fake_id}')
     with allure.step('Выполняем запрос с некорректным document_id'):
-        endpoint = get_ydocument_endpoint(document_id=fake_id, space_id=space_id_function)
+        endpoint = get_ydocument_endpoint(document_id=fake_id, space_id=temp_space)
         resp = owner_client.post(**endpoint)
         assert resp.status_code == expected_status, f'Ожидался {expected_status}, получен {resp.status_code}'
         body = resp.json()
@@ -83,30 +80,31 @@ def test_get_ydocument_invalid_id(owner_client, space_id_function, fake_id, expe
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
-        ('Project', 'project_id_function'),
-        ('Space', 'space_id_function'),
-        ('Member', 'member_id_function'),
+        ('Project', 'temp_project'),
+        ('Space', 'temp_space'),
+        ('Member', 'temp_member'),
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_ydocument_unauthorized(owner_client, guest_client, request, kind, kind_id_fixture, space_id_function):
-    """
-    Негативный сценарий: гость не может экспортировать Y-Doc.
-    """
-    allure.dynamic.title(f'Гость пытается экспортировать Y-Doc для {kind}')
+def test_get_ydocument_foreign_space(owner_client, guest_client, request, kind, kind_id_fixture, temp_space):
+    """ """
+    allure.dynamic.title(
+        f'Попытка экспортировать Y-Doc из чужого space(kind={kind})— должен вернуться SpaceIdNotSpecified'
+    )
     kind_id = request.getfixturevalue(kind_id_fixture)
 
     with allure.step('Создаем документ владельцем'):
         resp = owner_client.post(
-            **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id_function, title='GuestYDoc')
+            **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title='GuestYDoc')
         )
         assert resp.status_code == 200, f'Не удалось создать документ: {resp.text}'
         doc_id = resp.json()['payload']['document']['_id']
 
     with allure.step('Пытаемся экспортировать от гостя'):
-        endpoint = get_ydocument_endpoint(document_id=doc_id, space_id=space_id_function)
+        endpoint = get_ydocument_endpoint(document_id=doc_id, space_id=temp_space)
         resp2 = guest_client.post(**endpoint)
         assert resp2.status_code == 400, f'Ожидался 400 получен {resp2.status_code}'
+        assert resp2.json()['error']['code'] == 'SpaceIdNotSpecified'
         body2 = resp2.json()
         payload2 = body2.get('payload')
         if payload2:

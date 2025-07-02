@@ -68,6 +68,37 @@ def temp_space(owner_client):
 
 
 @pytest.fixture(scope='session')
+def temp_project(owner_client, temp_space):
+    """Создаёт проект, который используется во всех тестах модуля."""
+    name = generate_project_name()
+    slug = generate_slug()
+    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': temp_space}
+    response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+    assert response.status_code == 200
+    yield response.json()['payload']['project']['_id']
+
+
+@pytest.fixture(scope='session')
+def temp_board(owner_client, temp_project, temp_space):
+    """
+    Создаёт временную борду в указанном проекте и спейсе.
+    """
+    board_name = generate_board_name()
+    payload = create_board_endpoint(
+        name=board_name,
+        temp_project=temp_project,
+        space_id=temp_space,
+        groups=DEFAULT_BOARD_GROUPS,
+        typesList=[],
+        customFields=[],
+    )
+    response = owner_client.post(**payload)
+    assert response.status_code == 200
+
+    yield response.json()['payload']['board']['_id']
+
+
+@pytest.fixture(scope='session')
 def foreign_space(guest_client):
     """Создаёт space от имени другого пользователя"""
     response = guest_client.post(**create_space_endpoint(name='foreign space'))
@@ -114,37 +145,6 @@ def member_id_module(owner_client, space_id_module):
     member_id = data['members'][0]['_id']
 
     yield member_id
-
-
-@pytest.fixture(scope='session')
-def temp_project(owner_client, temp_space):
-    """Создаёт проект, который используется во всех тестах модуля."""
-    name = generate_project_name()
-    slug = generate_slug()
-    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': temp_space}
-    response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
-    assert response.status_code == 200
-    yield response.json()['payload']['project']['_id']
-
-
-@pytest.fixture(scope='session')
-def temp_board(owner_client, temp_project, temp_space):
-    """
-    Создаёт временную борду в указанном проекте и спейсе.
-    """
-    board_name = generate_board_name()
-    payload = create_board_endpoint(
-        name=board_name,
-        temp_project=temp_project,
-        space_id=temp_space,
-        groups=DEFAULT_BOARD_GROUPS,
-        typesList=[],
-        customFields=[],
-    )
-    response = owner_client.post(**payload)
-    assert response.status_code == 200
-
-    yield response.json()['payload']['board']['_id']
 
 
 @pytest.fixture(scope='function')
