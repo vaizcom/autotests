@@ -19,7 +19,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['project', 'space', 'member'],
 )
-def test_edit_document_success(owner_client, request, kind, kind_id_fixture, temp_space, temp_document):
+def test_edit_document_success(owner_client, kind, kind_id_fixture, temp_space, temp_document):
     allure.dynamic.title(f'Успешное редактирование полей title и icon. {kind}')
 
     # Редактируем title и icon
@@ -115,7 +115,7 @@ def test_edit_document_forbidden_no_membership(
     ],
     ids=['project', 'space', 'member'],
 )
-def test_edit_document_overwrite_race_condition(owner_client, kind, kind_id_fixture, temp_space, temp_document):
+def test_edit_document_overwrite(owner_client, kind, kind_id_fixture, temp_space, temp_document):
     allure.dynamic.title(
         f'Два последовательных запроса на редактирование одного документа- проверяем что последнее изменение сохранилось.{kind}'
     )
