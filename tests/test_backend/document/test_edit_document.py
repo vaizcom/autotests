@@ -13,13 +13,13 @@ pytestmark = [pytest.mark.backend]
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
-        ('Project', 'project_id_function'),
-        ('Space', 'space_id_function'),
-        ('Member', 'member_id_function'),
+        ('Project', 'temp_project'),
+        ('Space', 'temp_space'),
+        ('Member', 'temp_member'),
     ],
     ids=['project', 'space', 'member'],
 )
-def test_edit_document_success(owner_client, request, kind, kind_id_fixture, space_id_function):
+def test_edit_document_success(owner_client, request, kind, kind_id_fixture, temp_space):
     allure.dynamic.title(f'Успешное редактирование полей title и icon. {kind}')
     kind_id = request.getfixturevalue(kind_id_fixture)
 
@@ -29,7 +29,7 @@ def test_edit_document_success(owner_client, request, kind, kind_id_fixture, spa
             **create_document_endpoint(
                 kind=kind,
                 kind_id=kind_id,
-                space_id=space_id_function,
+                space_id=temp_space,
                 title='Original',
             )
         )
@@ -46,7 +46,7 @@ def test_edit_document_success(owner_client, request, kind, kind_id_fixture, spa
                 document_id=doc_id,
                 title=new_title,
                 icon=new_icon,
-                space_id=space_id_function,
+                space_id=temp_space,
             )
         )
         assert edit_resp.status_code == 200
@@ -68,7 +68,7 @@ def test_edit_document_success(owner_client, request, kind, kind_id_fixture, spa
     ],
     ids=['not_found', 'empty', 'null', 'bad_format'],
 )
-def test_edit_document_invalid_id(owner_client, space_id_function, fake_id, expected_status):
+def test_edit_document_invalid_id(owner_client, temp_space, fake_id, expected_status):
     allure.dynamic.title(f'Негативные сценарии: некорректный documentId. id={fake_id}')
     with allure.step('Attempt edit with invalid id'):
         resp = owner_client.post(
@@ -76,7 +76,7 @@ def test_edit_document_invalid_id(owner_client, space_id_function, fake_id, expe
                 document_id=fake_id,
                 title='X',
                 icon='Y',
-                space_id=space_id_function,
+                space_id=temp_space,
             )
         )
         assert resp.status_code == expected_status
@@ -91,15 +91,13 @@ def test_edit_document_invalid_id(owner_client, space_id_function, fake_id, expe
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
-        ('Project', 'project_id_function'),
-        ('Space', 'space_id_function'),
-        ('Member', 'member_id_function'),
+        ('Project', 'temp_project'),
+        ('Space', 'temp_space'),
+        ('Member', 'temp_member'),
     ],
     ids=['project', 'space', 'member'],
 )
-def test_edit_document_forbidden_no_membership(
-    owner_client, guest_client, request, kind, kind_id_fixture, space_id_function
-):
+def test_edit_document_forbidden_no_membership(owner_client, guest_client, request, kind, kind_id_fixture, temp_space):
     allure.dynamic.title(
         f'Попытка редактировать документ из чужого space (kind={kind})— должен вернуться MemberDidNotFound'
     )
@@ -110,7 +108,7 @@ def test_edit_document_forbidden_no_membership(
         **create_document_endpoint(
             kind=kind,
             kind_id=kind_id,
-            space_id=space_id_function,
+            space_id=temp_space,
             title='Original',
         )
     )
@@ -124,7 +122,7 @@ def test_edit_document_forbidden_no_membership(
                 document_id=doc_id,
                 title='X',
                 icon='Y',
-                space_id=space_id_function,
+                space_id=temp_space,
             )
         )
         assert resp2.status_code == 400
@@ -137,55 +135,13 @@ def test_edit_document_forbidden_no_membership(
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
-        ('Project', 'project_id_function'),
-        ('Space', 'space_id_function'),
-        ('Member', 'member_id_function'),
+        ('Project', 'temp_project'),
+        ('Space', 'temp_space'),
+        ('Member', 'temp_member'),
     ],
     ids=['project', 'space', 'member'],
 )
-def test_edit_document_title_too_long(owner_client, request, kind, kind_id_fixture, space_id_function):
-    allure.dynamic.title(f'Негативный сценарий: title превышает MAX_DOC_NAME_LENGTH (2048) (kind={kind})')
-    kind_id = request.getfixturevalue(kind_id_fixture)
-
-    # Создаем документ владельцем
-    resp = owner_client.post(
-        **create_document_endpoint(
-            kind=kind,
-            kind_id=kind_id,
-            space_id=space_id_function,
-            title='Original',
-        )
-    )
-    assert resp.status_code == 200
-    doc_id = resp.json()['payload']['document']['_id']
-
-    # Формируем слишком длинный title
-    long_title = 'A' * (2048 + 1)
-    with allure.step('Attempt edit with too long title'):
-        resp2 = owner_client.post(
-            **edit_document_endpoint(
-                document_id=doc_id,
-                title=long_title,
-                icon='ValidIcon',
-                space_id=space_id_function,
-            )
-        )
-        # Ожидаем 400 и код ошибки FieldTooLong
-        assert resp2.status_code == 400, f'Expected 400 for too long title, got {resp2.status_code}'
-        error_code = resp2.json().get('error', {}).get('code')
-        assert error_code == 'InvalidForm', f"Expected error code 'InvalidForm', got {error_code}"
-
-
-@pytest.mark.parametrize(
-    'kind, kind_id_fixture',
-    [
-        ('Project', 'project_id_function'),
-        ('Space', 'space_id_function'),
-        ('Member', 'member_id_function'),
-    ],
-    ids=['project', 'space', 'member'],
-)
-def test_edit_document_overwrite_race_condition(owner_client, request, kind, kind_id_fixture, space_id_function):
+def test_edit_document_overwrite_race_condition(owner_client, request, kind, kind_id_fixture, temp_space):
     allure.dynamic.title(
         f'Два последовательных запроса на редактирование одного документа- проверяем что последнее изменение сохранилось.{kind}'
     )
@@ -197,7 +153,7 @@ def test_edit_document_overwrite_race_condition(owner_client, request, kind, kin
             **create_document_endpoint(
                 kind=kind,
                 kind_id=kind_id,
-                space_id=space_id_function,
+                space_id=temp_space,
                 title='Original',
             )
         )
@@ -213,7 +169,7 @@ def test_edit_document_overwrite_race_condition(owner_client, request, kind, kin
                 document_id=doc_id,
                 title=first_title,
                 icon=first_icon,
-                space_id=space_id_function,
+                space_id=temp_space,
             )
         )
         assert r1.status_code == 200
@@ -230,7 +186,7 @@ def test_edit_document_overwrite_race_condition(owner_client, request, kind, kin
                 document_id=doc_id,
                 title=second_title,
                 icon=second_icon,
-                space_id=space_id_function,
+                space_id=temp_space,
             )
         )
         assert r2.status_code == 200
@@ -241,8 +197,60 @@ def test_edit_document_overwrite_race_condition(owner_client, request, kind, kin
     # 4) Финальная проверка: выгружаем документ и убеждаемся в последних значениях
     with allure.step('Проверка итогового состояния документа'):
         # Предполагаем, что есть endpoint GET /documents/{id}
-        get_resp = owner_client.post(**get_document_endpoint(document_id=doc_id, space_id=space_id_function))
+        get_resp = owner_client.post(**get_document_endpoint(document_id=doc_id, space_id=temp_space))
         assert get_resp.status_code == 200
         final = get_resp.json()['payload']['document']
         assert final['title'] == second_title
         assert final['icon'] == second_icon
+
+
+@pytest.mark.parametrize(
+    'kind, kind_id_fixture',
+    [
+        ('Project', 'project_id_function'),
+        ('Space', 'space_id_function'),
+        ('Member', 'member_id_function'),
+    ],
+    ids=['project', 'space', 'member'],
+)
+@pytest.mark.parametrize(
+    'length, expected_status',
+    [
+        (2048, 200),  # граница принятия
+        (2049, 400),  # превышение максимума
+    ],
+    ids=['max_allowed', 'exceed_max'],
+)
+def test_edit_document_title_length(
+    owner_client, request, kind, kind_id_fixture, space_id_function, length, expected_status
+):
+    allure.dynamic.title(f'Проверка граничной валидации длины title: MAX_DOC_NAME_LENGTH = 2048. {length} for {kind}')
+    kind_id = request.getfixturevalue(kind_id_fixture)
+
+    # Создаём документ
+    resp = owner_client.post(
+        **create_document_endpoint(
+            kind=kind,
+            kind_id=kind_id,
+            space_id=space_id_function,
+            title='Original',
+        )
+    )
+    assert resp.status_code == 200, f'Failed to create document: {resp.text}'
+    doc_id = resp.json()['payload']['document']['_id']
+
+    # Формируем title заданной длины
+    boundary_title = 'A' * length
+    with allure.step(f'Attempt edit with title length {length}'):
+        resp2 = owner_client.post(
+            **edit_document_endpoint(
+                document_id=doc_id,
+                title=boundary_title,
+                icon='ValidIcon',
+                space_id=space_id_function,
+            )
+        )
+        assert resp2.status_code == expected_status, f'Expected {expected_status}, got {resp2.status_code}'
+        if expected_status == 400:
+            error_code = resp2.json().get('error', {}).get('code')
+            assert error_code == 'InvalidForm', f"Expected error code 'InvalidForm', got {error_code}"
