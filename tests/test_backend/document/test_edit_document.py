@@ -224,7 +224,7 @@ def test_edit_document_overwrite_race_condition(owner_client, request, kind, kin
 def test_edit_document_title_length(
     owner_client, request, kind, kind_id_fixture, space_id_function, length, expected_status
 ):
-    allure.dynamic.title(f'Проверка граничной валидации длины title: MAX_DOC_NAME_LENGTH = 2048. {length} for {kind}')
+    allure.dynamic.title(f'Проверка граничной валидации длины title: LENGTH = {length} for {kind}')
     kind_id = request.getfixturevalue(kind_id_fixture)
 
     # Создаём документ
