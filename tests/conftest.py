@@ -5,10 +5,14 @@ from test_backend.data.endpoints.Document.document_endpoints import create_docum
 from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from tests.core.client import APIClient
 from tests.core.auth import get_token
-from tests.config.settings import API_URL
+from tests.config.settings import API_URL, MAIN_SPACE_ID
 from tests.test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
 from tests.test_backend.data.endpoints.Project.project_endpoints import create_project_endpoint, create_board_endpoint
-from tests.test_backend.data.endpoints.Space.space_endpoints import create_space_endpoint, remove_space_endpoint
+from tests.test_backend.data.endpoints.Space.space_endpoints import (
+    create_space_endpoint,
+    remove_space_endpoint,
+    get_space_endpoint,
+)
 
 
 def pytest_configure(config):
@@ -40,6 +44,25 @@ def owner_client():
 @pytest.fixture(scope='session')
 def foreign_client():
     return APIClient(base_url=API_URL, token=get_token('guest'))
+
+
+@pytest.fixture(scope='session')
+def main_client():
+    return APIClient(base_url=API_URL, token=get_token('main'))
+
+
+@pytest.fixture(scope='module')
+def main_space(main_client) -> str:
+    """
+    Берёт заранее созданный space_id из переменной окружения MAIN_SPACE_ID
+    и проверяет его существование через API.
+    Отличие этого спейса в том, что в  этом спейсе уже есть мемберы с разными ролями.
+    """
+
+    assert MAIN_SPACE_ID, 'Не задана переменная окружения MAIN_SPACE_ID'
+    resp = main_client.post(**get_space_endpoint(space_id=MAIN_SPACE_ID))
+    assert resp.status_code == 200, f'Space {MAIN_SPACE_ID} not found: {resp.text}'
+    return MAIN_SPACE_ID
 
 
 # Фикстура: создает временный спейс и возвращает member_id после прохождения тестов удаляет этот временный спейс

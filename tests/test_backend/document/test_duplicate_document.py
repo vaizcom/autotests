@@ -4,6 +4,7 @@ from test_backend.data.endpoints.Document.document_endpoints import duplicate_do
 
 pytestmark = [pytest.mark.backend]
 
+
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
