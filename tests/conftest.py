@@ -1,6 +1,7 @@
 import pytest
 from config import settings
 from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
+from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint
 from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from tests.core.client import APIClient
 from tests.core.auth import get_token
@@ -181,3 +182,21 @@ def member_id_function(owner_client, space_id_function):
     member_id = data['members'][0]['_id']
 
     yield member_id
+
+
+@pytest.fixture
+def temp_document(owner_client, request, kind, kind_id_fixture):
+    kind_id = request.getfixturevalue(kind_id_fixture)
+    space_id = request.getfixturevalue('temp_space')
+
+    response = owner_client.post(
+        **create_document_endpoint(
+            kind=kind,
+            kind_id=kind_id,
+            space_id=space_id,
+            title='Документ для дублирования',
+        )
+    )
+
+    assert response.status_code == 200
+    return response.json()['payload']['document']

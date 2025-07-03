@@ -19,23 +19,8 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['project', 'space', 'member'],
 )
-def test_edit_document_success(owner_client, request, kind, kind_id_fixture, temp_space):
+def test_edit_document_success(owner_client, kind, kind_id_fixture, temp_space, temp_document):
     allure.dynamic.title(f'Успешное редактирование полей title и icon. {kind}')
-    kind_id = request.getfixturevalue(kind_id_fixture)
-
-    # Создаем документ
-    with allure.step('Create document'):
-        resp = owner_client.post(
-            **create_document_endpoint(
-                kind=kind,
-                kind_id=kind_id,
-                space_id=temp_space,
-                title='Original',
-            )
-        )
-        assert resp.status_code == 200
-        doc = resp.json()['payload']['document']
-        doc_id = doc['_id']
 
     # Редактируем title и icon
     new_title = 'EditedTitle'
@@ -43,7 +28,7 @@ def test_edit_document_success(owner_client, request, kind, kind_id_fixture, tem
     with allure.step('Edit document'):
         edit_resp = owner_client.post(
             **edit_document_endpoint(
-                document_id=doc_id,
+                document_id=temp_document['_id'],
                 title=new_title,
                 icon=new_icon,
                 space_id=temp_space,
@@ -53,7 +38,7 @@ def test_edit_document_success(owner_client, request, kind, kind_id_fixture, tem
         body = edit_resp.json()
         assert body.get('type') == 'EditDocument'
         updated = body['payload']['document']
-        assert updated['_id'] == doc_id
+        assert updated['_id'] == temp_document['_id']
         assert updated['title'] == new_title
         assert updated['icon'] == new_icon
 
@@ -97,29 +82,18 @@ def test_edit_document_invalid_id(owner_client, temp_space, fake_id, expected_st
     ],
     ids=['project', 'space', 'member'],
 )
-def test_edit_document_forbidden_no_membership(owner_client, guest_client, request, kind, kind_id_fixture, temp_space):
+def test_edit_document_forbidden_no_membership(
+    owner_client, guest_client, kind, kind_id_fixture, temp_space, temp_document
+):
     allure.dynamic.title(
         f'Попытка редактировать документ из чужого space (kind={kind})— должен вернуться MemberDidNotFound'
     )
-    kind_id = request.getfixturevalue(kind_id_fixture)
-
-    # Создаем документ владельцем
-    resp = owner_client.post(
-        **create_document_endpoint(
-            kind=kind,
-            kind_id=kind_id,
-            space_id=temp_space,
-            title='Original',
-        )
-    )
-    assert resp.status_code == 200
-    doc_id = resp.json()['payload']['document']['_id']
-
+    # Создаем документ владельцем temp_document
     # Гость пытается редактировать
     with allure.step('Guest edit attempt'):
         resp2 = guest_client.post(
             **edit_document_endpoint(
-                document_id=doc_id,
+                document_id=temp_document['_id'],
                 title='X',
                 icon='Y',
                 space_id=temp_space,
@@ -141,32 +115,18 @@ def test_edit_document_forbidden_no_membership(owner_client, guest_client, reque
     ],
     ids=['project', 'space', 'member'],
 )
-def test_edit_document_overwrite_race_condition(owner_client, request, kind, kind_id_fixture, temp_space):
+def test_edit_document_overwrite(owner_client, kind, kind_id_fixture, temp_space, temp_document):
     allure.dynamic.title(
         f'Два последовательных запроса на редактирование одного документа- проверяем что последнее изменение сохранилось.{kind}'
     )
-    kind_id = request.getfixturevalue(kind_id_fixture)
-
-    # 1) Создаём документ
-    with allure.step('Создаем документ-исходник'):
-        resp = owner_client.post(
-            **create_document_endpoint(
-                kind=kind,
-                kind_id=kind_id,
-                space_id=temp_space,
-                title='Original',
-            )
-        )
-        assert resp.status_code == 200
-        doc_id = resp.json()['payload']['document']['_id']
-
+    # 1) Создаём документ temp_document["_id"]
     # 2) Первый апдейт
     first_title = 'FirstUpdate'
     first_icon = 'IconA'
     with allure.step('Первое редактирование'):
         r1 = owner_client.post(
             **edit_document_endpoint(
-                document_id=doc_id,
+                document_id=temp_document['_id'],
                 title=first_title,
                 icon=first_icon,
                 space_id=temp_space,
@@ -183,7 +143,7 @@ def test_edit_document_overwrite_race_condition(owner_client, request, kind, kin
     with allure.step('Второе редактирование (перезапись)'):
         r2 = owner_client.post(
             **edit_document_endpoint(
-                document_id=doc_id,
+                document_id=temp_document['_id'],
                 title=second_title,
                 icon=second_icon,
                 space_id=temp_space,
@@ -197,7 +157,7 @@ def test_edit_document_overwrite_race_condition(owner_client, request, kind, kin
     # 4) Финальная проверка: выгружаем документ и убеждаемся в последних значениях
     with allure.step('Проверка итогового состояния документа'):
         # Предполагаем, что есть endpoint GET /documents/{id}
-        get_resp = owner_client.post(**get_document_endpoint(document_id=doc_id, space_id=temp_space))
+        get_resp = owner_client.post(**get_document_endpoint(document_id=temp_document['_id'], space_id=temp_space))
         assert get_resp.status_code == 200
         final = get_resp.json()['payload']['document']
         assert final['title'] == second_title
