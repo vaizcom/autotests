@@ -7,6 +7,7 @@ URL = os.getenv('URL')
 print('Loaded URL:', URL)
 
 CURRENT_SPACE_ID = os.getenv('CURRENT_SPACE_ID')
+MAIN_SPACE_ID = os.getenv('MAIN_SPACE_ID')
 
 USERS = {
     'foreign_client': {'email': os.getenv('FOREIGN_CLIENT'), 'password': os.getenv('PASSWORD')},
@@ -14,6 +15,7 @@ USERS = {
     'member': {'email': os.getenv('MEMBER_EMAIL'), 'password': os.getenv('PASSWORD')},
     'manager': {'email': os.getenv('MANAGER_EMAIL'), 'password': os.getenv('PASSWORD')},
     'owner': {'email': os.getenv('OWNER_EMAIL'), 'password': os.getenv('PASSWORD')},
+    'main': {'email': os.getenv('MAIN_CLIENT'), 'password': os.getenv('PASSWORD')},
 }
 
 TEST_STAND_NAME = os.getenv('TEST_STAND_NAME', 'kuber_dev')
