@@ -1,13 +1,17 @@
 import pytest
 from config import settings
 from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
-from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint
+from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
 from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from tests.core.client import APIClient
 from tests.core.auth import get_token
 from tests.config.settings import API_URL, MAIN_SPACE_ID
 from tests.test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
-from tests.test_backend.data.endpoints.Project.project_endpoints import create_project_endpoint, create_board_endpoint
+from tests.test_backend.data.endpoints.Project.project_endpoints import (
+    create_project_endpoint,
+    create_board_endpoint,
+    get_project_endpoint,
+)
 from tests.test_backend.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
     remove_space_endpoint,
@@ -51,11 +55,9 @@ def main_client():
     return APIClient(base_url=API_URL, token=get_token('main'))
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def main_space(main_client) -> str:
     """
-    Берёт заранее созданный space_id из переменной окружения MAIN_SPACE_ID
-    и проверяет его существование через API.
     Отличие этого спейса в том, что в  этом спейсе уже есть мемберы с разными ролями.
     """
 
@@ -63,6 +65,27 @@ def main_space(main_client) -> str:
     resp = main_client.post(**get_space_endpoint(space_id=MAIN_SPACE_ID))
     assert resp.status_code == 200, f'Space {MAIN_SPACE_ID} not found: {resp.text}'
     return MAIN_SPACE_ID
+
+
+@pytest.fixture(scope='session')
+def main_project(main_client, main_space):
+    response = main_client.post(**get_project_endpoint(project_id='686672af85fb8d104544e798', space_id=main_space))
+    assert response.status_code == 200
+    return response.json()['payload']['project']['_id']
+
+
+@pytest.fixture(scope='session')
+def main_personal(main_client, main_space):
+    """Возвращает персональные ID участников пространства по ролям."""
+    response = main_client.post(**get_space_members_endpoint(space_id=main_space))
+    response.raise_for_status()
+
+    members = response.json()['payload']['members']
+    roles = ['owner', 'manager', 'member', 'guest']
+
+    # Собираем _id участников для каждой роли по имени (или другому признаку)
+    member_id = {role: [m['_id'] for m in members if m.get('fullName') == role] for role in roles}
+    return member_id
 
 
 # Фикстура: создает временный спейс и возвращает member_id после прохождения тестов удаляет этот временный спейс
@@ -222,4 +245,8 @@ def temp_document(owner_client, request, kind, kind_id_fixture):
     )
 
     assert response.status_code == 200
-    return response.json()['payload']['document']
+    doc_id = response.json()['payload']['document']
+
+    yield doc_id
+
+    owner_client.post(**archive_document_endpoint(space_id=space_id, document_id=doc_id))
