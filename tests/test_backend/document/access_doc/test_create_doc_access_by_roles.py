@@ -56,9 +56,9 @@ def test_create_project_doc_access_by_roles(request, main_project, main_space, c
     current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
     title = f'{current_date} {role} Project Doc'
 
-    allure.dynamic.title(f'Создание Project-документа для роли {title}')
+    allure.dynamic.title(f'Создание Project-документа для роли {role}')
 
-    with allure.step(f'{role} создаёт Project-документ'):
+    with allure.step(f'{role} создаёт Project-документ {title}'):
         resp = api_client.post(
             **create_document_endpoint(
                 kind='Project', kind_id=main_project, space_id=main_space, title=title
@@ -90,9 +90,9 @@ def test_create_personal_doc_access_by_roles(request, main_personal, client_fixt
     current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
     title = f'{current_date} {role} Personal Doc'
 
-    allure.dynamic.title(f'Создание Personal-документа для роли {title}')
+    allure.dynamic.title(f'Создание Personal-документа для роли {role}')
 
-    with allure.step(f'{role} создаёт Personal-документ'):
+    with allure.step(f'{role} создаёт Personal-документ {title}'):
         resp = api_client.post(
             **create_document_endpoint(
                 kind='Member', kind_id=personal_id, space_id=main_space, title=title
