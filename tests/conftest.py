@@ -250,3 +250,5 @@ def temp_document(owner_client, request, kind, kind_id_fixture):
     yield doc_id
 
     owner_client.post(**archive_document_endpoint(space_id=space_id, document_id=doc_id))
+
+

@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 
 import allure
@@ -15,7 +16,7 @@ pytestmark = [pytest.mark.backend]
         ('owner_client', 200),
         ('manager_client', 200),
         ('member_client', 200),
-        ('guest_client', 403),
+        ('guest_client', 200),
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
@@ -26,9 +27,11 @@ def test_get_space_docs_list_access_by_roles(request, main_space, client_fixture
     title = f"{current_date}_{role}_Space Doc For List Check"
 
     allure.dynamic.title(f"Получение списка Space-документов для роли {role}")
+    random_client = request.getfixturevalue(random.choice(['owner_client', 'manager_client', 'member_client']))
 
-    with allure.step(f"{role} создаёт Space-документ для проверки списка {title}"):
-        create_resp = api_client.post(
+    with allure.step(f"random_client({random_client}) создаёт Space-документ для проверки списка {title}"):
+
+        create_resp = random_client.post(
             **create_document_endpoint(
                 kind='Space',
                 kind_id=main_space,
@@ -57,7 +60,7 @@ def test_get_space_docs_list_access_by_roles(request, main_space, client_fixture
                 assert doc_id in doc_ids, "Созданный документ не найден в списке"
 
     with allure.step(f"Архивация созданного документа {title}"):
-        archive_resp = api_client.post(
+        archive_resp = random_client.post(
             **archive_document_endpoint(space_id=main_space, document_id=doc_id)
         )
         assert archive_resp.status_code == 200

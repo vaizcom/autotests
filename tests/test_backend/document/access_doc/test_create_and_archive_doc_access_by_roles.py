@@ -1,3 +1,5 @@
+import random
+
 import allure
 import pytest
 from datetime import datetime
@@ -17,7 +19,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_create_space_doc_access_by_roles(request, main_space, client_fixture, expected_status):
+def test_create_and_archive_space_doc_access_by_roles(request, main_space, client_fixture, expected_status):
     api_client = request.getfixturevalue(client_fixture)
     role = client_fixture.replace('_client', '')
     current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
@@ -50,7 +52,7 @@ def test_create_space_doc_access_by_roles(request, main_space, client_fixture, e
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_create_project_doc_access_by_roles(request, main_project, main_space, client_fixture, expected_status):
+def test_create_and_archive_project_doc_access_by_roles(request, main_project, main_space, client_fixture, expected_status):
     api_client = request.getfixturevalue(client_fixture)
     role = client_fixture.replace('_client', '')
     current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
@@ -83,7 +85,7 @@ def test_create_project_doc_access_by_roles(request, main_project, main_space, c
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_create_personal_doc_access_by_roles(request, main_personal, client_fixture, expected_status, main_space):
+def test_create_and_archive_personal_doc_access_by_roles(request, main_personal, client_fixture, expected_status, main_space):
     api_client = request.getfixturevalue(client_fixture)
     role = client_fixture.replace('_client', '')
     personal_id = main_personal[role][0]
@@ -105,3 +107,5 @@ def test_create_personal_doc_access_by_roles(request, main_personal, client_fixt
             with allure.step(f'Архивация Personal-документа {title}'):
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
+
+

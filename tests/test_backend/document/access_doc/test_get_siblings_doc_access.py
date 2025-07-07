@@ -1,4 +1,5 @@
 from datetime import datetime
+import random
 
 import allure
 import pytest
@@ -87,11 +88,12 @@ def test_get_space_doc_siblings_view_only_access(request, main_space, member_cli
 
     allure.dynamic.title(f"Просмотр соседей Space-документа для роли {role} (без создания)")
 
-    with allure.step("Создание документов в роли member для теста просмотра siblings"):
+    with allure.step("Создание документов (в рандомной роли) для теста просмотра siblings"):
+        random_client = request.getfixturevalue(random.choice(['owner_client', 'manager_client', 'member_client']))
         doc_ids = []
         for index in range(3):
             title = f"{current_date}_member_create_Sibling Test Doc {index}"
-            create_resp = member_client.post(
+            create_resp = random_client.post(
                 **create_document_endpoint(
                     kind='Space',
                     kind_id=main_space,
