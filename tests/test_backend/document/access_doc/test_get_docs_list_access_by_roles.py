@@ -52,8 +52,9 @@ def test_get_space_docs_list_access_by_roles(request, main_space, client_fixture
         if list_resp.status_code == 200:
             docs = list_resp.json()["payload"].get("documents", [])
             assert isinstance(docs, list), "Документы должны быть списком"
-            doc_ids = [doc["_id"] for doc in docs]
-            assert doc_id in doc_ids, "Созданный документ не найден в списке"
+            with allure.step("Проверка наличия созданного документа в списке"):
+                doc_ids = [doc["_id"] for doc in docs]
+                assert doc_id in doc_ids, "Созданный документ не найден в списке"
 
     with allure.step(f"Архивация созданного документа {title}"):
         archive_resp = api_client.post(
