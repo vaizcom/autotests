@@ -32,7 +32,7 @@ def test_archive_space_doc(request, main_space, client_fixture, expected_status)
     selected_client_name = random.choice(['owner_client', 'manager_client', 'member_client'])
     random_client = request.getfixturevalue(selected_client_name)
 
-    with allure.step(f"random_client({random_client}) создаёт Space-документ для архивации (title = {title})"):
+    with allure.step(f"random_client({selected_client_name}) создаёт Space-документ для архивации (title = {title})"):
         create_resp = random_client.post(
             **create_document_endpoint(
                 kind='Space',
@@ -75,7 +75,7 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
 
     random_client = request.getfixturevalue(selected_client_name)
 
-    with allure.step(f"random_client({random_client}) создаёт Project-документ для архивации(title:{title})"):
+    with allure.step(f"random_client({selected_client_name}) создаёт Project-документ для архивации(title:{title})"):
         create_resp = random_client.post(
             **create_document_endpoint(
                 kind='Project',
@@ -109,7 +109,7 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
 def test_archive_personal_doc(request, main_personal, main_space, client_fixture, expected_status, member_client):
     api_client = request.getfixturevalue(client_fixture)
     role = client_fixture.replace('_client', '')
-    personal_id = main_personal[role][0]
+    personal_id = main_personal['member'][0]
     current_date = datetime.now().strftime('%d.%m_%H:%M:%S')
     title = f"{current_date}_{role} Personal Doc For archive Check"
 
@@ -125,11 +125,7 @@ def test_archive_personal_doc(request, main_personal, main_space, client_fixture
             )
         )
 
-        if create_resp.status_code != 200:
-            with allure.step(
-                    f"Не удалось создать документ, статус {create_resp.status_code} — пропуск проверки списка"):
-                assert expected_status == 403
-            return
+        assert create_resp.status_code == 200
 
         doc_id = create_resp.json()['payload']['document']['_id']
         with allure.step(f'Архивация Personal-документа в роли {role}, {expected_status}'):
