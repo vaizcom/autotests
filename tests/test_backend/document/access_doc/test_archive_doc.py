@@ -3,6 +3,8 @@ import random
 
 import allure
 import pytest
+
+from conftest import member_client
 from test_backend.data.endpoints.Document.document_endpoints import (
     create_document_endpoint, archive_document_endpoint,
 )
@@ -46,7 +48,7 @@ def test_archive_space_doc(request, main_space, client_fixture, expected_status)
             return
 
         doc_id = create_resp.json()['payload']['document']['_id']
-        with allure.step(f'Архивация Personal-документа {title}'):
+        with allure.step(f'Архивация Space-документа {title}'):
             archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
             assert archive_resp.status_code == expected_status
 
@@ -67,7 +69,7 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
     current_date = datetime.now().strftime('%d.%m_%H:%M:%S')
     title = f"{current_date}_{role} Project Doc For archive Check"
 
-    allure.dynamic.title(f'Архивирование Space-документа для роли {role}')
+    allure.dynamic.title(f'Архивирование Project-документа для роли {role}')
 
     random_client = request.getfixturevalue(random.choice(['owner_client', 'manager_client', 'member_client']))
 
@@ -88,6 +90,46 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
             return
 
         doc_id = create_resp.json()['payload']['document']['_id']
-        with allure.step(f'Архивация Personal-документа {title}'):
+        with allure.step(f'Архивация Project-документа {title}'):
+            archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
+            assert archive_resp.status_code == expected_status
+
+@pytest.mark.parametrize(
+    'client_fixture, expected_status',
+    [
+        ('owner_client', 403),
+        ('manager_client', 403),
+        ('member_client', 200),
+        ('guest_client', 403),
+    ],
+    ids=['owner', 'manager', 'member', 'guest'],
+)
+def test_archive_personal_doc(request, main_personal, main_space, client_fixture, expected_status, member_client):
+    api_client = request.getfixturevalue(client_fixture)
+    role = client_fixture.replace('_client', '')
+    personal_id = main_personal[role][0]
+    current_date = datetime.now().strftime('%d.%m_%H:%M:%S')
+    title = f"{current_date}_{role} Personal Doc For archive Check"
+
+    allure.dynamic.title(f'Архивирование Personal-документа для роли {role}, документ создан в роли Member')
+
+    with allure.step(f"member_client создаёт Personal-документ {title} для архивации"):
+        create_resp = member_client.post(
+            **create_document_endpoint(
+                kind='Member',
+                kind_id=personal_id,
+                space_id=main_space,
+                title=title
+            )
+        )
+
+        if create_resp.status_code != 200:
+            with allure.step(
+                    f"Не удалось создать документ, статус {create_resp.status_code} — пропуск проверки списка"):
+                assert expected_status == 403
+            return
+
+        doc_id = create_resp.json()['payload']['document']['_id']
+        with allure.step(f'Архивация Personal-документа в роли {role}, {expected_status}'):
             archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
             assert archive_resp.status_code == expected_status
