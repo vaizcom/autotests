@@ -92,7 +92,7 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
             return
 
         doc_id = create_resp.json()['payload']['document']['_id']
-        with allure.step(f'Архивация Project-документа {title}'):
+        with allure.step(f'Архивация Project-документа {title} в роли {role}, {expected_status}'):
             archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
             assert archive_resp.status_code == expected_status
 
@@ -115,7 +115,7 @@ def test_archive_personal_doc(request, main_personal, main_space, client_fixture
 
     allure.dynamic.title(f'Архивирование Personal-документа для роли {role}, документ создан в роли Member')
 
-    with allure.step(f"member_client создаёт Personal-документ {title} для архивации"):
+    with allure.step(f"member_client создаёт Personal-документ для архивации ({title})"):
         create_resp = member_client.post(
             **create_document_endpoint(
                 kind='Member',
