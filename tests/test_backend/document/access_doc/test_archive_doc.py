@@ -29,9 +29,10 @@ def test_archive_space_doc(request, main_space, client_fixture, expected_status)
 
     allure.dynamic.title(f'Архивирование Space-документа для роли {role}')
 
-    random_client = request.getfixturevalue(random.choice(['owner_client', 'manager_client', 'member_client']))
+    selected_client_name = random.choice(['owner_client', 'manager_client', 'member_client'])
+    random_client = request.getfixturevalue(selected_client_name)
 
-    with allure.step(f"random_client создаёт Space-документ {title} для архивации"):
+    with allure.step(f"random_client({random_client}) создаёт Space-документ для архивации (title = {title})"):
         create_resp = random_client.post(
             **create_document_endpoint(
                 kind='Space',
@@ -70,10 +71,11 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
     title = f"{current_date}_{role} Project Doc For archive Check"
 
     allure.dynamic.title(f'Архивирование Project-документа для роли {role}')
+    selected_client_name = random.choice(['owner_client', 'manager_client', 'member_client'])
 
-    random_client = request.getfixturevalue(random.choice(['owner_client', 'manager_client', 'member_client']))
+    random_client = request.getfixturevalue(selected_client_name)
 
-    with allure.step(f"random_client создаёт Project-документ {title} для архивации"):
+    with allure.step(f"random_client({random_client}) создаёт Project-документ для архивации(title:{title})"):
         create_resp = random_client.post(
             **create_document_endpoint(
                 kind='Project',
