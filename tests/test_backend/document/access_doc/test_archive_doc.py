@@ -49,7 +49,7 @@ def test_archive_space_doc(request, main_space, client_fixture, expected_status)
             return
 
         doc_id = create_resp.json()['payload']['document']['_id']
-        with allure.step(f'Архивация Space-документа {title}'):
+        with allure.step(f'Архивация Space-документа в роли {role}, {expected_status}'):
             archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
             assert archive_resp.status_code == expected_status
 
@@ -92,7 +92,7 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
             return
 
         doc_id = create_resp.json()['payload']['document']['_id']
-        with allure.step(f'Архивация Project-документа {title} в роли {role}, {expected_status}'):
+        with allure.step(f'Архивация Project-документа в роли {role}, {expected_status}'):
             archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
             assert archive_resp.status_code == expected_status
 
