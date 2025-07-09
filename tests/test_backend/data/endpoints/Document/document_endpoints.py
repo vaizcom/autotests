@@ -96,3 +96,14 @@ def duplicate_document_endpoint(document_id: str, space_id: str):
             'Current-Space-Id': space_id,
         },
     }
+
+
+def archive_document_endpoint(document_id: str, space_id: str):
+    return {
+        'path': '/ArchiveDocument',
+        'json': {'documentId': document_id},
+        'headers': {
+            'Content-Type': 'application/json',
+            'Current-Space-Id': space_id,
+        },
+    }

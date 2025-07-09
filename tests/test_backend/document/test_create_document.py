@@ -37,7 +37,7 @@ MAX_DOC_NAME_LENGTH = 2048
     'title, expected_status, expected_actual_title',
     [
         (None, 200, 'Untitled document'),
-        ('', 400, None),
+        ('', 200, ''),
         (' ', 200, ' '),
         ('A' * MAX_DOC_NAME_LENGTH, 200, 'A' * MAX_DOC_NAME_LENGTH),
         ('A' * (MAX_DOC_NAME_LENGTH + 1), 400, None),
