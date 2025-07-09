@@ -33,7 +33,7 @@ def test_create_and_archive_space_doc_access_by_roles(request, main_space, clien
 
         if expected_status == 200:
             doc_id = resp.json()['payload']['document']['_id']
-            with allure.step(f'Архивация Space-документа {title}'):
+            with allure.step('Архивация Space-документа'):
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
 
@@ -58,7 +58,7 @@ def test_create_and_archive_project_doc_access_by_roles(
 
     allure.dynamic.title(f'Создание Project-документа для роли {role}')
 
-    with allure.step(f'{role} создаёт Project-документ {title}'):
+    with allure.step(f'{role} создаёт Project-документ, {expected_status}'):
         resp = api_client.post(
             **create_document_endpoint(kind='Project', kind_id=main_project, space_id=main_space, title=title)
         )
@@ -66,7 +66,7 @@ def test_create_and_archive_project_doc_access_by_roles(
 
         if expected_status == 200:
             doc_id = resp.json()['payload']['document']['_id']
-            with allure.step(f'Архивация Project-документа {title}, {expected_status}'):
+            with allure.step(f'Архивация Project-документа, {expected_status}'):
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
 
@@ -90,9 +90,9 @@ def test_create_and_archive_personal_doc_access_by_roles(
     current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
     title = f'{current_date} Personal Doc'
 
-    allure.dynamic.title(f'Создание Personal-документа для роли {role}, {expected_status}')
+    allure.dynamic.title(f'Создание Personal-документа для роли {role}')
 
-    with allure.step(f'{role} создаёт Personal-документ {title}'):
+    with allure.step(f'{role} создаёт Personal-документ, {expected_status}'):
         resp = api_client.post(
             **create_document_endpoint(kind='Member', kind_id=personal_id, space_id=main_space, title=title)
         )
@@ -100,6 +100,6 @@ def test_create_and_archive_personal_doc_access_by_roles(
 
         if expected_status == 200:
             doc_id = resp.json()['payload']['document']['_id']
-            with allure.step(f'Архивация Personal-документа {title}'):
+            with allure.step('Архивация Personal-документа'):
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
