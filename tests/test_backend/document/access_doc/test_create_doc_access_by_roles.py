@@ -25,7 +25,7 @@ def test_create_and_archive_space_doc_access_by_roles(request, main_space, clien
 
     allure.dynamic.title(f'Создание Space-документа для роли {role}')
 
-    with allure.step(f'{role} создаёт Space-документ'):
+    with allure.step(f'{role} создаёт Space-документ, {expected_status}'):
         resp = api_client.post(
             **create_document_endpoint(kind='Space', kind_id=main_space, space_id=main_space, title=title)
         )
@@ -54,7 +54,7 @@ def test_create_and_archive_project_doc_access_by_roles(
     api_client = request.getfixturevalue(client_fixture)
     role = client_fixture.replace('_client', '')
     current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
-    title = f'{current_date} {role} Project Doc'
+    title = f'{current_date} Project Doc'
 
     allure.dynamic.title(f'Создание Project-документа для роли {role}')
 
@@ -66,7 +66,7 @@ def test_create_and_archive_project_doc_access_by_roles(
 
         if expected_status == 200:
             doc_id = resp.json()['payload']['document']['_id']
-            with allure.step(f'Архивация Project-документа {title}'):
+            with allure.step(f'Архивация Project-документа {title}, {expected_status}'):
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
 
@@ -88,9 +88,9 @@ def test_create_and_archive_personal_doc_access_by_roles(
     role = client_fixture.replace('_client', '')
     personal_id = main_personal[role][0]
     current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
-    title = f'{current_date} {role} Personal Doc'
+    title = f'{current_date} Personal Doc'
 
-    allure.dynamic.title(f'Создание Personal-документа для роли {role}')
+    allure.dynamic.title(f'Создание Personal-документа для роли {role}, {expected_status}')
 
     with allure.step(f'{role} создаёт Personal-документ {title}'):
         resp = api_client.post(
