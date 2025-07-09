@@ -1,5 +1,3 @@
-import random
-
 import allure
 import pytest
 from datetime import datetime
@@ -29,9 +27,7 @@ def test_create_and_archive_space_doc_access_by_roles(request, main_space, clien
 
     with allure.step(f'{role} создаёт Space-документ'):
         resp = api_client.post(
-            **create_document_endpoint(
-                kind='Space', kind_id=main_space, space_id=main_space, title=title
-            )
+            **create_document_endpoint(kind='Space', kind_id=main_space, space_id=main_space, title=title)
         )
         assert resp.status_code == expected_status
 
@@ -52,7 +48,9 @@ def test_create_and_archive_space_doc_access_by_roles(request, main_space, clien
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_create_and_archive_project_doc_access_by_roles(request, main_project, main_space, client_fixture, expected_status):
+def test_create_and_archive_project_doc_access_by_roles(
+    request, main_project, main_space, client_fixture, expected_status
+):
     api_client = request.getfixturevalue(client_fixture)
     role = client_fixture.replace('_client', '')
     current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
@@ -62,9 +60,7 @@ def test_create_and_archive_project_doc_access_by_roles(request, main_project, m
 
     with allure.step(f'{role} создаёт Project-документ {title}'):
         resp = api_client.post(
-            **create_document_endpoint(
-                kind='Project', kind_id=main_project, space_id=main_space, title=title
-            )
+            **create_document_endpoint(kind='Project', kind_id=main_project, space_id=main_space, title=title)
         )
         assert resp.status_code == expected_status
 
@@ -85,7 +81,9 @@ def test_create_and_archive_project_doc_access_by_roles(request, main_project, m
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_create_and_archive_personal_doc_access_by_roles(request, main_personal, client_fixture, expected_status, main_space):
+def test_create_and_archive_personal_doc_access_by_roles(
+    request, main_personal, client_fixture, expected_status, main_space
+):
     api_client = request.getfixturevalue(client_fixture)
     role = client_fixture.replace('_client', '')
     personal_id = main_personal[role][0]
@@ -96,9 +94,7 @@ def test_create_and_archive_personal_doc_access_by_roles(request, main_personal,
 
     with allure.step(f'{role} создаёт Personal-документ {title}'):
         resp = api_client.post(
-            **create_document_endpoint(
-                kind='Member', kind_id=personal_id, space_id=main_space, title=title
-            )
+            **create_document_endpoint(kind='Member', kind_id=personal_id, space_id=main_space, title=title)
         )
         assert resp.status_code == expected_status
 
@@ -107,5 +103,3 @@ def test_create_and_archive_personal_doc_access_by_roles(request, main_personal,
             with allure.step(f'Архивация Personal-документа {title}'):
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
-
-

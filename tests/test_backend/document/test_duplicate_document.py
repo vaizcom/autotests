@@ -1,6 +1,9 @@
 import pytest
 import allure
-from test_backend.data.endpoints.Document.document_endpoints import duplicate_document_endpoint
+from test_backend.data.endpoints.Document.document_endpoints import (
+    duplicate_document_endpoint,
+    archive_document_endpoint,
+)
 
 pytestmark = [pytest.mark.backend]
 
@@ -32,6 +35,10 @@ def test_create_and_duplicate_document(owner_client, request, kind, kind_id_fixt
         assert duplicated['kind'] == temp_document['kind']
         assert duplicated['kindId'] == temp_document['kindId']
         assert duplicated.get('map') == temp_document.get('map')
+
+    # Архивируем
+    archive = owner_client.post(**archive_document_endpoint(document_id=duplicated['_id'], space_id=space_id))
+    assert archive.status_code == 200
 
 
 @pytest.mark.parametrize(

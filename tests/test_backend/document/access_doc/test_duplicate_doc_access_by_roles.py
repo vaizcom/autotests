@@ -49,6 +49,12 @@ def test_duplicate_space_doc_access_by_roles(request, main_space, client_fixture
             allure.attach(dup_resp.text, name='Response Body', attachment_type=allure.attachment_type.JSON)
         assert dup_resp.status_code == expected_status, f'Ожидали {expected_status}, получили {dup_resp.status_code}'
 
+        doc_copy_id = dup_resp.json()['payload']['document']['_id']
+
     with allure.step(f'Архивация исходного документа {title}'):
         archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
+        assert archive_resp.status_code == 200
+
+    with allure.step(f'Архивация Copy-документа {title}'):
+        archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_copy_id))
         assert archive_resp.status_code == 200

@@ -38,7 +38,7 @@ MAX_DOC_NAME_LENGTH = 2048
     [
         (None, 200, 'Untitled document'),
         ('', 200, ''),
-        (' ', 200 , ' '),
+        (' ', 200, ' '),
         ('A' * MAX_DOC_NAME_LENGTH, 200, 'A' * MAX_DOC_NAME_LENGTH),
         ('A' * (MAX_DOC_NAME_LENGTH + 1), 400, None),
         # Дополнительно:
