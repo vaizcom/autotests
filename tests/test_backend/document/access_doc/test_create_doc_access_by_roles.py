@@ -30,11 +30,11 @@ def test_create_and_archive_space_doc_access_by_roles(request, main_space, clien
             **create_document_endpoint(kind='Space', kind_id=main_space, space_id=main_space, title=title)
         )
         assert resp.status_code == expected_status
-    with allure.step('Созданный Project-документ содержит title'):
+    with allure.step('Созданный Space-документ содержит title'):
         if expected_status == 200:
             assert resp.json()['payload']['document']['title'] == title
             doc_id = resp.json()['payload']['document']['_id']
-            with allure.step('Архивация Space-документа'):
+    with allure.step('Архивация Space-документа'):
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
 
@@ -68,7 +68,7 @@ def test_create_and_archive_project_doc_access_by_roles(
         if expected_status == 200:
             assert resp.json()['payload']['document']['title'] == title
             doc_id = resp.json()['payload']['document']['_id']
-            with allure.step(f'Архивация Project-документа, {expected_status}'):
+    with allure.step(f'Архивация Project-документа, {expected_status}'):
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
 
@@ -100,11 +100,11 @@ def test_create_and_archive_personal_doc_access_by_roles(
         )
         assert resp.status_code == expected_status
 
-    with allure.step('Созданный Project-документ содержит title'):
+    with allure.step('Созданный Personal-документ содержит title'):
         assert resp.json()['payload']['document']['title'] == title
 
         if expected_status == 200:
             doc_id = resp.json()['payload']['document']['_id']
-            with allure.step('Архивация Personal-документа'):
+    with allure.step('Архивация Personal-документа'):
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
