@@ -33,7 +33,9 @@ def test_archive_space_doc(request, main_space, client_fixture, expected_status)
     selected_client_name = random.choice(['owner_client', 'manager_client', 'member_client'])
     random_client = request.getfixturevalue(selected_client_name)
 
-    with allure.step(f'Случайный клиент({selected_client_name}) создаёт Space-документ для архивации (title = {title})'):
+    with allure.step(
+        f'Случайный клиент({selected_client_name}) создаёт Space-документ для архивации (title = {title})'
+    ):
         create_resp = random_client.post(
             **create_document_endpoint(kind='Space', kind_id=main_space, space_id=main_space, title=title)
         )
@@ -48,13 +50,13 @@ def test_archive_space_doc(request, main_space, client_fixture, expected_status)
         doc_id = create_resp.json()['payload']['document']['_id']
 
     with allure.step(f'Архивация Space-документа в роли {role}, {expected_status}'):
-            archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-            assert archive_resp.status_code == expected_status
+        archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
+        assert archive_resp.status_code == expected_status
 
-    with allure.step(f'После теста документ  архивируется в роли {selected_client_name}, {expected_status}'):
-            if expected_status == 403:
-                archive = random_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-                assert archive.status_code == 200
+    if expected_status == 403:
+        with allure.step(f'После теста документ  архивируется в роли {selected_client_name}, {expected_status}'):
+            archive = random_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
+            assert archive.status_code == 200
 
 
 @pytest.mark.parametrize(
@@ -78,27 +80,30 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
 
     random_client = request.getfixturevalue(selected_client_name)
 
-    with allure.step(f'Случайный клиент({selected_client_name}) создаёт Project-документ для архивации(title:{title})'):
+    with allure.step(
+        f'Случайный клиент ({selected_client_name}) создаёт Project-документ для архивации (title: {title})'
+    ):
         create_resp = random_client.post(
             **create_document_endpoint(kind='Project', kind_id=main_project, space_id=main_space, title=title)
         )
 
         if create_resp.status_code != 200:
             with allure.step(
-                f'Не удалось создать документ, статус {create_resp.status_code} — пропуск проверки списка'
+                f'Не удалось создать документ, статус {create_resp.status_code} — пропуск проверки архивирования'
             ):
                 assert expected_status == 403
             return
 
         doc_id = create_resp.json()['payload']['document']['_id']
-        with allure.step(f'Архивация Project-документа в роли {role}, {expected_status}'):
-            archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-            assert archive_resp.status_code == expected_status
 
-        with allure.step(f'После теста документ  архивируется в роли {selected_client_name}, {expected_status}'):
-            if expected_status == 403:
-                archive = random_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-                assert archive.status_code == 200
+    with allure.step(f'Архивация Project-документа в роли {role} (ожидается статус {expected_status})'):
+        archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
+        assert archive_resp.status_code == expected_status
+
+    if expected_status == 403:
+        with allure.step(f'После теста документ архивируется в роли {selected_client_name} (cleanup)'):
+            archive = random_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
+            assert archive.status_code == 200
 
 
 @pytest.mark.parametrize(
@@ -128,9 +133,10 @@ def test_archive_personal_doc(request, main_personal, main_space, client_fixture
         assert create_resp.status_code == 200
 
         doc_id = create_resp.json()['payload']['document']['_id']
-        with allure.step(f'Архивация Personal-документа в роли {role}, {expected_status}'):
-            archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-            assert archive_resp.status_code == expected_status
+    with allure.step(f'Архивация Personal-документа в роли {role}, {expected_status}'):
+        archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
+        assert archive_resp.status_code == expected_status
 
-    archive = member_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-    assert archive.status_code == 200
+    with allure.step('member_client выполняет финальную архивацию Personal-документа для очистки после теста'):
+        archive = member_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
+        assert archive.status_code == 200
