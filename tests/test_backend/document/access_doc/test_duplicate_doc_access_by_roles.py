@@ -13,105 +13,41 @@ pytestmark = [pytest.mark.backend]
 
 
 @pytest.mark.parametrize(
-    'client_fixture, expected_status',
-    [
-        ('owner_client', 200),
-        ('manager_client', 200),
-        ('member_client', 200),
-        ('guest_client', 403),
-    ],
-    ids=['owner', 'manager', 'member', 'guest'],
-)
-@pytest.mark.parametrize(
-    'doc_type, doc_container',
-    [
-        ('Project', 'main_project'),
-        ('Space', 'main_space'),
-    ],
-    ids=['project_doc', 'space_doc']
-)
-def test_duplicate_project_and_space_docs_access(
-    request, 
-    main_space, 
-    client_fixture, 
-    expected_status, 
-    doc_type, 
-    doc_container
-):
-    api_client = request.getfixturevalue(client_fixture)
-    container_id = request.getfixturevalue(doc_container)
-    role = client_fixture.replace('_client', '')
-    current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
-    title = f'{current_date} Doc For Duplication'
-    doc_id = None
-    doc_copy_id = None
-    
-    allure.dynamic.title(f'Дублирование {doc_type}-документа для роли {role}')
-    
-    try:
-        with allure.step(f'Создание {doc_type}-документа'):
-            create_resp = api_client.post(
-                **create_document_endpoint(
-                    kind=doc_type, 
-                    kind_id=container_id, 
-                    space_id=main_space, 
-                    title=title
-                )
-            )
-            if create_resp.status_code != 200:
-                with allure.step(f'Не удалось создать документ, статус {create_resp.status_code} — пропуск дублирования'):
-                    assert (
-                        expected_status == 403
-                    ), f'Невозможно протестировать дублирование без документа (статус создания {create_resp.status_code})'
-                return
-            
-            doc_id = create_resp.json()['payload']['document']['_id']
-            original_title = create_resp.json()['payload']['document']['title']
-        
-        with allure.step(f'Дублирование документа пользователем с ролью {role}'):
-            dup_resp = api_client.post(**duplicate_document_endpoint(document_id=doc_id, space_id=main_space))
-            if dup_resp.status_code != expected_status:
-                allure.attach(dup_resp.text, name='Response Body', attachment_type=allure.attachment_type.JSON)
-            assert dup_resp.status_code == expected_status, f'Ожидали {expected_status}, получили {dup_resp.status_code}'
-            
-            if expected_status == 200:
-                doc_copy = dup_resp.json()['payload']['document']
-                doc_copy_id = doc_copy['_id']
-                copy_title = doc_copy['title']
-                
-                with allure.step('Проверка названия дублированного документа'):
-                    expected_title = f'{original_title} (copy)'
-                    assert copy_title == expected_title, (
-                        f'Неверный формат названия копии. '
-                        f'Ожидалось: "{expected_title}", Получено: "{copy_title}"'
-                    )
-    
-    finally:
-        # Cleanup
-        if doc_id:
-            with allure.step('Архивация исходного документа (cleanup)'):
-                archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-                assert archive_resp.status_code == 200
-                
-        if doc_copy_id:
-            with allure.step('Архивация Copy-документа (cleanup)'):
-                archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_copy_id))
-                assert archive_resp.status_code == 200
-
-
-@pytest.mark.parametrize(
     'creator_fixture, duplicator_fixture, expected_status',
     [
+        # Owner создает документ
+        ('owner_client', 'owner_client', 200),  # владелец дублирует свой документ
+        ('owner_client', 'manager_client', 200),  # владелец создает, менеджер дублирует
         ('owner_client', 'member_client', 200),  # владелец создает, участник дублирует
-        ('manager_client', 'guest_client', 403),  # менеджер создает, гость дублирует
-        ('member_client', 'manager_client', 200),  # участник создает, менеджер дублирует
         ('owner_client', 'guest_client', 403),  # владелец создает, гость дублирует
+        # Manager создает документ
+        ('manager_client', 'owner_client', 200),  # менеджер создает, владелец дублирует
+        ('manager_client', 'manager_client', 200),  # менеджер дублирует свой документ
         ('manager_client', 'member_client', 200),  # менеджер создает, участник дублирует
+        ('manager_client', 'guest_client', 403),  # менеджер создает, гость дублирует
+        # Member создает документ
+        ('member_client', 'owner_client', 200),  # участник создает, владелец дублирует
+        ('member_client', 'manager_client', 200),  # участник создает, менеджер дублирует
+        ('member_client', 'member_client', 200),  # участник дублирует свой документ
+        ('member_client', 'guest_client', 403),  # участник создает, гость дублирует
     ],
-
-    ids=['owner_to_member', 'manager_to_guest', 'member_to_manager',
-         'owner_to_guest', 'manager_to_member']
-
+    ids=[
+        # Owner создает
+        'owner_self_duplicate',
+        'owner_to_manager',
+        'owner_to_member',
+        'owner_to_guest',
+        # Manager создает
+        'manager_to_owner',
+        'manager_self_duplicate',
+        'manager_to_member',
+        'manager_to_guest',
+        # Member создает
+        'member_to_owner',
+        'member_to_manager',
+        'member_self_duplicate',
+        'member_to_guest',
+    ],
 )
 @pytest.mark.parametrize(
     'doc_type, doc_container',
@@ -119,16 +55,10 @@ def test_duplicate_project_and_space_docs_access(
         ('Project', 'main_project'),
         ('Space', 'main_space'),
     ],
-    ids=['project_doc', 'space_doc']
+    ids=['project_doc', 'space_doc'],
 )
 def test_duplicate_project_and_space_docs_different_roles(
-        request,
-        main_space,
-        creator_fixture,
-        duplicator_fixture,
-        expected_status,
-        doc_type,
-        doc_container
+    request, main_space, creator_fixture, duplicator_fixture, expected_status, doc_type, doc_container
 ):
     # Получаем клиентов для создания и дублирования
     creator_client = request.getfixturevalue(creator_fixture)
@@ -142,26 +72,20 @@ def test_duplicate_project_and_space_docs_different_roles(
     doc_id = None
     doc_copy_id = None
 
-    allure.dynamic.title(
-        f'Дублирование {doc_type}-документа: создание {creator_role}, дублирование {duplicator_role}'
-    )
+    allure.dynamic.title(f'Дублирование {doc_type}-документа: создание {creator_role}, дублирование {duplicator_role}')
 
     try:
         # Создание документа первой ролью
         with allure.step(f'Создание {doc_type}-документа пользователем с ролью {creator_role}'):
             create_response = creator_client.post(
                 **create_document_endpoint(
-                    kind=doc_type,
-                    kind_id=container_id,
-                    space_id=main_space,
-                    title=document_title
+                    kind=doc_type, kind_id=container_id, space_id=main_space, title=document_title
                 )
             )
 
             # Проверяем что документ создался
             assert create_response.status_code == 200, (
-                f'Ошибка при создании документа пользователем {creator_role}: '
-                f'статус {create_response.status_code}'
+                f'Ошибка при создании документа пользователем {creator_role}: ' f'статус {create_response.status_code}'
             )
 
             doc_id = create_response.json()['payload']['document']['_id']
@@ -175,9 +99,7 @@ def test_duplicate_project_and_space_docs_different_roles(
 
             if duplicate_response.status_code != expected_status:
                 allure.attach(
-                    duplicate_response.text,
-                    name='Response Body',
-                    attachment_type=allure.attachment_type.JSON
+                    duplicate_response.text, name='Response Body', attachment_type=allure.attachment_type.JSON
                 )
 
             assert duplicate_response.status_code == expected_status, (
@@ -201,89 +123,62 @@ def test_duplicate_project_and_space_docs_different_roles(
         # Очистка тестовых данных
         if doc_id:
             with allure.step('Архивация исходного документа'):
-                creator_client.post(
-                    **archive_document_endpoint(space_id=main_space, document_id=doc_id)
-                )
+                creator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
 
         if doc_copy_id:
             with allure.step('Архивация копии документа'):
-                duplicator_client.post(
-                    **archive_document_endpoint(space_id=main_space, document_id=doc_copy_id)
-                )
+                duplicator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_copy_id))
 
-
-@pytest.mark.parametrize(
-    'client_fixture',
-    ['owner_client', 'manager_client', 'member_client', 'guest_client'],
-    ids=['owner', 'manager', 'member', 'guest'],
-)
-def test_duplicate_personal_doc_access(request, main_space, main_personal, client_fixture):
-    api_client = request.getfixturevalue(client_fixture)
-    role = client_fixture.replace('_client', '')
-    current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
-    title = f'{current_date} Personal Doc For Duplication'
-    doc_id = None
-    doc_copy_id = None
-    
-    allure.dynamic.title(f'Дублирование Personal-документа пользователем с ролью {role}')
-    
-    try:
-        with allure.step(f'Создание Personal-документа для пользователя с ролью {role}'):
-            create_resp = api_client.post(
-                **create_document_endpoint(
-                    kind='Member', 
-                    kind_id=main_personal[role][0], 
-                    space_id=main_space, 
-                    title=title
-                )
-            )
-            assert create_resp.status_code == 200, 'Создание Personal-документа должно быть доступно всем ролям'
-            
-            doc_id = create_resp.json()['payload']['document']['_id']
-            original_title = create_resp.json()['payload']['document']['title']
-        
-        with allure.step(f'Дублирование документа пользователем с ролью {role}'):
-            dup_resp = api_client.post(**duplicate_document_endpoint(document_id=doc_id, space_id=main_space))
-            assert dup_resp.status_code == 200, 'Дублирование Personal-документа должно быть доступно всем ролям'
-            
-            doc_copy = dup_resp.json()['payload']['document']
-            doc_copy_id = doc_copy['_id']
-            copy_title = doc_copy['title']
-            
-            with allure.step('Проверка названия дублированного документа'):
-                expected_title = f'{original_title} (copy)'
-                assert copy_title == expected_title, (
-                    f'Неверный формат названия копии. '
-                    f'Ожидалось: "{expected_title}", Получено: "{copy_title}"'
-                )
-    
-    finally:
-        # Cleanup
-        if doc_id:
-            with allure.step('Архивация исходного документа (cleanup)'):
-                archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-                assert archive_resp.status_code == 200
-                
-        if doc_copy_id:
-            with allure.step('Архивация Copy-документа (cleanup)'):
-                archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_copy_id))
-                assert archive_resp.status_code == 200
 
 @pytest.mark.parametrize(
     'creator_fixture, duplicator_fixture, expected_status',
     [
-        ('member_client', 'owner_client', 403),     # владелец пытается дублировать чужой personal-документ
-        ('owner_client', 'member_client', 403),     # участник пытается дублировать чужой personal-документ
+        # Owner's personal documents
+        ('owner_client', 'owner_client', 200),  # владелец дублирует свой personal-документ
+        ('owner_client', 'manager_client', 403),  # владелец создает, менеджер пытается дублировать
+        ('owner_client', 'member_client', 403),  # владелец создает, участник пытается дублировать
+        ('owner_client', 'guest_client', 403),  # владелец создает, гость пытается дублировать
+        # Manager's personal documents
+        ('manager_client', 'owner_client', 403),  # менеджер создает, владелец пытается дублировать
+        ('manager_client', 'manager_client', 200),  # менеджер дублирует свой personal-документ
+        ('manager_client', 'member_client', 403),  # менеджер создает, участник пытается дублировать
+        ('manager_client', 'guest_client', 403),  # менеджер создает, гость пытается дублировать
+        # Member's personal documents
+        ('member_client', 'owner_client', 403),  # участник создает, владелец пытается дублировать
+        ('member_client', 'manager_client', 403),  # участник создает, менеджер пытается дублировать
+        ('member_client', 'member_client', 200),  # участник дублирует свой personal-документ
+        ('member_client', 'guest_client', 403),  # участник создает, гость пытается дублировать
+        # Guest's personal documents
+        ('guest_client', 'owner_client', 403),  # гость создает, владелец пытается дублировать
+        ('guest_client', 'manager_client', 403),  # гость создает, менеджер пытается дублировать
+        ('guest_client', 'member_client', 403),  # гость создает, участник пытается дублировать
+        ('guest_client', 'guest_client', 200),  # гость дублирует свой personal-документ
     ],
-    ids=['owner_other', 'member_other']
+    ids=[
+        # Owner's personal docs
+        'owner_self_personal',
+        'owner_personal_by_manager',
+        'owner_personal_by_member',
+        'owner_personal_by_guest',
+        # Manager's personal docs
+        'manager_personal_by_owner',
+        'manager_self_personal',
+        'manager_personal_by_member',
+        'manager_personal_by_guest',
+        # Member's personal docs
+        'member_personal_by_owner',
+        'member_personal_by_manager',
+        'member_self_personal',
+        'member_personal_by_guest',
+        # Guest's personal docs
+        'guest_personal_by_owner',
+        'guest_personal_by_manager',
+        'guest_personal_by_member',
+        'guest_self_personal',
+    ],
 )
 def test_duplicate_personal_doc_different_roles(
-        request,
-        main_space,
-        main_personal,
-        creator_fixture,
-        duplicator_fixture,
-        expected_status
+    request, main_space, main_personal, creator_fixture, duplicator_fixture, expected_status
 ):
     creator_client = request.getfixturevalue(creator_fixture)
     duplicator_client = request.getfixturevalue(duplicator_fixture)
@@ -295,25 +190,19 @@ def test_duplicate_personal_doc_different_roles(
     doc_id = None
     doc_copy_id = None
 
-    allure.dynamic.title(
-        f'Дублирование Personal-документа: создание {creator_role}, дублирование {duplicator_role}'
-    )
+    allure.dynamic.title(f'Дублирование Personal-документа: создание {creator_role}, дублирование {duplicator_role}')
 
     try:
         # Создание персонального документа
         with allure.step(f'Создание Personal-документа пользователем с ролью {creator_role}'):
             create_response = creator_client.post(
                 **create_document_endpoint(
-                    kind='Member',
-                    kind_id=main_personal[creator_role][0],
-                    space_id=main_space,
-                    title=document_title
+                    kind='Member', kind_id=main_personal[creator_role][0], space_id=main_space, title=document_title
                 )
             )
 
             assert create_response.status_code == 200, (
-                f'Ошибка при создании документа пользователем {creator_role}: '
-                f'статус {create_response.status_code}'
+                f'Ошибка при создании документа пользователем {creator_role}: ' f'статус {create_response.status_code}'
             )
 
             doc_id = create_response.json()['payload']['document']['_id']
@@ -327,9 +216,7 @@ def test_duplicate_personal_doc_different_roles(
 
             if duplicate_response.status_code != expected_status:
                 allure.attach(
-                    duplicate_response.text,
-                    name='Response Body',
-                    attachment_type=allure.attachment_type.JSON
+                    duplicate_response.text, name='Response Body', attachment_type=allure.attachment_type.JSON
                 )
 
             assert duplicate_response.status_code == expected_status, (
@@ -349,12 +236,8 @@ def test_duplicate_personal_doc_different_roles(
         # Очистка тестовых данных
         if doc_id:
             with allure.step('Архивация исходного документа'):
-                creator_client.post(
-                    **archive_document_endpoint(space_id=main_space, document_id=doc_id)
-                )
+                creator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
 
         if doc_copy_id:
             with allure.step('Архивация копии документа'):
-                duplicator_client.post(
-                    **archive_document_endpoint(space_id=main_space, document_id=doc_copy_id)
-                )
+                duplicator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_copy_id))
