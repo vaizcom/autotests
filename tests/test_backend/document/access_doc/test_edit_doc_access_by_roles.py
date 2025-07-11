@@ -5,8 +5,8 @@ import pytest
 
 from test_backend.data.endpoints.Document.document_endpoints import (
     create_document_endpoint,
-    archive_document_endpoint,
     edit_document_endpoint,
+    archive_document_endpoint,
     get_document_endpoint,
 )
 
@@ -14,54 +14,209 @@ pytestmark = [pytest.mark.backend]
 
 
 @pytest.mark.parametrize(
-    'client_fixture, expected_status',
+    'creator_fixture, editor_fixture, expected_status',
     [
-        ('owner_client', 200),
-        ('manager_client', 200),
-        ('member_client', 200),
-        ('guest_client', 403),
+        # Owner создает документ
+        ('owner_client', 'owner_client', 200),  # владелец редактирует свой документ
+        ('owner_client', 'manager_client', 200),  # владелец создает, менеджер редактирует
+        ('owner_client', 'member_client', 200),  # владелец создает, участник редактирует
+        ('owner_client', 'guest_client', 403),  # владелец создает, гость редактирует
+        # Manager создает документ
+        ('manager_client', 'owner_client', 200),  # менеджер создает, владелец редактирует
+        ('manager_client', 'manager_client', 200),  # менеджер редактирует свой документ
+        ('manager_client', 'member_client', 200),  # менеджер создает, участник редактирует
+        ('manager_client', 'guest_client', 403),  # менеджер создает, гость редактирует
+        # Member создает документ
+        ('member_client', 'owner_client', 200),  # участник создает, владелец редактирует
+        ('member_client', 'manager_client', 200),  # участник создает, менеджер редактирует
+        ('member_client', 'member_client', 200),  # участник редактирует свой документ
+        ('member_client', 'guest_client', 403),  # участник создает, гость редактирует
     ],
-    ids=['owner', 'manager', 'member', 'guest'],
+    ids=[
+        'owner_self_edit',
+        'owner_to_manager',
+        'owner_to_member',
+        'owner_to_guest',
+        'manager_to_owner',
+        'manager_self_edit',
+        'manager_to_member',
+        'manager_to_guest',
+        'member_to_owner',
+        'member_to_manager',
+        'member_self_edit',
+        'member_to_guest',
+    ],
 )
-def test_edit_space_doc_access_by_roles(request, main_space, client_fixture, expected_status):
-    api_client = request.getfixturevalue(client_fixture)
-    role = client_fixture.replace('_client', '')
-    current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
-    title = f'{current_date} {role} Space Doc For Editing'
+@pytest.mark.parametrize(
+    'doc_type, doc_container',
+    [
+        ('Project', 'main_project'),
+        ('Space', 'main_space'),
+    ],
+    ids=['project_doc', 'space_doc'],
+)
+def test_edit_project_and_space_docs_different_roles(
+    request, main_space, creator_fixture, editor_fixture, expected_status, doc_type, doc_container
+):
+    creator_client = request.getfixturevalue(creator_fixture)
+    editor_client = request.getfixturevalue(editor_fixture)
+    
+    container_id = request.getfixturevalue(doc_container)
+    creator_role = creator_fixture.replace('_client', '')
+    editor_role = editor_fixture.replace('_client', '')
+    
+    document_title = f'{datetime.now().strftime("%Y.%m.%d_%H:%M:%S")} Doc For Editing'
+    edited_title = f'Edited {datetime.now().strftime("%Y.%m.%d_%H:%M:%S")}'
+    doc_id = None
 
-    allure.dynamic.title(f'Редактирование Space-документа для роли {role}')
+    allure.dynamic.title(f'Редактирование {doc_type}-документа: создание {creator_role}, редактирование {editor_role}')
 
-    with allure.step(f'{role} создаёт Space-документ для редактирования'):
-        create_resp = api_client.post(
-            **create_document_endpoint(
-                kind='Space',
-                kind_id=main_space,
-                space_id=main_space,
-                title=title,
+    try:
+        # Создание документа первой ролью
+        with allure.step(f'Создание {doc_type}-документа пользователем с ролью {creator_role}'):
+            create_response = creator_client.post(
+                **create_document_endpoint(
+                    kind=doc_type,
+                    kind_id=container_id,
+                    space_id=main_space,
+                    title=document_title
+                )
             )
-        )
-
-        if create_resp.status_code != 200:
-            with allure.step(f'Не удалось создать документ, статус {create_resp.status_code} — пропуск редактирования'):
-                assert expected_status == 403
-            return
-
-        doc_id = create_resp.json()['payload']['document']['_id']
-
-    with allure.step(f'{role} пытается отредактировать документ {title}'):
-        edit_resp = api_client.post(
-            **edit_document_endpoint(
-                document_id=doc_id, title=f'Edited {current_date} {role}', icon='icon_test', space_id=main_space
+            assert create_response.status_code == 200, (
+                f'Ошибка при создании документа пользователем {creator_role}: '
+                f'статус {create_response.status_code}'
             )
-        )
-        assert edit_resp.status_code == expected_status
+            doc_id = create_response.json()['payload']['document']['_id']
 
-        if edit_resp.status_code == 200:
-            get_resp = api_client.post(**get_document_endpoint(document_id=doc_id, space_id=main_space))
-            assert get_resp.status_code == 200
-            updated_title = get_resp.json()['payload']['document']['title']
-            assert updated_title == f'Edited {current_date} {role}', 'Название документа не изменилось'
+        # Редактирование документа второй ролью
+        with allure.step(f'Редактирование документа пользователем с ролью {editor_role}'):
+            edit_response = editor_client.post(
+                **edit_document_endpoint(
+                    document_id=doc_id,
+                    title=edited_title,
+                    icon='+1',
+                    space_id=main_space
+                )
+            )
+            assert edit_response.status_code == expected_status, (
+                f'Неожиданный статус при редактировании: {edit_response.status_code}, '
+                f'ожидался: {expected_status}'
+            )
 
-    with allure.step(f'Архивация документа {title}'):
-        archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-        assert archive_resp.status_code == 200
+            if expected_status == 200:
+                get_response = editor_client.post(
+                    **get_document_endpoint(document_id=doc_id, space_id=main_space)
+                )
+                assert get_response.status_code == 200
+                updated_doc = get_response.json()['payload']['document']
+                assert updated_doc['title'] == edited_title, (
+                    f'Название документа не изменилось. '
+                    f'Ожидалось: "{edited_title}", Получено: "{updated_doc["title"]}"'
+                )
+
+    finally:
+        if doc_id:
+            with allure.step('Архивация документа'):
+                creator_client.post(
+                    **archive_document_endpoint(space_id=main_space, document_id=doc_id)
+                )
+
+
+@pytest.mark.parametrize(
+    'creator_fixture, editor_fixture, expected_status',
+    [
+        # Owner's personal documents
+        ('owner_client', 'owner_client', 200),  # владелец редактирует свой документ
+        ('owner_client', 'manager_client', 403),  # владелец создает, менеджер пытается редактировать
+        ('owner_client', 'member_client', 403),  # владелец создает, участник пытается редактировать
+        ('owner_client', 'guest_client', 403),  # владелец создает, гость пытается редактировать
+        # Manager's personal documents
+        ('manager_client', 'owner_client', 403),  # менеджер создает, владелец пытается редактировать
+        ('manager_client', 'manager_client', 200),  # менеджер редактирует свой документ
+        ('manager_client', 'member_client', 403),  # менеджер создает, участник пытается редактировать
+        ('manager_client', 'guest_client', 403),  # менеджер создает, гость пытается редактировать
+        # Member's personal documents
+        ('member_client', 'owner_client', 403),  # участник создает, владелец пытается редактировать
+        ('member_client', 'manager_client', 403),  # участник создает, менеджер пытается редактировать
+        ('member_client', 'member_client', 200),  # участник редактирует свой документ
+        ('member_client', 'guest_client', 403),  # участник создает, гость пытается редактировать
+    ],
+    ids=[
+        'owner_self_edit_personal',
+        'owner_personal_by_manager',
+        'owner_personal_by_member', 
+        'owner_personal_by_guest',
+        'manager_personal_by_owner',
+        'manager_self_edit_personal',
+        'manager_personal_by_member',
+        'manager_personal_by_guest',
+        'member_personal_by_owner',
+        'member_personal_by_manager',
+        'member_self_edit_personal',
+        'member_personal_by_guest',
+    ],
+)
+def test_edit_personal_doc_different_roles(
+    request, main_space, main_personal, creator_fixture, editor_fixture, expected_status
+):
+    creator_client = request.getfixturevalue(creator_fixture)
+    editor_client = request.getfixturevalue(editor_fixture)
+
+    creator_role = creator_fixture.replace('_client', '')
+    editor_role = editor_fixture.replace('_client', '')
+
+    document_title = f'{datetime.now().strftime("%Y.%m.%d_%H:%M:%S")} Personal Doc For Editing'
+    edited_title = f'Edited {datetime.now().strftime("%Y.%m.%d_%H:%M:%S")}'
+    doc_id = None
+
+    allure.dynamic.title(f'Редактирование Personal-документа: создание {creator_role}, редактирование {editor_role}')
+
+    try:
+        # Создание персонального документа
+        with allure.step(f'Создание Personal-документа пользователем с ролью {creator_role}'):
+            create_response = creator_client.post(
+                **create_document_endpoint(
+                    kind='Member',
+                    kind_id=main_personal[creator_role][0],
+                    space_id=main_space,
+                    title=document_title
+                )
+            )
+            assert create_response.status_code == 200, (
+                f'Ошибка при создании документа пользователем {creator_role}: '
+                f'статус {create_response.status_code}'
+            )
+            doc_id = create_response.json()['payload']['document']['_id']
+
+        # Редактирование документа
+        with allure.step(f'Редактирование документа пользователем с ролью {editor_role}'):
+            edit_response = editor_client.post(
+                **edit_document_endpoint(
+                    document_id=doc_id,
+                    title=edited_title,
+                    icon='icon_test',
+                    space_id=main_space
+                )
+            )
+            assert edit_response.status_code == expected_status, (
+                f'Неожиданный статус при редактировании: {edit_response.status_code}, '
+                f'ожидался: {expected_status}'
+            )
+
+            if expected_status == 200:
+                get_response = editor_client.post(
+                    **get_document_endpoint(document_id=doc_id, space_id=main_space)
+                )
+                assert get_response.status_code == 200
+                updated_doc = get_response.json()['payload']['document']
+                assert updated_doc['title'] == edited_title, (
+                    f'Название документа не изменилось. '
+                    f'Ожидалось: "{edited_title}", Получено: "{updated_doc["title"]}"'
+                )
+
+    finally:
+        if doc_id:
+            with allure.step('Архивация документа'):
+                creator_client.post(
+                    **archive_document_endpoint(space_id=main_space, document_id=doc_id)
+                )
