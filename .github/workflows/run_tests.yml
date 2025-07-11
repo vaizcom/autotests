@@ -2,7 +2,7 @@ name: Tests + Allure Report
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ '**' ]  # все ветки
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
@@ -106,17 +106,19 @@ jobs:
         if: ${{ env.TEST_SCOPE == 'backend' }}
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            # Для PR запускаем все тесты с меткой backend
             echo "TEST_PATH=." >> $GITHUB_ENV
           else
-            # Получаем измененные файлы в последнем коммите
-            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '^tests.*\.py$' || true)
+            # Используем git diff с origin/HEAD для корректного сравнения
+            git fetch origin
+            CHANGED_FILES=$(git diff --name-only origin/HEAD...HEAD | grep '^tests.*\.py$' || true)
             if [ -n "$CHANGED_FILES" ]; then
-              # Получаем уникальные директории измененных тестов
-              TEST_DIRS=$(dirname $CHANGED_FILES | sort -u | tr '\n' ' ')
+              echo "Changed files:"
+              echo "$CHANGED_FILES"
+              TEST_DIRS=$(dirname "$CHANGED_FILES" | sort -u | tr '\n' ' ')
               echo "TEST_PATH=$TEST_DIRS" >> $GITHUB_ENV
+              echo "Running tests only in changed directories: $TEST_DIRS"
             else
-              # Если нет измененных тестов, запускаем все тесты с меткой backend
+              echo "No test files changed, running all tests"
               echo "TEST_PATH=." >> $GITHUB_ENV
             fi
           fi
@@ -126,15 +128,21 @@ jobs:
         run: |
           export PYTHONPATH=tests
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            # Полный прогон для PR - все тесты с меткой backend
             echo "Running all backend tests for PR"
             pytest . -v -m backend --alluredir=allure-results
           elif [ "$TEST_SCOPE" == "backend" ]; then
-            # Выборочный прогон для push в backend тестах - только измененные файлы
             echo "Running backend tests in: $TEST_PATH"
-            pytest $TEST_PATH -v -m backend --alluredir=allure-results
+            if [ "$TEST_PATH" != "." ]; then
+              # Запускаем только измененные тесты
+              for dir in $TEST_PATH; do
+                echo "Running tests in $dir"
+                pytest "$dir" -v -m backend --alluredir=allure-results
+              done
+            else
+              # Если TEST_PATH=".", запускаем все тесты
+              pytest . -v -m backend --alluredir=allure-results
+            fi
           else
-            # Для остальных типов тестов - стандартный запуск
             pytest . -v -m "$TEST_SCOPE" --alluredir=allure-results
           fi
 
