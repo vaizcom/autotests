@@ -2,7 +2,7 @@ name: Tests + Allure Report
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ '**' ]  # все ветки
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
@@ -102,11 +102,49 @@ jobs:
           echo "TEST_STAND=$TEST_STAND_NAME" >> allure-results/environment.properties
           echo "API_URL=$API_URL" >> allure-results/environment.properties
 
+      - name: Determine test path
+        if: ${{ env.TEST_SCOPE == 'backend' }}
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "TEST_PATH=." >> $GITHUB_ENV
+          else
+            # Используем git diff с origin/HEAD для корректного сравнения
+            git fetch origin
+            CHANGED_FILES=$(git diff --name-only origin/HEAD...HEAD | grep '^tests.*\.py$' || true)
+            if [ -n "$CHANGED_FILES" ]; then
+              echo "Changed files:"
+              echo "$CHANGED_FILES"
+              TEST_DIRS=$(dirname "$CHANGED_FILES" | sort -u | tr '\n' ' ')
+              echo "TEST_PATH=$TEST_DIRS" >> $GITHUB_ENV
+              echo "Running tests only in changed directories: $TEST_DIRS"
+            else
+              echo "No test files changed, running all tests"
+              echo "TEST_PATH=." >> $GITHUB_ENV
+            fi
+          fi
+
       - name: ✅ Run tests with Allure
         continue-on-error: true
         run: |
           export PYTHONPATH=tests
-          pytest . --alluredir=allure-results -m "$TEST_SCOPE"
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "Running all backend tests for PR"
+            pytest . -v -m backend --alluredir=allure-results
+          elif [ "$TEST_SCOPE" == "backend" ]; then
+            echo "Running backend tests in: $TEST_PATH"
+            if [ "$TEST_PATH" != "." ]; then
+              # Запускаем только измененные тесты
+              for dir in $TEST_PATH; do
+                echo "Running tests in $dir"
+                pytest "$dir" -v -m backend --alluredir=allure-results
+              done
+            else
+              # Если TEST_PATH=".", запускаем все тесты
+              pytest . -v -m backend --alluredir=allure-results
+            fi
+          else
+            pytest . -v -m "$TEST_SCOPE" --alluredir=allure-results
+          fi
 
       - name: Check allure-results content
         run: ls -lah allure-results
