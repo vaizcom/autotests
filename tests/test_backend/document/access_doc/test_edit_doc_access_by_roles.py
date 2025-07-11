@@ -189,7 +189,7 @@ def test_edit_personal_doc_different_roles(
             doc_id = create_response.json()['payload']['document']['_id']
 
         # Редактирование документа
-        with allure.step(f'Редактирование документа пользователем с ролью {editor_role}'):
+        with allure.step(f'Редактирование документа пользователем с ролью {editor_role} (Нельзя редактировать чужие персональные документы)'):
             edit_response = editor_client.post(
                 **edit_document_endpoint(
                     document_id=doc_id,
