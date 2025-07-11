@@ -102,11 +102,41 @@ jobs:
           echo "TEST_STAND=$TEST_STAND_NAME" >> allure-results/environment.properties
           echo "API_URL=$API_URL" >> allure-results/environment.properties
 
+      - name: Determine test path
+        if: ${{ env.TEST_SCOPE == 'backend' }}
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # Для PR запускаем все тесты с меткой backend
+            echo "TEST_PATH=." >> $GITHUB_ENV
+          else
+            # Получаем измененные файлы в последнем коммите
+            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '^tests.*\.py$' || true)
+            if [ -n "$CHANGED_FILES" ]; then
+              # Получаем уникальные директории измененных тестов
+              TEST_DIRS=$(dirname $CHANGED_FILES | sort -u | tr '\n' ' ')
+              echo "TEST_PATH=$TEST_DIRS" >> $GITHUB_ENV
+            else
+              # Если нет измененных тестов, запускаем все тесты с меткой backend
+              echo "TEST_PATH=." >> $GITHUB_ENV
+            fi
+          fi
+
       - name: ✅ Run tests with Allure
         continue-on-error: true
         run: |
           export PYTHONPATH=tests
-          pytest . --alluredir=allure-results -m "$TEST_SCOPE"
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # Полный прогон для PR - все тесты с меткой backend
+            echo "Running all backend tests for PR"
+            pytest . -v -m backend --alluredir=allure-results
+          elif [ "$TEST_SCOPE" == "backend" ]; then
+            # Выборочный прогон для push в backend тестах - только измененные файлы
+            echo "Running backend tests in: $TEST_PATH"
+            pytest $TEST_PATH -v -m backend --alluredir=allure-results
+          else
+            # Для остальных типов тестов - стандартный запуск
+            pytest . -v -m "$TEST_SCOPE" --alluredir=allure-results
+          fi
 
       - name: Check allure-results content
         run: ls -lah allure-results
