@@ -1,4 +1,5 @@
 import pytest
+import threading
 from config import settings
 from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
@@ -17,6 +18,15 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
     remove_space_endpoint,
     get_space_endpoint,
 )
+
+
+_resource_lock = threading.Lock()
+
+@pytest.fixture
+def resource_lock():
+    """Фикстура для синхронизации доступа к ресурсам"""
+    with _resource_lock:
+        yield
 
 
 def pytest_configure(config):
