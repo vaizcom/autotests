@@ -50,10 +50,10 @@ pytestmark = [pytest.mark.backend]
 @pytest.mark.parametrize(
     'doc_type, doc_container',
     [
-        ('Project', 'main_project'),
         ('Space', 'main_space'),
+        ('Project', 'main_project'),
     ],
-    ids=['project_doc', 'space_doc'],
+    ids=['space_doc', 'project_doc'],
 )
 def test_edit_project_and_space_docs_different_roles(
     request, main_space, creator_fixture, editor_fixture, expected_status, doc_type, doc_container
@@ -66,7 +66,7 @@ def test_edit_project_and_space_docs_different_roles(
     editor_role = editor_fixture.replace('_client', '')
     
     document_title = f'{datetime.now().strftime("%Y.%m.%d_%H:%M:%S")} Doc For Editing'
-    edited_title = f'Edited {datetime.now().strftime("%Y.%m.%d_%H:%M:%S")}'
+    edited_title = f'Edited Doc {datetime.now().strftime("%Y.%m.%d_%H:%M:%S")}'
     doc_id = None
 
     allure.dynamic.title(f'Редактирование {doc_type}-документа: создание {creator_role}, редактирование {editor_role}')
@@ -104,15 +104,35 @@ def test_edit_project_and_space_docs_different_roles(
             )
 
             if expected_status == 200:
-                get_response = editor_client.post(
-                    **get_document_endpoint(document_id=doc_id, space_id=main_space)
-                )
-                assert get_response.status_code == 200
-                updated_doc = get_response.json()['payload']['document']
-                assert updated_doc['title'] == edited_title, (
-                    f'Название документа не изменилось. '
-                    f'Ожидалось: "{edited_title}", Получено: "{updated_doc["title"]}"'
-                )
+                # Собираем всех клиентов, которые должны видеть документ
+                with allure.step('Получение клиентов для проверки'):
+                    clients_to_check = {
+                        'owner': request.getfixturevalue('owner_client'),
+                        'manager': request.getfixturevalue('manager_client'),
+                        'member': request.getfixturevalue('member_client'),
+                        'guest': request.getfixturevalue('guest_client')
+                    }
+
+                # Проверяем видимость изменений для каждого клиента
+                for role, client in clients_to_check.items():
+                    with allure.step(f'Проверка для роли {role}'):
+                        with allure.step(f'Запрос документа от имени {role}'):
+                            get_response = client.post(
+                                **get_document_endpoint(document_id=doc_id, space_id=main_space)
+                            )
+                            
+                        with allure.step(f'Проверка статуса ответа для {role}'):
+                            assert get_response.status_code == 200, (
+                                f'Ошибка при получении документа для роли {role}: '
+                                f'статус {get_response.status_code}'
+                            )
+
+                        with allure.step(f'Проверка содержимого документа для {role}'):
+                            updated_doc = get_response.json()['payload']['document']
+                            assert updated_doc['title'] == edited_title, (
+                                f'Название документа не совпадает для роли {role}. '
+                                f'Ожидалось: "{edited_title}", Получено: "{updated_doc["title"]}"'
+                            )
 
     finally:
         if doc_id:
@@ -204,15 +224,36 @@ def test_edit_personal_doc_different_roles(
             )
 
             if expected_status == 200:
-                get_response = editor_client.post(
-                    **get_document_endpoint(document_id=doc_id, space_id=main_space)
-                )
-                assert get_response.status_code == 200
-                updated_doc = get_response.json()['payload']['document']
-                assert updated_doc['title'] == edited_title, (
-                    f'Название документа не изменилось. '
-                    f'Ожидалось: "{edited_title}", Получено: "{updated_doc["title"]}"'
-                )
+                with allure.step('Проверка видимости изменений документа для всех ролей'):
+                    # Собираем всех клиентов, которые должны видеть документ
+                    with allure.step('Получение клиентов для проверки'):
+                        clients_to_check = {
+                            'owner': request.getfixturevalue('owner_client'),
+                            'manager': request.getfixturevalue('manager_client'),
+                            'member': request.getfixturevalue('member_client'),
+                            'guest': request.getfixturevalue('guest_client')
+                        }
+
+                    # Проверяем видимость изменений для каждого клиента
+                    for role, client in clients_to_check.items():
+                        with allure.step(f'Проверка для роли {role}'):
+                            with allure.step(f'Запрос документа от имени {role}'):
+                                get_response = client.post(
+                                    **get_document_endpoint(document_id=doc_id, space_id=main_space)
+                                )
+                                
+                            with allure.step(f'Проверка статуса ответа для {role}'):
+                                assert get_response.status_code == 200, (
+                                    f'Ошибка при получении документа для роли {role}: '
+                                    f'статус {get_response.status_code}'
+                                )
+
+                            with allure.step(f'Проверка содержимого документа для {role}'):
+                                updated_doc = get_response.json()['payload']['document']
+                                assert updated_doc['title'] == edited_title, (
+                                    f'Название документа не совпадает для роли {role}. '
+                                    f'Ожидалось: "{edited_title}", Получено: "{updated_doc["title"]}"'
+                                )
 
     finally:
         if doc_id:
