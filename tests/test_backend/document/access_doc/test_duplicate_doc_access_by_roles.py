@@ -209,7 +209,9 @@ def test_duplicate_personal_doc_different_roles(
             original_title = create_response.json()['payload']['document']['title']
 
         # Дублирование документа
-        with allure.step(f'Дублирование документа пользователем с ролью {duplicator_role} (Нельзя дублировать чужие персональные документы)'):
+        with allure.step(
+            f'Дублирование документа пользователем с ролью {duplicator_role} (Нельзя дублировать чужие персональные документы)'
+        ):
             duplicate_response = duplicator_client.post(
                 **duplicate_document_endpoint(document_id=doc_id, space_id=main_space)
             )
