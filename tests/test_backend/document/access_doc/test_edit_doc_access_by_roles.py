@@ -56,7 +56,8 @@ pytestmark = [pytest.mark.backend]
     ids=['space_doc', 'project_doc'],
 )
 def test_edit_project_and_space_docs_different_roles(
-    request, main_space, creator_fixture, editor_fixture, expected_status, doc_type, doc_container
+    request, main_space, creator_fixture, editor_fixture, expected_status, doc_type, doc_container, resource_lock
+
 ):
     creator_client = request.getfixturevalue(creator_fixture)
     editor_client = request.getfixturevalue(editor_fixture)
