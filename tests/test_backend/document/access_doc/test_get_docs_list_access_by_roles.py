@@ -1,6 +1,3 @@
-import random
-from datetime import datetime
-
 import allure
 import pytest
 
@@ -23,39 +20,69 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_get_space_docs_list_access_by_roles(request, main_space, client_fixture, expected_status):
-    api_client = request.getfixturevalue(client_fixture)
-    role = client_fixture.replace('_client', '')
-    current_date = datetime.now().strftime('%d.%m_%H:%M:%S')
-    title = f'{current_date}_{role}_Space Doc For List Check'
+@pytest.mark.parametrize(
+    'kind, container_fixture',
+    [
+        ('Space', 'main_space'),
+        ('Project', 'main_project'),
+    ],
+    ids=['space_docs', 'project_docs'],
+)
+def test_get_project_and_space_docs_access_by_roles(request, kind, container_fixture, client_fixture, expected_status):
+    """Проверяем что разные роли могут получить список документов из пространства и проекта"""
+    with allure.step(f'Подготовка тестовых данных для проверки доступа к документам в {kind}'):
+        api_client = request.getfixturevalue(client_fixture)
+        container_id = request.getfixturevalue(container_fixture)
+        space_id = request.getfixturevalue('main_space')
+        role = client_fixture.replace('_client', '')
 
-    allure.dynamic.title(f'Получение списка Space-документов для роли {role}')
-    random_client = request.getfixturevalue(random.choice(['owner_client', 'manager_client', 'member_client']))
+    allure.dynamic.title(f'Проверка доступа к списку документов в {kind} для роли {role}')
+    created_docs = []
 
-    with allure.step(f'random_client({random_client}) создаёт Space-документ для проверки списка {title}'):
-        create_resp = random_client.post(
-            **create_document_endpoint(kind='Space', kind_id=main_space, space_id=main_space, title=title)
-        )
+    try:
+        with allure.step(f'Создание тестовых документов в {kind} разными ролями'):
+            creator_roles = {'owner_client': 'owner', 'manager_client': 'manager', 'member_client': 'member'}
 
-        if create_resp.status_code != 200:
-            with allure.step(
-                f'Не удалось создать документ, статус {create_resp.status_code} — пропуск проверки списка'
-            ):
-                assert expected_status == 403
-            return
+            # Создаем по документу каждой ролью
+            for creator_fixture, creator_role in creator_roles.items():
+                creator_client = request.getfixturevalue(creator_fixture)
 
-        doc_id = create_resp.json()['payload']['document']['_id']
+                with allure.step(f'Создание документа пользователем {creator_role}'):
+                    title = f'{kind} doc by {creator_role}'
+                    create_resp = creator_client.post(
+                        **create_document_endpoint(kind=kind, kind_id=container_id, space_id=space_id, title=title)
+                    )
+                    assert create_resp.status_code == 200, (
+                        f'Ошибка при создании документа пользователем {creator_role}: '
+                        f'статус {create_resp.status_code}'
+                    )
 
-    with allure.step(f'{role} пытается получить список документов пространства'):
-        list_resp = api_client.post(**get_documents_endpoint(kind='Space', kind_id=main_space, space_id=main_space))
-        assert list_resp.status_code == expected_status
+                    doc_id = create_resp.json()['payload']['document']['_id']
+                    created_docs.append(
+                        {'id': doc_id, 'title': title, 'creator': creator_client, 'creator_role': creator_role}
+                    )
+
+        with allure.step(f'Проверка получения списка документов ролью {role}'):
+            list_resp = api_client.post(**get_documents_endpoint(kind=kind, kind_id=container_id, space_id=space_id))
+
+            assert list_resp.status_code == expected_status, (
+                f'Ошибка при получении списка документов: '
+                f'ожидался статус {expected_status}, получили {list_resp.status_code}'
+            )
+
         if list_resp.status_code == 200:
-            docs = list_resp.json()['payload'].get('documents', [])
-            assert isinstance(docs, list), 'Документы должны быть списком'
-            with allure.step('Проверка наличия созданного документа в списке'):
+            with allure.step('Проверка наличия всех созданных документов в списке'):
+                docs = list_resp.json()['payload']['documents']
                 doc_ids = [doc['_id'] for doc in docs]
-                assert doc_id in doc_ids, 'Созданный документ не найден в списке'
 
-    with allure.step(f'Архивация созданного документа {title}'):
-        archive_resp = random_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-        assert archive_resp.status_code == 200
+                for created_doc in created_docs:
+                    assert created_doc['id'] in doc_ids, (
+                        f'Документ "{created_doc["title"]}" (создан {created_doc["creator_role"]}) '
+                        f'не найден в списке'
+                    )
+
+    finally:
+        with allure.step('Очистка тестовых данных'):
+            for doc in created_docs:
+                with allure.step(f'Удаление документа "{doc["title"]}" ' f'(создан {doc["creator_role"]})'):
+                    doc['creator'].post(**archive_document_endpoint(space_id=space_id, document_id=doc['id']))
