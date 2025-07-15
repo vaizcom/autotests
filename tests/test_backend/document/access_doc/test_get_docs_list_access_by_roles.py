@@ -28,8 +28,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['space_docs', 'project_docs'],
 )
-def test_get_project_and_space_docs_access_by_roles(request, kind, container_fixture, client_fixture, expected_status
-):
+def test_get_project_and_space_docs_access_by_roles(request, kind, container_fixture, client_fixture, expected_status):
     """Проверяем что разные роли могут получить список документов из пространства и проекта"""
     with allure.step(f'Подготовка тестовых данных для проверки доступа к документам в {kind}'):
         api_client = request.getfixturevalue(client_fixture)
@@ -92,59 +91,44 @@ def test_get_project_and_space_docs_access_by_roles(request, kind, container_fix
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
-        ('owner_client', 403),    # владелец не может получить чужие personal docs
+        ('owner_client', 403),  # владелец не может получить чужие personal docs
         ('manager_client', 403),  # менеджер не может получить чужие personal docs
-        ('member_client', 200),   # участник может получить свои personal docs
-        ('guest_client', 403),    # гость не может получить чужие personal docs
+        ('member_client', 200),  # участник может получить свои personal docs
+        ('guest_client', 403),  # гость не может получить чужие personal docs
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_get_personal_docs_access_by_roles(request, client_fixture, expected_status, main_space, main_personal, member_client):
+def test_get_personal_docs_access_by_roles(
+    request, client_fixture, expected_status, main_space, main_personal, member_client
+):
     """Проверяем что пользователи могут получить только свои personal документы"""
     with allure.step('Подготовка тестовых данных'):
         api_client = request.getfixturevalue(client_fixture)
         role = client_fixture.replace('_client', '')
         member_id = main_personal['member'][0]  # Берём ID member для проверки доступа к его документам
-        
+
     allure.dynamic.title(f'Проверка доступа к personal документам для роли {role}')
     created_docs = []
-    
+
     try:
         with allure.step('Создание тестовых документов'):
             # Создаём тестовый документ от имени member
             member_client = request.getfixturevalue('member_client')
-            
+
             with allure.step('Создание personal документа пользователем member'):
-                title = f'Personal doc by member'
+                title = 'Personal doc by member'
                 create_resp = member_client.post(
-                    **create_document_endpoint(
-                        kind='Member',
-                        kind_id=member_id,
-                        space_id=main_space,
-                        title=title
-                    )
+                    **create_document_endpoint(kind='Member', kind_id=member_id, space_id=main_space, title=title)
                 )
                 assert create_resp.status_code == 200, (
-                    f'Ошибка при создании документа пользователем member: '
-                    f'статус {create_resp.status_code}'
+                    f'Ошибка при создании документа пользователем member: ' f'статус {create_resp.status_code}'
                 )
-                
+
                 doc_id = create_resp.json()['payload']['document']['_id']
-                created_docs.append({
-                    'id': doc_id,
-                    'title': title,
-                    'creator': member_client,
-                    'creator_role': 'member'
-                })
+                created_docs.append({'id': doc_id, 'title': title, 'creator': member_client, 'creator_role': 'member'})
 
         with allure.step(f'Проверка получения personal документов ролью {role}'):
-            list_resp = api_client.post(
-                **get_documents_endpoint(
-                    kind='Member',
-                    kind_id=member_id,
-                    space_id=main_space
-                )
-            )
+            list_resp = api_client.post(**get_documents_endpoint(kind='Member', kind_id=member_id, space_id=main_space))
 
             assert list_resp.status_code == expected_status, (
                 f'Ошибка при получении списка документов: '
@@ -155,7 +139,7 @@ def test_get_personal_docs_access_by_roles(request, client_fixture, expected_sta
             with allure.step('Проверка наличия созданного документа в списке'):
                 docs = list_resp.json()['payload']['documents']
                 doc_ids = [doc['_id'] for doc in docs]
-                
+
                 for created_doc in created_docs:
                     assert created_doc['id'] in doc_ids, (
                         f'Документ "{created_doc["title"]}" (создан {created_doc["creator_role"]}) '
@@ -165,11 +149,5 @@ def test_get_personal_docs_access_by_roles(request, client_fixture, expected_sta
     finally:
         with allure.step('Очистка тестовых данных'):
             for doc in created_docs:
-                with allure.step(f'Удаление документа "{doc["title"]}" '
-                               f'(создан {doc["creator_role"]})'):
-                    doc['creator'].post(
-                        **archive_document_endpoint(
-                            space_id=main_space,
-                            document_id=doc['id']
-                        )
-                    )
+                with allure.step(f'Удаление документа "{doc["title"]}" ' f'(создан {doc["creator_role"]})'):
+                    doc['creator'].post(**archive_document_endpoint(space_id=main_space, document_id=doc['id']))

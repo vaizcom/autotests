@@ -18,6 +18,10 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
     get_space_endpoint,
 )
 
+# conftest.py
+from datetime import datetime
+import allure
+
 
 def pytest_configure(config):
     print(f'\n🧪 Running on stand: {settings.TEST_STAND_NAME}')
@@ -250,3 +254,40 @@ def temp_document(owner_client, request, kind, kind_id_fixture):
     yield doc_id
 
     owner_client.post(**archive_document_endpoint(space_id=space_id, document_id=doc_id))
+
+
+@pytest.fixture
+def create_test_documents(request, main_space):
+    """
+    Фикстура для создания тестовых документов разными ролями
+    """
+    created_docs = []
+
+    def _create_docs(kind, kind_id, creator_roles):
+        with allure.step(f'Создание тестовых документов в {kind} разными ролями'):
+            for creator_fixture, creator_role in creator_roles.items():
+                creator_client = request.getfixturevalue(creator_fixture)
+
+                with allure.step(f'Создание документа пользователем {creator_role}'):
+                    title = f'{kind} doc by {creator_role} {datetime.now().strftime("%Y.%m.%d_%H:%M:%S")}'
+                    create_resp = creator_client.post(
+                        **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=main_space, title=title)
+                    )
+                    assert create_resp.status_code == 200, (
+                        f'Ошибка при создании документа пользователем {creator_role}: '
+                        f'статус {create_resp.status_code}'
+                    )
+
+                    doc_id = create_resp.json()['payload']['document']['_id']
+                    created_docs.append(
+                        {'id': doc_id, 'title': title, 'creator': creator_client, 'creator_role': creator_role}
+                    )
+        return created_docs
+
+    yield _create_docs
+
+    # Очистка тестовых данных
+    with allure.step('Очистка тестовых данных'):
+        for doc in created_docs:
+            with allure.step(f'Удаление документа "{doc["title"]}" (создан {doc["creator_role"]})'):
+                doc['creator'].post(**archive_document_endpoint(space_id=main_space, document_id=doc['id']))
