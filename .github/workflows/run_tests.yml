@@ -64,7 +64,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install allure-pytest pytest-xdist
+          pip install allure-pytest
 
       # ✅ Импортируем settings.py, чтобы API_URL записался в GITHUB_ENV
       - name: Export API_URL from settings.py
@@ -106,7 +106,7 @@ jobs:
         continue-on-error: true
         run: |
           export PYTHONPATH=tests
-          pytest . -n 2 --dist=loadscope --alluredir=allure-results -m "$TEST_SCOPE"
+          pytest . --alluredir=allure-results -m "$TEST_SCOPE"
 
       - name: Check allure-results content
         run: ls -lah allure-results
