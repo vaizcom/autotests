@@ -17,7 +17,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_create_and_archive_space_doc_access_by_roles(request, main_space, client_fixture, expected_status, resource_lock):
+def test_create_and_archive_space_doc_access_by_roles(request, main_space, client_fixture, expected_status):
     api_client = request.getfixturevalue(client_fixture)
     role = client_fixture.replace('_client', '')
     current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')
