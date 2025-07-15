@@ -46,6 +46,12 @@ def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
         for title in titles:
             assert title in doc_titles, f'Документ "{title}" не найден в списке'
 
+    with allure.step('Проверка обязательных полей в документах'):
+        required_fields = ['_id', 'title', 'kind', 'kindId', 'creator', 'createdAt']
+        for doc in docs:
+            missing_fields = [field for field in required_fields if field not in doc]
+            assert not missing_fields, f'В документе отсутствуют обязательные поля: {missing_fields}'
+
 
 @pytest.mark.parametrize(
     'kind, kind_id, space_id, expected_status, case_id',
