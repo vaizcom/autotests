@@ -26,38 +26,19 @@ def test_create_and_archive_space_doc_access_by_roles(request, main_space, clien
     allure.dynamic.title(f'Создание Space-документа для роли {role}')
 
     with allure.step(f'{role} создаёт Space-документ, {expected_status}'):
-        with resource_lock:
-            endpoint_args = create_document_endpoint(
-                kind='Space', 
-                kind_id=main_space, 
-                space_id=main_space, 
-                title=title
-            )
-            resp = api_client.post(**endpoint_args)
-            
-            if resp.status_code != expected_status:
-                print(f"\nRequest failed:")
-                print(f"Role: {role}")
-                print(f"Space ID: {main_space}")
-                print(f"Response status: {resp.status_code}")
-                print(f"Response body: {resp.text}")
-            
-            assert resp.status_code == expected_status
+        resp = api_client.post(
+            **create_document_endpoint(kind='Space', kind_id=main_space, space_id=main_space, title=title)
+        )
+        assert resp.status_code == expected_status
 
-            if expected_status == 200:
-                doc_id = resp.json()['payload']['document']['_id']
-                with allure.step('Созданный Space-документ содержит title'):
-                    assert resp.json()['payload']['document']['title'] == title
+        if expected_status == 200:
+            doc_id = resp.json()['payload']['document']['_id']
+            with allure.step('Созданный Space-документ содержит title'):
+                assert resp.json()['payload']['document']['title'] == title
 
-                with allure.step('Архивация Space-документа'):
-                    archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
-                    if archive_resp.status_code != 200:
-                        print(f"\nArchive request failed:")
-                        print(f"Role: {role}")
-                        print(f"Doc ID: {doc_id}")
-                        print(f"Response status: {archive_resp.status_code}")
-                        print(f"Response body: {archive_resp.text}")
-                    assert archive_resp.status_code == 200
+            with allure.step('Архивация Space-документа'):
+                archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
+                assert archive_resp.status_code == 200
 
 
 @pytest.mark.parametrize(
