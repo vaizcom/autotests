@@ -66,22 +66,23 @@ def main_client():
 
 
 @pytest.fixture(scope='session')
-def main_space(main_client) -> str:
+def main_space(main_client, resource_lock) -> str:
     """
-    Отличие этого спейса в том, что в  этом спейсе уже есть мемберы с разными ролями.
+    Отличие этого спейса в том, что в этом спейсе уже есть мемберы с разными ролями.
     """
-
-    assert MAIN_SPACE_ID, 'Не задана переменная окружения MAIN_SPACE_ID'
-    resp = main_client.post(**get_space_endpoint(space_id=MAIN_SPACE_ID))
-    assert resp.status_code == 200, f'Space {MAIN_SPACE_ID} not found: {resp.text}'
-    return MAIN_SPACE_ID
+    with resource_lock:
+        assert MAIN_SPACE_ID, 'Не задана переменная окружения MAIN_SPACE_ID'
+        resp = main_client.post(**get_space_endpoint(space_id=MAIN_SPACE_ID))
+        assert resp.status_code == 200, f'Space {MAIN_SPACE_ID} not found: {resp.text}'
+        return MAIN_SPACE_ID
 
 
 @pytest.fixture(scope='session')
-def main_project(main_client, main_space):
-    response = main_client.post(**get_project_endpoint(project_id='686672af85fb8d104544e798', space_id=main_space))
-    assert response.status_code == 200
-    return response.json()['payload']['project']['_id']
+def main_project(main_client, main_space, resource_lock):
+    with resource_lock:
+        response = main_client.post(**get_project_endpoint(project_id='686672af85fb8d104544e798', space_id=main_space))
+        assert response.status_code == 200
+        return response.json()['payload']['project']['_id']
 
 
 @pytest.fixture(scope='session')

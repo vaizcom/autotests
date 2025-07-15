@@ -106,7 +106,7 @@ jobs:
         continue-on-error: true
         run: |
           export PYTHONPATH=tests
-          pytest . -n 4 --dist=loadscope --alluredir=allure-results -m "$TEST_SCOPE"
+          pytest . -n 2 --dist=loadscope --alluredir=allure-results -m "$TEST_SCOPE"
 
       - name: Check allure-results content
         run: ls -lah allure-results
