@@ -1,4 +1,5 @@
 import pytest
+import allure
 from config import settings
 from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
@@ -17,10 +18,7 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
     remove_space_endpoint,
     get_space_endpoint,
 )
-
-# conftest.py
 from datetime import datetime
-import allure
 
 
 def pytest_configure(config):
@@ -257,13 +255,20 @@ def temp_document(owner_client, request, kind, kind_id_fixture):
 
 
 @pytest.fixture
-def create_test_documents(request, main_space):
+def create_main_documents(request, main_space):
     """
-    Фикстура для создания тестовых документов разными ролями
+    Фикстура для создания тестовых документов разными ролями в main_space
     """
     created_docs = []
 
     def _create_docs(kind, kind_id, creator_roles):
+        """
+        Внутренняя функция для создания документов
+        Args:
+            kind (str): Тип документа (Space/Project/Member)
+            kind_id (str): ID контейнера (space_id/project_id/member_id)
+            creator_roles (dict): Словарь {fixture_name: role_name} для создания документов
+        """
         with allure.step(f'Создание тестовых документов в {kind} разными ролями'):
             for creator_fixture, creator_role in creator_roles.items():
                 creator_client = request.getfixturevalue(creator_fixture)

@@ -28,7 +28,7 @@ pytestmark = [pytest.mark.backend]
     ids=['space_doc', 'project_doc'],
 )
 def test_get_project_and_space_doc_access_by_roles(
-    request, kind, container_fixture, client_fixture, expected_status, create_test_documents, main_space
+    request, kind, container_fixture, client_fixture, expected_status, create_main_documents, main_space
 ):
     """Проверяем что разные роли могут получить доступ к документу из пространства и проекта"""
     with allure.step(f'Подготовка тестовых данных для проверки доступа к документу в {kind}'):
@@ -40,7 +40,7 @@ def test_get_project_and_space_doc_access_by_roles(
 
     creator_roles = {'owner_client': 'owner', 'manager_client': 'manager', 'member_client': 'member'}
 
-    docs = create_test_documents(kind, container_id, creator_roles)
+    docs = create_main_documents(kind, container_id, creator_roles)
 
     with allure.step(f'Проверка доступа к документам ролью {role}'):
         for doc in docs:
@@ -69,7 +69,7 @@ def test_get_project_and_space_doc_access_by_roles(
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_get_personal_doc_access_by_roles(
-    request, client_fixture, expected_status, main_space, main_personal, create_test_documents
+    request, client_fixture, expected_status, main_space, main_personal, create_main_documents
 ):
     """Проверяем что пользователи могут получить только свои personal документы"""
     with allure.step('Подготовка тестовых данных'):
@@ -81,7 +81,7 @@ def test_get_personal_doc_access_by_roles(
 
     # Создаем документ от имени member
     creator_roles = {'member_client': 'member'}
-    docs = create_test_documents('Member', member_id, creator_roles)
+    docs = create_main_documents('Member', member_id, creator_roles)
 
     with allure.step(f'Проверка доступа к personal документу ролью {role}'):
         get_resp = api_client.post(**get_document_endpoint(space_id=main_space, document_id=docs[0]['id']))
