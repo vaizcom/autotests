@@ -58,7 +58,7 @@ pytestmark = [pytest.mark.backend]
     ids=['project_doc', 'space_doc'],
 )
 def test_duplicate_project_and_space_docs_different_roles(
-    request, main_space, creator_fixture, duplicator_fixture, expected_status, doc_type, doc_container
+    request, main_space, creator_fixture, duplicator_fixture, expected_status, doc_type, doc_container, resource_lock
 ):
     # Получаем клиентов для создания и дублирования
     creator_client = request.getfixturevalue(creator_fixture)
