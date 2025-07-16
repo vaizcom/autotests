@@ -58,6 +58,12 @@ pytestmark = [pytest.mark.backend]
 def test_edit_project_and_space_docs_different_roles(
     request, main_space, creator_fixture, editor_fixture, expected_status, doc_type, doc_container
 ):
+    """
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для 
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    """
     creator_client = request.getfixturevalue(creator_fixture)
     editor_client = request.getfixturevalue(editor_fixture)
 

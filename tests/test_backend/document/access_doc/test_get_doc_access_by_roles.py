@@ -30,7 +30,10 @@ pytestmark = [pytest.mark.backend]
 def test_get_project_and_space_doc_access_by_roles(
     request, kind, container_fixture, client_fixture, expected_status, create_main_documents, main_space
 ):
-    """Проверяем что разные роли могут получить доступ к документу из пространства и проекта"""
+    """
+    Проверяем что разные роли могут получить документы из пространства и проекта. Тест параметризован
+    для проверки разных типов клиентов и контейнеров документов.
+    """
     with allure.step(f'Подготовка тестовых данных для проверки доступа к документу в {kind}'):
         api_client = request.getfixturevalue(client_fixture)
         container_id = request.getfixturevalue(container_fixture)

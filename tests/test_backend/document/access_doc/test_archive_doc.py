@@ -23,6 +23,15 @@ pytestmark = [pytest.mark.backend]
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_archive_space_doc(request, main_space, client_fixture, expected_status):
+    """
+    Проверяет функциональность архивации Space-документа с разными ролями и уровнями доступа.
+
+    Тест создает Space-документ, используя случайного клиента с повышенными правами (владелец, менеджер или участник),
+    и оценивает возможность архивации документа на основе предоставленной роли client_fixture.
+    Проверяется, что возвращаются корректные коды состояния в зависимости от прав пользователя.
+    Дополнительно, в случаях, когда доступ запрещен и ожидаемый статус 403, документ архивируется после теста
+    с использованием случайного клиента с повышенными правами.
+    """
     api_client = request.getfixturevalue(client_fixture)
     role = client_fixture.replace('_client', '')
     current_date = datetime.now().strftime('%d.%m_%H:%M:%S')
