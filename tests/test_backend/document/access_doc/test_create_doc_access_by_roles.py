@@ -18,6 +18,15 @@ pytestmark = [pytest.mark.backend]
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_create_and_archive_space_doc_access_by_roles(request, main_space, client_fixture, expected_status):
+    """
+    Тест для проверки создания и архивирования Space-документа с разными клиентскими ролями.
+    Тест выполняет следующие шаги для каждой роли:
+    1. Создает Space-документ с использованием предоставленной клиентской роли.
+    2. Проверяет, что статус ответа соответствует ожидаемому результату.
+    3. Если создание документа успешно (статус 200):
+       - Проверяет, что заголовок созданного документа соответствует ожидаемому.
+       - Архивирует созданный Space-документ и проверяет статус запроса на архивирование.
+    """
     api_client = request.getfixturevalue(client_fixture)
     role = client_fixture.replace('_client', '')
     current_date = datetime.now().strftime('%Y.%m.%d_%H:%M:%S')

@@ -60,6 +60,10 @@ pytestmark = [pytest.mark.backend]
 def test_duplicate_project_and_space_docs_different_roles(
     request, main_space, creator_fixture, duplicator_fixture, expected_status, doc_type, doc_container
 ):
+    """
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть 
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    """
     # Получаем клиентов для создания и дублирования
     creator_client = request.getfixturevalue(creator_fixture)
     duplicator_client = request.getfixturevalue(duplicator_fixture)

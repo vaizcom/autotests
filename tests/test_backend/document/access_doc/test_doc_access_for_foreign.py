@@ -20,6 +20,12 @@ pytestmark = [pytest.mark.backend]
     ids=['foreign project', 'foreign space', 'foreign member'],
 )
 def test_documents_access_denied_for_foreign_user(foreign_client, request, space_id_module, kind, fixture_name):
+    """
+    Проверяет запрет доступа к документам для стороннего пользователя при попытке
+    получить документы, связанные с определенным типом сущности (например, 'Project',
+    'Space' или 'Member'). Тест проверяет, что сторонний клиент получает статус 403
+    и код ошибки 'AccessDenied' в ответе.
+    """
     kind_id = request.getfixturevalue(fixture_name)
     allure.dynamic.title(f'Отказ в доступе к {kind} документам другим пользователем')
 

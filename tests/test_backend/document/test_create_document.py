@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pytest
 
 from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint
