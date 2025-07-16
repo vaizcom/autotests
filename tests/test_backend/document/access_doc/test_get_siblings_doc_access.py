@@ -18,10 +18,12 @@ pytestmark = [pytest.mark.backend]
         ('owner_client', 'manager_client', 200),
         ('owner_client', 'member_client', 200),
         ('owner_client', 'guest_client', 200),
+
         ('manager_client', 'owner_client', 200),
         ('manager_client', 'manager_client', 200),
         ('manager_client', 'member_client', 200),
         ('manager_client', 'guest_client', 200),
+        
         ('member_client', 'owner_client', 200),
         ('member_client', 'manager_client', 200),
         ('member_client', 'member_client', 200),
@@ -246,3 +248,90 @@ def test_get_personal_siblings_docs_access_by_roles(
                 **archive_document_endpoint(space_id=main_space, document_id=doc_id)
             )
             assert archive_resp.status_code == 200
+
+
+@pytest.mark.parametrize(
+    'kind, container_fixture',
+    [
+        ('Project', 'main_project'),
+        ('Space', 'main_space'),
+        ('Member', 'main_personal'),
+    ],
+    ids=['project_doc', 'space_doc', 'member_doc']
+)
+def test_get_siblings_foreign_space_access_denied(
+        owner_client,
+        request,
+        main_space,
+        space_id_module,
+        kind,
+        container_fixture
+):
+    """
+    Проверяет ограничения доступа при попытке получения siblings документов через чужое пространство.
+    Тест удостоверяется, что попытка получить siblings документов через пространство, где у пользователя
+    нет прав, завершается ошибкой доступа.
+
+    Тест обрабатывает три типа документов: Project, Space и Member. Создается последовательность
+    из трех документов указанного типа в основном пространстве, после чего выполняется попытка
+    получить siblings среднего документа через чужое пространство и проверяется, что доступ запрещен.
+    """
+    kind_id = request.getfixturevalue(container_fixture)
+    if kind == 'Member':
+        kind_id = request.getfixturevalue(container_fixture)['owner'][0]
+
+    current_date = datetime.now().strftime('%d.%m_%H:%M:%S')
+    doc_ids = []
+
+    allure.dynamic.title(f'Проверка запрета доступа к siblings {kind}-документа через чужой space')
+
+    try:
+        # Создаем цепочку из трех документов в основном пространстве
+        with allure.step(f'Создание трёх последовательных {kind}-документов в main_space'):
+            for index in range(3):
+                title = f'{current_date}_{kind}_Doc_{index}'
+                create_resp = owner_client.post(
+                    **create_document_endpoint(
+                        kind=kind,
+                        kind_id=kind_id,
+                        space_id=main_space,
+                        title=title
+                    )
+                )
+                assert create_resp.status_code == 200, (
+                    f'Ошибка при создании документа {index}: '
+                    f'статус {create_resp.status_code}'
+                )
+                doc_id = create_resp.json()['payload']['document']['_id']
+                doc_ids.append(doc_id)
+
+        # Пытаемся получить siblings среднего документа через чужой space
+        middle_doc_id = doc_ids[1]
+        with allure.step('Попытка получить siblings через чужой space'):
+            siblings_resp = owner_client.post(
+                **get_document_siblings_endpoint(
+                    document_id=middle_doc_id,
+                    space_id=space_id_module  # Чужой space
+                )
+            )
+
+        with allure.step('Проверка получения ошибки доступа'):
+            assert siblings_resp.status_code == 403, (
+                f'Ожидался статус 403, получен {siblings_resp.status_code}'
+            )
+            error = siblings_resp.json().get('error', {})
+            assert error.get('code') == 'AccessDenied', (
+                f'Ожидался код ошибки AccessDenied, получен {error.get("code")}'
+            )
+
+    finally:
+        # Очистка тестовых данных
+        with allure.step('Архивация созданных документов'):
+            for doc_id in doc_ids:
+                archive_resp = owner_client.post(
+                    **archive_document_endpoint(
+                        space_id=main_space,
+                        document_id=doc_id
+                    )
+                )
+                assert archive_resp.status_code == 200
