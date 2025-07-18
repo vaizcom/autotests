@@ -40,11 +40,11 @@ def test_get_recent_documents_access_by_roles(request, main_space, client_fixtur
     container_id = request.getfixturevalue(container_fixture)
     EXPECTED_DOCS_COUNT = 9
 
-    allure.dynamic.title(f'Получение списка недавних документов ролью {role}')
+    allure.dynamic.title(f'Получение списка недавних {kind}-документов ролью {role}')
 
     created_docs = []
     
-    with allure.step(f'Создание {EXPECTED_DOCS_COUNT} тестовых документов'):
+    with allure.step(f'Создание {EXPECTED_DOCS_COUNT} тестовых {kind}-документов'):
         # Создаем по 3 документа от каждой роли
         for creator_role in ['owner', 'manager', 'member']:
             creator = request.getfixturevalue(f'{creator_role}_client')
