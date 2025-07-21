@@ -28,11 +28,17 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['space_docs', 'project_docs'],
 )
-def test_get_recent_documents_access_by_roles(request, main_space, client_fixture, expected_status,
-                                            kind, container_fixture):
+def test_get_recent_documents_access_by_roles(
+    request,
+    main_space,
+    client_fixture,
+    expected_status,
+    kind,
+    container_fixture
+):
     """
     Проверяем доступ к списку недавних документов для ролей owner, manager, member, guest.
-    Создаются 9 тестовых документов (по 3 от каждой роли), проверяется их доступность
+    Создаются тестовые документы, проверяется их доступность
     и корректный порядок отображения после повторной маркировки.
     """
     api_client = request.getfixturevalue(client_fixture)
@@ -43,7 +49,7 @@ def test_get_recent_documents_access_by_roles(request, main_space, client_fixtur
     allure.dynamic.title(f'Получение списка недавних {kind}-документов ролью {role}')
 
     created_docs = []
-    
+
     with allure.step(f'Создание {EXPECTED_DOCS_COUNT} тестовых {kind}-документов'):
         # Создаем по 3 документа от каждой роли
         for creator_role in ['owner', 'manager', 'member']:
@@ -75,7 +81,6 @@ def test_get_recent_documents_access_by_roles(request, main_space, client_fixtur
             f'Неверное количество созданных документов: {docs_count}, ожидалось: {EXPECTED_DOCS_COUNT}'
         )
 
-        # Маркируем документы как недавние в прямом порядке
         with allure.step('Маркировка документов как недавних'):
             for doc in created_docs:
                 mark_resp = api_client.post(
@@ -119,26 +124,26 @@ def test_get_recent_documents_access_by_roles(request, main_space, client_fixtur
                     if received_count == EXPECTED_DOCS_COUNT:
                         original_ids = [doc['_id'] for doc in recent_docs]
 
-                        # Повторно маркируем документы в обратном порядке для проверки сортировки
                         with allure.step('Повторная маркировка документов для проверки порядка'):
-                            for doc in recent_docs[::-1]:  # Изменили порядок маркировки на обратный
+                            for doc in recent_docs[::-1]:
                                 mark_resp = api_client.post(
                                     **mark_recent_document_endpoint(document_id=doc['_id'], space_id=main_space)
                                 )
                                 assert mark_resp.status_code == 200
 
-                        # Проверяем обновленный порядок
                         updated_resp = api_client.post(**get_recent_documents_endpoint(space_id=main_space))
                         updated_docs = updated_resp.json()['payload']['recentDocuments']
-                        
-                        # Проверяем, что порядок изменился на обратный
                         updated_ids = [doc['_id'] for doc in updated_docs]
-                        assert updated_ids == original_ids, (  # Убрали [::-1], так как порядок должен остаться тем же
+
+                        # TODO: BUG: APP-3037 mark_recent_document_endpoint не перемещает документ на верх списка recent
+                        # Когда баг будет исправлен — ожидаем, что порядок изменится на обратный:
+                        # assert updated_ids == original_ids[::-1]
+                        # Пока баг не исправлен, этот ассерт падает — оставляем для контроля
+                        assert updated_ids == original_ids[::-1], (
                             'Порядок документов после повторной маркировки неверный'
                         )
 
     finally:
-        # Очистка созданных документов
         with allure.step('Удаление тестовых документов'):
             for doc in created_docs:
                 doc['creator'].post(
