@@ -18,12 +18,10 @@ pytestmark = [pytest.mark.backend]
         ('owner_client', 'manager_client', 200),
         ('owner_client', 'member_client', 200),
         ('owner_client', 'guest_client', 200),
-
         ('manager_client', 'owner_client', 200),
         ('manager_client', 'manager_client', 200),
         ('manager_client', 'member_client', 200),
         ('manager_client', 'guest_client', 200),
-        
         ('member_client', 'owner_client', 200),
         ('member_client', 'manager_client', 200),
         ('member_client', 'member_client', 200),
@@ -42,7 +40,7 @@ pytestmark = [pytest.mark.backend]
         'member_docs_by_manager_403',
         'member_self_docs_200',
         'member_docs_by_guest_403',
-    ]
+    ],
 )
 @pytest.mark.parametrize(
     'kind, container_fixture',
@@ -50,7 +48,7 @@ pytestmark = [pytest.mark.backend]
         ('Space', 'main_space'),
         ('Project', 'main_project'),
     ],
-    ids=['space_doc', 'project_doc']
+    ids=['space_doc', 'project_doc'],
 )
 def test_get_project_and_space_siblings_docs_access_by_roles(
     request, main_space, creator_fixture, client_fixture, expected_status, kind, container_fixture
@@ -60,7 +58,7 @@ def test_get_project_and_space_siblings_docs_access_by_roles(
     - Создателя документа
     - Просматривающего пользователя
     - Типа документа (Space/Project)
-    
+
     Проверки:
         1. Создание трёх последовательных документов указанной ролью
         2. Запрос siblings для среднего документа другой ролью
@@ -71,38 +69,31 @@ def test_get_project_and_space_siblings_docs_access_by_roles(
     creator_role = creator_fixture.replace('_client', '')
     viewer_role = client_fixture.replace('_client', '')
     container_id = request.getfixturevalue(container_fixture)
-    
+
     current_date = datetime.now().strftime('%d.%m_%H:%M:%S')
-    
+
     allure.dynamic.title(
         f'Проверка доступа к siblings {kind}-документа: создатель - {creator_role}, просматривающий - {viewer_role}'
     )
-    
+
     doc_ids = []
     with allure.step(f'Создание трёх {kind}-документов пользователем {creator_role}'):
         for index in range(3):
             title = f'{current_date}_{creator_role}_{kind}_Doc_{index}'
             create_resp = creator.post(
-                **create_document_endpoint(
-                    kind=kind,
-                    kind_id=container_id,
-                    space_id=main_space,
-                    title=title
-                )
+                **create_document_endpoint(kind=kind, kind_id=container_id, space_id=main_space, title=title)
             )
-            assert create_resp.status_code == 200, (
-                f'Ошибка при создании документа {index}: статус {create_resp.status_code}'
-            )
+            assert (
+                create_resp.status_code == 200
+            ), f'Ошибка при создании документа {index}: статус {create_resp.status_code}'
             doc_id = create_resp.json()['payload']['document']['_id']
             doc_ids.append(doc_id)
-    
+
     middle_doc_id = doc_ids[1]
     with allure.step(f'Попытка получения siblings для среднего документа пользователем {viewer_role}'):
-        siblings_resp = viewer.post(
-            **get_document_siblings_endpoint(document_id=middle_doc_id, space_id=main_space)
-        )
+        siblings_resp = viewer.post(**get_document_siblings_endpoint(document_id=middle_doc_id, space_id=main_space))
         assert siblings_resp.status_code == expected_status
-        
+
         if siblings_resp.status_code == 200:
             payload = siblings_resp.json().get('payload', {})
             with allure.step('Проверка корректности данных siblings'):
@@ -110,22 +101,20 @@ def test_get_project_and_space_siblings_docs_access_by_roles(
                 assert 'prevSibling' in payload, 'Отсутствует поле prevSibling'
                 assert 'nextSibling' in payload, 'Отсутствует поле nextSibling'
                 assert 'tree' in payload, 'Отсутствует поле tree'
-                
+
                 # Проверка корректности siblings
                 assert payload['prevSibling']['_id'] == doc_ids[0], 'Некорректный левый сосед'
                 assert payload['nextSibling']['_id'] == doc_ids[2], 'Некорректный правый сосед'
-                
+
                 # Проверка дополнительных полей в siblings
                 for sibling in [payload['prevSibling'], payload['nextSibling']]:
                     assert 'title' in sibling, 'Отсутствует поле title в siblings'
                     assert 'kind' in sibling, 'Отсутствует поле kind в siblings'
                     assert sibling['kind'] == kind, f'Некорректный kind в siblings: {sibling["kind"]}, ожидался: {kind}'
-    
+
     with allure.step('Архивация созданных документов'):
         for doc_id in doc_ids:
-            archive_resp = creator.post(
-                **archive_document_endpoint(space_id=main_space, document_id=doc_id)
-            )
+            archive_resp = creator.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
             assert archive_resp.status_code == 200
 
 
@@ -170,10 +159,10 @@ def test_get_project_and_space_siblings_docs_access_by_roles(
         'guest_docs_by_manager_403',
         'guest_docs_by_member_403',
         'guest_self_docs_200',
-    ]
+    ],
 )
 def test_get_personal_siblings_docs_access_by_roles(
-        request, main_space, main_personal, creator_fixture, client_fixture, expected_status
+    request, main_space, main_personal, creator_fixture, client_fixture, expected_status
 ):
     """
     Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
@@ -204,23 +193,18 @@ def test_get_personal_siblings_docs_access_by_roles(
             title = f'{current_date}_{creator_role}_Member_Doc_{index}'
             create_resp = creator.post(
                 **create_document_endpoint(
-                    kind='Member',
-                    kind_id=main_personal[creator_role][0],
-                    space_id=main_space,
-                    title=title
+                    kind='Member', kind_id=main_personal[creator_role][0], space_id=main_space, title=title
                 )
             )
-            assert create_resp.status_code == 200, (
-                f'Ошибка при создании документа {index}: статус {create_resp.status_code}'
-            )
+            assert (
+                create_resp.status_code == 200
+            ), f'Ошибка при создании документа {index}: статус {create_resp.status_code}'
             doc_id = create_resp.json()['payload']['document']['_id']
             doc_ids.append(doc_id)
 
     middle_doc_id = doc_ids[1]
     with allure.step(f'Попытка получения siblings для среднего документа пользователем {viewer_role}'):
-        siblings_resp = viewer.post(
-            **get_document_siblings_endpoint(document_id=middle_doc_id, space_id=main_space)
-        )
+        siblings_resp = viewer.post(**get_document_siblings_endpoint(document_id=middle_doc_id, space_id=main_space))
         assert siblings_resp.status_code == expected_status
 
         if siblings_resp.status_code == 200:
@@ -239,14 +223,13 @@ def test_get_personal_siblings_docs_access_by_roles(
                 for sibling in [payload['prevSibling'], payload['nextSibling']]:
                     assert 'title' in sibling, 'Отсутствует поле title в siblings'
                     assert 'kind' in sibling, 'Отсутствует поле kind в siblings'
-                    assert sibling[
-                               'kind'] == 'Member', f'Некорректный kind в siblings: {sibling["kind"]}, ожидался: Member'
+                    assert (
+                        sibling['kind'] == 'Member'
+                    ), f'Некорректный kind в siblings: {sibling["kind"]}, ожидался: Member'
 
     with allure.step('Архивация созданных документов'):
         for doc_id in doc_ids:
-            archive_resp = creator.post(
-                **archive_document_endpoint(space_id=main_space, document_id=doc_id)
-            )
+            archive_resp = creator.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
             assert archive_resp.status_code == 200
 
 
@@ -257,15 +240,10 @@ def test_get_personal_siblings_docs_access_by_roles(
         ('Space', 'main_space'),
         ('Member', 'main_personal'),
     ],
-    ids=['project_doc', 'space_doc', 'member_doc']
+    ids=['project_doc', 'space_doc', 'member_doc'],
 )
 def test_get_siblings_foreign_space_access_denied(
-        owner_client,
-        request,
-        main_space,
-        space_id_module,
-        kind,
-        container_fixture
+    owner_client, request, main_space, space_id_module, kind, container_fixture
 ):
     """
     Проверяет ограничения доступа при попытке получения siblings документов через чужое пространство.
@@ -291,16 +269,10 @@ def test_get_siblings_foreign_space_access_denied(
             for index in range(3):
                 title = f'{current_date}_{kind}_Doc_{index}'
                 create_resp = owner_client.post(
-                    **create_document_endpoint(
-                        kind=kind,
-                        kind_id=kind_id,
-                        space_id=main_space,
-                        title=title
-                    )
+                    **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=main_space, title=title)
                 )
                 assert create_resp.status_code == 200, (
-                    f'Ошибка при создании документа {index}: '
-                    f'статус {create_resp.status_code}'
+                    f'Ошибка при создании документа {index}: ' f'статус {create_resp.status_code}'
                 )
                 doc_id = create_resp.json()['payload']['document']['_id']
                 doc_ids.append(doc_id)
@@ -311,27 +283,18 @@ def test_get_siblings_foreign_space_access_denied(
             siblings_resp = owner_client.post(
                 **get_document_siblings_endpoint(
                     document_id=middle_doc_id,
-                    space_id=space_id_module  # Чужой space
+                    space_id=space_id_module,  # Чужой space
                 )
             )
 
         with allure.step('Проверка получения ошибки доступа'):
-            assert siblings_resp.status_code == 403, (
-                f'Ожидался статус 403, получен {siblings_resp.status_code}'
-            )
+            assert siblings_resp.status_code == 403, f'Ожидался статус 403, получен {siblings_resp.status_code}'
             error = siblings_resp.json().get('error', {})
-            assert error.get('code') == 'AccessDenied', (
-                f'Ожидался код ошибки AccessDenied, получен {error.get("code")}'
-            )
+            assert error.get('code') == 'AccessDenied', f'Ожидался код ошибки AccessDenied, получен {error.get("code")}'
 
     finally:
         # Очистка тестовых данных
         with allure.step('Архивация созданных документов'):
             for doc_id in doc_ids:
-                archive_resp = owner_client.post(
-                    **archive_document_endpoint(
-                        space_id=main_space,
-                        document_id=doc_id
-                    )
-                )
+                archive_resp = owner_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
