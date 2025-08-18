@@ -1,9 +1,12 @@
 import allure
 import pytest
 from test_backend.data.endpoints.Document.document_endpoints import (
-    archive_document_endpoint, get_documents_endpoint,
+    archive_document_endpoint,
+    get_documents_endpoint,
 )
+
 pytestmark = [pytest.mark.backend]
+
 
 @pytest.mark.parametrize(
     'kind, container_fixture',
@@ -13,13 +16,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['space_docs', 'project_docs'],
 )
-def test_archive_all_documents(
-        request,
-        owner_client,
-        kind,
-        container_fixture,
-        main_space
-):
+def test_archive_all_documents(request, owner_client, kind, container_fixture, main_space):
     """
     Проверяем удаление всех документов в пространстве и проекте.
     """
@@ -27,9 +24,7 @@ def test_archive_all_documents(
         container_id = request.getfixturevalue(container_fixture)
 
     with allure.step(f'Получение списка документов в {kind}'):
-        docs_resp = owner_client.post(
-            **get_documents_endpoint(space_id=main_space, kind=kind, kind_id=container_id)
-        )
+        docs_resp = owner_client.post(**get_documents_endpoint(space_id=main_space, kind=kind, kind_id=container_id))
         assert docs_resp.status_code == 200, 'Не удалось получить список документов'
 
         # Получаем список ID документов
@@ -37,13 +32,7 @@ def test_archive_all_documents(
 
     with allure.step(f'Удаление всех документов в {kind}'):
         for doc_id in doc_ids:
-            archive_resp = owner_client.post(
-                **archive_document_endpoint(
-                    document_id=doc_id,
-                    space_id=main_space
-                )
-            )
+            archive_resp = owner_client.post(**archive_document_endpoint(document_id=doc_id, space_id=main_space))
             assert archive_resp.status_code == 200, (
-                f'Не удалось архивировать документ {doc_id}: '
-                f'статус {archive_resp.status_code}'
+                f'Не удалось архивировать документ {doc_id}: ' f'статус {archive_resp.status_code}'
             )

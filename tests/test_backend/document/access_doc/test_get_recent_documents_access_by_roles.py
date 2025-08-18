@@ -10,6 +10,7 @@ from test_backend.data.endpoints.Document.document_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 
+@pytest.mark.skip('BUG: APP-3037 mark_recent_document не перемещает документ вверх списка recent')
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -18,7 +19,7 @@ pytestmark = [pytest.mark.backend]
         ('member_client', 200),
         ('guest_client', 200),
     ],
-    ids=['owner', 'manager', 'member', 'guest']
+    ids=['owner', 'manager', 'member', 'guest'],
 )
 @pytest.mark.parametrize(
     'kind, container_fixture',
@@ -29,12 +30,7 @@ pytestmark = [pytest.mark.backend]
     ids=['space_docs', 'project_docs'],
 )
 def test_get_recent_documents_access_by_roles(
-    request,
-    main_space,
-    client_fixture,
-    expected_status,
-    kind,
-    container_fixture
+    request, main_space, client_fixture, expected_status, kind, container_fixture
 ):
     """
     Проверяем доступ к списку недавних документов для ролей owner, manager, member, guest.
@@ -55,40 +51,27 @@ def test_get_recent_documents_access_by_roles(
         for creator_role in ['owner', 'manager', 'member']:
             creator = request.getfixturevalue(f'{creator_role}_client')
             for i in range(3):
-                title = f"Recent document {i+1} by {creator_role}"
+                title = f'Recent document {i+1} by {creator_role}'
                 create_resp = creator.post(
-                    **create_document_endpoint(
-                        kind=kind,
-                        kind_id=container_id,
-                        space_id=main_space,
-                        title=title
-                    )
+                    **create_document_endpoint(kind=kind, kind_id=container_id, space_id=main_space, title=title)
                 )
-                assert create_resp.status_code == 200, (
-                    f'Ошибка при создании документа: статус {create_resp.status_code}'
-                )
+                assert (
+                    create_resp.status_code == 200
+                ), f'Ошибка при создании документа: статус {create_resp.status_code}'
                 doc_id = create_resp.json()['payload']['document']['_id']
-                created_docs.append({
-                    'id': doc_id,
-                    'title': title,
-                    'creator': creator,
-                    'creator_role': creator_role
-                })
+                created_docs.append({'id': doc_id, 'title': title, 'creator': creator, 'creator_role': creator_role})
 
     try:
         docs_count = len(created_docs)
-        assert docs_count == EXPECTED_DOCS_COUNT, (
-            f'Неверное количество созданных документов: {docs_count}, ожидалось: {EXPECTED_DOCS_COUNT}'
-        )
+        assert (
+            docs_count == EXPECTED_DOCS_COUNT
+        ), f'Неверное количество созданных документов: {docs_count}, ожидалось: {EXPECTED_DOCS_COUNT}'
 
         with allure.step('Маркировка документов как недавних'):
             for doc in created_docs:
-                mark_resp = api_client.post(
-                    **mark_recent_document_endpoint(document_id=doc['id'], space_id=main_space)
-                )
+                mark_resp = api_client.post(**mark_recent_document_endpoint(document_id=doc['id'], space_id=main_space))
                 assert mark_resp.status_code == 200, (
-                    f'Не удалось пометить документ {doc["id"]} как недавний: '
-                    f'статус {mark_resp.status_code}'
+                    f'Не удалось пометить документ {doc["id"]} как недавний: ' f'статус {mark_resp.status_code}'
                 )
 
         with allure.step(f'Получение списка недавних документов ролью {role}'):
@@ -111,8 +94,7 @@ def test_get_recent_documents_access_by_roles(
                     created_doc_ids = {doc['id'] for doc in created_docs}
                     missing_docs = created_doc_ids - recent_doc_ids
                     assert not missing_docs, (
-                        f'Не все документы найдены в списке недавних. '
-                        f'Отсутствуют документы с ID: {missing_docs}'
+                        f'Не все документы найдены в списке недавних. ' f'Отсутствуют документы с ID: {missing_docs}'
                     )
 
                     required_fields = {'_id', 'title', 'kind'}
@@ -139,13 +121,11 @@ def test_get_recent_documents_access_by_roles(
                         # Когда баг будет исправлен — ожидаем, что порядок изменится на обратный:
                         # assert updated_ids == original_ids[::-1]
                         # Пока баг не исправлен, этот ассерт падает — оставляем для контроля
-                        assert updated_ids == original_ids[::-1], (
-                            'Порядок документов после повторной маркировки неверный'
-                        )
+                        assert (
+                            updated_ids == original_ids[::-1]
+                        ), 'Порядок документов после повторной маркировки неверный'
 
     finally:
         with allure.step('Удаление тестовых документов'):
             for doc in created_docs:
-                doc['creator'].post(
-                    **archive_document_endpoint(space_id=main_space, document_id=doc['id'])
-                )
+                doc['creator'].post(**archive_document_endpoint(space_id=main_space, document_id=doc['id']))

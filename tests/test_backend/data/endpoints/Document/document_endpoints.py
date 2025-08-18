@@ -108,6 +108,7 @@ def archive_document_endpoint(document_id: str, space_id: str):
         },
     }
 
+
 def get_recent_documents_endpoint(space_id: str):
     return {
         'path': '/GetRecentDocuments',
@@ -119,7 +120,7 @@ def get_recent_documents_endpoint(space_id: str):
 def mark_recent_document_endpoint(space_id: str, document_id: str):
     """
     Endpoint для маркировки документа как недавнего
-    
+
     Args:
         space_id: ID пространства
         document_id: ID документа
