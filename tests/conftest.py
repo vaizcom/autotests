@@ -2,11 +2,12 @@ import pytest
 import allure
 from config import settings
 from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
+from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
 from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
 from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from tests.core.client import APIClient
 from tests.core.auth import get_token
-from tests.config.settings import API_URL, MAIN_SPACE_ID
+from tests.config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID
 from tests.test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
 from tests.test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint,
@@ -27,18 +28,8 @@ def pytest_configure(config):
 
 
 @pytest.fixture(scope='session')
-def guest_client():
-    return APIClient(base_url=API_URL, token=get_token('guest'))
-
-
-@pytest.fixture(scope='session')
-def member_client():
-    return APIClient(base_url=API_URL, token=get_token('member'))
-
-
-@pytest.fixture(scope='session')
-def manager_client():
-    return APIClient(base_url=API_URL, token=get_token('manager'))
+def main_client():
+    return APIClient(base_url=API_URL, token=get_token('main'))
 
 
 # Фикстура: возвращает авторизованного API клиента с токеном владельца
@@ -48,13 +39,23 @@ def owner_client():
 
 
 @pytest.fixture(scope='session')
-def foreign_client():
+def manager_client():
+    return APIClient(base_url=API_URL, token=get_token('manager'))
+
+
+@pytest.fixture(scope='session')
+def member_client():
+    return APIClient(base_url=API_URL, token=get_token('member'))
+
+
+@pytest.fixture(scope='session')
+def guest_client():
     return APIClient(base_url=API_URL, token=get_token('guest'))
 
 
 @pytest.fixture(scope='session')
-def main_client():
-    return APIClient(base_url=API_URL, token=get_token('main'))
+def foreign_client():
+    return APIClient(base_url=API_URL, token=get_token('foreign_client'))
 
 
 @pytest.fixture(scope='session')
@@ -71,9 +72,18 @@ def main_space(main_client) -> str:
 
 @pytest.fixture(scope='session')
 def main_project(main_client, main_space):
-    response = main_client.post(**get_project_endpoint(project_id='686672af85fb8d104544e798', space_id=main_space))
-    assert response.status_code == 200
-    return response.json()['payload']['project']['_id']
+    assert MAIN_PROJECT_ID, 'Не задана переменная окружения MAIN_PROJECT_ID'
+    resp = main_client.post(**get_project_endpoint(project_id=MAIN_PROJECT_ID, space_id=main_space))
+    assert resp.status_code == 200, f'Space {MAIN_PROJECT_ID} not found: {resp.text}'
+    return MAIN_PROJECT_ID
+
+
+@pytest.fixture(scope='session')
+def main_board(main_client, main_space):
+    assert MAIN_BOARD_ID, 'Не задана переменная окружения MAIN_BOARD_ID'
+    resp = main_client.post(**get_board_endpoint(board_id=MAIN_BOARD_ID, space_id=main_space))
+    assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {resp.text}'
+    return MAIN_BOARD_ID
 
 
 @pytest.fixture(scope='session')
