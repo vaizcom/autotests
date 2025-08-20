@@ -20,6 +20,7 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
     get_space_endpoint,
 )
 from datetime import datetime
+import os
 
 
 def pytest_configure(config):
@@ -319,3 +320,33 @@ def create_main_documents(request, main_space):
         for doc in created_docs:
             with allure.step(f'Удаление документа "{doc["title"]}" (создан {doc["creator_role"]})'):
                 doc['creator'].post(**archive_document_endpoint(space_id=main_space, document_id=doc['id']))
+
+
+@pytest.fixture(scope='session')
+def main_space_doc():
+    """
+    Возвращает ID документа MAIN_SPACE_DOC_ID из переменных окружения.
+    """
+    doc_id = os.getenv('MAIN_SPACE_DOC_ID')
+    assert doc_id, 'Переменная окружения MAIN_SPACE_DOC_ID не задана или пуста'
+    return doc_id
+
+
+@pytest.fixture(scope='session')
+def main_project_doc():
+    """
+    Возвращает ID документа MAIN_PROJECT_DOC_ID из переменных окружения.
+    """
+    doc_id = os.getenv('MAIN_PROJECT_DOC_ID')
+    assert doc_id, 'Переменная окружения MAIN_PROJECT_DOC_ID не задана или пуста'
+    return doc_id
+
+
+@pytest.fixture(scope='session')
+def main_personal_doc():
+    """
+    Возвращает ID документа MAIN_PERSONAL_DOC_ID из переменных окружения.
+    """
+    doc_id = os.getenv('MAIN_PERSONAL_DOC_ID')
+    assert doc_id, 'Переменная окружения MAIN_PERSONAL_DOC_ID не задана или пуста'
+    return doc_id
