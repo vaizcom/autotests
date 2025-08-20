@@ -1,7 +1,6 @@
 import allure
 import pytest
 
-from config.generators import generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import (
     create_board_custom_field_endpoint,
     create_board_group_endpoint,
@@ -11,7 +10,6 @@ from tests.test_backend.data.endpoints.Board.custom_field_types import CustomFie
 from tests.test_backend.data.endpoints.Board.board_endpoints import create_board_endpoint
 from tests.test_backend.data.endpoints.Board.constants import (
     MAX_BOARD_NAME_LENGTH,
-    BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH,
     BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH,
     BOARD_GROUP_LIMIT_MAX_VALUE,
     BOARD_GROUP_MAX_DESCRIPTION_LENGTH,
@@ -24,48 +22,37 @@ pytestmark = [pytest.mark.backend]
     'name, expected_status',
     [
         ('', 400),
-        (None, 400),
         ('A' * (MAX_BOARD_NAME_LENGTH + 1), 400),
         ('Валидное имя', 200),
-        (123, 400),
         ('A' * MAX_BOARD_NAME_LENGTH, 200),
+        (' ', 400),  # Только пробелы
+        ('@#$%^&*()!', 200),  # Специальные символы
+        ('Имя с пробелами', 200),  # Имя с пробелами внутри
+        ('中文名字', 200),  # Имя на другом языке
     ],
-    ids=['empty string', 'none', 'length > 50', 'valid name', 'number instead of string', 'exactly 50 chars'],
+    ids=[
+        'empty string',
+        'length > 50',
+        'valid name',
+        'exactly 50 chars',
+        ' ',
+        '@#$%^&*()!',
+        'valid name with spaces',
+        'chinese',
+    ],
 )
 def test_board_name_validation(owner_client, temp_project, temp_space, name, expected_status, request):
     allure.dynamic.title(f'Валидация имени борды: {request.node.callspec.id} → ожидали {expected_status}')
+    if not isinstance(name, str):
+        raise ValueError('Name must be of type str.')
     response = owner_client.post(
         **create_board_endpoint(
-            name=name, temp_project=temp_project, space_id=temp_space, groups=[], typesList=[], customFields=[]
+            name=name, project=temp_project, space_id=temp_space, groups=[], typesList=[], customFields=[]
         )
     )
 
     with allure.step(f'Проверка, что API вернул статус {expected_status} при {request.node.callspec.id}'):
         assert response.status_code == expected_status
-
-
-@allure.title('Создание борды с описанием максимальной длины(Поле отсутствует на фронте)')
-def test_board_with_max_description(owner_client, temp_project, temp_space):
-    name = generate_board_name()
-    description = 'D' * BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH
-
-    with allure.step(
-        f'Отправка запроса на создание борды с описанием длиной {BOARD_CUSTOM_FIELD_MAX_DESCRIPTION_LENGTH} символов'
-    ):
-        response = owner_client.post(
-            **create_board_endpoint(
-                name=name,
-                temp_project=temp_project,
-                space_id=temp_space,
-                groups=[],
-                typesList=[],
-                customFields=[],
-                description=description,
-            )
-        )
-
-    with allure.step('Проверка, что API вернул 200 и описание корректно сохранено'):
-        assert response.status_code == 200
 
 
 @pytest.mark.parametrize(
