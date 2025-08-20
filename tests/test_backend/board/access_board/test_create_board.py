@@ -5,6 +5,7 @@ import allure
 from test_backend.data.endpoints.Board.board_endpoints import create_board_endpoint, delete_board_endpoint, \
     get_board_endpoint
 
+pytestmark = [pytest.mark.backend]
 
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
@@ -39,7 +40,6 @@ def test_create_board_access_by_roles(request, client_fixture, expected_status, 
 
     with allure.step(f'Проверка статус-кода: ожидаемый {expected_status}'):
         assert response.status_code == expected_status, response.text
-
     if response.status_code == 200:
         with allure.step('Обработка созданной доски'):
             board_id = response.json()['payload']['board']['_id']
