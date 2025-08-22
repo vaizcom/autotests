@@ -8,8 +8,17 @@ print('Loaded URL:', URL)
 
 CURRENT_SPACE_ID = os.getenv('CURRENT_SPACE_ID')
 MAIN_SPACE_ID = os.getenv('MAIN_SPACE_ID')
+MAIN_PROJECT_ID = os.getenv('MAIN_PROJECT_ID')
+MAIN_BOARD_ID = os.getenv('MAIN_BOARD_ID')
+SPACE_CLIENT = os.getenv('SPACE_CLIENT')
+
+MAIN_SPACE_DOC_ID = os.getenv('MAIN_SPACE_DOC_ID')
+MAIN_PROJECT_DOC_ID = os.getenv('MAIN_PROJECT_DOC_ID')
+MAIN_PERSONAL_DOC_ID = os.getenv('MAIN_PERSONAL_DOC_ID')
 
 USERS = {
+    'project_client': {'email': os.getenv('PROJECT_CLIENT'), 'password': os.getenv('PASSWORD')},
+    'space_client': {'email': SPACE_CLIENT, 'password': os.getenv('PASSWORD')},
     'foreign_client': {'email': os.getenv('FOREIGN_CLIENT'), 'password': os.getenv('PASSWORD')},
     'guest': {'email': os.getenv('GUEST_EMAIL'), 'password': os.getenv('PASSWORD')},
     'member': {'email': os.getenv('MEMBER_EMAIL'), 'password': os.getenv('PASSWORD')},

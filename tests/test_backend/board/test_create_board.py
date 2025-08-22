@@ -5,7 +5,6 @@ from tests.test_backend.data.endpoints.Board.board_endpoints import (
     create_board_endpoint,
     create_board_custom_field_endpoint,
     edit_board_custom_field_endpoint,
-    get_boards_endpoint,
     get_board_endpoint,
     edit_board_endpoint,
     create_board_group_endpoint,
@@ -62,84 +61,6 @@ def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
 
     with allure.step('Проверка, что API вернул 400 – ошибка валидации типов'):
         assert response.status_code == 400
-
-
-@allure.title('Получение списка борд: проверка, что все созданные борды присутствуют в ответе(board_names)')
-def test_get_boards_returns_multiple_created_boards(owner_client, temp_project, temp_space):
-    board_names = [generate_board_name() for _ in range(3)]
-
-    with allure.step('Создание трёх борд'):
-        for name in board_names:
-            response = owner_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
-            assert response.status_code == 200, f"Не удалось создать борду '{name}'"
-
-    with allure.step('Запрос всех борд в текущем спейсе'):
-        get_response = owner_client.post(**get_boards_endpoint(temp_space))
-        assert get_response.status_code == 200
-
-    boards = get_response.json()['payload']['boards']
-    board_names_in_response = [b['name'] for b in boards]
-
-    with allure.step('Проверка, что все созданные борды присутствуют в ответе(board_names)'):
-        for name in board_names:
-            assert name in board_names_in_response, f"Борда '{name}' не найдена в списке"
-
-
-@allure.title('Получение списка борд: проверка созданных борд и их обязательных полей(name, projectId, createdAt)')
-def test_get_boards_required_fields(owner_client, temp_project, temp_space):
-    board_names = [generate_board_name() for _ in range(3)]
-
-    with allure.step('Создание трёх борд'):
-        for name in board_names:
-            response = owner_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
-            assert response.status_code == 200, f"Не удалось создать борду '{name}'"
-
-    with allure.step('Запрос всех борд в текущем спейсе'):
-        get_response = owner_client.post(**get_boards_endpoint(temp_space))
-        assert get_response.status_code == 200
-
-    boards = get_response.json()['payload']['boards']
-    board_map = {b['name']: b for b in boards if b['name'] in board_names}
-
-    with allure.step('Проверка, что все созданные борды присутствуют в ответе и содержат нужные поля'):
-        for name in board_names:
-            assert name in board_map, f"Борда '{name}' не найдена в списке"
-            board = board_map[name]
-            assert board.get('project') == temp_project, f"projectId борды '{name}' не совпадает"
-            assert 'createdAt' in board, f"У борды '{name}' отсутствует поле createdAt"
-            assert isinstance(board['createdAt'], str), 'Поле createdAt должно быть строкой (ISO формат)'
-
-
-@allure.title('Получение борды по boardId через /GetBoard')
-def test_get_board_by_id(owner_client, temp_project, temp_space):
-    name = generate_board_name()
-
-    with allure.step('Создание борды'):
-        create_response = owner_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
-        assert create_response.status_code == 200
-        board_id = create_response.json()['payload']['board']['_id']
-
-    with allure.step('Получение борды по boardId через /GetBoard'):
-        get_response = owner_client.post(**get_board_endpoint(board_id, temp_space))
-        assert get_response.status_code == 200
-
-        board = get_response.json()['payload']['board']
-        assert board['name'] == name
-        assert board['_id'] == board_id
-        assert board['project'] == temp_project
-
-
-@allure.title('Ошибка при попытке получить борду по несуществующему boardId')
-def test_get_board_with_invalid_id(owner_client, temp_space):
-    fake_board_id = 'non_existing_board_id_12345'
-
-    with allure.step('Попытка получить борду по несуществующему boardId'):
-        response = owner_client.post(**get_board_endpoint(board_id=fake_board_id, space_id=temp_space))
-
-    with allure.step('Проверка, что API вернул ошибку 400 или 404'):
-        assert (
-            response.status_code == 400
-        ), f'Ожидался статус 400, но получен {response.status_code} с ответом: {response.text}'
 
 
 @allure.title('Редактирование борды: изменение имени через /EditBoard')

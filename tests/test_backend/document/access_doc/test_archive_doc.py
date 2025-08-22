@@ -6,7 +6,7 @@ import pytest
 
 from test_backend.data.endpoints.Document.document_endpoints import (
     create_document_endpoint,
-    archive_document_endpoint,
+    archive_document_endpoint, get_documents_endpoint,
 )
 
 pytestmark = [pytest.mark.backend]
@@ -62,10 +62,19 @@ def test_archive_space_doc(request, main_space, client_fixture, expected_status)
         archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
         assert archive_resp.status_code == expected_status
 
+    if expected_status == 200:
+        with allure.step('Проверка, что заархивированный документ отсутствует в списке'):
+            list_resp = api_client.post(**get_documents_endpoint(kind='Space', kind_id=main_space, space_id=main_space))
+            assert list_resp.status_code == 200, f'Ошибка при получении списка: {list_resp.text}'
+            documents = list_resp.json()['payload']['documents']
+            document_ids = [doc['_id'] for doc in documents]
+            assert doc_id not in document_ids, 'Заархивированный документ найден в списке документов'
+
     if expected_status == 403:
         with allure.step(f'После теста документ  архивируется в роли {selected_client_name}'):
             archive = random_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
             assert archive.status_code == 200
+
 
 
 @pytest.mark.parametrize(
@@ -109,6 +118,14 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
         archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
         assert archive_resp.status_code == expected_status
 
+    if expected_status == 200:
+        with allure.step('Проверка, что заархивированный документ отсутствует в списке'):
+            list_resp = api_client.post(**get_documents_endpoint(kind='Space', kind_id=main_space, space_id=main_space))
+            assert list_resp.status_code == 200, f'Ошибка при получении списка: {list_resp.text}'
+            documents = list_resp.json()['payload']['documents']
+            document_ids = [doc['_id'] for doc in documents]
+            assert doc_id not in document_ids, 'Заархивированный документ найден в списке документов'
+
     if expected_status == 403:
         with allure.step(f'После теста документ архивируется в роли {selected_client_name} (cleanup)'):
             archive = random_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
@@ -145,6 +162,14 @@ def test_archive_personal_doc(request, main_personal, main_space, client_fixture
     with allure.step(f'Архивация Personal-документа в роли {role}, {expected_status} (доступно только создателю доки)'):
         archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
         assert archive_resp.status_code == expected_status
+
+    if expected_status == 200:
+        with allure.step('Проверка, что заархивированный документ отсутствует в списке'):
+            list_resp = api_client.post(**get_documents_endpoint(kind='Space', kind_id=main_space, space_id=main_space))
+            assert list_resp.status_code == 200, f'Ошибка при получении списка: {list_resp.text}'
+            documents = list_resp.json()['payload']['documents']
+            document_ids = [doc['_id'] for doc in documents]
+            assert doc_id not in document_ids, 'Заархивированный документ найден в списке документов'
 
     if expected_status == 403:
         with allure.step('member_client выполняет финальную архивацию Personal-документа для очистки после теста'):

@@ -15,27 +15,27 @@ def get_board_endpoint(board_id: str, space_id: str):
 
 
 def create_board_endpoint(
-    name: str,
-    temp_project: str,
-    space_id: str,
-    groups: list = None,
-    typesList: list = None,
-    customFields: list = None,
-    description: str = None,
+    name: str, project: str, space_id: str, groups: list = None, typesList: list = None, customFields: list = None
 ):
     payload = {
         'name': name,
-        'project': temp_project,
+        'project': project,
         'groups': groups,
         'typesList': typesList,
         'customFields': customFields,
     }
-    if description is not None:
-        payload['description'] = description
 
     return {
         'path': '/CreateBoard',
         'json': payload,
+        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+    }
+
+
+def delete_board_endpoint(board_id: str, board_name: str, space_id: str):
+    return {
+        'path': '/DeleteBoard',
+        'json': {'boardId': board_id, 'board_name': board_name},
         'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
     }
 
