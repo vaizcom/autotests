@@ -94,3 +94,27 @@ def test_owner_client_document_access(owner_client, main_space, main_space_doc, 
             **get_document_endpoint(document_id=main_personal_doc, space_id=main_space)
         )
         assert response_personal.status_code == 403, 'Доступ к MAIN_PERSONAL_DOC_ID должен быть запрещён'
+
+
+@allure.title('Проверка доступа с некорректным ID документа')
+@pytest.mark.parametrize(
+    'document_id, space_id, expected_status, expected_error_code',
+    [
+        ('invalid-id-123', 'valid-space-id', 400, 'InvalidForm'),
+        ('valid-document-id', 'invalid-space-id-456', 400, 'InvalidForm'),
+        ('invalid-id-789', 'invalid-space-id', 400, 'InvalidForm'),
+    ],
+    ids=['invalid document_id', 'invalid space_id', 'invalid both'],
+)
+def test_access_with_invalid_ids(owner_client, document_id, space_id, expected_status, expected_error_code):
+    """
+    Проверяет, что запросы с некорректными document_id или space_id вызывают ошибку.
+    """
+    with allure.step(f'Попытка получить доступ к документу {document_id} в пространстве {space_id}'):
+        response = owner_client.post(**get_document_endpoint(document_id=document_id, space_id=space_id))
+
+    with allure.step(f'Проверка, что статус ответа = {expected_status} и ошибка соответствующая'):
+        assert response.status_code == expected_status, f'Ожидался статус {expected_status}, получен {response.status_code}'
+        error = response.json().get('error')
+        assert error.get(
+            'code') == expected_error_code, f"Ожидался код ошибки '{expected_error_code}', получен: {error.get('code')}"
