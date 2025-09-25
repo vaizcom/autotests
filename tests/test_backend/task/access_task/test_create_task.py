@@ -4,26 +4,9 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
-from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
-from test_backend.task.utils import validate_hrid
+from test_backend.task.utils import validate_hrid, get_client, get_member_profile, create_task
 
 pytestmark = [pytest.mark.backend]
-
-def get_member_profile(client, space_id):
-    """Helper function to get member profile."""
-    resp = client.post(**get_profile_endpoint(space_id=space_id))
-    resp.raise_for_status()
-    return resp.json()["payload"]["profile"]["memberId"]
-
-def create_task(client, payload):
-    """Helper function to create task."""
-    return client.post(**payload)
-
-def get_client(request, client_fixture):
-    """Получение клиента из тестового фикстура."""
-    with allure.step(f"Получение клиента для {client_fixture}"):
-        return request.getfixturevalue(client_fixture)
-
 
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
@@ -58,42 +41,42 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
         with allure.step("Проверяем содержимое ответа с задачей"):
             task = response.json()["payload"]["task"]
 
-            # Проверка обязательных полей
-            assert task["board"] == main_board, "Ошибка: неверное значение поля 'board'"
-            assert task["name"] == "Untitled task", "Ошибка: неверное значение поля 'name'"
-            assert task["completed"] is False, "Ошибка: поле 'completed' должно быть False"
-            assert task["creator"] == member_id, "Ошибка: 'creator' не соответствует memberId пользователя"
+            with allure.step("Проверка обязательных полей"):
+                assert task["board"] == main_board, "Ошибка: неверное значение поля 'board'"
+                assert task["name"] == "Untitled task", "Ошибка: неверное значение поля 'name'"
+                assert task["completed"] is False, "Ошибка: поле 'completed' должно быть False"
+                assert task["creator"] == member_id, "Ошибка: 'creator' не соответствует memberId пользователя"
 
-            # Проверка системных полей
-            assert "_id" in task, "Ошибка: отсутствует поле '_id'"
-            assert task["createdAt"] is not None, "Ошибка: поле 'createdAt' должно быть задано"
-            assert task["updatedAt"] is not None, "Ошибка: поле 'updatedAt' должно быть задано"
+            with allure.step("Проверка системных полей"):
+                assert "_id" in task, "Ошибка: отсутствует поле '_id'"
+                assert task["createdAt"] is not None, "Ошибка: поле 'createdAt' должно быть задано"
+                assert task["updatedAt"] is not None, "Ошибка: поле 'updatedAt' должно быть задано"
 
             # Проверка корректности формата `hrid`
             with allure.step("Проверяем поле 'hrid'"):
                 assert "hrid" in task, "Поле 'hrid' отсутствует"
                 validate_hrid(task["hrid"])
 
-            # Проверка полей, которые должны быть пустыми
-            assert task["assignees"] == [], "Ошибка: 'assignees' должно быть пустым списком"
-            assert task["types"] == [], "Ошибка: 'types' должно быть пустым списком"
-            assert task["milestones"] == [], "Ошибка: 'milestones' должно быть пустым списком"
-            assert task["subtasks"] == [], "Ошибка: 'subtasks' должно быть пустым списком"
+            with allure.step("Проверка полей, которые должны быть пустыми"):
+                assert task["assignees"] == [], "Ошибка: 'assignees' должно быть пустым списком"
+                assert task["types"] == [], "Ошибка: 'types' должно быть пустым списком"
+                assert task["milestones"] == [], "Ошибка: 'milestones' должно быть пустым списком"
+                assert task["subtasks"] == [], "Ошибка: 'subtasks' должно быть пустым списком"
 
-            # Проверка полей с `None` (null)
-            assert task["parentTask"] is None, "Ошибка: 'parentTask' должно быть None"
-            assert task["archiver"] is None, "Ошибка: 'archiver' должно быть None"
-            assert task["archivedAt"] is None, "Ошибка: 'archivedAt' должно быть None"
-            assert task["completedAt"] is None, "Ошибка: 'completedAt' должно быть None"
+            with allure.step("Проверка полей с `None` (null)"):
+                assert task["parentTask"] is None, "Ошибка: 'parentTask' должно быть None"
+                assert task["archiver"] is None, "Ошибка: 'archiver' должно быть None"
+                assert task["archivedAt"] is None, "Ошибка: 'archivedAt' должно быть None"
+                assert task["completedAt"] is None, "Ошибка: 'completedAt' должно быть None"
 
-            # Проверка значений по умолчанию
-            assert task["priority"] == 1, "Ошибка: 'priority' должно быть равно 1"
-            assert isinstance(task["followers"], dict), "Ошибка: 'followers' должно быть словарем"
-            assert task["followers"].get(member_id) == "creator", "Ошибка: 'followers' должно включать creator"
-            assert isinstance(task["rightConnectors"], list) and len(task["rightConnectors"]) == 0, \
-                "Ошибка: 'rightConnectors' должно быть пустым списком"
-            assert isinstance(task["leftConnectors"], list) and len(task["leftConnectors"]) == 0, \
-                "Ошибка: 'leftConnectors' должно быть пустым списком"
+            with allure.step("Проверка значений по умолчанию"):
+                assert task["priority"] == 1, "Ошибка: 'priority' должно быть равно 1"
+                assert isinstance(task["followers"], dict), "Ошибка: 'followers' должно быть словарем"
+                assert task["followers"].get(member_id) == "creator", "Ошибка: 'followers' должно включать creator"
+                assert isinstance(task["rightConnectors"], list) and len(task["rightConnectors"]) == 0, \
+                    "Ошибка: 'rightConnectors' должно быть пустым списком"
+                assert isinstance(task["leftConnectors"], list) and len(task["leftConnectors"]) == 0, \
+                    "Ошибка: 'leftConnectors' должно быть пустым списком"
 
 
 @pytest.mark.parametrize(
@@ -124,7 +107,7 @@ def test_create_task_with_specific_payload_and_response(
     task_name = f"Create task клиент={client_fixture}, дата={datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
 
     # Получение профиля для извлечения creator ID
-    with allure.step(f"Отправка запроса на получение профиля в space_id={main_space}"):
+    with allure.step(f"Получение профиля для извлечения creator ID"):
         member_id = get_member_profile(client, main_space)
 
     # Формируем payload
