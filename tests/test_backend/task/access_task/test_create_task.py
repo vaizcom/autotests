@@ -1,10 +1,12 @@
 from datetime import datetime
+import random
 
 import allure
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
-from test_backend.task.utils import validate_hrid, get_client, get_member_profile, create_task
+from test_backend.task.utils import validate_hrid, get_client, get_member_profile, create_task, get_type, get_group, \
+    get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone
 
 pytestmark = [pytest.mark.backend]
 
@@ -72,7 +74,7 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
             with allure.step("Проверка значений по умолчанию"):
                 assert task["priority"] == 1, "Ошибка: 'priority' должно быть равно 1"
                 assert isinstance(task["followers"], dict), "Ошибка: 'followers' должно быть словарем"
-                assert task["followers"].get(member_id) == "creator", "Ошибка: 'followers' должно включать creator"
+                assert task["followers"] == {member_id: "creator"}, "Ошибка: 'followers' должно включать creator"
                 assert isinstance(task["rightConnectors"], list) and len(task["rightConnectors"]) == 0, \
                     "Ошибка: 'rightConnectors' должно быть пустым списком"
                 assert isinstance(task["leftConnectors"], list) and len(task["leftConnectors"]) == 0, \
@@ -110,20 +112,45 @@ def test_create_task_with_specific_payload_and_response(
     with allure.step(f"Получение профиля для извлечения creator ID"):
         member_id = get_member_profile(client, main_space)
 
+    with allure.step("Получаем случайный type из борды"):
+        random_type_id = get_type(client, main_board, main_space)
+
+    with allure.step("Получаем случайную группу из борды"):
+        random_group_id = get_group(client, main_board, main_space)
+
+    with allure.step("Получаем текущую дату и время в формате ISO 8601 UTC"):
+        current_timestamp = get_current_timestamp()
+
+    with allure.step("Прибавляем неделю к переданному времени в формате ISO 8601 UTC"):
+        due_end = get_due_end()
+
+    with allure.step("Получаем случайную priority"):
+        priority = get_priority()
+
+    with allure.step("Получаем random_member_id для извлечения assignees"):
+        random_member_id = get_assignee(client, main_space)
+
+    with allure.step("Получаем get_random_complete для извлечения completed"):
+        get_random_complete = random.choice([True, False])
+
+    with allure.step("Получаем get_random_complete для извлечения completed"):
+        get_random_milestone = get_milestone(client, main_space, main_board)
+
+
     # Формируем payload
     with allure.step("Генерация payload"):
         payload = create_task_endpoint(
             space_id=main_space,
             board=main_board,
             name=task_name,
-            types=["6866731185fb8d104544e82b"],
-            assignees=["6866309d85fb8d104544a620"],
-            due_start="2025-09-19T14:47:17.596+00:00",
-            due_end="2026-09-19T14:47:17.596+00:00",
-            priority=3,
-            completed=True,
-            group="6866731185fb8d104544e828",
-            milestones=["68d5189654c332d6918a9b52"],
+            types=[random_type_id],
+            assignees= random_member_id,
+            due_start=current_timestamp,
+            due_end= due_end,
+            priority=priority,
+            completed=get_random_complete,
+            group=random_group_id,
+            milestones=[get_random_milestone],
             parent_task=None,
             index=2
         )
@@ -144,24 +171,24 @@ def test_create_task_with_specific_payload_and_response(
             # Проверка основных полей задачи
             with allure.step("Проверяем основные данные задачи"):
                 assert task["name"] == task_name, "Ошибка: неверное имя задачи"
-                assert task["group"] == "6866731185fb8d104544e828", "Ошибка: неверная группа задачи"
+                assert task["group"] == random_group_id, "Ошибка: неверная группа задачи"
                 assert task["board"] == main_board, "Ошибка: неверное значение board задачи"
                 assert task["project"] == main_project, "Ошибка: неверный проект"
                 assert task["parentTask"] is None, "Ошибка: поле parentTask должно быть None"
-                assert task["priority"] == 3, "Ошибка: неверный приоритет задачи"
-                assert task["completed"] is True, "Ошибка: задача должна быть помечена как завершённая"
+                assert task["priority"] == priority, "Ошибка: неверный приоритет задачи"
+                assert task["completed"] == get_random_complete, "Ошибка: задача должна быть помечена как завершённая"
 
             # Проверка полей, относящихся к работе
             with allure.step("Проверяем связанные поля"):
-                assert task["types"] == ["6866731185fb8d104544e82b"], "Ошибка: неверное значение types"
-                assert task["assignees"] == ["6866309d85fb8d104544a620"], "Ошибка: неверное значение assignees"
-                assert task["milestones"] == ["68d5189654c332d6918a9b52"], "Ошибка: неверное значение milestones"
+                assert task["types"] == [random_type_id], "Ошибка: неверное значение types"
+                assert task["assignees"] == [random_member_id], "Ошибка: неверное значение assignees"
+                assert task["milestones"] == [get_random_milestone], "Ошибка: неверное значение milestones"
                 assert task["subtasks"] == [], "Ошибка: поле с подзадачами должно быть пустым"
 
             # Проверка временных полей
             with allure.step("Проверяем временные поля и сроки задачи"):
-                assert task["dueStart"] == "2025-09-19T14:47:17.596Z", "Ошибка: неверное значение dueStart"
-                assert task["dueEnd"] == "2026-09-19T14:47:17.596Z", "Ошибка: неверное значение dueEnd"
+                assert task["dueStart"] == current_timestamp.replace("+00:00", "Z"), "Ошибка: неверное значение dueStart"
+                assert task["dueEnd"] == due_end.replace("+00:00", "Z"), "Ошибка: неверное значение dueEnd"
 
             # Проверка метаданных и системных полей
             with allure.step("Проверяем метаданные"):
@@ -169,13 +196,13 @@ def test_create_task_with_specific_payload_and_response(
                 assert task["createdAt"] is not None, "Ошибка: поле 'createdAt' должно быть задано"
                 assert task["updatedAt"] is not None, "Ошибка: поле 'updatedAt' должно быть задано"
                 assert task["document"] is not None, "Ошибка: неверный документ"
-                assert task["milestone"] == "68d5189654c332d6918a9b52", "Ошибка: неверный milestone"
-                assert task["followers"].get(member_id) == "creator", "Ошибка: 'followers' должно включать creator"
+                assert task["milestone"] == get_random_milestone, "Ошибка: неверный milestone"
+                assert task["followers"] == {member_id: "creator"}, "Ошибка: 'followers' должно включать creator"
 
             # Проверка корректности формата `hrid`
             with allure.step("Проверяем поле 'hrid'"):
                 assert "hrid" in task, "Поле 'hrid' отсутствует"
-                validate_hrid(task["hrid"])
+                validate_hrid(client, main_space, main_project, task["hrid"])
 
             # Проверка пустых и None полей
             with allure.step("Проверяем поля с пустыми значениями и None"):
