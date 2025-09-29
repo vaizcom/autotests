@@ -53,6 +53,13 @@ def create_task_endpoint(
 def delete_task_endpoint(task_id: str, space_id: str):
     return {
         "path": "/DeleteTask",
-        "json": {"task_id": task_id},
+        "json": {"taskId": task_id},
+        "headers": {"Content-Type": "application/json", "Current-Space-Id": space_id}
+    }
+
+def get_tasks_endpoint(board: str, space_id: str):
+    return {
+        "path": "/GetTasks",
+        "json": {"board": board},
         "headers": {"Content-Type": "application/json", "Current-Space-Id": space_id}
     }

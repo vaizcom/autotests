@@ -147,3 +147,15 @@ def get_milestone(client, space_id, board_id):
     # Возвращаем случайный milestone_id
     random_milestone = random.choice(milestones)
     return random_milestone["_id"]
+
+def assert_task_keys(doc, expected_keys):
+    actual = set(doc.keys())
+    extra = actual - expected_keys
+    missing = expected_keys - actual
+    info_msg = (
+        f"\nВсе ключи в ответе: {sorted(list(actual))}\n"
+        f"Ожидались ключи:    {sorted(list(expected_keys))}\n"
+    )
+    assert not extra, f"Есть лишние ключи в задаче: {sorted(list(extra))}" + info_msg
+    assert not missing, f"Нет обязательных ключей в задаче: {sorted(list(missing))}" + info_msg
+

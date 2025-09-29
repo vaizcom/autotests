@@ -20,6 +20,13 @@ pytestmark = [pytest.mark.backend]
 def test_negative_access_to_board(
     request, client_fixture, expected_status, expected_error_code, main_board, main_space
 ):
+    """
+    Test to verify negative access scenarios for a board.
+
+    This test validates that a client cannot access a board in various scenarios
+    when they do not have sufficient permissions. The test ensures that an appropriate
+    error response is returned along with the correct status code and error structure.
+    """
     allure.dynamic.title(
         f'Негативный тест на доступ к борде: клиент={client_fixture}, ожидаемый статус={expected_status}'
     )
