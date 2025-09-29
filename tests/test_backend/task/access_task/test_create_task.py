@@ -6,7 +6,7 @@ import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
 from test_backend.task.utils import validate_hrid, get_client, get_member_profile, create_task, get_type, get_group, \
-    get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone, assert_document_keys
+    get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone, assert_task_keys
 
 pytestmark = [pytest.mark.backend]
 
@@ -96,7 +96,7 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
                             "hrid", "rightConnectors", "leftConnectors", "archiver", "archivedAt",
                             "completedAt", "deleter", "deletedAt", "customFields", "creator"
                         }
-                        assert_document_keys(task, expected_task_keys)
+                        assert_task_keys(task, expected_task_keys)
     finally:
         if task_id:
             with allure.step(f"Удаляем задачу: {task_id}"):
@@ -257,7 +257,7 @@ def test_create_task_with_specific_payload_and_response(
                             "hrid", "rightConnectors", "leftConnectors", "archiver", "archivedAt",
                             "completedAt", "deleter", "deletedAt", "customFields", "creator"
                         }
-                        assert_document_keys(task, expected_task_keys)
+                        assert_task_keys(task, expected_task_keys)
 
     finally:
         if task_id:

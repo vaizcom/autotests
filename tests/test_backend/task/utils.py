@@ -158,4 +158,3 @@ def assert_task_keys(doc, expected_keys):
     )
     assert not extra, f"Есть лишние ключи в задаче: {sorted(list(extra))}" + info_msg
     assert not missing, f"Нет обязательных ключей в задаче: {sorted(list(missing))}" + info_msg
-
