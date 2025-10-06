@@ -1,26 +1,11 @@
 import pytest
 import allure
 import re
-import requests
 from datetime import datetime
 
+from test_backend.data.endpoints.personal_access_tokens.pat_edpoints import create_token
+
 pytestmark = [pytest.mark.backend]
-
-
-def create_token(owner_token, main_space, token_name):
-    """
-    Выполняет POST-запрос на создание персонального access-токена.
-    Возвращает response.
-    """
-    return requests.post(
-        "https://vaiz-api-uat.vaiz.dev/v4/CreatePersonalAccessToken",
-        headers={
-            "Authorization": f"Bearer {owner_token}",
-            "Current-Space-Id": main_space,
-            "Content-Type": "application/json"
-        },
-        json={"name": token_name}
-    )
 
 
 @allure.title("Создание персонального access-токена (уникальное имя, полное покрытие требований)")
