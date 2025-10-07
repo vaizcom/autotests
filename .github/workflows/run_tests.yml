@@ -88,7 +88,7 @@ jobs:
           auth_client_secret: ${{ secrets.CF_TOKEN }}
 
       - name: Adding static DNS
-        run: echo "10.114.16.5 api.vaiz.dev app.vaiz.dev" | sudo tee -a /etc/hosts
+        run: echo "10.114.16.5 app.vaiz.dev" | sudo tee -a /etc/hosts
 
       - name: ❌ Clean old Allure results
         run: rm -rf allure-results
