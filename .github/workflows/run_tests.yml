@@ -103,7 +103,7 @@ jobs:
           
       - name: ✅ Check if the API is available from the agent 
         continue-on-error: false
-        run: curl $API_URL/healthCheck
+        run: curl -m 10 $API_URL/healthCheck
 
 
       - name: ✅ Run tests with Allure
