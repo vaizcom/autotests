@@ -16,7 +16,12 @@ on:
         description: 'Which test stand to run?'
         default: 'kuber_dev'
         type: choice
-        options: [ dev, uat, kuber_dev, kuber_uat ]
+        options: [ dev, kuber_dev, kuber_uat ]
+
+permissions:
+  contents: write 
+  issues: write
+  pull-requests: write
 
 jobs:
   test:
@@ -48,12 +53,6 @@ jobs:
       # ✅ Добавляем tests/ в PYTHONPATH (для from config import settings)
       - name: Add tests to PYTHONPATH
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
-
-      - name: Set default TEST_SCOPE if not defined
-        run: |
-          if [ -z "$TEST_SCOPE" ]; then
-            echo "TEST_SCOPE=backend" >> $GITHUB_ENV
-          fi
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -101,12 +100,15 @@ jobs:
           echo "TEST_SCOPE=$TEST_SCOPE" >> allure-results/environment.properties
           echo "TEST_STAND=$TEST_STAND_NAME" >> allure-results/environment.properties
           echo "API_URL=$API_URL" >> allure-results/environment.properties
+          
+      - name: ✅ Check if the API is available from the agent 
+        continue-on-error: false
+        run: curl $API_URL/healthCheck
+
 
       - name: ✅ Run tests with Allure
         continue-on-error: true
-        run: |
-          export PYTHONPATH=tests
-          pytest . --alluredir=allure-results -m "$TEST_SCOPE"
+        run: pytest . --alluredir=allure-results -m "$TEST_SCOPE"
 
       - name: Check allure-results content
         run: ls -lah allure-results
