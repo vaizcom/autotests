@@ -11,6 +11,7 @@ pytestmark = [pytest.mark.backend]
     "initial_tasks, create_index, expected_position, title",
     [
         (0, None, 0, "Пустая группа, индекс не указан"),
+        (0, 0, 0, "Пустая группа, индекс=0"),
         (0, 10, 0, "Пустая группа, индекс=10"),
         (10, 2, 2, "Группа из 10 тасок, индекс=2"),
         (10, 999, 10, "Группа из 10 тасок, индекс=999"),
@@ -20,6 +21,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=[
         "empty_group_no_index",
+        "empty_group_index_0",
         "empty_group_index_10",
         "ten_tasks_index_2",
         "ten_tasks_index_999",
@@ -72,7 +74,6 @@ def test_task_indexing_in_group(
             }
             target_task = create_task_in_main(**params)
             target_task_id = target_task["_id"]
-            time.sleep(1)
 
         with allure.step("Запросить список задач группы и проверить корректность порядка"):
             board = client.post(**get_board_endpoint(main_board, main_space)).json()["payload"]["board"]
