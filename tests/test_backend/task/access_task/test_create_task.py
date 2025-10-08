@@ -38,11 +38,8 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
     allure.dynamic.title(
         f"Create task with minimal payload: клиент={client_fixture}, ожидаемый статус={expected_status}")
 
-    with allure.step(f"Получение клиента для {client_fixture}"):
-        client = get_client(request, client_fixture)
-
-    with allure.step(f"Получение id пользователя который создает задачу"):
-        member_id = get_member_profile(client, main_space)
+    client = get_client(request, client_fixture)
+    member_id = get_member_profile(client, main_space)
 
     task_id = None  # переменную объявляем до блока try
 
@@ -142,42 +139,18 @@ def test_create_task_with_specific_payload_and_response(
         f"Проверка создания задачи с конкретным payload и структурой ответа : клиент={client_fixture}, ожидаемый статус={expected_status}"
     )
 
-    # Получение клиента
-    with allure.step(f"Получение клиента для {client_fixture}"):
-        client = get_client(request, client_fixture)
-
-    # Формируем имя задачи с учетом пользователя и текущей даты
+    client = get_client(request, client_fixture)
     task_name = f"Create task клиент={client_fixture}, дата={datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    member_id = get_member_profile(client, main_space) # Получение профиля для извлечения creator ID
+    random_type_id = get_type(client, main_board, main_space)
+    random_group_id = get_group(client, main_board, main_space)
+    current_timestamp = get_current_timestamp()
+    due_end = get_due_end()
+    priority = get_priority()
+    random_member_id = get_assignee(client, main_space)
+    get_random_complete = random.choice([True, False])
+    get_random_milestone = get_milestone(client, main_space, main_board)
 
-    # Получение профиля для извлечения creator ID
-    with allure.step(f"Получение профиля для извлечения creator ID"):
-        member_id = get_member_profile(client, main_space)
-
-    with allure.step("Получаем случайный type из борды"):
-        random_type_id = get_type(client, main_board, main_space)
-
-    with allure.step("Получаем случайную группу из борды"):
-        random_group_id = get_group(client, main_board, main_space)
-
-    with allure.step("Получаем текущую дату и время в формате ISO 8601 UTC"):
-        current_timestamp = get_current_timestamp()
-
-    with allure.step("Прибавляем неделю к переданному времени в формате ISO 8601 UTC"):
-        due_end = get_due_end()
-
-    with allure.step("Получаем случайную priority"):
-        priority = get_priority()
-
-    with allure.step("Получаем random_member_id для извлечения assignees"):
-        random_member_id = get_assignee(client, main_space)
-
-    with allure.step("Получаем get_random_complete для извлечения completed"):
-        get_random_complete = random.choice([True, False])
-
-    with allure.step("Получаем get_random_complete для извлечения completed"):
-        get_random_milestone = get_milestone(client, main_space, main_board)
-
-    # Если запрос успешен, проверяем содержимое ответа
     task_id = None
 
     try:
