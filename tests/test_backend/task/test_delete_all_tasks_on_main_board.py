@@ -4,6 +4,8 @@ import allure
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, delete_task_endpoint
 from test_backend.task.utils import get_client
 
+pytestmark = [pytest.mark.backend]
+
 @pytest.mark.backend
 def test_delete_all_tasks_on_main_board(request, owner_client, main_space, main_board):
     """

@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import re
 
 import random
@@ -99,8 +99,8 @@ def get_due_end():
     Возвращает дату и время через неделю от текущего момента в формате "YYYY-MM-DDTHH:MM:SS.sss+00:00".
     :return: строка с датой и временем.
     """
-    current_time = datetime.utcnow()
-    due_end = current_time + datetime.timedelta(weeks=1)
+    current_time = datetime.utcnow()  # OK: datetime импортирован
+    due_end = current_time + timedelta(weeks=1)  # OK: timedelta импортирован
     return due_end.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "+00:00"
 
 def get_priority():

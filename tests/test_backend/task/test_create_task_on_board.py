@@ -1,9 +1,12 @@
 import random
 import allure
+import pytest
 
 from test_backend.task.utils import get_client
 from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
 from test_backend.task.utils import get_group
+
+pytestmark = [pytest.mark.backend]
 
 def test_create_task_and_verify_on_board(request, create_task_in_main, main_space, main_board):
     """

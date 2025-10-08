@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 
 import allure
@@ -33,15 +33,7 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
         3. Формирование минимального payload и попытка создать задачу через API.
         4. Проверка статус-кода ответа.
         5. Если задача успешно создана (ответ 200):
-            - Проверка наполнения и структуры ответа:
-                - Сопоставление идентификатора доски.
-                - Проверка значения названия (должно быть "Untitled task" по умолчанию).
-                - Проверка исполнителей, типов, майлстоунов, подзадач (должны быть пустые списки).
-                - Проверка полей completed (False), creator, hrid, priority и других системных полей.
-                - Проверка структуры ключей (обязательные и дополнительные).
-                - Проверка, что поля parentTask, archiver, archivedAt, completedAt равны None.
-        6. Независимо от результата (finally):
-            - Если задача была создана, выполняется её удаление через соответствующий endpoint.
+            - Проверка наполнения и структуры ответа
     """
     allure.dynamic.title(
         f"Create task with minimal payload: клиент={client_fixture}, ожидаемый статус={expected_status}")

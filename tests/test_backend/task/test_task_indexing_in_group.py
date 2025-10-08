@@ -5,6 +5,7 @@ from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
 from test_backend.task.utils import wait_group_empty, safe_delete_all_tasks_in_group
 
+pytestmark = [pytest.mark.backend]
 
 @pytest.mark.parametrize(
     "initial_tasks, create_index, expected_position, title",
@@ -14,7 +15,8 @@ from test_backend.task.utils import wait_group_empty, safe_delete_all_tasks_in_g
         (10, 2, 2, "Группа из 10 тасок, индекс=2"),
         (10, 999, 10, "Группа из 10 тасок, индекс=999"),
         (10, 0, 0, "Группа из 10 тасок, индекс=0"),
-        (10, 10,10, "Группа из 10 тасок, индекс=10")
+        (10, 10,10, "Группа из 10 тасок, индекс=10"),
+        (10,9,9, "Группа из 10 тасок, индекс=9")
     ],
     ids=[
         "empty_group_no_index",
@@ -22,7 +24,8 @@ from test_backend.task.utils import wait_group_empty, safe_delete_all_tasks_in_g
         "ten_tasks_index_2",
         "ten_tasks_index_999",
         "ten_tasks_index_0",
-        "ten_tasks_index_10"
+        "ten_tasks_index_10",
+        "ten_tasks_index_9"
     ]
 )
 def test_task_indexing_in_group(
