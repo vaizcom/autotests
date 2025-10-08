@@ -1,16 +1,15 @@
 import random
-
 import allure
 
+from test_backend.task.utils import get_client
 from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
-from test_backend.task.utils import get_client, get_group
-
+from test_backend.task.utils import get_group
 
 def test_create_task_and_verify_on_board(request, create_task_in_main, main_space, main_board):
     """
-    Тест создает задачу с указанными бордой, группой и индексом, и проверяет:
+    Тест создает задачу с указанными бордой, группой и индексом=0, и проверяет:
       - корректность задачи,
-      - что задача только в одной группе, нет дублей, верный индекс.
+      - что задача только в одной группе, нет дублей, верный индекс=0.
       - random client_fixture
     """
     random_client = random.choice(["owner_client", "manager_client", "member_client"])

@@ -1,12 +1,12 @@
+import datetime
 import re
 
 import random
 import allure
-
-from datetime import datetime, timedelta
-
+import time
 from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
 from test_backend.data.endpoints.Project.project_endpoints import get_project_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, delete_task_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
 from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from test_backend.data.endpoints.milestone.milestones_endpoints import get_milestones_endpoint
@@ -100,7 +100,7 @@ def get_due_end():
     :return: строка с датой и временем.
     """
     current_time = datetime.utcnow()
-    due_end = current_time + timedelta(weeks=1)
+    due_end = current_time + datetime.timedelta(weeks=1)
     return due_end.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "+00:00"
 
 def get_priority():
@@ -158,3 +158,57 @@ def assert_task_keys(doc, expected_keys):
     )
     assert not extra, f"Есть лишние ключи в задаче: {sorted(list(extra))}" + info_msg
     assert not missing, f"Нет обязательных ключей в задаче: {sorted(list(missing))}" + info_msg
+
+
+def delete_all_tasks_in_group(client, main_board, main_space, group_id):
+    """
+    Удаляет все задачи из конкретной группы на борде.
+    """
+    with allure.step(f"Удаляем все задачи из группы {group_id}"):
+        resp = client.post(**get_tasks_endpoint(board=main_board, space_id=main_space))
+        resp.raise_for_status()
+        tasks = resp.json()["payload"].get("tasks", [])
+        group_tasks = [t for t in tasks if t.get("group") == group_id]
+        for t in group_tasks:
+            del_resp = client.post(**delete_task_endpoint(task_id=t["_id"], space_id=main_space))
+            assert del_resp.status_code == 200, f"Не удалось удалить задачу {t['_id']}"
+
+
+def safe_delete_all_tasks_in_group(client, main_board, main_space, group_id, max_retries=3):
+    """
+    Удаляет все задачи из конкретной группы.
+    Для каждой задачи делает несколько попыток, если не получилось — пишет причину, но не падает жестко.
+    """
+    with allure.step(f"Удаляем все задачи из группы {group_id} (безаварийно)"):
+        resp = client.post(**get_board_endpoint(main_board, main_space))
+        board = resp.json()["payload"]["board"]
+        task_ids = board["taskOrderByGroups"].get(group_id, [])
+        if not task_ids:
+            return
+        # Чтобы не пропустить "зависшие" задачи (если get_tasks_endpoint вдруг отличается), проходим по списку task_ids
+        for tid in task_ids:
+            for attempt in range(max_retries):
+                del_resp = client.post(
+                    path="/DeleteTask",
+                    json={"taskId": tid},
+                    headers={"Content-Type": "application/json", "Current-Space-Id": main_space}
+                )
+                if del_resp.status_code == 200:
+                    break
+                time.sleep(0.5)
+            else:
+                print(f"Не удалось удалить задачу {tid} после {max_retries} попыток: статус {del_resp.status_code}, ответ: {del_resp.text}")
+
+
+
+def wait_group_empty(client, board_id, space_id, group_id, timeout=10, poll_interval=0.5):
+    """Ожидает, пока группа не станет пустой, либо истекает timeout (сек)"""
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        board = client.post(**get_board_endpoint(board_id, space_id)).json()["payload"]["board"]
+        tasks = board["taskOrderByGroups"].get(group_id, [])
+        if not tasks:
+            return
+        time.sleep(poll_interval)
+    # Если tasks не пуст — значит, что-то не так
+    raise AssertionError(f"Группа {group_id} осталась не пустой: {tasks}")
