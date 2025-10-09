@@ -6,6 +6,8 @@ from test_backend.data.endpoints.Task.task_endpoints import (
     get_task_endpoint,
 )
 
+pytestmark = [pytest.mark.backend]
+
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
