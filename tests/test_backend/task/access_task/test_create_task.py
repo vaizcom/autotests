@@ -5,7 +5,7 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
-from test_backend.task.utils import validate_hrid, get_client, get_member_profile, create_task, get_type, get_group, \
+from test_backend.task.utils import validate_hrid, get_client, get_member_profile, create_task, get_random_type_id, get_random_group_id, \
     get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone, assert_task_keys
 
 pytestmark = [pytest.mark.backend]
@@ -142,8 +142,8 @@ def test_create_task_with_specific_payload_and_response(
     client = get_client(request, client_fixture)
     task_name = f"Create task клиент={client_fixture}, дата={datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
     member_id = get_member_profile(client, main_space) # Получение профиля для извлечения creator ID
-    random_type_id = get_type(client, main_board, main_space)
-    random_group_id = get_group(client, main_board, main_space)
+    random_type_id = get_random_type_id(client, main_board, main_space)
+    random_group_id = get_random_group_id(client, main_board, main_space)
     current_timestamp = get_current_timestamp()
     due_end = get_due_end()
     priority = get_priority()

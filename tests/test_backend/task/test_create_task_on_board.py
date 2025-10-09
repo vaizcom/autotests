@@ -4,7 +4,7 @@ import pytest
 
 from test_backend.task.utils import get_client
 from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
-from test_backend.task.utils import get_group
+from test_backend.task.utils import get_random_group_id
 
 pytestmark = [pytest.mark.backend]
 
@@ -17,7 +17,7 @@ def test_create_task_and_verify_on_board(request, create_task_in_main, main_spac
     """
     random_client = random.choice(["owner_client", "manager_client", "member_client"])
     client = get_client(request, random_client)
-    random_group_id = get_group(client, main_board, main_space)
+    random_group_id = get_random_group_id(client, main_board, main_space)
     task_index = 0
 
     with allure.step(f"Создаем задачу от случайного пользователя: {random_client}"):

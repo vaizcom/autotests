@@ -1,9 +1,11 @@
+import random
 from datetime import datetime
 
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
-from test_backend.task.utils import get_client, create_task
+from test_backend.task.utils import get_client, create_task, get_member_profile, get_random_type_id, get_random_group_id, \
+    get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone
 
 
 @pytest.fixture
@@ -25,22 +27,38 @@ def create_task_in_main(request, main_space, main_board, main_project):
         """
         # Получение клиента
         client = get_client(request, client_fixture)
+        task_name = kwargs.get(
+            "name") or f"Create task клиент={client_fixture}, дата={datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        random_type_id = kwargs.get("types") or [get_random_type_id(client, main_board, main_space)]
+        random_group_id = kwargs.get("group") or get_random_group_id(client, main_board, main_space)
+        current_timestamp = kwargs.get("due_start") or get_current_timestamp()
+        due_end = kwargs.get("due_end") or get_due_end()
+        priority = kwargs.get("priority") if "priority" in kwargs else get_priority()
+        random_member_id = kwargs.get("assignees") or [get_assignee(client, main_space)]
+        get_random_complete = kwargs.get("completed") if "completed" in kwargs else random.choice([True, False])
+
+        if "milestones" in kwargs:
+            milestones = kwargs["milestones"]
+        else:
+            milestones = None
+
+        parent_task = kwargs["parent_task"] if "parent_task" in kwargs else None
 
         # Формирование payload с обязательными и опциональными параметрами
         payload = create_task_endpoint(
             space_id=main_space,
             board=main_board,
-            name=kwargs.get("name", f"Default Task {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"),
-            types=kwargs.get("types", ["6866731185fb8d104544e82b"]),
-            assignees=kwargs.get("assignees", ["6866309d85fb8d104544a620"]),
-            due_start=kwargs.get("due_start", "2025-09-19T14:47:17.596+00:00"),
-            due_end=kwargs.get("due_end", "2026-09-19T14:47:17.596+00:00"),
-            priority=kwargs.get("priority", 3),
-            completed=kwargs.get("completed", False),
-            group=kwargs.get("group", "6866731185fb8d104544e828"),
-            milestones=kwargs.get("milestones", ["68d5189654c332d6918a9b52"]),
-            parent_task=kwargs.get("parent_task", None),
-            index=kwargs.get("index", 1),
+            name=task_name,
+            types=random_type_id,
+            assignees=random_member_id,
+            due_start=current_timestamp,
+            due_end=due_end,
+            priority=priority,
+            completed=get_random_complete,
+            group=random_group_id,
+            milestones=milestones,
+            parent_task=parent_task,
+            index=1,
         )
 
         # Отправка запроса на создание задачи

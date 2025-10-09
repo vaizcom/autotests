@@ -47,7 +47,7 @@ def get_client(request, client_fixture):
         return request.getfixturevalue(client_fixture)
 
 
-def get_type(client, board_id, space_id):
+def get_random_type_id(client, board_id, space_id):
     """
     Получение случайного `_id` из typesList борды.
     """
@@ -66,7 +66,7 @@ def get_type(client, board_id, space_id):
         return random_type["_id"]
 
 
-def get_group(client, board_id, space_id):
+def get_random_group_id(client, board_id, space_id):
     """
     Получение случайного `_id` группы из списка groups борды.
     """
