@@ -41,7 +41,7 @@ def test_create_subtask_per_role(
             parent_id = parent_task["_id"]
             parent_slug = parent_task["hrid"]
 
-        with allure.step(f"Попытка создать сабтаску через {client_fixture}"):
+        with allure.step(f"Создание сабтаски в роли {client_fixture}"):
             try:
                 subtask = create_task_in_main(
                     client_fixture,
@@ -59,7 +59,7 @@ def test_create_subtask_per_role(
         if expected_status == 200:
             assert subtask_id, f"{client_fixture} должен иметь возможность создать сабтаску, но упали с {creation_exception}"
 
-            with allure.step(f"Проверяем, что в ответе у сабтаски присутствует parentTask с корректным ID."):
+            with allure.step("Проверяем, что в ответе у сабтаски присутствует parentTask с корректным ID."):
                 assert subtask.get("parentTask") == parent_id, (
                     f"У созданной сабтаски (ID={subtask_id}) поле parentTask должно быть {parent_id}, "
                     f"но сейчас: {subtask.get('parentTask')}"
@@ -70,9 +70,11 @@ def test_create_subtask_per_role(
                     f"но сейчас: {subtask.get('subtasks')}"
                 )
 
+
         else:  # expected_status == 403
-            assert subtask_id is None, f"{client_fixture} НЕ должен иметь права создавать сабтаску, но задача появилась: {subtask_id}"
-            assert creation_exception is not None, "Ожидалось исключение (ошибка запроса), но его не было"
+            with allure.step(f"Проверяем, что {client_fixture} не может создать сабтаску (expected_status == 403)"):
+                assert subtask_id is None, f"{client_fixture} НЕ должен иметь права создавать сабтаску, но задача появилась: {subtask_id}"
+                assert creation_exception is not None, "Ожидалось исключение (ошибка запроса), но его не было"
 
         # Проверка связей: теперь через get_task_endpoint (используя slug)
         with allure.step('Проверяем родительскую задачу через get_task_endpoint'):

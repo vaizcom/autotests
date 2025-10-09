@@ -18,7 +18,7 @@ def validate_hrid(client, space_id, project_id, task_hrid):
     # Проверяем, что клиент является объектом APIClient
     assert hasattr(client, 'post'), "Клиент должен быть экземпляром APIClient"
 
-    with allure.step(f"Получаем slug проекта"):
+    with allure.step("Получаем slug проекта"):
         response = client.post(**get_project_endpoint(project_id=project_id, space_id=space_id))
         response.raise_for_status()
 
