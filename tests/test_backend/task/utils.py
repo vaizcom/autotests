@@ -237,9 +237,13 @@ def get_named_milestone_id(client, space_id, board_id, milestone_name):
             return ms["_id"]
     raise AssertionError(f"Milestone с именем '{milestone_name}' не найден на борде {board_id}")
 
-def get_parent_ms(client, space_id, board_id):
+def get_parent_ms_1(client, space_id, board_id):
     """ID milestone для родительской задачи (A)."""
-    return get_named_milestone_id(client, space_id, board_id, "parent_ms")
+    return get_named_milestone_id(client, space_id, board_id, "parent_ms_1")
+
+def get_parent_ms_2(client, space_id, board_id):
+    """ID milestone для родительской задачи (A)."""
+    return get_named_milestone_id(client, space_id, board_id, "parent_ms_2")
 
 def get_subtask_ms_1(client, space_id, board_id):
     """ID milestone для сабтаска 1 (B)."""
