@@ -43,6 +43,7 @@ def create_task_in_main(request, main_space, main_board, main_project):
             milestones = None
 
         parent_task = kwargs["parent_task"] if "parent_task" in kwargs else None
+        index_task = kwargs["index"] if "index" in kwargs else None
 
         # Формирование payload с обязательными и опциональными параметрами
         payload = create_task_endpoint(
@@ -58,7 +59,7 @@ def create_task_in_main(request, main_space, main_board, main_project):
             group=random_group_id,
             milestones=milestones,
             parent_task=parent_task,
-            index=1,
+            index=index_task,
         )
 
         # Отправка запроса на создание задачи

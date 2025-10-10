@@ -3,7 +3,8 @@ import allure
 import time
 from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
-from test_backend.task.utils import wait_group_empty, safe_delete_all_tasks_in_group
+from test_backend.task.utils import wait_group_empty, safe_delete_all_tasks_in_group, \
+    delete_all_group_tasks
 
 pytestmark = [pytest.mark.backend]
 
@@ -43,8 +44,7 @@ def test_task_indexing_in_group(
         group_id = resp.json()["payload"]["board"]["groups"][0]["_id"]
 
     with allure.step("Очистить все задачи в выбранной группе"):
-        safe_delete_all_tasks_in_group(client, main_board, main_space, group_id)
-        wait_group_empty(client, main_board, main_space, group_id)
+        delete_all_group_tasks(client, main_board, main_space, group_id)
 
     try:
         with allure.step("Убедиться, что группа действительно пуста"):

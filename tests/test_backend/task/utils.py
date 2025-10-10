@@ -5,7 +5,7 @@ import allure
 import time
 from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
 from test_backend.data.endpoints.Project.project_endpoints import get_project_endpoint
-from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, delete_task_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import delete_task_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
 from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from test_backend.data.endpoints.milestone.milestones_endpoints import get_milestones_endpoint
@@ -159,18 +159,31 @@ def assert_task_keys(doc, expected_keys):
     assert not missing, f"Нет обязательных ключей в задаче: {sorted(list(missing))}" + info_msg
 
 
-def delete_all_tasks_in_group(client, main_board, main_space, group_id):
+def delete_task_with_retry(client, task_id, space_id, retries=2, delay=0.5):
     """
-    Удаляет все задачи из конкретной группы на борде.
+    Пытается удалить задачу с несколькими попытками.
     """
-    with allure.step(f"Удаляем все задачи из группы {group_id}"):
-        resp = client.post(**get_tasks_endpoint(board=main_board, space_id=main_space))
+    for attempt in range(retries):
+        del_resp = client.post(**delete_task_endpoint(task_id=task_id, space_id=space_id))
+        if del_resp.status_code == 200:
+            return True
+        time.sleep(delay)
+    print(f"Не удалось удалить задачу {task_id} после {retries} попыток: статус {del_resp.status_code}, ответ: {del_resp.text}")
+    return False
+
+def delete_all_group_tasks(client, board_id, space_id, group_id):
+    """
+    Удаляет все задачи из указанной группы на борде.
+    """
+    with allure.step(f'Удаляем все задачи из группы {group_id}'):
+        resp = client.post(**get_board_endpoint(board_id, space_id))
         resp.raise_for_status()
-        tasks = resp.json()["payload"].get("tasks", [])
-        group_tasks = [t for t in tasks if t.get("group") == group_id]
-        for t in group_tasks:
-            del_resp = client.post(**delete_task_endpoint(task_id=t["_id"], space_id=main_space))
-            assert del_resp.status_code == 200, f"Не удалось удалить задачу {t['_id']}"
+        board = resp.json()['payload']['board']
+        task_ids = board['taskOrderByGroups'].get(group_id, [])
+        for task_id in task_ids:
+            time.sleep(0.5)
+            delete_task_with_retry(client, task_id, space_id)
+
 
 
 def safe_delete_all_tasks_in_group(client, main_board, main_space, group_id, max_retries=3):
@@ -186,6 +199,7 @@ def safe_delete_all_tasks_in_group(client, main_board, main_space, group_id, max
             return
         # Чтобы не пропустить "зависшие" задачи (если get_tasks_endpoint вдруг отличается), проходим по списку task_ids
         for tid in task_ids:
+            time.sleep(0.5)
             for attempt in range(max_retries):
                 del_resp = client.post(
                     path="/DeleteTask",
