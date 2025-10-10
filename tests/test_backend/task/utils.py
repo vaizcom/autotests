@@ -184,8 +184,6 @@ def delete_all_group_tasks(client, board_id, space_id, group_id):
             time.sleep(0.5)
             delete_task_with_retry(client, task_id, space_id)
 
-
-
 def safe_delete_all_tasks_in_group(client, main_board, main_space, group_id, max_retries=3):
     """
     Удаляет все задачи из конкретной группы.
@@ -213,7 +211,6 @@ def safe_delete_all_tasks_in_group(client, main_board, main_space, group_id, max
                 print(f"Не удалось удалить задачу {tid} после {max_retries} попыток: статус {del_resp.status_code}, ответ: {del_resp.text}")
 
 
-
 def wait_group_empty(client, board_id, space_id, group_id, timeout=10, poll_interval=0.5):
     """Ожидает, пока группа не станет пустой, либо истекает timeout (сек)"""
     start_time = time.time()
@@ -225,3 +222,29 @@ def wait_group_empty(client, board_id, space_id, group_id, timeout=10, poll_inte
         time.sleep(poll_interval)
     # Если tasks не пуст — значит, что-то не так
     raise AssertionError(f"Группа {group_id} осталась не пустой: {tasks}")
+
+
+def get_named_milestone_id(client, space_id, board_id, milestone_name):
+    """
+    Возвращает _id майлстоуна с заданным именем в текущей доске.
+    Ошибка, если не найден.
+    """
+    resp = client.post(**get_milestones_endpoint(space_id=space_id, board_id=board_id))
+    resp.raise_for_status()
+    milestones = resp.json().get("payload", {}).get("milestones", [])
+    for ms in milestones:
+        if ms.get("name") == milestone_name:
+            return ms["_id"]
+    raise AssertionError(f"Milestone с именем '{milestone_name}' не найден на борде {board_id}")
+
+def get_parent_ms(client, space_id, board_id):
+    """ID milestone для родительской задачи (A)."""
+    return get_named_milestone_id(client, space_id, board_id, "parent_ms")
+
+def get_subtask_ms_1(client, space_id, board_id):
+    """ID milestone для сабтаска 1 (B)."""
+    return get_named_milestone_id(client, space_id, board_id, "subtask_ms_1")
+
+def get_subtask_ms_2(client, space_id, board_id):
+    """ID milestone для сабтаска 2 (C)."""
+    return get_named_milestone_id(client, space_id, board_id, "subtask_ms_2")
