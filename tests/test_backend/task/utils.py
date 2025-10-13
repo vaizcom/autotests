@@ -8,7 +8,7 @@ from test_backend.data.endpoints.Project.project_endpoints import get_project_en
 from test_backend.data.endpoints.Task.task_endpoints import delete_task_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
 from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
-from test_backend.data.endpoints.milestone.milestones_endpoints import get_milestones_endpoint
+from test_backend.data.endpoints.milestone.milestones_endpoints import get_milestones_endpoint, get_milestone_endpoint
 
 
 def validate_hrid(client, space_id, project_id, task_hrid):
@@ -252,3 +252,10 @@ def get_subtask_ms_1(client, space_id, board_id):
 def get_subtask_ms_2(client, space_id, board_id):
     """ID milestone для сабтаска 2 (C)."""
     return get_named_milestone_id(client, space_id, board_id, "subtask_ms_2")
+
+def get_milestone_tasks(client, space_id: str, ms_id: str):
+    """Получить подробности по одному milestone по его _id."""
+    endpoint = get_milestone_endpoint(ms_id, space_id)
+    response = client.post(**endpoint)
+    response.raise_for_status()
+    return response.json()['payload']['milestone']
