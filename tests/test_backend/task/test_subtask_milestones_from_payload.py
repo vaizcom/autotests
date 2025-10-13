@@ -1,7 +1,7 @@
 import allure
 import pytest
 from test_backend.task.utils import get_subtask_ms_1, get_subtask_ms_2, delete_task_with_retry, \
-    get_parent_ms_1
+    get_parent_ms_1, get_parent_ms_2
 
 pytestmark = [pytest.mark.backend]
 
@@ -15,11 +15,13 @@ def test_subtask_milestone_with_own_milestone(
     Создание сабтаска с собственным milestone.
     Сабтаск отображает milestone B (из payload), а не наследует milestone A от родителя.
     """
-    with allure.step("Получаем ID milestone для родителя"):
-        parent_ms_id = get_parent_ms_1(owner_client, main_space, main_board)
+    with allure.step("Получаем IDs milestons для родителя"):
+        parent_ms_id_1 = get_parent_ms_1(owner_client, main_space, main_board)
+        parent_ms_id_2 = get_parent_ms_2(owner_client, main_space, main_board)
+
 
     with allure.step("Создаём родительскую задачу"):
-        parent = create_task_in_main("owner_client", milestones=[parent_ms_id])
+        parent = create_task_in_main("owner_client", milestones=[parent_ms_id_1, parent_ms_id_2])
         parent_task = parent["_id"]
 
     with allure.step("Получаем ID milestone для сабтаска"):
@@ -29,10 +31,15 @@ def test_subtask_milestone_with_own_milestone(
         subtask = create_task_in_main("owner_client", parent_task=parent_task, milestones=[subtask_ms_id])
 
     try:
-        with allure.step("Проверяем, что у сабтаска создана с собственным milestone"):
-            expected_ms_id = [subtask_ms_id]
-            assert subtask["milestones"] == expected_ms_id, (
-                f"Ожидались milestones {expected_ms_id}, получили {subtask.get('milestones')}"
+        with allure.step("Проверяем, что у сабтаска создана с собственным milestone(milestone берется из payload)"):
+            expected_subtask_ms_id = [subtask_ms_id]
+            assert subtask["milestones"] == [subtask_ms_id], (
+                f"Ожидались milestones {expected_subtask_ms_id}, получили {subtask.get('milestones')}"
+            )
+        with allure.step("Проверяем, что у родительской таски корректные milestones(milestone берется из payload)"):
+            expected_parents_ms_id = [parent_ms_id_1, parent_ms_id_2]
+            assert parent["milestones"] == expected_parents_ms_id, (
+                f"Ожидались milestones {expected_parents_ms_id}, получили {parent.get('milestones')}"
             )
     finally:
         with allure.step("Удаляем сабтаск и родительскую задачу после теста"):
@@ -67,6 +74,11 @@ def test_subtask_milestone_without_own_milestone(
             expected_ms_id = []
             assert subtask["milestones"] == expected_ms_id, (
                 f"Ожидались milestones {expected_ms_id}, получили {subtask.get('milestones')}"
+            )
+        with allure.step("Проверяем, что у родительской таски корректные milestones(milestone берется из payload)"):
+            expected_parents_ms_id = [parent_ms_id]
+            assert parent["milestones"] == expected_parents_ms_id, (
+                f"Ожидались milestones {expected_parents_ms_id}, получили {parent.get('milestones')}"
             )
     finally:
         with allure.step("Удаляем сабтаск и родительскую задачу после теста"):
@@ -113,6 +125,12 @@ def test_create_subtasks_with_various_milestones(
             assert subtask1["milestones"] == [ms_1], f"Subtask #1: ожидался milestone {ms_1}"
             assert subtask2["milestones"] == [ms_2], f"Subtask #2: ожидался milestone {ms_2}"
             assert subtask3["milestones"] == [], "Subtask #3: ожидался пустой milestone"
+
+        with allure.step("Проверяем, что у родительской таски корректные milestones(milestone берется из payload)"):
+            expected_parents_ms_id = [parent_ms_id]
+            assert parent["milestones"] == expected_parents_ms_id, (
+                f"Ожидались milestones {expected_parents_ms_id}, получили {parent.get('milestones')}"
+            )
     finally:
         with allure.step("Удаляем все сабтаски и родительскую задачу после теста"):
             for subtask in subtasks:
