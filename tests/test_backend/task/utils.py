@@ -253,9 +253,80 @@ def get_subtask_ms_2(client, space_id, board_id):
     """ID milestone для сабтаска 2 (C)."""
     return get_named_milestone_id(client, space_id, board_id, "subtask_ms_2")
 
-def get_milestone_tasks(client, space_id: str, ms_id: str):
+def get_milestone_id(client, space_id: str, ms_id: str):
     """Получить подробности по одному milestone по его _id."""
     endpoint = get_milestone_endpoint(ms_id, space_id)
     response = client.post(**endpoint)
     response.raise_for_status()
     return response.json()['payload']['milestone']
+
+
+def create_parent_and_subtasks(create_task_in_main, client_fixture, owner_client, main_space, main_board):
+    """
+    Создает родительскую задачу с milestone parent_ms_1,
+    три подзадачи: первая с milestone subtask_ms_1,
+    вторая с milestone subtask_ms_2, третья без milestone.
+
+    Возвращает:
+        created_tasks (list): список всех созданных задач
+        ids (dict): словарь с ключами 'parent', 'subtask1', 'subtask2', 'subtask3' и их _id
+    """
+    parent_ms_1 = get_parent_ms_1(owner_client, main_space, main_board)
+    subtask_ms_1 = get_subtask_ms_1(owner_client, main_space, main_board)
+    subtask_ms_2 = get_subtask_ms_2(owner_client, main_space, main_board)
+
+    ms = {
+        "parent_ms_1": parent_ms_1,
+        "subtask_ms_1": subtask_ms_1,
+        "subtask_ms_2": subtask_ms_2
+    }
+
+    created_tasks = []
+
+    with allure.step('Создание родительской задачи с milestone parent_ms_1'):
+        parent_task = create_task_in_main(
+            client_fixture,
+            name="Parent Task with milestone parent_ms_1",
+            milestones=[parent_ms_1],
+        )
+        created_tasks.append(parent_task)
+        parent_task_id = parent_task["_id"]
+
+    with allure.step('Создание первой подзадачи с milestone subtask_ms_1'):
+        subtask1 = create_task_in_main(
+            client_fixture,
+            name="Subtask 1 with milestone subtask_ms_1",
+            milestones=[subtask_ms_1],
+            parent_task=parent_task_id,
+        )
+        created_tasks.append(subtask1)
+        subtask1_id = subtask1["_id"]
+
+    with allure.step('Создание второй подзадачи с milestone subtask_ms_2'):
+        subtask2 = create_task_in_main(
+            client_fixture,
+            name="Subtask 2 with milestone subtask_ms_2",
+            milestones=[subtask_ms_2],
+            parent_task=parent_task_id,
+        )
+        created_tasks.append(subtask2)
+        subtask2_id = subtask2["_id"]
+
+    with allure.step('Создание третьей подзадачи без milestone'):
+        subtask3 = create_task_in_main(
+            client_fixture,
+            name="Subtask 3 without milestone",
+            milestones=[],
+            parent_task=parent_task_id,
+        )
+        created_tasks.append(subtask3)
+        subtask3_id = subtask3["_id"]
+
+    ids = {
+        "parent": parent_task_id,
+        "subtask1": subtask1_id,
+        "subtask2": subtask2_id,
+        "subtask3": subtask3_id,
+    }
+
+    return ids, ms
