@@ -38,13 +38,13 @@ def test_subtask_parent_child_relationships(
             subtask_slug = subtask["hrid"]
 
         with allure.step('Проверяем родительскую задачу через get_task_endpoint'):
-            resp_parent = owner_client.post(**get_task_endpoint(slug_id=parent_slug, space_id=main_space))
+            resp_parent = owner_client.post(**get_task_endpoint(slug_id=parent_id, space_id=main_space)) # в slug_id можно передать id или slug
             assert resp_parent.status_code == 200, f'Не удалось получить родительскую задачу: {resp_parent.status_code}'
             parent = resp_parent.json()["payload"].get("task")
             assert parent is not None, f"Родительская задача (slug={parent_slug}) не найдена"
 
         with allure.step('Проверяем подзадачу через get_task_endpoint'):
-            resp_sub = owner_client.post(**get_task_endpoint(slug_id=subtask_slug, space_id=main_space))
+            resp_sub = owner_client.post(**get_task_endpoint(slug_id=subtask_id, space_id=main_space))
             assert resp_sub.status_code == 200, f'Не удалось получить подзадачу: {resp_sub.status_code}'
             sub = resp_sub.json()["payload"].get("task")
             assert sub is not None, f"Подзадача (slug={subtask_slug}) не найдена"
