@@ -9,7 +9,7 @@ from test_backend.task.utils import delete_task_with_retry, get_named_milestone_
 pytestmark = [pytest.mark.backend]
 
 @allure.story("Проверка счетчика задач у существующего milestone 'Milestone total task count'")
-def test_milestone_total_task_count(
+def test_milestone_total_task_count_increases_after_task_creation(
     owner_client, main_space, create_task_in_main
 , main_board):
     """
@@ -73,7 +73,7 @@ def test_milestone_total_task_count(
                 )
                 created_task_ids.append(task["_id"])
 
-        with allure.step(f"Проверяем, что total увеличился на {random_count}"):
+        with allure.step(f"Проверяем, что total увеличился на рандомное количество = {random_count}"):
             total_after = get_total()
             assert total_after == initial_total + 1 + random_count, \
                 f"Ожидалось total={initial_total + random_count}, получили {total_after}"
@@ -83,3 +83,66 @@ def test_milestone_total_task_count(
         with allure.step("Удаляем созданные задачи после теста"):
             for task_id in created_task_ids:
                 delete_task_with_retry(client, task_id, main_space)
+
+
+@allure.story("Проверка уменьшения счетчика задач milestone после удаления задач")
+def test_milestone_total_task_count_decrease_after_task_deletion(
+    owner_client, main_space, create_task_in_main, main_board
+):
+    """
+    Проверяем, что при удалении задач с milestone счетчик total уменьшается корректно,
+    и в итоге становится 0 после удаления всех задач.
+    """
+
+    client = owner_client
+    milestone_name = "Milestone total task count"
+    milestone_id = get_named_milestone_id(client, main_space, main_board, milestone_name)
+    created_task_ids = []
+
+    def get_total():
+        resp = client.post(**get_milestone_endpoint(space_id=main_space, ms_id=milestone_id))
+        resp.raise_for_status()
+        ms = resp.json()["payload"]["milestone"]
+        assert "total" in ms, "'total' отсутствует в milestone"
+        return ms["total"]
+
+    try:
+        with allure.step("Очищаем milestone от задач перед тестом"):
+            resp = client.post(**get_milestone_endpoint(space_id=main_space, ms_id=milestone_id))
+            resp.raise_for_status()
+            tasks = resp.json()["payload"]["milestone"].get("tasks", [])
+            for task in tasks:
+                delete_task_with_retry(client, task, main_space)
+            assert get_total() == 0, "Ожидалось, что total будет 0 после очистки"
+
+        with allure.step("Создаём несколько задач с этим milestone"):
+            count = 5
+            for i in range(count):
+                task = create_task_in_main(
+                    "owner_client",
+                    milestones=[milestone_id],
+                    name=f"Task #{i + 1} for milestone decrease test"
+                )
+                created_task_ids.append(task["_id"])
+
+        with allure.step("Проверяем, что total соответствует количеству созданных задач"):
+            total_after_creation = get_total()
+            assert total_after_creation == count, f"Ожидали total={count}, получили {total_after_creation}"
+
+        with allure.step("Удаляем задачи по одной и проверяем decrement total"):
+            for index, task_id in enumerate(created_task_ids):
+                delete_task_with_retry(client, task_id, main_space)
+                expected_total = count - (index + 1)
+                total_after_delete = get_total()
+                assert total_after_delete == expected_total, \
+                    f"После удаления {index + 1} задач ожидали total={expected_total}, получили {total_after_delete}"
+
+    finally:
+        # На всякий случай удаляем оставшиеся задачи
+        with allure.step("Финальная очистка created задач"):
+            for task_id in created_task_ids:
+                # Проверяем, что задача еще не удалена (возможно, уже удалена выше)
+                try:
+                    delete_task_with_retry(client, task_id, main_space)
+                except Exception:
+                    pass

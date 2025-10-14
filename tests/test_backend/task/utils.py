@@ -159,7 +159,7 @@ def assert_task_keys(doc, expected_keys):
     assert not missing, f"Нет обязательных ключей в задаче: {sorted(list(missing))}" + info_msg
 
 
-def delete_task_with_retry(client, task_id, space_id, retries=2, delay=0.5):
+def delete_task_with_retry(client, task_id, space_id, retries=1, delay=0.5):
     """
     Пытается удалить задачу с несколькими попытками.
     """
