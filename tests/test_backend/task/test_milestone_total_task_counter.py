@@ -63,7 +63,8 @@ def test_milestone_total_task_count_increases_after_task_creation(
             assert total_after_first == initial_total + 1, \
                 f"Ожидалось total={initial_total + 1}, получили {total_after_first}"
 
-        with allure.step("Создаём рандомное количество задач с этим milestone (от 1 до 10)"):
+        with allure.step("Создаём рандомное количество задач с этим milestone (от 1 до 10) Проверяем, что при добавлении"
+                         " задач, счетчик total увеличивается корректно "):
             random_count = random.randint(1, 10)
             for i in range(random_count):
                 task = create_task_in_main(
@@ -72,6 +73,11 @@ def test_milestone_total_task_count_increases_after_task_creation(
                     name=f"Random task #{i + 1} for milestone total count test"
                 )
                 created_task_ids.append(task["_id"])
+
+                expected_total = initial_total + 1 + (i + 1)
+                total_after_create = get_total()
+                assert total_after_create == expected_total, \
+                    f"После добавления {i + 1} задач ожидали total={expected_total}, получили {total_after_create}"
 
         with allure.step(f"Проверяем, что total увеличился на рандомное количество = {random_count}"):
             total_after = get_total()
@@ -146,3 +152,10 @@ def test_milestone_total_task_count_decrease_after_task_deletion(
                     delete_task_with_retry(client, task_id, main_space)
                 except Exception:
                     pass
+
+
+# TODO: Добавить тесты для проверки корректности обновления счетчика total
+# при архивировании задач в milestone.
+# Сейчас проверяем только добавление и удаление задач. Архивация пока не покрыта.
+with allure.step("TODO: В будущем - проверить изменение total при архивировании задач"):
+    pass
