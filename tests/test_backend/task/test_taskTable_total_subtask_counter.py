@@ -15,7 +15,7 @@ def get_parent_task_subtask_count(client, space_id, task_id) -> int:
     assert "subtasks" in task, "'subtasks' отсутствует в родительской задаче"
     return len(task["subtasks"])
 
-@allure.story("Проверка счетчика сабтасок в родительской задаче")
+@allure.title("Проверка счетчика сабтасок в taskTable в родительской задаче")
 def test_parent_task_total_subtask_count_increases_after_subtask_creation(owner_client, main_space,create_task_in_main):
     """
     Тест проверяет увеличение счетчика total сабтасок у родительской задачи после добавления сабтасок.
@@ -69,7 +69,7 @@ def test_parent_task_total_subtask_count_increases_after_subtask_creation(owner_
             delete_task_with_retry(client, parent_task_id, main_space)
 
 
-@allure.story("Проверка уменьшения счетчика сабтасок после удаления сабтасок в родительской задаче")
+@allure.title("Проверка уменьшения счетчика сабтасок после удаления сабтасок в родительской задаче")
 def test_parent_task_total_subtask_count_decrease_after_subtask_deletion(owner_client, main_space, create_task_in_main):
     """
     Тест проверяет корректное уменьшение счетчика total сабтасок после удаления подзадач.
