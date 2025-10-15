@@ -18,18 +18,16 @@ def validate_hrid(client, space_id, project_id, task_hrid):
     # Проверяем, что клиент является объектом APIClient
     assert hasattr(client, 'post'), "Клиент должен быть экземпляром APIClient"
 
-    with allure.step("Получаем slug проекта"):
-        response = client.post(**get_project_endpoint(project_id=project_id, space_id=space_id))
-        response.raise_for_status()
+    response = client.post(**get_project_endpoint(project_id=project_id, space_id=space_id))
+    response.raise_for_status()
 
-        # Получаем slug проекта
-        project_slug = response.json().get("payload", {}).get("project", {}).get("slug", None)
-        assert project_slug, "Ошибка: не удалось получить slug проекта"
+    # Получаем slug проекта
+    project_slug = response.json().get("payload", {}).get("project", {}).get("slug", None)
+    assert project_slug, "Ошибка: не удалось получить slug проекта"
 
     # Проверяем, что hrid соответствует формату <slug>-<число>
     hrid_pattern = rf"^{project_slug}-\d+$"
-    with allure.step(f"Проверка, что hrid '{task_hrid}' соответствует шаблону '{hrid_pattern}'"):
-        assert re.match(hrid_pattern, task_hrid), f"Поле 'hrid' имеет некорректный формат: {task_hrid}"
+    assert re.match(hrid_pattern, task_hrid), f"Поле 'hrid' имеет некорректный формат: {task_hrid}"
 
 def get_member_profile(client, space_id):
     """Получение id пользователя который создает задачу"""
@@ -43,46 +41,39 @@ def create_task(client, payload):
 
 def get_client(request, client_fixture):
     """Получение клиента из тестового фикстура."""
-    with allure.step(f"Получение клиента для {client_fixture}"):
-        return request.getfixturevalue(client_fixture)
+    return request.getfixturevalue(client_fixture)
 
 
 def get_random_type_id(client, board_id, space_id):
     """
     Получение случайного `_id` из typesList борды.
     """
-    with allure.step(f"Запрашиваем данные борды с ID: {board_id}"):
-        response = client.post(**get_board_endpoint(board_id=board_id, space_id=space_id))
-        response.raise_for_status()
+    response = client.post(**get_board_endpoint(board_id=board_id, space_id=space_id))
+    response.raise_for_status()
 
     board_data = response.json().get("payload", {}).get("board", {})
     types_list = board_data.get("typesList", [])
 
-    with allure.step("Проверяем наличие typesList"):
-        assert types_list, "Ошибка: typesList пуст или не существует."
+    assert types_list, "Ошибка: typesList пуст или не существует."
 
-    with allure.step("Рандомно выбираем `type` из typesList"):
-        random_type = random.choice(types_list)
-        return random_type["_id"]
+    random_type = random.choice(types_list)
+    return random_type["_id"]
 
 
 def get_random_group_id(client, board_id, space_id):
     """
     Получение случайного `_id` группы из списка groups борды.
     """
-    with allure.step(f"Запрашиваем данные борды с ID: {board_id}"):
-        response = client.post(**get_board_endpoint(board_id=board_id, space_id=space_id))
-        response.raise_for_status()
+    response = client.post(**get_board_endpoint(board_id=board_id, space_id=space_id))
+    response.raise_for_status()
 
     board_data = response.json().get("payload", {}).get("board", {})
     groups = board_data.get("groups", [])
 
-    with allure.step("Проверяем наличие списка групп"):
-        assert groups, "Ошибка: groups пуст или не существует."
+    assert groups, "Ошибка: groups пуст или не существует."
 
-    with allure.step("Рандомно выбираем группу из списка"):
-        random_group = random.choice(groups)
-        return random_group["_id"]
+    random_group = random.choice(groups)
+    return random_group["_id"]
 
 
 def get_current_timestamp():
@@ -175,40 +166,38 @@ def delete_all_group_tasks(client, board_id, space_id, group_id):
     """
     Удаляет все задачи из указанной группы на борде.
     """
-    with allure.step(f'Удаляем все задачи из группы {group_id}'):
-        resp = client.post(**get_board_endpoint(board_id, space_id))
-        resp.raise_for_status()
-        board = resp.json()['payload']['board']
-        task_ids = board['taskOrderByGroups'].get(group_id, [])
-        for task_id in task_ids:
-            time.sleep(0.5)
-            delete_task_with_retry(client, task_id, space_id)
+    resp = client.post(**get_board_endpoint(board_id, space_id))
+    resp.raise_for_status()
+    board = resp.json()['payload']['board']
+    task_ids = board['taskOrderByGroups'].get(group_id, [])
+    for task_id in task_ids:
+        time.sleep(0.5)
+        delete_task_with_retry(client, task_id, space_id)
 
 def safe_delete_all_tasks_in_group(client, main_board, main_space, group_id, max_retries=3):
     """
     Удаляет все задачи из конкретной группы.
     Для каждой задачи делает несколько попыток, если не получилось — пишет причину, но не падает жестко.
     """
-    with allure.step(f"Удаляем все задачи из группы {group_id} (безаварийно)"):
-        resp = client.post(**get_board_endpoint(main_board, main_space))
-        board = resp.json()["payload"]["board"]
-        task_ids = board["taskOrderByGroups"].get(group_id, [])
-        if not task_ids:
-            return
-        # Чтобы не пропустить "зависшие" задачи (если get_tasks_endpoint вдруг отличается), проходим по списку task_ids
-        for tid in task_ids:
+    resp = client.post(**get_board_endpoint(main_board, main_space))
+    board = resp.json()["payload"]["board"]
+    task_ids = board["taskOrderByGroups"].get(group_id, [])
+    if not task_ids:
+        return
+    # Чтобы не пропустить "зависшие" задачи (если get_tasks_endpoint вдруг отличается), проходим по списку task_ids
+    for tid in task_ids:
+        time.sleep(0.5)
+        for attempt in range(max_retries):
+            del_resp = client.post(
+                path="/DeleteTask",
+                json={"taskId": tid},
+                headers={"Content-Type": "application/json", "Current-Space-Id": main_space}
+            )
+            if del_resp.status_code == 200:
+                break
             time.sleep(0.5)
-            for attempt in range(max_retries):
-                del_resp = client.post(
-                    path="/DeleteTask",
-                    json={"taskId": tid},
-                    headers={"Content-Type": "application/json", "Current-Space-Id": main_space}
-                )
-                if del_resp.status_code == 200:
-                    break
-                time.sleep(0.5)
-            else:
-                print(f"Не удалось удалить задачу {tid} после {max_retries} попыток: статус {del_resp.status_code}, ответ: {del_resp.text}")
+        else:
+            print(f"Не удалось удалить задачу {tid} после {max_retries} попыток: статус {del_resp.status_code}, ответ: {del_resp.text}")
 
 
 def wait_group_empty(client, board_id, space_id, group_id, timeout=10, poll_interval=0.5):
