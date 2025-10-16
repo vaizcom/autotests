@@ -36,7 +36,7 @@ def test_delete_all_tasks_on_main_board(request, owner_client, main_space, main_
     deleted_ids = []
     for task in tasks:
         task_id = task["_id"]
-        with allure.step(f"Удаляем задачу: {task_id}"):
+        with allure.step(f"Удаляем в цикле все созданные задачи"):
             del_resp = client.post(**delete_task_endpoint(task_id=task_id, space_id=main_space))
             assert del_resp.status_code == 200, f"Не удалось удалить задачу {task_id}: {del_resp.text}"
             deleted_ids.append(task_id)

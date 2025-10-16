@@ -95,7 +95,7 @@ def test_parent_task_total_subtask_count_decrease_after_subtask_deletion(owner_c
             total_after_creation = get_parent_task_subtask_count(client, main_space, parent_task_id)
             assert total_after_creation == random_count, f"Ожидалось total={random_count}, получили {total_after_creation}"
 
-        with allure.step("Удаляем сабтаски по одной и проверяем decrement total"):
+        with allure.step("Удаляем сабтаски по одной и проверяем decrement total пока их кол-во не станет равным 0"):
             for index, subtask_id in enumerate(created_subtask_ids, 1):
                 delete_task_with_retry(client, subtask_id, main_space)
                 expected_total = random_count - index
@@ -103,7 +103,7 @@ def test_parent_task_total_subtask_count_decrease_after_subtask_deletion(owner_c
                 assert actual_total == expected_total, f"После удаления {index} сабтасок ожидали total={expected_total}, получили {actual_total}"
 
     finally:
-        with allure.step("Удаляем оставшиеся сабтаски и родительскую задачу"):
+        with allure.step("Удаляем сабтаски и родительскую задачу принудительно (на случай если тесты упадут)"):
             for subtask_id in created_subtask_ids:
                 try:
                     delete_task_with_retry(client, subtask_id, main_space)

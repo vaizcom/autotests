@@ -10,6 +10,7 @@ from test_backend.task.utils import validate_hrid, get_client, get_member_profil
 
 pytestmark = [pytest.mark.backend]
 
+@allure.title("Тестирование создания задачи разными пользовательскими ролями с минимальным набором полей. Проверка структуры ключ/значение")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -116,7 +117,7 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
                     f"Не удалось удалить задачу {task_id}: {del_resp.status_code} {del_resp.text}"
                 )
 
-
+@allure.title("Тестирование создания задачи разными пользовательскими ролями с заранее определённым набором данных (payload). Проверка содержимого ответа")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [

@@ -19,7 +19,7 @@ def test_subtask_parent_child_relationships(
     parent_id = subtask_id = None
 
     # Создаём родительскую задачу и подзадачу, чтобы проверить связи
-    with allure.step("Создание родительской задачи через owner_client"):
+    with allure.step("Создание родительской задачи в роли owner_client"):
         parent_task = create_task_in_main(
             "owner_client",
             name="Parent task for relationship check"
@@ -28,7 +28,7 @@ def test_subtask_parent_child_relationships(
         parent_slug = parent_task["hrid"]
 
     try:
-        with allure.step("Создание подзадачи через owner_client"):
+        with allure.step("Создание подзадачи в роли owner_client"):
             subtask = create_task_in_main(
                 "owner_client",
                 name="Subtask for relationship check",
@@ -37,13 +37,13 @@ def test_subtask_parent_child_relationships(
             subtask_id = subtask["_id"]
             subtask_slug = subtask["hrid"]
 
-        with allure.step('Проверяем родительскую задачу через get_task_endpoint'):
+        with allure.step('Проверяем наличие родительской задачи через get_task_endpoint'):
             resp_parent = owner_client.post(**get_task_endpoint(slug_id=parent_id, space_id=main_space)) # в slug_id можно передать id или slug
             assert resp_parent.status_code == 200, f'Не удалось получить родительскую задачу: {resp_parent.status_code}'
             parent = resp_parent.json()["payload"].get("task")
             assert parent is not None, f"Родительская задача (slug={parent_slug}) не найдена"
 
-        with allure.step('Проверяем подзадачу через get_task_endpoint'):
+        with allure.step('Проверяем наличие подзадачи через get_task_endpoint'):
             resp_sub = owner_client.post(**get_task_endpoint(slug_id=subtask_id, space_id=main_space))
             assert resp_sub.status_code == 200, f'Не удалось получить подзадачу: {resp_sub.status_code}'
             sub = resp_sub.json()["payload"].get("task")
@@ -63,10 +63,10 @@ def test_subtask_parent_child_relationships(
 
     finally:
         if subtask_id:
-            with allure.step(f"Удаляем сабтаску {subtask_id}"):
+            with allure.step(f"Удаляем сабтаску"):
                 resp = owner_client.post(**delete_task_endpoint(task_id=subtask_id, space_id=main_space))
                 assert resp.status_code == 200, f"Не удалось удалить сабтаску {subtask_id}: {resp.text}"
         if parent_id:
-            with allure.step(f"Удаляем родительскую задачу {parent_id}"):
+            with allure.step(f"Удаляем родительскую задачу"):
                 resp = owner_client.post(**delete_task_endpoint(task_id=parent_id, space_id=main_space))
                 assert resp.status_code == 200, f"Не удалось удалить родителя {parent_id}: {resp.text}"

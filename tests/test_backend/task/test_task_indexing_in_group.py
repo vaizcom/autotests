@@ -59,7 +59,7 @@ def test_task_indexing_in_group(
                 time.sleep(1)
             assert not task_ids, f"Группа не пуста после очистки! Остались: {task_ids}"
 
-        with allure.step("Добавить стартовые задачи в группу (если требуется по сценарию)"):
+        with allure.step("Добавить стартовые задачи в группу для сценариев где initial_tasks != 0 (Только если требуется по сценарию)"):
             for i in range(initial_tasks):
                 create_task_in_main(
                     client_fixture="owner_client",
