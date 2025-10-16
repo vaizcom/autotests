@@ -8,6 +8,7 @@ from test_backend.task.utils import wait_group_empty, safe_delete_all_tasks_in_g
 
 pytestmark = [pytest.mark.backend]
 
+@allure.title("Проверка что index соответствует ожидаемой позиции задачи в колонке")
 @pytest.mark.parametrize(
     "initial_tasks, create_index, expected_position, title",
     [
@@ -18,7 +19,8 @@ pytestmark = [pytest.mark.backend]
         (10, 999, 10, "Группа из 10 тасок, индекс=999"),
         (10, 0, 0, "Группа из 10 тасок, индекс=0"),
         (10, 10,10, "Группа из 10 тасок, индекс=10"),
-        (10,9,9, "Группа из 10 тасок, индекс=9")
+        (10,9,9, "Группа из 10 тасок, индекс=9"),
+        (10, None, 0, "Группа из 10 тасок, индекс не указан")
     ],
     ids=[
         "empty_group_no_index",
@@ -28,7 +30,8 @@ pytestmark = [pytest.mark.backend]
         "ten_tasks_index_999",
         "ten_tasks_index_0",
         "ten_tasks_index_10",
-        "ten_tasks_index_9"
+        "ten_tasks_index_9",
+        "ten_tasks_index_none"
     ]
 )
 def test_task_indexing_in_group(
@@ -101,7 +104,7 @@ def test_task_indexing_in_group(
             wait_group_empty(client, main_board, main_space, group_id)
 
 
-
+@allure.title("Негативный тест: создание задачи с отрицательным индексом должно возвращать ошибку по полю index.")
 @pytest.mark.parametrize("negative_index", [-1, -10])
 def test_create_task_with_negative_index_returns_error(
     request, main_space, main_board, negative_index

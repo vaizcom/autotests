@@ -5,6 +5,7 @@ from test_backend.task.utils import get_subtask_ms_1, get_subtask_ms_2, delete_t
 
 pytestmark = [pytest.mark.backend]
 
+@allure.title("Новая логика: Milestone у сабтаска берется из payload, а не наследуются от родителя")
 def test_subtask_milestone_with_own_milestone(
     create_task_in_main,
     owner_client,
@@ -47,6 +48,7 @@ def test_subtask_milestone_with_own_milestone(
             delete_task_with_retry(owner_client, parent["_id"], main_space)
 
 
+@allure.title("Если поле milestone у сабтаска пустое, оно также не наследует milestone от родителя.")
 def test_subtask_milestone_without_own_milestone(
     create_task_in_main,
     owner_client,
@@ -86,6 +88,7 @@ def test_subtask_milestone_without_own_milestone(
             delete_task_with_retry(owner_client, parent["_id"], main_space)
 
 
+@allure.title("Проверка создания нескольких сабтасков с разными milestone, также не наследует milestone родителя.")
 def test_create_subtasks_with_various_milestones(
     create_task_in_main, owner_client, main_space, main_board
 ):

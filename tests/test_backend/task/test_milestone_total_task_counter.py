@@ -23,7 +23,8 @@ def clear_milestone_tasks(client, space_id, milestone_id):
     total_after_cleanup = get_milestone_total(client, space_id, milestone_id)
     assert total_after_cleanup == 0, f"После удаления всех задач total должен быть 0, а получил {total_after_cleanup}"
 
-@allure.title("Проверка счетчика задач у существующего milestone 'Milestone total task count'")
+
+@allure.title("Проверка увеличения счетчика задач у milestone после создания задач")
 def test_milestone_total_task_count_increases_after_task_creation(owner_client, main_space, create_task_in_main, main_board):
     """
     Тест проверяет увеличение счетчика total задач у milestone после создания задач.

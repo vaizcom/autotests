@@ -8,6 +8,7 @@ from test_backend.task.utils import get_random_group_id
 
 pytestmark = [pytest.mark.backend]
 
+@allure.title("Создание задачи на доске и проверка: группа, индекс и уникальность размещения")
 def test_create_task_and_verify_on_board(request, create_task_in_main, main_space, main_board):
     """
     Тест создает задачу с указанными бордой, группой и индексом=0, и проверяет:
