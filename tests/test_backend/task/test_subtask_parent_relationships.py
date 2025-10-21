@@ -63,10 +63,10 @@ def test_subtask_parent_child_relationships(
 
     finally:
         if subtask_id:
-            with allure.step(f"Удаляем сабтаску"):
+            with allure.step("Удаляем сабтаску"):
                 resp = owner_client.post(**delete_task_endpoint(task_id=subtask_id, space_id=main_space))
                 assert resp.status_code == 200, f"Не удалось удалить сабтаску {subtask_id}: {resp.text}"
         if parent_id:
-            with allure.step(f"Удаляем родительскую задачу"):
+            with allure.step("Удаляем родительскую задачу"):
                 resp = owner_client.post(**delete_task_endpoint(task_id=parent_id, space_id=main_space))
                 assert resp.status_code == 200, f"Не удалось удалить родителя {parent_id}: {resp.text}"

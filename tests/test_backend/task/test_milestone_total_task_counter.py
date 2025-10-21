@@ -41,7 +41,8 @@ def test_milestone_total_task_count_increases_after_task_creation(owner_client, 
         if initial_total != 0:
             with allure.step("Очищаем milestone от задач, проверяем что total стал 0"):
                 clear_milestone_tasks(client, main_space, milestone_id)
-            assert initial_total == 0
+                initial_total = get_milestone_total(client, main_space, milestone_id)
+                assert initial_total == 0
 
         with allure.step("Создаём первую задачу с этим milestone"):
             task1 = create_task_in_main(
