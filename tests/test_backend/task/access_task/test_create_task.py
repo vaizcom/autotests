@@ -11,7 +11,7 @@ from test_backend.task.utils import validate_hrid, get_client, get_member_profil
 pytestmark = [pytest.mark.backend]
 
 @allure.title("Тестирование создания задачи разными пользовательскими ролями с минимальным набором полей."
-              " Проверка структуры ключ/значение")
+              " Проверка полного совпадения набора ключей задачи")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [

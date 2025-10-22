@@ -30,6 +30,9 @@ def test_create_subtask_per_role(
     родительской задачей и подзадачей, включая поля `parentTask` и `subtasks`.
 
     """
+    allure.dynamic.title(
+        f"Тестирование создания подзадачи разными пользовательскими ролями: клиент={client_fixture}, ожидаемый статус={expected_status}"
+    )
     parent_id = subtask_id = None
 
     try:

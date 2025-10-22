@@ -61,22 +61,6 @@ def test_milestone_total_and_completed_after_task_creation(owner_client, main_sp
                 assert initial_completed == 0
 
 
-        with allure.step("Создаём первую задачу с этим milestone"):
-            task1 = create_task_in_main(
-                "owner_client",
-                milestones=[milestone_id],
-                name="Task 1 for milestone total count test",
-            )
-            created_task_ids.append(task1["_id"])
-            if task1.get("completed"):  # Только если True!
-                completed_task_ids.append(task1["_id"])
-
-        with allure.step("Проверяем, что total и complited корректны после создания первой задачи"):
-            total_after_first = get_milestone_total(client, main_space, milestone_id)
-            completed_after_first = get_milestone_completed(client, main_space, milestone_id)
-            assert total_after_first == initial_total + 1, f"Ожидался total={initial_total + 1}, получили {total_after_first}"
-            assert completed_after_first == len(completed_task_ids), f"Ожидалось completed={len(completed_task_ids)}, получили {completed_after_first}"
-
         with allure.step("Создаём последовательно рандомное количество задач (от 1 до 10) с этим milestone, completed=random и каждый раз проверяем  total и completed"):
             random_count = random.randint(1, 10)
             for i in range(1, random_count + 1):
@@ -89,23 +73,13 @@ def test_milestone_total_and_completed_after_task_creation(owner_client, main_sp
                 if task.get("completed"):  # добавляем только если completed = true
                     completed_task_ids.append(task["_id"])
 
-                expected_total = initial_total + 1 + i
+                expected_total = initial_total + i
                 actual_total = get_milestone_total(client, main_space, milestone_id)
                 assert actual_total == expected_total, f"После добавления {i} задач ожидали total={expected_total}, получили {actual_total}"
 
                 expected_completed = len(completed_task_ids)
                 actual_completed = get_milestone_completed(client, main_space, milestone_id)
                 assert expected_completed == actual_completed, f"Ожидалось completed={expected_completed}, получили {actual_completed}"
-
-        with allure.step("Проверяем итоговое значение total и complited после добавления всех задач"):
-            final_total = get_milestone_total(client, main_space, milestone_id)
-            expected_final = initial_total + 1 + random_count
-            assert final_total == expected_final, f"Ожидался total={expected_final}, получили {final_total}"
-
-            expected_completed = len(completed_task_ids)
-            actual_completed = get_milestone_completed(client, main_space, milestone_id)
-            assert expected_completed == actual_completed, f"Ожидалось completed={expected_completed}, получили {actual_completed}"
-
 
     finally:
         with allure.step("Удаляем все созданные задачи"):
