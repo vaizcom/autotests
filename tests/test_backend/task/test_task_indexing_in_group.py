@@ -40,6 +40,7 @@ def test_task_indexing_in_group(
     """
     Тест проверяет корректность позиционирования задач при создании новой задачи в группе на доске (board).
     """
+    allure.dynamic.title(f"Проверка index -> ожидаемая позиция задачи в колонке| {title} ")
 
     with allure.step("Получить ID первой группы на доске"):
         client = request.getfixturevalue("owner_client")
@@ -112,6 +113,7 @@ def test_create_task_with_negative_index_returns_error(
     """
     Негативный тест: создание задачи с отрицательным индексом должно возвращать ошибку по полю index.
     """
+    allure.dynamic.title(f"Негативный тест: создание задачи с отрицательным индексом (index={negative_index}) Ожидался статус 400")
     client = request.getfixturevalue("owner_client")
     payload = create_task_endpoint(
         space_id=main_space,
