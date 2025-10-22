@@ -3,7 +3,7 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
-from test_backend.task.utils import delete_task_with_retry
+from test_backend.task_service.create_task.utils import delete_task_with_retry
 
 pytestmark = [pytest.mark.backend]
 
@@ -15,6 +15,8 @@ def get_parent_task_subtask_count(client, space_id, task_id) -> int:
     assert "subtasks" in task, "'subtasks' отсутствует в родительской задаче"
     return len(task["subtasks"])
 
+
+@allure.suite("create_task")
 @allure.title("Проверка счетчика сабтасок в taskTable в родительской задаче")
 def test_parent_task_total_subtask_count_increases_after_subtask_creation(owner_client, main_space,create_task_in_main):
     """
@@ -69,6 +71,7 @@ def test_parent_task_total_subtask_count_increases_after_subtask_creation(owner_
             delete_task_with_retry(client, parent_task_id, main_space)
 
 
+@allure.suite("create_task")
 @allure.title("Проверка уменьшения счетчика сабтасок после удаления сабтасок в родительской задаче")
 def test_parent_task_total_subtask_count_decrease_after_subtask_deletion(owner_client, main_space, create_task_in_main):
     """

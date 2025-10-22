@@ -7,6 +7,7 @@ from test_backend.data.endpoints.Task.task_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
+@allure.suite("create_task")
 @allure.title("Тестирование создания подзадачи разными пользовательскими ролями и проверка ожидаемого поведения")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
@@ -39,7 +40,7 @@ def test_create_subtask_per_role(
         with allure.step("Создание родительской задачи через owner_client"):
             parent_task = create_task_in_main(
                 "owner_client",
-                name="Main task for subtask access test"
+                name="Main create_task for subtask access test"
             )
             parent_id = parent_task["_id"]
 

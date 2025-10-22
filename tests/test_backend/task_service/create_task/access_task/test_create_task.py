@@ -5,11 +5,12 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
-from test_backend.task.utils import validate_hrid, get_client, get_member_profile, create_task, get_random_type_id, get_random_group_id, \
+from test_backend.task_service.create_task.utils import validate_hrid, get_client, get_member_profile, create_task, get_random_type_id, get_random_group_id, \
     get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone, assert_task_keys
 
 pytestmark = [pytest.mark.backend]
 
+@allure.suite("create_task")
 @allure.title("Тестирование создания задачи разными пользовательскими ролями с минимальным набором полей."
               " Проверка полного совпадения набора ключей задачи")
 @pytest.mark.parametrize(
@@ -118,6 +119,7 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
                     f"Не удалось удалить задачу {task_id}: {del_resp.status_code} {del_resp.text}"
                 )
 
+@allure.suite("create_task")
 @allure.title("Тестирование создания задачи разными пользовательскими ролями с заранее определённым набором данных (payload). Проверка содержимого ответа")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',

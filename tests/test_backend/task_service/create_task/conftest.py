@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
-from test_backend.task.utils import get_client, create_task, get_random_type_id, get_random_group_id, \
+from test_backend.task_service.create_task.utils import get_client, create_task, get_random_type_id, get_random_group_id, \
     get_current_timestamp, get_due_end, get_priority, get_assignee
 
 

@@ -3,7 +3,7 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.milestone.milestones_endpoints import get_milestone_endpoint
-from test_backend.task.utils import delete_task_with_retry, get_named_milestone_id
+from test_backend.task_service.create_task.utils import delete_task_with_retry, get_named_milestone_id
 
 pytestmark = [pytest.mark.backend]
 
@@ -35,6 +35,7 @@ def clear_milestone_tasks(client, space_id, milestone_id):
     assert total_after_cleanup == 0, f"После удаления всех задач total должен быть 0, а получил {total_after_cleanup}"
 
 
+@allure.suite("create_task")
 @allure.title("Проверка увеличения счетчика задач у milestone после создания задач и соответствия completed")
 def test_milestone_total_and_completed_after_task_creation(owner_client, main_space, create_task_in_main, main_board):
     """
@@ -87,6 +88,7 @@ def test_milestone_total_and_completed_after_task_creation(owner_client, main_sp
                 delete_task_with_retry(client, task_id, main_space)
 
 
+@allure.suite("create_task")
 @allure.title("Проверка уменьшения счетчика задач milestone после удаления задач")
 def test_milestone_total_task_count_decrease_after_task_deletion(owner_client, main_space, create_task_in_main, main_board):
     """

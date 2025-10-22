@@ -2,10 +2,11 @@
 import allure
 import pytest
 
-from test_backend.task.utils import delete_task_with_retry, get_milestone_id, create_parent_and_subtasks
+from test_backend.task_service.create_task.utils import delete_task_with_retry, get_milestone_id, create_parent_and_subtasks
 
 pytestmark = [pytest.mark.backend]
 
+@allure.suite("create_task")
 @allure.title('Проверка что все задачи корректно видны в соответствующих milestones.')
 def test_tasks_visibility_in_correct_milestones(create_task_in_main, owner_client, main_space, main_board):
     """

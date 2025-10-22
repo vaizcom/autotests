@@ -4,10 +4,11 @@ import pytest
 import allure
 
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, delete_task_endpoint
-from test_backend.task.utils import get_client
+from test_backend.task_service.create_task.utils import get_client
 
 pytestmark = [pytest.mark.backend]
 
+@allure.suite("create_task")
 @allure.title("Проверка удаление всех задач на доске")
 def test_delete_all_tasks_on_main_board(request, owner_client, main_space, main_board, create_task_in_main):
     """
