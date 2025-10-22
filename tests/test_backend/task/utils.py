@@ -138,8 +138,15 @@ def get_milestone(client, space_id, board_id):
     random_milestone = random.choice(milestones)
     return random_milestone["_id"]
 
-def assert_task_keys(doc, expected_keys):
-    actual = set(doc.keys())
+def assert_task_keys(task, expected_keys):
+    """
+    Проверяет, что словарь задачи (task) содержит ровно ожидаемые ключи:
+    - Лишние ключи (есть в task, но нет в expected_keys) — AssertionError.
+    - Отсутствующие ключи (есть в expected_keys, но нет в task) — AssertionError.
+    В тексте ошибки выводятся отсортированные списки фактических и ожидаемых ключей.
+    Успешное выполнение означает полное совпадение набора ключей.
+    """
+    actual = set(task.keys())
     extra = actual - expected_keys
     missing = expected_keys - actual
     info_msg = (

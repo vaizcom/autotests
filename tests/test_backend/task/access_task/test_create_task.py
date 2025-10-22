@@ -10,7 +10,8 @@ from test_backend.task.utils import validate_hrid, get_client, get_member_profil
 
 pytestmark = [pytest.mark.backend]
 
-@allure.title("Тестирование создания задачи разными пользовательскими ролями с минимальным набором полей. Проверка структуры ключ/значение")
+@allure.title("Тестирование создания задачи разными пользовательскими ролями с минимальным набором полей."
+              " Проверка структуры ключ/значение")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -27,6 +28,7 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
 
     Цель теста — убедиться, что можно успешно создать задачу, указав только минимально необходимые данные, и что поведение API зависит от прав пользователя (типа клиента).
     В процессе теста дополнительно валидируются структура созданной задачи, значения по умолчанию, связи (creator, board и пр.), а также удаление задачи после проверки.
+    assert_task_keys обеспечивает падение теста при добавлении/удалении ключей с понятным сообщением.
 
     Ход теста:
         1. Получение клиента согласно переданной роли через фикстуру.
@@ -97,10 +99,9 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
                     assert isinstance(task["leftConnectors"], list) and len(task["leftConnectors"]) == 0, \
                         "Ошибка: 'leftConnectors' должно быть пустым списком"
 
-                with allure.step("Проверяем содержимое ответа задачи"):
                     task = response.json()["payload"]["task"]
 
-                    with allure.step("Проверка структуры ключей задачи"):
+                    with allure.step("Проверка полного совпадения набора ключей задачи"):
                         expected_task_keys = {
                             "name", "group", "board", "project", "parentTask", "priority", "completed",
                             "types", "assignees", "milestones", "subtasks", "dueStart", "dueEnd",
@@ -199,15 +200,13 @@ def test_create_task_with_specific_payload_and_response(
                     assert task["completed"] == get_random_complete, "Ошибка: задача должна быть помечена как завершённая"
                     assert task["creator"] == member_id, "Ошибка: 'creator' не соответствует memberId пользователя"
 
-                # Проверка полей, относящихся к работе
-                with allure.step("Проверяем связанные поля"):
+                # Проверка полей, переданные в payload
+                with allure.step("Проверяем переданные поля в payload"):
                     assert task["types"] == [random_type_id], "Ошибка: неверное значение types"
                     assert task["assignees"] == [random_member_id], "Ошибка: неверное значение assignees"
                     assert task["milestones"] == [get_random_milestone], "Ошибка: неверное значение milestones"
                     assert task["subtasks"] == [], "Ошибка: поле с подзадачами должно быть пустым"
-
-                # Проверка временных полей
-                with allure.step("Проверяем временные поля и сроки задачи"):
+                    assert task["milestone"] == get_random_milestone, "Ошибка: неверный milestone"
                     assert task["dueStart"] == current_timestamp.replace("+00:00", "Z"), "Ошибка: неверное значение dueStart"
                     assert task["dueEnd"] == due_end.replace("+00:00", "Z"), "Ошибка: неверное значение dueEnd"
 
@@ -217,7 +216,6 @@ def test_create_task_with_specific_payload_and_response(
                     assert task["createdAt"] is not None, "Ошибка: поле 'createdAt' должно быть задано"
                     assert task["updatedAt"] is not None, "Ошибка: поле 'updatedAt' должно быть задано"
                     assert task["document"] is not None, "Ошибка: неверный документ"
-                    assert task["milestone"] == get_random_milestone, "Ошибка: неверный milestone"
                     assert task["followers"] == {member_id: "creator"}, "Ошибка: 'followers' должно включать creator"
 
                 # Проверка корректности формата `hrid`
@@ -236,10 +234,9 @@ def test_create_task_with_specific_payload_and_response(
                     assert task["deletedAt"] is None, "Ошибка: поле deletedAt должно быть None"
                     assert task["customFields"] == [], "Ошибка: поле customFields должно быть пустым"
 
-                with allure.step("Проверяем содержимое ответа задачи"):
                     task = response.json()["payload"]["task"]
 
-                    with allure.step("Проверка структуры ключей задачи"):
+                    with allure.step("Проверка полного совпадения набора ключей задачи"):
                         expected_task_keys = {
                             "name", "group", "board", "project", "parentTask", "priority", "completed",
                             "types", "assignees", "milestones", "subtasks", "dueStart", "dueEnd",
