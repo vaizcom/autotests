@@ -2,7 +2,8 @@
 import allure
 import pytest
 
-from test_backend.task_service.create_task.utils import delete_task_with_retry, get_milestone_id, create_parent_and_subtasks
+from test_backend.task_service.create_task.utils import delete_task_with_retry, get_milestone_id, \
+    create_parent_and_subtasks, get_parent_ms_1, get_subtask_ms_1, get_subtask_ms_2
 
 pytestmark = [pytest.mark.backend]
 
@@ -78,3 +79,56 @@ def test_tasks_visibility_in_correct_milestones(create_task_in_main, owner_clien
         with allure.step('Удаление всех созданных задач'):
             for task in created_tasks:
                 delete_task_with_retry(owner_client, task, main_space)
+
+
+@allure.parent_suite("create_task")
+@allure.title("Проверка что задача с двумя (несколькими) майлстоунами отображается в каждом из них")
+def test_subtask_with_two_milestones_visibility_like_previous(
+    create_task_in_main,
+    owner_client,
+    main_space,
+    main_board
+):
+    """
+    По аналогии с test_tasks_visibility_in_correct_milestones:
+    Сабтаск с двумя milestones (B и C) должен отображаться в обоих milestones.
+    Проверяем через get_milestone_id и содержимое поля tasks.
+    """
+    with allure.step("Готовим данные: A для родителя, B и C для сабтаска"):
+        parent_ms_id = get_parent_ms_1(owner_client, main_space, main_board)
+        subtask_ms_b = get_subtask_ms_1(owner_client, main_space, main_board)
+        subtask_ms_c = get_subtask_ms_2(owner_client, main_space, main_board)
+
+    with allure.step("Создаём родительскую задачу c milestone A"):
+        parent_task = create_task_in_main("owner_client", milestones=[parent_ms_id])
+        parent_task_id = parent_task["_id"]
+
+    with allure.step("Создаём сабтаск с двумя milestones B и C"):
+        subtask = create_task_in_main(
+            "owner_client",
+            parent_task=parent_task_id,
+            milestones=[subtask_ms_b, subtask_ms_c],
+            name="Subtask #B&C"
+        )
+        subtask_id = subtask["_id"]
+
+    try:
+        # Проверяем задачи в milestone B
+        with allure.step("Проверка задач в milestone B (должна быть сабтаска, родителя быть не должно)"):
+            tasks_in_ms_b = get_milestone_id(owner_client, main_space, subtask_ms_b)
+            with allure.step("Проверяем, что сабтаск есть в milestone B"):
+                assert subtask_id in tasks_in_ms_b["tasks"]
+            with allure.step("Проверяем, что родитель отсутствует в milestone B"):
+                assert parent_task_id not in tasks_in_ms_b["tasks"]
+
+        # Проверяем задачи в milestone C
+        with allure.step("Проверка задач в milestone C (должна быть сабтаска, родителя быть не должно)"):
+            tasks_in_ms_c = get_milestone_id(owner_client, main_space, subtask_ms_c)
+            with allure.step("Проверяем, что сабтаск есть в milestone C"):
+                assert subtask_id in tasks_in_ms_c["tasks"]
+            with allure.step("Проверяем, что родитель отсутствует в milestone C"):
+                assert parent_task_id not in tasks_in_ms_c["tasks"]
+    finally:
+        with allure.step("Удаляем созданные задачи после теста"):
+            delete_task_with_retry(owner_client, subtask_id, main_space)
+            delete_task_with_retry(owner_client, parent_task_id, main_space)
