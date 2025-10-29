@@ -95,7 +95,6 @@ def test_token_missing():
         assert r.status_code != 404, f'Эндпоинт не найден: url={url}'
 
 
-
 def make_invalid_token(owner_client) -> str:
     token = getattr(owner_client, "token", "")
     assert token, "owner_client.token пуст"
@@ -133,10 +132,6 @@ def test_token_invalid(owner_client):
         assert meta.get("description") == "invalid signature", f"Неожиданное описание: {meta.get('description')}"
 
 @allure.title("Авторизация: пустой токен '_t=' приводит к Unauthorized 401 ")
-@allure.description(
-    "Негативная проверка: передача пустого токена в Authorization и Cookie должна завершаться отказом Unauthorized 401. "
-    "Универсальна для всех эндпоинтов; выполнена на GetSpaceMembers."
-)
 def test_token_empty():
     url = f'{API_URL.rstrip("/")}/GetSpaceMembers'
     headers = {
@@ -159,11 +154,8 @@ def test_token_empty():
         assert err.get("code") == "Unauthorized", f'error.code должен быть "Unauthorized", получено: {err.get("code")}'
         assert err.get("originalType") == "GetSpaceMembers", "error.originalType должен совпадать с типом"
 
+
 @allure.title("Авторизация: токен пользователя без доступа к спейсу (foreign_client) => отказ 400")
-@allure.description(
-    "Негативная проверка: токен существующего клиента, не имеющего доступа к текущему пространству, "
-    "должен приводить к 400 Bad Request без 404. Универсальна; выполнена на GetSpaceMembers."
-)
 def test_token_foreign_client(foreign_client: str):
     url = f'{API_URL.rstrip("/")}/GetSpaceMembers'
     token = foreign_client
