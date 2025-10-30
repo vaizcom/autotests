@@ -25,7 +25,8 @@ def test_token_missing():
     """
     url = f'{API_URL}/GetSpaces'
     headers = {
-        "Current-Space-Id": MAIN_SPACE_ID
+        "Current-Space-Id": MAIN_SPACE_ID,
+        "Content-Type": "application/json",
     }
     # Без Authorization и Cookie, пустое тело
     with allure.step("POST без Authorization и Cookie к GetSpaces"):
@@ -51,6 +52,7 @@ def test_token_invalid(owner_client):
         "Current-Space-Id": MAIN_SPACE_ID,
         "Authorization": f"Bearer {invalid}",
         "Cookie": f"_t={invalid}",
+        "Content-Type": "application/json",
     }
     with allure.step("Отправляем POST-запрос с невалидным токеном"):
         r = requests.post(url, data="", headers=headers)
@@ -77,6 +79,7 @@ def test_token_empty():
     headers = {
         "Current-Space-Id": MAIN_SPACE_ID,
         "Cookie": '_t= ',
+        "Content-Type": "application/json",
         # Опционально можно не передавать Authorization вовсе
         # "Authorization": "Bearer",
     }
@@ -84,7 +87,6 @@ def test_token_empty():
         r = requests.post(url, data="", headers=headers)
     with allure.step("Проверка: статус 401 Unauthorized"):
         assert r.status_code == 401, f'Ожидали 401 при пустом токене, получили {r.status_code}; body={r.text}'
-    with allure.step("Проверка: нет 404 (эндпоинт существует)"):
         assert r.status_code != 404, f'Эндпоинт не найден: url={url}'
     with allure.step("Проверка структуры тела ошибки"):
         body = r.json()
