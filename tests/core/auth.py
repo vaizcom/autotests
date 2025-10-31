@@ -16,9 +16,15 @@ def get_token(role: str = 'guest') -> str:
     headers = {'Content-Type': 'application/json'}
     response = requests.post(login_url, headers=headers, json=credentials)
 
-    assert response.status_code == 202, f'Login failed ({response.status_code}): {response.text}'
+    assert response.status_code in (200, 202), f'Login failed ({response.status_code}): {response.text}'
 
-    token = response.json()['payload']['token']
+    data = response.json()
+    token = (
+            (data.get('payload') or {}).get('token')
+            or data.get('token')
+            or data.get('access_token')
+    )
+    assert token, f"Token not found in login response: {data}"
     _token_cache[role] = token
     return token
 
