@@ -2,7 +2,7 @@ def get_boards_endpoint(space_id: str):
     return {
         'path': '/GetBoards',
         'json': {},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -10,7 +10,7 @@ def get_board_endpoint(board_id: str, space_id: str):
     return {
         'path': '/GetBoard',
         'json': {'boardId': board_id},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -28,7 +28,7 @@ def create_board_endpoint(
     return {
         'path': '/CreateBoard',
         'json': payload,
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -36,7 +36,7 @@ def delete_board_endpoint(board_id: str, board_name: str, space_id: str):
     return {
         'path': '/DeleteBoard',
         'json': {'boardId': board_id, 'board_name': board_name},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -44,7 +44,7 @@ def edit_board_endpoint(board_id: str, name: str, space_id: str):
     return {
         'path': '/EditBoard',
         'json': {'boardId': board_id, 'name': name},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -52,7 +52,7 @@ def import_board_file_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/ImportBoardFile',
         'json': {'project': project_id, 'file': 'mock_file_data'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -60,7 +60,7 @@ def import_board_text_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/ImportBoardText',
         'json': {'project': project_id, 'text': 'imported text content'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -68,7 +68,7 @@ def create_board_type_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/CreateBoardType',
         'json': {'label': 'Bug', 'color': 'red', 'icon': 'Bug', 'description': ''},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -82,7 +82,7 @@ def edit_board_type_endpoint(name: str, project_id: str, space_id: str):
             'icon': 'BugCheck',
             'description': 'Updated description',
         },
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -90,7 +90,7 @@ def remove_board_type_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/RemoveBoardType',
         'json': {'id': 'type_id'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -111,7 +111,7 @@ def create_board_group_endpoint(
     return {
         'path': '/CreateBoardGroup',
         'json': payload,
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -143,7 +143,7 @@ def edit_board_group_endpoint(
     return {
         'path': '/EditBoardGroup',
         'json': payload,
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -151,7 +151,7 @@ def remove_board_group_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/RemoveBoardGroup',
         'json': {'id': 'group_id'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -159,7 +159,7 @@ def reorder_board_groups_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/ReorderBoardGroups',
         'json': {'order': ['group_id1', 'group_id2']},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -182,7 +182,7 @@ def create_board_custom_field_endpoint(
 
     return {
         'path': '/CreateBoardCustomField',
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
         'json': payload,
     }
 
@@ -212,7 +212,7 @@ def edit_board_custom_field_endpoint(
 
     return {
         'path': '/EditBoardCustomField',
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
         'json': payload,
     }
 
@@ -221,7 +221,7 @@ def remove_board_custom_field_endpoint(name: str, project_id: str, space_id: str
     return {
         'path': '/RemoveBoardCustomField',
         'json': {'id': 'field_id'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -229,5 +229,5 @@ def broadcast_board_endpoint(name: str, project_id: str, space_id: str):
     return {
         'path': '/BroadcastBoard',
         'json': {'boardId': 'board_id'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }

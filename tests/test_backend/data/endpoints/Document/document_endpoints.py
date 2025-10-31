@@ -27,7 +27,6 @@ def create_document_endpoint(
         'path': '/CreateDocument',
         'json': payload,
         'headers': {
-            'Content-Type': 'application/json',
             'Current-Space-Id': space_id,
         },
     }
@@ -37,7 +36,7 @@ def get_documents_endpoint(kind: str, kind_id: str, space_id: str):
     return {
         'path': '/GetDocuments',
         'json': {'kind': kind, 'kindId': kind_id},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -45,7 +44,7 @@ def get_document_endpoint(document_id: str, space_id: str):
     return {
         'path': '/GetDocument',
         'json': {'documentId': document_id},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -53,7 +52,7 @@ def get_document_siblings_endpoint(document_id: str, space_id: str):
     return {
         'path': '/GetDocumentSiblings',
         'json': {'documentId': document_id},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -66,7 +65,6 @@ def get_ydocument_endpoint(document_id: str, space_id: str, till_commit_id: Opti
         'path': '/GetYDocument',
         'json': payload,
         'headers': {
-            'Content-Type': 'application/json',
             'Current-Space-Id': space_id,
         },
     }
@@ -81,7 +79,6 @@ def edit_document_endpoint(document_id: str, title: str, icon: str, space_id: st
             'icon': icon,
         },
         'headers': {
-            'Content-Type': 'application/json',
             'Current-Space-Id': space_id,
         },
     }
@@ -92,7 +89,6 @@ def duplicate_document_endpoint(document_id: str, space_id: str):
         'path': '/DuplicateDocument',
         'json': {'documentId': document_id},
         'headers': {
-            'Content-Type': 'application/json',
             'Current-Space-Id': space_id,
         },
     }
@@ -103,7 +99,6 @@ def archive_document_endpoint(document_id: str, space_id: str):
         'path': '/ArchiveDocument',
         'json': {'documentId': document_id},
         'headers': {
-            'Content-Type': 'application/json',
             'Current-Space-Id': space_id,
         },
     }
@@ -113,7 +108,7 @@ def get_recent_documents_endpoint(space_id: str):
     return {
         'path': '/GetRecentDocuments',
         'json': {},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
@@ -128,5 +123,5 @@ def mark_recent_document_endpoint(space_id: str, document_id: str):
     return {
         'path': '/MarkRecentDocument',
         'json': {'documentId': document_id},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }

@@ -30,7 +30,6 @@ def get_milestones_endpoint(
     return {
         "path": "/GetMilestones",
         "headers": {
-            "Content-Type": "application/json",
             'Current-Space-Id': space_id,
         },
         "json": payload,
@@ -40,5 +39,5 @@ def get_milestone_endpoint(ms_id: str, space_id: str):
     return {
         "path": "/GetMilestone",
         "json": {"_id": ms_id},
-        "headers": {"Content-Type": "application/json", "Current-Space-Id": space_id}
+        "headers": {"Current-Space-Id": space_id}
     }

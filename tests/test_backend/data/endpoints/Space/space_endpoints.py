@@ -1,5 +1,5 @@
 def create_space_endpoint(name: str):
-    return {'path': '/CreateSpace', 'json': {'name': name}, 'headers': {'Content-Type': 'application/json'}}
+    return {'path': '/CreateSpace', 'json': {'name': name}}
 
 
 def edit_space_endpoint(name: str, space_id: str = None):
@@ -18,12 +18,12 @@ def get_space_endpoint(space_id: str):
     return {
         'path': '/GetSpace',
         'json': {'spaceId': space_id},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
     }
 
 
 def get_spaces_endpoint():
-    return {'path': '/GetSpaces', 'json': {}, 'headers': {'Content-Type': 'application/json'}}
+    return {'path': '/GetSpaces', 'json': {}}
 
 
 def remove_space_endpoint(space_id: str) -> dict:
@@ -34,6 +34,6 @@ def remove_space_endpoint(space_id: str) -> dict:
     """
     return {
         'path': '/RemoveSpace',
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+        'headers': {'Current-Space-Id': space_id},
         'json': {'spaceId': space_id},
     }
