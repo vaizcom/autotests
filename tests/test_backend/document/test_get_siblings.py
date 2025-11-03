@@ -1,7 +1,7 @@
 import pytest
 import allure
 
-from test_backend.data.endpoints.Document.document_endpoints import (
+from tests.test_backend.data.endpoints.Document.document_endpoints import (
     create_document_endpoint,
     get_document_siblings_endpoint,
 )

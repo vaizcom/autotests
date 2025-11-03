@@ -8,13 +8,13 @@ from test_backend.data.endpoints.member.member_endpoints import get_space_member
 from tests.core.client import APIClient
 from tests.core.auth import get_token
 from tests.config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID
-from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
-from test_backend.data.endpoints.Project.project_endpoints import (
+from tests.test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
+from tests.test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint,
     create_board_endpoint,
     get_project_endpoint,
 )
-from test_backend.data.endpoints.Space.space_endpoints import (
+from tests.test_backend.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
     remove_space_endpoint,
     get_space_endpoint,
