@@ -3,12 +3,12 @@ import re
 import random
 import allure
 import time
-from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
-from test_backend.data.endpoints.Project.project_endpoints import get_project_endpoint
-from test_backend.data.endpoints.Task.task_endpoints import delete_task_endpoint
-from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
-from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
-from test_backend.data.endpoints.milestone.milestones_endpoints import get_milestones_endpoint, get_milestone_endpoint
+from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
+from tests.test_backend.data.endpoints.Project.project_endpoints import get_project_endpoint
+from tests.test_backend.data.endpoints.Task.task_endpoints import delete_task_endpoint
+from tests.test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
+from tests.test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
+from tests.test_backend.data.endpoints.milestone.milestones_endpoints import get_milestones_endpoint, get_milestone_endpoint
 
 
 def validate_hrid(client, space_id, project_id, task_hrid):

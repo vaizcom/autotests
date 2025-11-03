@@ -1,6 +1,6 @@
 import allure
 import pytest
-from test_backend.data.endpoints.Document.document_endpoints import (
+from tests.test_backend.data.endpoints.Document.document_endpoints import (
     get_recent_documents_endpoint,
     create_document_endpoint,
     archive_document_endpoint,

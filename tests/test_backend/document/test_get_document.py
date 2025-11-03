@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Document.document_endpoints import get_document_endpoint, create_document_endpoint
+from tests.test_backend.data.endpoints.Document.document_endpoints import get_document_endpoint, create_document_endpoint
 
 pytestmark = [pytest.mark.backend]
 
