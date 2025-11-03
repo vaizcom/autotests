@@ -168,3 +168,4 @@ allure-results/
 # Optional: generated HTML reports
 allure-report/
 /venv/
+/.idea/
