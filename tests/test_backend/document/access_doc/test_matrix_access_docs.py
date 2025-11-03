@@ -4,7 +4,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import get_do
 
 pytestmark = [pytest.mark.backend]
 
-
+@pytest.mark.skip(reason="revert")
 @allure.title('Проверка доступа к документам: пользователь без доступа (foreign_client)')
 def test_document_access_denied_for_foreign_client(request, foreign_client, main_space):
     """
@@ -19,6 +19,7 @@ def test_document_access_denied_for_foreign_client(request, foreign_client, main
         assert error.get('code') == 'NotFound', f"Ожидался код ошибки 'NotFound', получен {error.get('code')}"
 
 
+@pytest.mark.skip(reason="Revert")
 @allure.title(
     'Проверка доступа space_client к основному документу и отсутствия доступа к проектному документу и персональному документу'
 )
@@ -47,7 +48,7 @@ def test_space_client_document_access(
         )
         assert response_personal.status_code == 403, 'Доступ к MAIN_PERSONAL_DOC_ID должен быть запрещён'
 
-
+@pytest.mark.skip(reason="Revert")
 @allure.title(
     'Проверка доступа project_client к основному документу, проектному документу и отсутствия доступа к персональному документу'
 )

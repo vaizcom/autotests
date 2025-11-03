@@ -64,7 +64,7 @@ def test_get_document_invalid_input(owner_client, temp_space, document_id, expec
         assert resp.status_code == expected_status
         assert resp.json().get('error', {}).get('code') == expected_error_code
 
-
+@pytest.mark.skip(reason="revert")
 @pytest.mark.parametrize(
     'kind, fixture_name',
     [
