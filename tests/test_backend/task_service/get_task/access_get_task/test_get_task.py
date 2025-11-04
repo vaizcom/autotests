@@ -31,6 +31,7 @@ def test_get_task(request, main_space, board_with_tasks, client_fixture, expecte
     client = get_client(request, client_fixture)
     slug_id = 'CCSS-13258'
 
+
     with allure.step("Получение задачи"):
         payload = get_task_endpoint(space_id=main_space, slug_id=slug_id)
         response = get_task_endpoint(client, payload)
