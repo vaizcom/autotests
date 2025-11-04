@@ -1,20 +1,20 @@
 import pytest
 import allure
-from config import settings
-from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
-from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
-from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
-from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
+from tests.config import settings
+from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
+from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
+from tests.test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
+from tests.test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from tests.core.client import APIClient
 from tests.core.auth import get_token
 from tests.config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID
-from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
-from test_backend.data.endpoints.Project.project_endpoints import (
+from tests.test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
+from tests.test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint,
     create_board_endpoint,
     get_project_endpoint,
 )
-from test_backend.data.endpoints.Space.space_endpoints import (
+from tests.test_backend.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
     remove_space_endpoint,
     get_space_endpoint,

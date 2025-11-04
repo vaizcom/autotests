@@ -7,7 +7,6 @@ URL = os.getenv('URL')
 print('Loaded URL:', URL)
 
 CURRENT_SPACE_ID = os.getenv('CURRENT_SPACE_ID')
-FOREIGN_SPACE_ID = os.getenv('FOREIGN_SPACE_ID')
 MAIN_SPACE_ID = os.getenv('MAIN_SPACE_ID')
 MAIN_PROJECT_ID = os.getenv('MAIN_PROJECT_ID')
 MAIN_BOARD_ID = os.getenv('MAIN_BOARD_ID')

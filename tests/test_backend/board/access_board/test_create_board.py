@@ -2,7 +2,7 @@ import pytest
 import uuid
 import allure
 
-from test_backend.data.endpoints.Board.board_endpoints import (
+from tests.test_backend.data.endpoints.Board.board_endpoints import (
     create_board_endpoint,
     delete_board_endpoint,
 )

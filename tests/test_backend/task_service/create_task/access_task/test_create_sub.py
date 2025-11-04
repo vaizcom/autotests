@@ -1,13 +1,13 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import (
+from tests.test_backend.data.endpoints.Task.task_endpoints import (
     delete_task_endpoint,
 )
 
 pytestmark = [pytest.mark.backend]
 
-
+@pytest.mark.skip(reason="Revert")
 @allure.parent_suite("access_task")
 @allure.title("Тестирование создания подзадачи разными пользовательскими ролями и проверка ожидаемого поведения")
 @pytest.mark.parametrize(

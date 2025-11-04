@@ -3,8 +3,8 @@ import random
 import pytest
 import allure
 
-from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, delete_task_endpoint
-from test_backend.task_service.create_task.utils import get_client
+from tests.test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, delete_task_endpoint
+from tests.test_backend.task_service.create_task.utils import get_client
 
 pytestmark = [pytest.mark.backend]
 

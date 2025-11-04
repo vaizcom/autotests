@@ -1,7 +1,7 @@
 import pytest
 import allure
 
-from test_backend.data.endpoints.Board.board_endpoints import (
+from tests.test_backend.data.endpoints.Board.board_endpoints import (
     get_board_endpoint,
 )
 

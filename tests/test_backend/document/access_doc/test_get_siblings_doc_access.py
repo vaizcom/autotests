@@ -2,7 +2,7 @@ from datetime import datetime
 import allure
 import pytest
 
-from test_backend.data.endpoints.Document.document_endpoints import (
+from tests.test_backend.data.endpoints.Document.document_endpoints import (
     create_document_endpoint,
     get_document_siblings_endpoint,
     archive_document_endpoint,

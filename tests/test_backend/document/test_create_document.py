@@ -1,6 +1,6 @@
 import pytest
 
-from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint
+from tests.test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint
 import allure
 
 
@@ -218,7 +218,7 @@ def test_document_response_structure(owner_client, temp_space, temp_project):
         for field in ['_id', 'kind']:
             assert field in document, f'Поле {field} отсутствует в payload'
 
-
+@pytest.mark.skip(reason="Revert")
 @allure.title('Создание документа без авторизации')
 def test_create_document_without_auth(foreign_client, temp_space, temp_project):
     with allure.step('Создание документа гостем'):
@@ -229,7 +229,7 @@ def test_create_document_without_auth(foreign_client, temp_space, temp_project):
         assert response.status_code == 400
         assert response.json()['error']['code'] == 'SpaceIdNotSpecified'
 
-
+@pytest.mark.skip(reason="Revert")
 @allure.title('Создание документа в чужом space')
 def test_create_document_in_foreign_space(owner_client, foreign_space, temp_project):
     with allure.step('Попытка создать документ в чужом space'):

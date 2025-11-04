@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import (
+from tests.test_backend.data.endpoints.Task.task_endpoints import (
     delete_task_endpoint,
     get_task_endpoint,
 )
