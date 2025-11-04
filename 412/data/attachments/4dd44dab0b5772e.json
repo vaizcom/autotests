@@ -1,0 +1,1 @@
+{"payload":null,"type":"DuplicateDocument","error":{"code":"InternalServerError","fields":[],"originalType":"DuplicateDocument","meta":{"context":"MongoServerError","message":"Caused by :: Write conflict during plan execution and yielding is disabled. :: Please retry your operation or multi-document transaction."}}}
