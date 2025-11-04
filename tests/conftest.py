@@ -1,5 +1,7 @@
 import pytest
 import allure
+
+from config.settings import BOARD_WITH_TASKS
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
@@ -99,6 +101,13 @@ def main_board(main_client, main_space):
     assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {resp.text}'
     return MAIN_BOARD_ID
 
+# Доска с 10.000 тасок в main_space
+@pytest.fixture(scope='session')
+def board_with_tasks(main_client, main_space):
+    assert BOARD_WITH_TASKS, 'Не задана переменная окружения MAIN_BOARD_ID'
+    resp = main_client.post(**get_board_endpoint(board_id=BOARD_WITH_TASKS, space_id=main_space))
+    assert resp.status_code == 200, f'Board {BOARD_WITH_TASKS} not found: {resp.text}'
+    return BOARD_WITH_TASKS
 
 @pytest.fixture(scope='session')
 def main_personal(main_client, main_space):
