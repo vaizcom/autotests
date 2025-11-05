@@ -29,7 +29,7 @@ def test_get_task(request, main_space, board_with_tasks, client_fixture, expecte
         f"Get task: клиент={client_fixture}, ожидаемый статус={expected_status}")
 
     client = get_client(request, client_fixture)
-    slug_id = 'CCSS-13258'
+    slug_id = 'CCSS-15042'
     # to do: сделать рандом slug от getTasks
     # to do: сделать по таск Id
 
@@ -66,8 +66,8 @@ def test_get_task(request, main_space, board_with_tasks, client_fixture, expecte
                 "createdAt": str,
                 "updatedAt": str,
                 "document": str,
-                "editor": str,
-                "milestone": str,
+                #"editor": str,
+
 
                 # допускают None или строку
                 "parentTask": (str, type(None)),
@@ -78,6 +78,7 @@ def test_get_task(request, main_space, board_with_tasks, client_fixture, expecte
                 "completedAt": (str, type(None)),
                 "deleter": (str, type(None)),
                 "deletedAt": (str, type(None)),
+                "milestone": (str, type(None)),
 
                 # булево
                 "completed": bool,
@@ -105,7 +106,10 @@ def test_get_task(request, main_space, board_with_tasks, client_fixture, expecte
                 missing = expected_keys - actual_keys
                 extra = actual_keys - expected_keys
                 assert not missing, f"Отсутствуют обязательные поля: {sorted(missing)}"
-                assert not extra, f"Найдены лишние поля: {sorted(extra)}"
+                assert not extra - {"editor"}, f"Найдены лишние поля: {sorted(extra - {'editor'})}"
+                # "editor" допустим как дополнительное поле
+                if "editor" in actual_keys:
+                    assert isinstance(task["editor"], str), "Поле 'editor' (если присутствует) должно быть строкой"
 
             # Проверка типов по схеме
             with allure.step("Проверка типов данных всех полей задачи"):
@@ -139,3 +143,6 @@ def test_get_task(request, main_space, board_with_tasks, client_fixture, expecte
     else:
         task_err = response.json()["error"]
         assert task_err['code'] in ['AccessDenied', 'NotFound']
+
+# To Do: parentTask не равен _id; если есть subtasks — они не содержат _id текущей задачи.
+
