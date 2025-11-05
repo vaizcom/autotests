@@ -64,13 +64,13 @@ def foreign_client():
 
 # Пользователь имеет доступ к spаce в роли member(и не имеет доступ к проекту и борде)
 @pytest.fixture(scope='session')
-def space_client_memb():
+def client_with_access_only_in_space():
     return APIClient(base_url=API_URL, token=get_token('space_client'))
 
 
 # Пользователь имеет доступ к spаce и к проекту (и не имеет доступ к борде)
 @pytest.fixture(scope='session')
-def project_client():
+def client_with_access_only_in_project():
     return APIClient(base_url=API_URL, token=get_token('project_client'))
 
 

@@ -15,8 +15,8 @@ pytestmark = [pytest.mark.backend]
         ('manager_client', 200),
         ('member_client', 200),
         ('guest_client', 200),
-        ('space_client_memb', 400),
-        ('project_client', 400),
+        ('client_with_access_only_in_space', 400),
+        ('client_with_access_only_in_project', 400),
         ('foreign_client', 403)
     ],
     ids=['owner', 'manager', 'member', 'guest','no_access_to_project', 'no_access_to_board', 'no_access_to_space'],
