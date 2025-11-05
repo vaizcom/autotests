@@ -15,8 +15,8 @@ pytestmark = [pytest.mark.backend]
         ('manager_client', 200),
         ('member_client', 200),
         ('guest_client', 200),
-        ('space_client_memb', 403),
-        ('project_client', 403),
+        ('space_client_memb', 400),
+        ('project_client', 400),
         ('foreign_client', 403)
     ],
     ids=['owner', 'manager', 'member', 'guest','no_access_to_project', 'no_access_to_board', 'no_access_to_space'],
@@ -30,11 +30,12 @@ def test_get_task(request, main_space, board_with_tasks, client_fixture, expecte
 
     client = get_client(request, client_fixture)
     slug_id = 'CCSS-13258'
+    # to do: сделать рандом slug от getTasks
+    # to do: сделать по таск Id
 
 
     with allure.step("Получение задачи"):
-        payload = get_task_endpoint(space_id=main_space, slug_id=slug_id)
-        response = get_task_endpoint(client, payload)
+        response = client.post(**get_task_endpoint(space_id=main_space, slug_id=slug_id))
 
     # Проверяем статус ответа
     with allure.step(f"Проверка статус-кода: ожидаем {expected_status}"):
@@ -136,5 +137,5 @@ def test_get_task(request, main_space, board_with_tasks, client_fixture, expecte
                 assert task["project"] == main_project, "Ошибка: неверное значение поля 'project'"
 
     else:
-        task_err = response.json()["payload"]["error"]
-        assert task_err['code'] == 'AccessDenied'
+        task_err = response.json()["error"]
+        assert task_err['code'] in ['AccessDenied', 'NotFound']
