@@ -6,7 +6,6 @@ pytestmark = [pytest.mark.backend]
 
 SAMPLE_SIZE = 20  # сколько задач валидировать из ответа
 
-@allure.title("Тестирование получения задач(get_tasks) под разными ролями с валидацией набора полей и типов")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -18,6 +17,18 @@ SAMPLE_SIZE = 20  # сколько задач валидировать из от
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_get_tasks_access_by_role(request, client_fixture, expected_status, board_with_tasks, main_space):
+    """
+    Тестирование получения задач(get_tasks) под разными ролями с валидацией набора полей и типов.
+
+    Проверяет:
+    1. HTTP статус код ответа
+    2. Структуру payload ответа
+    3. Валидацию полей и типов данных для выборки задач
+    4. Принадлежность задач правильной доске
+    """
+    role_name = client_fixture.replace('_client', '').capitalize()
+    allure.dynamic.title(f"Тестирование получения задач под ролью {role_name} (HTTP {expected_status})")
+
     client = request.getfixturevalue(client_fixture)
 
     with allure.step(f"{client_fixture}: вызвать GetTasks"):
@@ -76,7 +87,7 @@ def test_get_tasks_access_by_role(request, client_fixture, expected_status, boar
             optional_fields = {"editor", "milestone", "dueStart", "completedAt", "deleter", "deletedAt"}
 
             for task in sample:
-                with allure.step(f"Проверить задачу {task.get('_id', 'unknown')}"):
+                with allure.step(f"Проверить задачу с '_id' {task.get('_id', 'unknown')}"):
                     # Проверяем все обязательные поля
                     for field, expected_type in required_fields.items():
                         assert field in task, f"Отсутствует обязательное поле: {field}"
@@ -99,13 +110,21 @@ def test_get_tasks_access_by_role(request, client_fixture, expected_status, boar
                 assert task["board"] == str(board_with_tasks), f"Задача {task['_id']} принадлежит неправильному board"
 
 
-@allure.title("Проверка что список задач пустой для пользователей которые не имеют доступ к борде")
 @pytest.mark.parametrize(
     'client_fixture',
     ['client_with_access_only_in_space', 'client_with_access_only_in_project'],
     ids=['no_access_to_project', 'no_access_to_board'],
 )
 def test_get_tasks_limited_access(request, client_fixture, board_with_tasks, main_space):
+    """
+        Проверка что список задач пустой для пользователей которые не имеют доступ к борде
+
+        Проверяет, что пользователи без доступа к проекту или доске получают пустой список задач,
+        но при этом запрос выполняется успешно (HTTP 200).
+        """
+    role_name = client_fixture.capitalize()
+    allure.dynamic.title(f"Тестирование получения задач под ролью {role_name}")
+
     client = request.getfixturevalue(client_fixture)
 
     with allure.step(f"{client_fixture}: вызвать GetTasks"):

@@ -111,7 +111,7 @@ def test_token_foreign_client(foreign_client: str):
     }
     with allure.step("POST с токеном foreign_client (нет прав к спейсу)"):
         r = requests.post(url, json=payload, headers=headers)
-    with allure.step("Проверка: отсутствие 404 и ожидаемый 403 Forbidden"):
+    with allure.step("Проверка: ожидаемый статус код 400"):
         assert r.status_code != 404, f'Эндпоинт не найден: url={url}'
         assert r.status_code == 400, f'Ожидали 400, получили {r.status_code}; body={r.text}'
     with allure.step("Проверка структуры тела ошибки: AccessDenied"):
