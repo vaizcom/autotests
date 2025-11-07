@@ -1,0 +1,8 @@
+Не удалось удалить задачу 690ded7c4aa117e4bab32418 после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
+Не удалось удалить задачу 690ded7d4aa117e4bab324ef после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
+Не удалось удалить задачу 690ded7f4aa117e4bab325c6 после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
+Не удалось удалить задачу 690ded804aa117e4bab3269d после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
+Не удалось удалить задачу 690ded814aa117e4bab32774 после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
+Не удалось удалить задачу 690ded824aa117e4bab3284b после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
+Не удалось удалить задачу 690ded834aa117e4bab32922 после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
+Не удалось удалить задачу 690ded844aa117e4bab329f9 после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
