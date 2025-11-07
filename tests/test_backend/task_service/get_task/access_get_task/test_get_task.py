@@ -6,7 +6,7 @@ from test_backend.task_service.create_task.utils import get_client
 
 pytestmark = [pytest.mark.backend]
 
-@allure.title("Тестирование получения задачи под разными ролями с валидацией набора полей и типов")
+@allure.title("Тестирование получения задачи(get_task) под разными ролями с валидацией набора полей и типов")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
