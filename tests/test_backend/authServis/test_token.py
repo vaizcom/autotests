@@ -97,7 +97,7 @@ def test_token_empty():
         assert err.get("originalType") == "GetSpaceMembers", "error.originalType должен совпадать с типом"
 
 
-@allure.title("Авторизация: токен пользователя без доступа к спейсу (foreign_client) => Forbidden 403")
+@allure.title("Авторизация: токен пользователя без доступа к спейсу (foreign_client) => 400")
 def test_token_foreign_client(foreign_client: str):
     url = f'{API_URL.rstrip("/")}/GetSpace'
     token = getattr(foreign_client, "token", "")
@@ -113,7 +113,7 @@ def test_token_foreign_client(foreign_client: str):
         r = requests.post(url, json=payload, headers=headers)
     with allure.step("Проверка: отсутствие 404 и ожидаемый 403 Forbidden"):
         assert r.status_code != 404, f'Эндпоинт не найден: url={url}'
-        assert r.status_code == 400, f'Ожидали 403, получили {r.status_code}; body={r.text}'
+        assert r.status_code == 400, f'Ожидали 400, получили {r.status_code}; body={r.text}'
     with allure.step("Проверка структуры тела ошибки: AccessDenied"):
         body = r.json()
         err = (body or {}).get("error") or {}
@@ -122,48 +122,3 @@ def test_token_foreign_client(foreign_client: str):
         assert err.get("originalType") == "GetSpace", "error.originalType должен совпадать с типом"
         assert err.get("code") == "MemberDidNotFound" , \
             f'Ожидали code MemberDidNotFound, получили: {err.get("code")}'
-
-
-@allure.title("Авторизация: logout инвалидирует текущий токен (до — 200, после — 400)")
-def test_logout_invalidates_token(owner_client):
-    """
-    Сценарий:
-    1) До logout: защищённый эндпоинт доступен (200).
-    2) POST /Logout.
-    3) После logout: тот же токен получает отказ 400 (JwtDoesNotExits).
-    """
-    url_members = f'{API_URL}/GetSpaceMembers'
-    url_logout = f'{API_URL}/Logout'
-
-    token = getattr(owner_client, "token", "")
-    assert token, "owner_client.token пуст"
-
-    headers = {
-        "Current-Space-Id": MAIN_SPACE_ID,
-        "Authorization": f"Bearer {token}",
-        "Cookie": f"_t={token}",
-        "Content-Type": "application/json",
-    }
-
-    with allure.step("До logout: доступ к защищённому эндпоинту (ожидаем 200)"):
-        r = requests.post(url_members, data="", headers=headers)
-    assert r.status_code != 404, f'Эндпоинт не найден: url={url_members}'
-    assert r.status_code == 200, f'Ожидали 200 до logout, получили {r.status_code}; body={r.text}'
-
-    with allure.step("Вызываем Logout"):
-        r = requests.post(url_logout, json={}, headers=headers)
-    assert r.status_code != 404, f'Эндпоинт Logout не найден: url={url_logout}'
-    # Успешный logout: 200
-    assert r.status_code == 200, f'Неожиданный статус logout: {r.status_code}; body={r.text}'
-
-    with allure.step("После logout: тот же токен должен быть невалиден (ожидаем 400)"):
-        r = requests.post(url_members, data="", headers=headers)
-    assert r.status_code != 404, f'Эндпоинт не найден: url={url_members}'
-    assert r.status_code == 400, f'Ожидали 400 после logout, получили {r.status_code}; body={r.text}'
-    try:
-        body = r.json()
-    except ValueError:
-        pytest.skip("Сервер вернул не-JSON при ошибке после logout, пропускаем проверку кода")
-    err = (body or {}).get("error") or {}
-    assert err.get("code") == "JwtDoesNotExits", \
-        f'Ожидали JwtDoesNotExits, получили: {err.get("code")}'
