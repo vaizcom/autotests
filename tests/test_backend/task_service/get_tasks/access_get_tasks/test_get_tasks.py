@@ -2,8 +2,9 @@ import pytest
 import allure
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
-SAMPLE_SIZE = 20  # сколько задач валидировать из ответа
+pytestmark = [pytest.mark.backend]
 
+SAMPLE_SIZE = 20  # сколько задач валидировать из ответа
 
 @allure.title("Тестирование получения задач(get_tasks) под разными ролями с валидацией набора полей и типов")
 @pytest.mark.parametrize(
