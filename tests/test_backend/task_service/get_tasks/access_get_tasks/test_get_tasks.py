@@ -129,5 +129,3 @@ def test_get_tasks_no_access(request, board_with_tasks, main_space):
 
     with allure.step("Проверить HTTP 400"):
         assert resp.status_code == 400
-
-# TODO: добавить кейс для пользователя у которого нет доступа к борде, роль-No access
