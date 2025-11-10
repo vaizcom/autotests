@@ -76,3 +76,44 @@ def test_get_tasks_sorting_by_created_at_asc(owner_client, main_space, board_wit
                 "Результат сортировки",
                 allure.attachment_type.TEXT
             )
+
+
+@allure.title("Проверка сортировки по умолчанию (должна быть по возрастанию)")
+def test_get_tasks_default_sorting(owner_client, main_space, board_with_tasks):
+    """Проверяет что без указания sortDirection сортировка происходит по возрастанию"""
+
+    with allure.step("Выполнить запрос с sortCriteria без sortDirection"):
+        resp = owner_client.post(**get_tasks_endpoint(
+            space_id=main_space,
+            board=board_with_tasks,
+            sortCriteria="createdAt",
+            limit=15
+            # sortDirection НЕ указываем - проверяем поведение по умолчанию
+        ))
+
+    with allure.step("Проверить HTTP 200"):
+        assert resp.status_code == 200
+
+    with allure.step("Проверить что сортировка по умолчанию - по возрастанию"):
+        tasks = resp.json()["payload"]["tasks"]
+
+        assert len(tasks) <= 15, "Количество задач не должно превышать лимит"
+
+        if len(tasks) > 1:
+            created_dates = [parser.parse(task["createdAt"]) for task in tasks]
+
+            # Проверяем что это именно сортировка по возрастанию
+            for i in range(len(created_dates) - 1):
+                assert created_dates[i] <= created_dates[i + 1], \
+                    f"Сортировка по умолчанию должна быть по возрастанию, но {created_dates[i]} > {created_dates[i + 1]}"
+
+            allure.attach(
+                f"Сортировка по умолчанию: ПО ВОЗРАСТАНИЮ ✓\n"
+                f"Количество задач: {len(tasks)}\n"
+                f"Первая (самая старая) задача: {created_dates[0]}\n"
+                f"Последняя (самая новая) задача: {created_dates[-1]}",
+                "Результат проверки сортировки по умолчанию",
+                allure.attachment_type.TEXT
+            )
+        else:
+            allure.attach("Недостаточно задач для проверки сортировки", "Предупреждение", allure.attachment_type.TEXT)
