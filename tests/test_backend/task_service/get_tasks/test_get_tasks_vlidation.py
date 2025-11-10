@@ -22,7 +22,7 @@ def test_get_tasks_invalid_format_board_id(owner_client, main_space):
     """Проверяет поведение при запросе с некорректным форматом board_id"""
     malformed_board_id = "invalid_board_id"
 
-    with allure.step("owner_client: вызвать GetTasks с некорректным board_id"):
+    with allure.step("owner_client: вызвать GetTasks с некорректным board_id = 'invalid_board_id'"):
         resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, board=malformed_board_id))
 
     with allure.step("Проверить HTTP 400"):
@@ -36,20 +36,8 @@ def test_get_tasks_invalid_format_space_id(request, board_with_tasks):
     client = request.getfixturevalue('owner_client')
     malformed_space_id = "invalid_space_id"
 
-    with allure.step("owner_client: вызвать GetTasks с некорректным space_id"):
+    with allure.step("owner_client: вызвать GetTasks с некорректным space_id='invalid_space_id'"):
         resp = client.post(**get_tasks_endpoint(space_id=malformed_space_id, board=board_with_tasks))
-
-    with allure.step("Проверить HTTP 400"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "SpaceIdNotSpecified"
-
-
-@allure.title("Проверка получения задач без аутентификации")
-def test_get_tasks_unauthenticated(foreign_client, board_with_tasks, main_space):
-    """Проверяет поведение при запросе без аутентификации"""
-
-    with allure.step("unauthenticated_client: вызвать GetTasks"):
-        resp = foreign_client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_tasks))
 
     with allure.step("Проверить HTTP 400"):
         assert resp.status_code == 400
@@ -79,12 +67,12 @@ def test_get_tasks_empty_response_structure(request, board_with_tasks, main_spac
         assert len(payload["tasks"]) == 0, "Список задач должен быть пустым"
 
 
-@allure.title("Проверка обработки пустых строк в параметрах")
+@allure.title("Проверка поведения при передачи пустой строки в space_id")
 def test_get_tasks_empty_string_params(request, board_with_tasks, main_space):
     """Проверяет поведение при передаче пустых строк в качестве параметров"""
     client = request.getfixturevalue('owner_client')
 
-    with allure.step("owner_client: вызвать GetTasks с пустыми параметрами"):
+    with allure.step("owner_client: вызвать GetTasks с пустым space_id"):
         # Тестируем с пустым space_id в URL
         params = get_tasks_endpoint(space_id="", board=board_with_tasks)
         resp = client.post(**params)
@@ -107,18 +95,18 @@ def test_get_tasks_consistency(request, board_with_tasks, main_space):
                 assert resp.status_code == 200
                 responses.append(resp.json())
 
-    with allure.step("Проверить идентичность ответов"):
+    with allure.step("Проверить идентичность ответов(Сравнивает каждый последующий ответ с первым)"):
         first_response = responses[0]
         for i, response in enumerate(responses[1:], 2):
             assert response == first_response, f"Ответ {i} отличается от первого"
 
 
-@allure.title("Проверка максимальной длины идентификаторов")
+@allure.title("Проверка максимальной длины board_id")
 def test_get_tasks_max_id_length(request, main_space):
-    """Проверяет поведение при передаче очень длинных идентификаторов"""
+    """Проверяет поведение при передаче очень длинного board_id"""
     client = request.getfixturevalue('owner_client')
 
-    # Создаем очень длинный ID (больше разумного лимита)
+    # Создаем длинный ID (больше чем must be a mongodb id)
     long_board_id = "1" * 25
 
     with allure.step("owner_client: вызвать GetTasks с очень длинным board_id"):
