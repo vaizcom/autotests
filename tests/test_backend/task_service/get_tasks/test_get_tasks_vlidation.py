@@ -83,7 +83,7 @@ def test_get_tasks_empty_string_params(request, board_with_tasks, main_space):
 
 
 @allure.title("Проверка стабильности ответа при множественных запросах")
-def test_get_tasks_consistency(request, board_with_tasks, main_space):
+def test_get_tasks_stable_response(request, board_with_tasks, main_space):
     """Проверяет что множественные запросы возвращают одинаковый результат"""
     client = request.getfixturevalue('owner_client')
     responses = []
