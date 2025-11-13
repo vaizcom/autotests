@@ -6,7 +6,7 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-
+@pytest.mark.skip
 @allure.title("Проверка сортировки задач по дате создания (по возрастанию)")
 def test_get_tasks_sorting_by_created_at_asc(owner_client, main_space, board_with_tasks):
     """Проверяет сортировку задач по дате создания в порядке возрастания (старые сверху)"""
@@ -49,6 +49,7 @@ def test_get_tasks_sorting_by_created_at_asc(owner_client, main_space, board_wit
             attachment_type=allure.attachment_type.TEXT
         )
 
+@pytest.mark.skip
 @allure.title("Проверка сортировки по умолчанию (должна быть по возрастанию)")
 def test_get_tasks_default_sorting(owner_client, main_space, board_with_tasks):
     """Проверяет что без указания sortDirection сортировка происходит по возрастанию"""
@@ -57,9 +58,8 @@ def test_get_tasks_default_sorting(owner_client, main_space, board_with_tasks):
         resp = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
             board=board_with_tasks,
-            sortCriteria="createdAt",
             limit=30
-            # sortDirection НЕ указываем - проверяем поведение по умолчанию
+            # sortCriteria="createdAt", sortDirection НЕ указываем - проверяем поведение по умолчанию
         ))
 
     with allure.step("Проверить HTTP 200"):

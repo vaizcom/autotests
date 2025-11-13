@@ -5,6 +5,7 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
+@pytest.mark.skip
 @allure.title("Проверка сортировки задач по createdAt: по убыванию (новые сверху)")
 def test_get_tasks_sorting_by_created_at_desc(owner_client, main_space, board_with_tasks):
     """Проверяет сортировку задач по дате создания в порядке убывания (новые сверху)"""

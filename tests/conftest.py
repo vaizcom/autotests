@@ -2,6 +2,7 @@ import pytest
 import allure
 
 from config.settings import BOARD_WITH_TASKS
+from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
@@ -108,6 +109,22 @@ def board_with_tasks(main_client, main_space):
     resp = main_client.post(**get_board_endpoint(board_id=BOARD_WITH_TASKS, space_id=main_space))
     assert resp.status_code == 200, f'Board {BOARD_WITH_TASKS} not found: {resp.text}'
     return BOARD_WITH_TASKS
+
+# Возвращает tasks_ids с board_with_tasks == 10.000 тасок в main_space
+@pytest.fixture(scope='session')
+def task_id_list(owner_client, main_space, board_with_tasks):
+    resp = owner_client.post(**get_tasks_endpoint(
+        space_id=main_space,
+        board=board_with_tasks,
+        limit=20
+    ))
+    assert resp.status_code == 200
+    payload = resp.json().get("payload", {})
+    tasks = payload.get("tasks", [])
+    assert isinstance(tasks, list), "payload['tasks'] должен быть списком"
+
+    ids = [t.get("_id") for t in tasks if isinstance(t, dict)]
+    return [i for i in ids if i]
 
 @pytest.fixture(scope='session')
 def main_personal(main_client, main_space):
