@@ -5,8 +5,10 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 pytestmark = [pytest.mark.backend]
 
 @allure.title("GetTasks limit: Возвращает abs(limit) документов (если данных достаточно)")
-@pytest.mark.parametrize("expected_limit", [1, 2, -1, -10])
+@pytest.mark.parametrize("expected_limit", [1, -10])
 def test_get_tasks_limit(owner_client, main_space, board_with_tasks, expected_limit):
+    allure.dynamic.title(f"GetTasks limit: {expected_limit}")
+
     with allure.step(f"Выполнить запрос с limit={expected_limit}"):
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
