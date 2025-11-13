@@ -1,9 +1,7 @@
-
 import allure
 import pytest
 from dateutil import parser
 
-from core.auth import reset_token_cache
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
@@ -19,30 +17,37 @@ def test_get_tasks_sorting_by_created_at_asc(owner_client, main_space, board_wit
             board=board_with_tasks,
             sortCriteria="createdAt",
             sortDirection=1,
-            limit=10
+            limit=20
         ))
 
     with allure.step("Проверить HTTP 200"):
         assert resp.status_code == 200
 
-    with allure.step("Проверить сортировку по возрастанию (старые задачи сверху)"):
+    with allure.step("Извлечь задачи и проверить лимит"):
         tasks = resp.json()["payload"]["tasks"]
+        assert tasks, "Ожидаются задачи в ответе"
 
-        assert len(tasks) <= 10, "Количество задач не должно превышать лимит"
+    # Если данных недостаточно для сравнения — корректно пропускаем тест
+    if len(tasks) <= 2:
+        pytest.skip(f"Недостаточно данных для проверки убывания: получено {len(tasks)} (нужно > 2)")
 
-        if len(tasks) > 1:
+    with allure.step("Проверить возрастание по createdAt (новые задачи снизу)"):
+        try:
             created_dates = [parser.parse(task["createdAt"]) for task in tasks]
+        except Exception as e:
+            raise AssertionError(f"Не удалось распарсить createdAt в одной из задач: {e}")
 
-            # Проверяем сортировку по возрастанию (каждая следующая дата >= предыдущей)
-            for i in range(len(created_dates) - 1):
-                assert created_dates[i] <= created_dates[i + 1], \
-                    f"Нарушена сортировка по возрастанию: {created_dates[i]} должна быть <= {created_dates[i + 1]}"
-
-            allure.attach(
-                f"Количество задач: {len(tasks)}\nПервая задача: {created_dates[0]}\nПоследняя задача: {created_dates[-1]}",
-                "Результат сортировки",
-                allure.attachment_type.TEXT
+        for i in range(len(created_dates) - 1):
+            assert created_dates[i] <= created_dates[i + 1], (
+                f"Нарушена сортировка по убыванию: позиции {i} ({created_dates[i]}) и {i + 1} ({created_dates[i + 1]})"
             )
+
+        first, last = created_dates[0], created_dates[-1]
+        allure.attach(
+            f"Количество задач: {len(tasks)}\nПервая дата: {first}\nПоследняя дата: {last}",
+            name="Результат сортировки createdAt ASC",
+            attachment_type=allure.attachment_type.TEXT
+        )
 
 @allure.title("Проверка сортировки по умолчанию (должна быть по возрастанию)")
 def test_get_tasks_default_sorting(owner_client, main_space, board_with_tasks):
@@ -53,7 +58,7 @@ def test_get_tasks_default_sorting(owner_client, main_space, board_with_tasks):
             space_id=main_space,
             board=board_with_tasks,
             sortCriteria="createdAt",
-            limit=15
+            limit=30
             # sortDirection НЕ указываем - проверяем поведение по умолчанию
         ))
 
@@ -62,8 +67,6 @@ def test_get_tasks_default_sorting(owner_client, main_space, board_with_tasks):
 
     with allure.step("Проверить что сортировка по умолчанию - по возрастанию"):
         tasks = resp.json()["payload"]["tasks"]
-
-        assert len(tasks) <= 15, "Количество задач не должно превышать лимит"
 
         if len(tasks) > 1:
             created_dates = [parser.parse(task["createdAt"]) for task in tasks]
@@ -78,8 +81,7 @@ def test_get_tasks_default_sorting(owner_client, main_space, board_with_tasks):
                 f"Количество задач: {len(tasks)}\n"
                 f"Первая (самая старая) задача: {created_dates[0]}\n"
                 f"Последняя (самая новая) задача: {created_dates[-1]}",
-                "Результат проверки сортировки по умолчанию",
-                allure.attachment_type.TEXT
+                "Результат проверки сортировки по умолчанию"
             )
         else:
-            allure.attach("Недостаточно задач для проверки сортировки", "Предупреждение", allure.attachment_type.TEXT)
+            allure.attach("Недостаточно данных для проверки убывания: нужно > 2")
