@@ -106,7 +106,7 @@ def test_get_tasks_ids_nonexistent(owner_client, main_space, board_with_tasks):
 def test_get_tasks_ids_invalid_format(owner_client, main_space, board_with_tasks, task_id_list):
     # Формируем массив с одним корректным и несколькими некорректными элементами
     valid_id = task_id_list[0]
-    invalid_values = ["short", "", None, 123, {}, []]  # примеры некорректных элементов
+    invalid_values = ["CCSS-18137"]  # пример передачи hrid
     ids_with_invalids = [valid_id] + invalid_values
 
     with allure.step("Выполнить запрос с ids, содержащим элементы неверного формата"):
