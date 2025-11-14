@@ -5,7 +5,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import get_do
 pytestmark = [pytest.mark.backend]
 
 @allure.title('Проверка доступа к документам: пользователь без доступа (foreign_client)')
-def test_document_access_denied_for_foreign_client(request, foreign_client, main_space):
+def test_document_access_denied_for_foreign_client(foreign_client, main_space):
     """
     Проверяет, что пользователь foreign_client без доступа к Space получает ошибку.
     """
