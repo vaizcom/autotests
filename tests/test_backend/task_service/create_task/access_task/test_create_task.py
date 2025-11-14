@@ -23,7 +23,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_create_task_with_minimal_payload(request, main_space, main_board, client_fixture, expected_status, main_project):
+def test_create_task_with_minimal_payload(request, main_space, main_board, client_fixture, expected_status, main_project, owner_client):
     """
     Тест проверки создания задачи с минимальным набором полей в системе управления проектами под разными ролями.
 
@@ -114,7 +114,7 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
     finally:
         if task_id:
             with allure.step(f"Удаляем задачу: {task_id}"):
-                del_resp = client.post(**delete_task_endpoint(task_id=task_id, space_id=main_space))
+                del_resp = owner_client.post(**delete_task_endpoint(task_id=task_id, space_id=main_space))
                 assert del_resp.status_code == 200, (
                     f"Не удалось удалить задачу {task_id}: {del_resp.status_code} {del_resp.text}"
                 )
@@ -132,7 +132,7 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_create_task_with_specific_payload_and_response(
-        request, client_fixture, expected_status, main_space, main_board, main_project
+        request, client_fixture, expected_status, main_space, main_board, main_project, owner_client
 ):
     """
     Данный тест проверяет возможность создания задачи с заранее определённым набором данных (payload) через API
@@ -251,7 +251,7 @@ def test_create_task_with_specific_payload_and_response(
     finally:
         if task_id:
             with allure.step(f"Удаляем задачу: {task_id}"):
-                del_resp = client.post(**delete_task_endpoint(space_id=main_space, task_id=task_id))
+                del_resp = owner_client.post(**delete_task_endpoint(space_id=main_space, task_id=task_id))
                 assert del_resp.status_code == 200, (
                     f"Не удалось удалить задачу {task_id}: {del_resp.status_code} {del_resp.text}"
                 )

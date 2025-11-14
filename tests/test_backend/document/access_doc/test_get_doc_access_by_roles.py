@@ -1,4 +1,3 @@
-# test_get_doc_access_by_roles.py
 import allure
 import pytest
 

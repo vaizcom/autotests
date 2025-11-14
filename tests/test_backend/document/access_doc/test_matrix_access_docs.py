@@ -4,9 +4,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import get_do
 
 pytestmark = [pytest.mark.backend]
 
-@pytest.mark.skip(reason="revert")
 @allure.title('Проверка доступа к документам: пользователь без доступа (foreign_client)')
-def test_document_access_denied_for_foreign_client(request, foreign_client, main_space):
+def test_document_access_denied_for_foreign_client(foreign_client, main_space):
     """
     Проверяет, что пользователь foreign_client без доступа к Space получает ошибку.
     """
@@ -19,58 +18,57 @@ def test_document_access_denied_for_foreign_client(request, foreign_client, main
         assert error.get('code') == 'NotFound', f"Ожидался код ошибки 'NotFound', получен {error.get('code')}"
 
 
-@pytest.mark.skip(reason="Revert")
 @allure.title(
     'Проверка доступа space_client к основному документу и отсутствия доступа к проектному документу и персональному документу'
 )
 def test_space_client_document_access(
-    space_client_memb, main_space, main_space_doc, main_project_doc, main_personal_doc
+        client_with_access_only_in_space, main_space, main_space_doc, main_project_doc, main_personal_doc
 ):
     """
     Проверяем, что space_client имеет доступ к main_space_doc и не имеет доступа к main_personal_doc и main_project_doc.
 
     """
     with allure.step('Проверка доступа к основному документу MAIN_SPACE_DOC_ID'):
-        response_space = space_client_memb.post(
+        response_space = client_with_access_only_in_space.post(
             **get_document_endpoint(document_id=main_space_doc, space_id=main_space)
         )
         assert response_space.status_code == 200, 'Доступ к MAIN_SPACE_DOC_ID должен быть разрешён'
 
     with allure.step('Проверка отсутствия доступа к проектному документу MAIN_PROJECT_DOC_ID'):
-        response_project = space_client_memb.post(
+        response_project = client_with_access_only_in_space.post(
             **get_document_endpoint(document_id=main_project_doc, space_id=main_space)
         )
         assert response_project.status_code == 403, 'Доступ к MAIN_PROJECT_DOC_ID должен быть запрещён'
 
     with allure.step('Проверка отсутствия доступа к персональному документу MAIN_PERSONAL_DOC_ID'):
-        response_personal = space_client_memb.post(
+        response_personal = client_with_access_only_in_space.post(
             **get_document_endpoint(document_id=main_personal_doc, space_id=main_space)
         )
         assert response_personal.status_code == 403, 'Доступ к MAIN_PERSONAL_DOC_ID должен быть запрещён'
 
-@pytest.mark.skip(reason="Revert")
+
 @allure.title(
     'Проверка доступа project_client к основному документу, проектному документу и отсутствия доступа к персональному документу'
 )
 def test_project_client_document_access(
-    project_client, main_space, main_space_doc, main_project_doc, main_personal_doc
+        client_with_access_only_in_project, main_space, main_space_doc, main_project_doc, main_personal_doc
 ):
     """
     Проверяем, что project_client имеет доступ к main_space_doc и main_project_doc, но не имеет доступа к main_personal_doc.
     """
 
     with allure.step('Проверка доступа project_client к основному документу MAIN_SPACE_DOC_ID'):
-        response_space = project_client.post(**get_document_endpoint(document_id=main_space_doc, space_id=main_space))
+        response_space = client_with_access_only_in_project.post(**get_document_endpoint(document_id=main_space_doc, space_id=main_space))
         assert response_space.status_code == 200, 'Доступ к MAIN_SPACE_DOC_ID должен быть разрешён'
 
     with allure.step('Проверка доступа project_client к проектному документу MAIN_PROJECT_DOC_ID'):
-        response_project = project_client.post(
+        response_project = client_with_access_only_in_project.post(
             **get_document_endpoint(document_id=main_project_doc, space_id=main_space)
         )
         assert response_project.status_code == 200, 'Доступ к MAIN_PROJECT_DOC_ID должен быть разрешён'
 
     with allure.step('Проверка отсутствия доступа project_client к персональному документу MAIN_PERSONAL_DOC_ID'):
-        response_personal = project_client.post(
+        response_personal = client_with_access_only_in_project.post(
             **get_document_endpoint(document_id=main_personal_doc, space_id=main_space)
         )
         assert response_personal.status_code == 403, 'Доступ к MAIN_PERSONAL_DOC_ID должен быть запрещён'
