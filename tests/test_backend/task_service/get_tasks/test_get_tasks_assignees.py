@@ -61,3 +61,20 @@ def test_get_tasks_assignees_multiple_members(owner_client, main_space, board_wi
         for task in to_check:
             assignees = task.get("assignees", [])
             assert member_1 in assignees or member_2 in assignees
+
+
+@allure.title("GetTasks assignees: если указать пользователя невалидного(из другой борды) — ожидаем пустой список задач")
+def test_get_tasks_assignees_user_without_access(owner_client, main_space, board_with_tasks, temp_member):
+    user_without_access = temp_member
+    with allure.step("Выполнить POST /GetTasks от пользователя без доступа к борде"):
+        response = owner_client.post(**get_tasks_endpoint(
+            space_id=main_space,
+            board=board_with_tasks,
+            assignees=[user_without_access]
+        ))
+    with allure.step("Проверить HTTP 200 и пустой массив tasks при запросе с assignees= user_without_access"):
+        assert response.status_code == 200
+        data = response.json().get("payload", {})
+        tasks = data.get("tasks", [])
+        assert isinstance(tasks, list)
+        assert tasks == []
