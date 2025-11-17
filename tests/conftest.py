@@ -1,7 +1,7 @@
 import pytest
 import allure
 
-from config.settings import BOARD_WITH_TASKS
+from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
@@ -86,6 +86,15 @@ def main_space(main_client) -> str:
     assert resp.status_code == 200, f'Space {MAIN_SPACE_ID} not found: {resp.text}'
     return MAIN_SPACE_ID
 
+@pytest.fixture(scope='session')
+def second_space(main_client) -> str:
+    """
+    Отличие этого спейса в том, что в  этом спейсе уже есть мемберы с разными ролями(Дубликат).
+    """
+    assert SECOND_SPACE_ID, 'Не задана переменная окружения SECOND_SPACE_ID'
+    resp = main_client.post(**get_space_endpoint(space_id=SECOND_SPACE_ID))
+    assert resp.status_code == 200, f'Space {SECOND_SPACE_ID} not found: {resp.text}'
+    return SECOND_SPACE_ID
 
 @pytest.fixture(scope='session')
 def main_project(main_client, main_space):
