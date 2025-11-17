@@ -57,12 +57,12 @@ def delete_task_endpoint(task_id: str, space_id: str):
         "headers": {"Content-Type": "application/json", "Current-Space-Id": space_id}
     }
 
-def get_tasks_endpoint(board: str, space_id: str, **optional_params):
-    payload = {"board": board}
-    payload.update({k: v for k, v in optional_params.items() if v is not None})
+
+def get_tasks_endpoint(space_id: str, **optional_params):
+    payload = {k: v for k, v in optional_params.items() if v is not None}
     return {
         "path": "/GetTasks",
-        "json": payload,
+        "json": payload if payload else {},
         "headers": {"Content-Type": "application/json", "Current-Space-Id": space_id}
     }
 

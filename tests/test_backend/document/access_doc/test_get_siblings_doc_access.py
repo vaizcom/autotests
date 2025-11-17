@@ -124,22 +124,22 @@ def test_get_project_and_space_siblings_docs_access_by_roles(
         # Owner's personal documents
         ('owner_client', 'owner_client', 200),  # владелец смотрит свои документы
         ('owner_client', 'manager_client', 403),  # менеджер пытается смотреть документы владельца
-        ('owner_client', 'member_client', 403),  # участник пытается смотреть документы владельца
+        ('owner_client', 'member_client', 403),  # мембер пытается смотреть документы владельца
         ('owner_client', 'guest_client', 403),  # гость пытается смотреть документы владельца
         # Manager's personal documents
         ('manager_client', 'owner_client', 403),  # владелец пытается смотреть документы менеджера
         ('manager_client', 'manager_client', 200),  # менеджер смотрит свои документы
-        ('manager_client', 'member_client', 403),  # участник пытается смотреть документы менеджера
+        ('manager_client', 'member_client', 403),  # мембер пытается смотреть документы менеджера
         ('manager_client', 'guest_client', 403),  # гость пытается смотреть документы менеджера
         # Member's personal documents
         ('member_client', 'owner_client', 403),  # владелец пытается смотреть документы участника
         ('member_client', 'manager_client', 403),  # менеджер пытается смотреть документы участника
-        ('member_client', 'member_client', 200),  # участник смотрит свои документы
+        ('member_client', 'member_client', 200),  # мембер смотрит свои документы
         ('member_client', 'guest_client', 403),  # гость пытается смотреть документы участника
         # Guest's personal documents
         ('guest_client', 'owner_client', 403),  # владелец пытается смотреть документы гостя
         ('guest_client', 'manager_client', 403),  # менеджер пытается смотреть документы гостя
-        ('guest_client', 'member_client', 403),  # участник пытается смотреть документы гостя
+        ('guest_client', 'member_client', 403),  # мембер пытается смотреть документы гостя
         ('guest_client', 'guest_client', 200),  # гость смотрит свои документы
     ],
     ids=[

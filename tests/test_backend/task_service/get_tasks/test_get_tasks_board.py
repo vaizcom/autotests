@@ -18,6 +18,9 @@ def test_get_tasks_board_valid(owner_client, main_space, board_with_tasks):
         data = response.json().get("payload", {})
         tasks = data.get("tasks", [])
         assert isinstance(tasks, list)
+        assert len(tasks) > 10000
+        for task in tasks[:20]:
+            assert task.get("board") == board_with_tasks
 
 @allure.title("GetTasks board: доска не принадлежит space — ожидаем пустой список задач")
 def test_get_tasks_board_mismatched_space(owner_client, second_space, board_with_tasks):
@@ -26,7 +29,7 @@ def test_get_tasks_board_mismatched_space(owner_client, second_space, board_with
             space_id=second_space,
             board=board_with_tasks
         ))
-    with allure.step("Проверить контракт: либо HTTP 200 и пустой tasks"):
+    with allure.step("Проверить контракт: HTTP 200 и пустой tasks"):
         if response.status_code == 200:
             data = response.json().get("payload", {})
             tasks = data.get("tasks", [])

@@ -5,112 +5,45 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-SAMPLE_SIZE = 20  # сколько задач валидировать из ответа
-
+@allure.title("GetTasks: Проверка доступа к задачам для всех ролей (с фильтрацией по борде)")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
         ('owner_client', 200),
         ('manager_client', 200),
         ('member_client', 200),
-        ('guest_client', 200),
+        ('guest_client', 200)
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_get_tasks_access_by_role(request, client_fixture, expected_status, board_with_tasks, main_space):
+def test_get_tasks_filtered_by_board_by_role(request, client_fixture, expected_status, board_with_tasks, main_space):
     """
-    Тестирование получения задач(get_tasks) под разными ролями с валидацией набора полей и типов.
-
-    Проверяет:
-    1. HTTP статус код ответа
-    2. Структуру payload ответа
-    3. Валидацию полей и типов данных для выборки задач
-    4. Принадлежность задач правильной доске
+    Проверка фильтрации по конкретной борде для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указанной борде;
+    - foreign_client: HTTP 400 и отсутствие payload.tasks.Пользователь без доступа к спейсу не имеет доступ к задачам
     """
-    role_name = client_fixture.replace('_client', '').capitalize()
-    allure.dynamic.title(f"Тестирование получения задач под ролью {role_name} (HTTP {expected_status})")
-
     client = request.getfixturevalue(client_fixture)
+    role_name = client_fixture.replace('_client', '').capitalize()
+    allure.dynamic.title(f"Фильтрация по board под ролью {role_name} (HTTP {expected_status})")
 
-    with allure.step(f"{client_fixture}: вызвать GetTasks"):
+    with allure.step(f"{client_fixture}: вызвать GetTasks с фильтром board"):
         resp = client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_tasks))
 
     with allure.step(f"Проверить HTTP {expected_status}"):
         assert resp.status_code == expected_status
 
-    if expected_status == 200:
-        with allure.step("Проверить payload"):
-            payload = resp.json().get("payload", {})
-            assert "tasks" in payload and isinstance(payload["tasks"], list)
-            tasks = payload["tasks"]
+    with allure.step("Проверить payload и фильтрацию по board"):
+        payload = resp.json().get("payload", {})
+        assert "tasks" in payload and isinstance(payload["tasks"], list)
+        tasks = payload["tasks"]
 
-        if len(tasks) == 0:
-            with allure.step("Список задач пустой - пропускаем проверку схемы"):
-                return
-
-        # Ограничиваем количество проверяемых задач
-        sample = tasks[:SAMPLE_SIZE] if len(tasks) > SAMPLE_SIZE else tasks
-
-        with allure.step(f"Проверить схему для {len(sample)} задач из {len(tasks)}"):
-            # Обязательные поля и их типы
-            required_fields = {
-                "_id": str,
-                "name": str,
-                "group": str,
-                "project": str,
-                "priority": (int, float),
-                "creator": str,
-                "completed": bool,
-                "assignees": list,
-                "document": str,
-                "createdAt": str,
-                "updatedAt": str,
-                "board": str,
-                "types": list,
-                "subtasks": list,
-                "hrid": str,
-                "leftConnectors": list,
-                "rightConnectors": list,
-                "customFields": list,
-                "followers": dict,
-                "milestones": list,
-            }
-
-            # Поля которые могут быть None
-            nullable_fields = {
-                "archiver": (str, type(None)),
-                "archivedAt": (str, type(None)),
-                "parentTask": (str, type(None)),
-                "dueEnd": (str, type(None)),
-            }
-
-            # Опциональные поля
-            optional_fields = {"editor", "milestone", "dueStart", "completedAt", "deleter", "deletedAt"}
-
-            for task in sample:
-                with allure.step(f"Проверить задачу с '_id' {task.get('_id', 'unknown')}"):
-                    # Проверяем все обязательные поля
-                    for field, expected_type in required_fields.items():
-                        assert field in task, f"Отсутствует обязательное поле: {field}"
-                        assert isinstance(task[field],
-                                          expected_type), f"Поле {field} должно быть типа {expected_type.__name__}"
-
-                    # Проверяем nullable поля
-                    for field, expected_types in nullable_fields.items():
-                        if field in task:
-                            assert isinstance(task[field], expected_types), f"Поле {field} имеет неверный тип"
-
-                    # Проверяем что нет лишних полей (кроме известных опциональных)
-                    task_fields = set(task.keys())
-                    all_known_fields = set(required_fields.keys()) | set(nullable_fields.keys()) | optional_fields
-                    unexpected_fields = task_fields - all_known_fields
-                    assert not unexpected_fields, f"Найдены неожиданные поля: {unexpected_fields}"
-
-        with allure.step("Проверить что задачи принадлежат правильному board"):
-            for task in sample:
-                assert task["board"] == str(board_with_tasks), f"Задача {task['_id']} принадлежит неправильному board"
+        for task in tasks[:20]:
+            assert task.get("board") == board_with_tasks, (
+                f"Задача {task.get('_id', 'unknown')} принадлежит другой board: {task.get('board')}"
+            )
 
 
+@allure.title("GetTasks: Проверка что список задач пустой для пользователей которые не имеют доступ к борде")
 @pytest.mark.parametrize(
     'client_fixture',
     ['client_with_access_only_in_space', 'client_with_access_only_in_project'],

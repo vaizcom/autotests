@@ -35,7 +35,7 @@ def test_get_tasks_assignees_single_member(owner_client, main_space, board_with_
         data = response.json().get("payload", {})
         tasks = data.get("tasks", [])
         assert isinstance(tasks, list)
-    with allure.step(f"Проверить наличие переданного исполнителя (в массиве) в первых 20 задачах"):
+    with allure.step("Проверить наличие переданного исполнителя (в массиве) в первых 20 задачах"):
         to_check = tasks[:20] if len(tasks) > 20 else tasks
         for task in to_check:
             assignees = task.get("assignees", [])
@@ -56,7 +56,7 @@ def test_get_tasks_assignees_multiple_members(owner_client, main_space, board_wi
         data = response.json().get("payload", {})
         tasks = data.get("tasks", [])
         assert isinstance(tasks, list)
-    with allure.step(f"Проверить что хотябы один из двух переданных исполнителей(OR-фильтр) присутствует в первых 20 задачах"):
+    with allure.step("Проверить что хотябы один из двух переданных исполнителей(OR-фильтр) присутствует в первых 20 задачах"):
         to_check = tasks[:20] if len(tasks) > 20 else tasks
         for task in to_check:
             assignees = task.get("assignees", [])
