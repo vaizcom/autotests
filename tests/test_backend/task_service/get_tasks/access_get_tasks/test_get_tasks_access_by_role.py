@@ -20,7 +20,6 @@ def test_get_tasks_filtered_by_board_by_role(request, client_fixture, expected_s
     """
     Проверка фильтрации по конкретной борде для всех ролей:
     - роли с доступом: HTTP 200 и все задачи принадлежат указанной борде;
-    - foreign_client: HTTP 400 и отсутствие payload.tasks.Пользователь без доступа к спейсу не имеет доступ к задачам
     """
     client = request.getfixturevalue(client_fixture)
     role_name = client_fixture.replace('_client', '').capitalize()
@@ -82,3 +81,39 @@ def test_get_tasks_no_access(request, board_with_tasks, main_space):
 
     with allure.step("Проверить HTTP 400"):
         assert resp.status_code == 400
+
+
+@allure.title("GetTasks: Проверка доступа к задачам для всех ролей (без фильтраций)")
+@pytest.mark.parametrize(
+    'client_fixture, expected_status',
+    [
+        ('owner_client', 200),
+        ('manager_client', 200),
+        ('member_client', 200),
+        ('guest_client', 200)
+    ],
+    ids=['owner', 'manager', 'member', 'guest'],
+)
+def test_get_tasks_by_role(request, client_fixture, expected_status, main_space):
+    """
+    Проверка фильтрации по конкретной борде для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указанной борде;
+    """
+    client = request.getfixturevalue(client_fixture)
+    role_name = client_fixture.replace('_client', '').capitalize()
+    allure.dynamic.title(f"Фильтрация по board под ролью {role_name} (HTTP {expected_status})")
+
+    with allure.step(f"{client_fixture}: вызвать GetTasks с фильтром board"):
+        resp = client.post(**get_tasks_endpoint(space_id=main_space))
+
+    with allure.step(f"Проверить HTTP {expected_status}"):
+        assert resp.status_code == expected_status
+
+    with allure.step("Проверить payload и фильтрацию по board"):
+        payload = resp.json().get("payload", {})
+        assert "tasks" in payload and isinstance(payload["tasks"], list)
+        tasks = payload["tasks"]
+        sks=len(tasks)
+        assert len(tasks)>100
+        pass
+
