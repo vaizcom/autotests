@@ -61,8 +61,6 @@ def test_get_tasks_filtered_by_board_by_role(request, client_fixture, expected_s
 )
 def test_get_tasks_limited_access_filtered_by_board(request, client_fixture, board_with_tasks, main_space):
     """
-        Проверка что список задач пустой для пользователей которые не имеют доступ к борде
-
         Проверяет, что пользователи без доступа к проекту или доске получают пустой список задач,
         но при этом запрос выполняется успешно (HTTP 200).
         """

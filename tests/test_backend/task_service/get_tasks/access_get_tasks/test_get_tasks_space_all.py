@@ -6,8 +6,6 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-# TODO: после исправления бага добавить проверку, что заархивированные задачи не попадают в выборку(сейчас указан спейс в котором нет архивных тасок)
-
 @allure.title("GetTasks: Проверка доступа к задачам спейса для всех ролей (без фильтраций)")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
@@ -23,6 +21,9 @@ def test_get_tasks_by_role_in_second_space(request, client_fixture, expected_sta
     """
     Проверка доступа ко всем таскам в спейсе для всех ролей:
     - роли с доступом: HTTP 200 и все задачи принадлежат указанному спейсу;
+
+    TODO: после исправления бага добавить проверку, что заархивированные задачи не попадают в выборку
+    (сейчас указан спейс в котором нет архивных тасок)
     """
     client = request.getfixturevalue(client_fixture)
     role_name = client_fixture.replace('_client', '').capitalize()

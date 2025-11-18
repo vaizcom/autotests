@@ -61,8 +61,6 @@ def test_get_tasks_filtered_by_project_by_role(request, client_fixture, expected
 )
 def test_get_tasks_limited_access_filtered_by_project(request, client_fixture, main_project, main_space):
     """
-        Проверка что список задач пустой для пользователей которые не имеют доступ к project
-
         Проверяет, что пользователи без доступа к проекту получают пустой список задач,
         но при этом запрос выполняется успешно (HTTP 200).
         """

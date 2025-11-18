@@ -121,7 +121,7 @@ def test_create_task_with_negative_index_returns_error(
         space_id=main_space,
         board=main_board,
         name="Test negative index",
-        index=negative_index,
+        index=negative_index
     )
     with allure.step(f"Пробуем создать задачу с index={negative_index}"):
         response = client.post(**payload)
