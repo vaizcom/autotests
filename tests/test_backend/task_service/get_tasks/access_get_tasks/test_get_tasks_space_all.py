@@ -1,7 +1,6 @@
 import pytest
 import allure
 
-from conftest import main_project
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
@@ -43,17 +42,14 @@ def test_get_tasks_by_role_in_second_space(request, client_fixture, expected_sta
     if not tasks:
         pytest.skip("Список задач пуст — нечего валидировать")
 
-    for task in tasks[:20]:
-        assert task.get("project") == second_project, (
-            f"Задача {task.get('_id', 'unknown')} принадлежит другому space: {task.get('project')}"
-        )
-
-    with allure.step("Проверить отсутствие задач из другого спейса(проверка отсутствия project_id из другого space))"):
-        another_project_id = main_project
+    # Жёсткая проверка: каждая задача должна принадлежать только second_project
+    with allure.step("Проверить отсутствие задач из другого спейса)"):
         for task in tasks[:20]:
-            assert task.get("project") != another_project_id, (
-                f"Найдена задача {task.get('_id', 'unknown')} из чужой борды {another_project_id}"
-            )
+            assert "project" in task, f"У задачи {task.get('_id', 'unknown')} отсутствует поле project"
+            assert task.get("project") == second_project, (
+                f"Задача {task.get('_id', 'unknown')} принадлежит другому проекту: {task.get('project')}, "
+                f"ожидался {second_project}"
+                )
 
 
 @allure.title("Проверка что пользователь без доступа к спейсу не имеет доступ к задачам")

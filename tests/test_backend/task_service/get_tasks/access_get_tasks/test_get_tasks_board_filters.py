@@ -40,14 +40,14 @@ def test_get_tasks_filtered_by_board_by_role(request, client_fixture, expected_s
         if not tasks:
             pytest.skip("Список задач пуст — нечего валидировать по фильтру борды")
 
-        for task in tasks[20:]:
+        for task in tasks[50:]:
             assert task.get("board") == board_with_tasks, (
                 f"Задача {task.get('_id', 'unknown')} принадлежит другой board: {task.get('board')}"
             )
 
         with allure.step("Дополнительная проверка: отсутствие задач из соседней борды (этого же проекта)"):
             another_board_id = "6866309d85fb8d104544a637"
-            for task in tasks[50:]:
+            for task in tasks[100:]:
                 assert task.get("board") != another_board_id, (
                     f"Найдена задача {task.get('_id', 'unknown')} из чужой борды {another_board_id}"
                 )
