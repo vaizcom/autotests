@@ -8,17 +8,23 @@ pytestmark = [pytest.mark.backend]
 
 @allure.title("GetTasks assignees: пустой массив — без фильтра по исполнителям")
 def test_get_tasks_assignees_empty(owner_client, main_space, board_with_tasks):
+    """
+    Сейчас пустой массив возвращает пустой список задач,
+    (для наших нужд нет потребности выводить список тасок в котором нет асайни),
+    в публичном апи этот момент нужно будет учитывать и выводить таски если в них нет ассайни
+    """
     with allure.step("Выполнить POST /GetTasks с assignees=[]"):
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
             board=board_with_tasks,
             assignees=[]
         ))
-    with allure.step("Проверить HTTP 200 и наличие массива tasks"):
+    with allure.step("Проверить HTTP 200 и наличие пустого массива tasks"):
         assert response.status_code == 200
         data = response.json().get("payload", {})
         tasks = data.get("tasks", [])
         assert isinstance(tasks, list)
+        assert len(tasks) == 0 #  пустой массив возвращает пустой список задач
 
 
 @allure.title("GetTasks assignees: один валидный исполнитель")
@@ -70,7 +76,7 @@ def test_get_tasks_assignees_user_without_access(owner_client, main_space, board
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
             board=board_with_tasks,
-            assignees=[user_without_access]
+            assignees=user_without_access
         ))
     with allure.step("Проверить HTTP 200 и пустой массив tasks при запросе с assignees= user_without_access"):
         assert response.status_code == 200
@@ -78,3 +84,22 @@ def test_get_tasks_assignees_user_without_access(owner_client, main_space, board
         tasks = data.get("tasks", [])
         assert isinstance(tasks, list)
         assert tasks == []
+
+@allure.title("GetTasks assignees: если указать невалидный формат — ожидаем пустой список задач")
+def test_get_tasks_assignees_invalid_format(owner_client, main_space, board_with_tasks):
+    with allure.step("Выполнить GetTasks передав строку вместо массива в assignees=''"):
+        response = owner_client.post(**get_tasks_endpoint(
+            space_id=main_space,
+            board=board_with_tasks,
+            assignees="Marina"
+        ))
+    with allure.step("Проверить HTTP 400 и 'each value in assignees must be a mongodb id'"):
+        assert response.status_code == 400
+        body = response.json()
+        assert body.get("payload") is None
+        error = body.get("error", {})
+        assert error.get("code") == "InvalidForm"
+        fields = error.get("fields", [])
+        board_field = next((f for f in fields if f.get("name") == "assignees"), None)
+        codes = board_field.get("codes", [])
+        assert "each value in assignees must be a mongodb id" in codes
