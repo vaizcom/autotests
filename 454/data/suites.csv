@@ -1,0 +1,1655 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","2486","Проверка доступа к siblings Project-документа: создатель - member, просматривающий - member","tests.test_backend.document.access_doc","Wed Nov 19 08:16:04 UTC 2025","passed","Wed Nov 19 08:16:07 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Тест проверки создания задачи с минимальным набором полей в системе управления проектами под разными ролями.
+
+    Цель теста — убедиться, что можно успешно создать задачу, указав только минимально необходимые данные, и что поведение API зависит от прав пользователя (типа клиента).
+    В процессе теста дополнительно валидируются структура созданной задачи, значения по умолчанию, связи (creator, board и пр.), а также удаление задачи после проверки.
+    assert_task_keys обеспечивает падение теста при добавлении/удалении ключей с понятным сообщением.
+
+    Ход теста:
+        1. Получение клиента согласно переданной роли через фикстуру.
+        2. Получение id пользователя, с помощью которого осуществляется создание задачи.
+        3. Формирование минимального payload и попытка создать задачу через API.
+        4. Проверка статус-кода ответа.
+        5. Если задача успешно создана (ответ 200):
+            - Проверка наполнения и структуры ответа
+    ","1094","Create task with minimal payload: клиент=owner_client, ожидаемый статус=200","access_task","Wed Nov 19 08:19:02 UTC 2025","passed","Wed Nov 19 08:19:03 UTC 2025","","test_create_task","",""
+"","846","Архивирование Project-документа для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:01 UTC 2025","passed","Wed Nov 19 08:13:02 UTC 2025","","test_archive_doc","",""
+"Тест проверки siblins и родителей для родительского документа","946","Проверка отсутствия siblins и родителей для одного корневого документа (kind=Project)","tests.test_backend.document","Wed Nov 19 08:17:57 UTC 2025","passed","Wed Nov 19 08:17:58 UTC 2025","","test_get_siblings","",""
+"
+    Проверяем что разные роли могут получить списки документов из пространства и проекта.
+    Тест параметризован для проверки разных типов клиентов и контейнеров документов.
+
+    Проверяется получение и наличие в ответе всех созданных документов с учетом
+    ожидаемого статуса запроса для каждой роли.
+    ","1067","Проверка доступа к списку документов в Space для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:15:10 UTC 2025","passed","Wed Nov 19 08:15:11 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"","699","Дублирование Personal-документа: создание owner, дублирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:43 UTC 2025","passed","Wed Nov 19 08:13:44 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1021","Дублирование Space-документа: создание owner, дублирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:31 UTC 2025","passed","Wed Nov 19 08:13:32 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","4086","Сортировка документов по createdAt (kind=Project)","tests.test_backend.document","Wed Nov 19 08:17:44 UTC 2025","passed","Wed Nov 19 08:17:49 UTC 2025","","test_get_documents","",""
+"","776","Архивирование Personal-документа для роли manager, документ создан в роли Member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:05 UTC 2025","passed","Wed Nov 19 08:13:06 UTC 2025","","test_archive_doc","",""
+"","717","Дублирование Personal-документа: создание owner, дублирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:43 UTC 2025","passed","Wed Nov 19 08:13:43 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверяем что разные роли могут получить документы из пространства и проекта. Тест параметризован
+    для проверки разных типов клиентов и контейнеров документов.
+    ","1371","Проверка доступа к документу в Space для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:44 UTC 2025","passed","Wed Nov 19 08:14:46 UTC 2025","","test_get_doc_access_by_roles","",""
+"","218","GetTasks board: доска без задач — ожидаем пустой список","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:10 UTC 2025","passed","Wed Nov 19 08:24:11 UTC 2025","","test_get_tasks_board","",""
+"
+        Проверка обработки некорректных значений slug при получении задачи.
+        Ожидаем корректные коды ошибок для разных невалидных входных данных.
+        ","206","Негативные сценарии: Get task с invalid slug | slug='AAAAAAAAA' -> 400","tests.test_backend.task_service.get_task","Wed Nov 19 08:22:37 UTC 2025","passed","Wed Nov 19 08:22:37 UTC 2025","","test_get_task_wrong_slug","",""
+"
+    Тест проверяет корректность позиционирования задач при создании новой задачи в группе на доске (board).
+    ","2985","Проверка index -> ожидаемая позиция задачи в колонке| Пустая группа, индекс=10 ","create_task","Wed Nov 19 08:20:26 UTC 2025","passed","Wed Nov 19 08:20:29 UTC 2025","","test_task_indexing_in_group","",""
+"","246","Создание документа — кейс: [html injection] (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:51 UTC 2025","passed","Wed Nov 19 08:16:51 UTC 2025","","test_create_document","",""
+"
+    Проверяем доступ к списку недавних документов для ролей owner, manager, member, guest.
+    Создаются тестовые документы, проверяется их доступность
+    и корректный порядок отображения после повторной маркировки.
+    ","0","test_get_recent_documents_access_by_roles[space_docs-manager]","tests.test_backend.document.access_doc","Wed Nov 19 08:15:23 UTC 2025","skipped","Wed Nov 19 08:15:23 UTC 2025","","test_get_recent_documents_access_by_roles","",""
+"","229","Создание кастомного поля типа: Text","tests.test_backend.board","Wed Nov 19 08:12:47 UTC 2025","passed","Wed Nov 19 08:12:48 UTC 2025","","test_create_board","",""
+"
+    Test to verify negative access scenarios for a board.
+
+    ","760","Негативный тест на доступ к борде: клиент=client_with_access_only_in_space, ожидаемый статус=403","tests.test_backend.board.access_board","Wed Nov 19 08:12:35 UTC 2025","passed","Wed Nov 19 08:12:36 UTC 2025","","test_matrix_access_board","",""
+"","203","Тест: Проверка предельной длины описания проекта","tests.test_backend.project","Wed Nov 19 08:18:45 UTC 2025","passed","Wed Nov 19 08:18:46 UTC 2025","","test_project","",""
+"","144","Test space name length limit","tests.test_backend.space","Wed Nov 19 08:18:48 UTC 2025","passed","Wed Nov 19 08:18:49 UTC 2025","","test_space","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1804","Проверка доступа к siblings Space-документа: создатель - manager, просматривающий - manager","tests.test_backend.document.access_doc","Wed Nov 19 08:15:32 UTC 2025","passed","Wed Nov 19 08:15:34 UTC 2025","","test_get_siblings_doc_access","",""
+"","221","Валидация имени борды: empty string → ожидали 400","tests.test_backend.board","Wed Nov 19 08:12:37 UTC 2025","passed","Wed Nov 19 08:12:37 UTC 2025","","board_validation_test","",""
+"","178","Авторизация: пустой токен '_t=' приводит к Unauthorized 401 ","tests.test_backend.authServis","Wed Nov 19 08:12:27 UTC 2025","passed","Wed Nov 19 08:12:28 UTC 2025","","test_token","",""
+"","481","Позитивный сценарий: успешный экспорт Y-Doc для документа. Space","tests.test_backend.document","Wed Nov 19 08:18:40 UTC 2025","passed","Wed Nov 19 08:18:40 UTC 2025","","test_get_y_document","",""
+"Проверяем что пользователи могут получить только свои personal документы","460","Проверка доступа к personal документам для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:15:21 UTC 2025","passed","Wed Nov 19 08:15:21 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"","215","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Boolean","tests.test_backend.board","Wed Nov 19 08:12:43 UTC 2025","passed","Wed Nov 19 08:12:44 UTC 2025","","board_validation_test","",""
+"","227","Валидация имени борды: length > 50 → ожидали 400","tests.test_backend.board","Wed Nov 19 08:12:37 UTC 2025","passed","Wed Nov 19 08:12:38 UTC 2025","","board_validation_test","",""
+"","484","Позитивный сценарий: успешный экспорт Y-Doc для документа. Member","tests.test_backend.document","Wed Nov 19 08:18:40 UTC 2025","passed","Wed Nov 19 08:18:41 UTC 2025","","test_get_y_document","",""
+"","746","Редактирование Personal-документа: создание manager, редактирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:36 UTC 2025","passed","Wed Nov 19 08:14:37 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Тест проверки получения задачи под разными ролями с валидацией набора полей и типов.
+    ","536","Get task: клиент=manager_client, ожидаемый статус=200","tests.test_backend.task_service.get_task.access_get_task","Wed Nov 19 08:22:33 UTC 2025","passed","Wed Nov 19 08:22:34 UTC 2025","","test_get_task","",""
+"
+    Проверка фильтрации по конкретной борде для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указанной борде;
+    ","5970","Доступ к таскам с фильтрацией по board под ролью Member (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:22:51 UTC 2025","passed","Wed Nov 19 08:22:57 UTC 2025","","test_get_tasks_board_filters","",""
+"Проверяет корректность структуры ответа когда задач нет","413","Проверка структуры ответа при пустом списке задач","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:25:14 UTC 2025","passed","Wed Nov 19 08:25:15 UTC 2025","","test_get_tasks_vlidation","",""
+"
+    Проверяем, что space_client имеет доступ к main_space_doc и не имеет доступа к main_personal_doc и main_project_doc.
+
+    ","655","Проверка доступа space_client к основному документу и отсутствия доступа к проектному документу и персональному документу","tests.test_backend.document.access_doc","Wed Nov 19 08:16:44 UTC 2025","passed","Wed Nov 19 08:16:45 UTC 2025","","test_matrix_access_docs","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1685","Проверка доступа к siblings Space-документа: создатель - owner, просматривающий - owner","tests.test_backend.document.access_doc","Wed Nov 19 08:15:23 UTC 2025","passed","Wed Nov 19 08:15:25 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1722","Проверка доступа к siblings Space-документа: создатель - manager, просматривающий - member","tests.test_backend.document.access_doc","Wed Nov 19 08:15:34 UTC 2025","passed","Wed Nov 19 08:15:35 UTC 2025","","test_get_siblings_doc_access","",""
+"","1018","Дублирование Personal-документа: создание member, дублирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:49 UTC 2025","passed","Wed Nov 19 08:13:50 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","213","Ошибка при попытке получить борду по несуществующему boardId","tests.test_backend.board","Wed Nov 19 08:12:53 UTC 2025","passed","Wed Nov 19 08:12:53 UTC 2025","","test_get_board","",""
+"","446","Создание Personal-документа для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:11 UTC 2025","passed","Wed Nov 19 08:13:11 UTC 2025","","test_create_doc_access_by_roles","",""
+"
+    Тест создает задачу с указанными бордой, группой и индексом=0, и проверяет:
+      - корректность задачи,
+      - что задача только в одной группе, нет дублей, верный индекс=0.
+      - random client_fixture
+    ","1445","Создание задачи на доске и проверка: группа, индекс и уникальность размещения","create_task","Wed Nov 19 08:19:14 UTC 2025","passed","Wed Nov 19 08:19:15 UTC 2025","","test_create_task_on_board","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1839","Проверка доступа к siblings Project-документа: создатель - manager, просматривающий - member","tests.test_backend.document.access_doc","Wed Nov 19 08:15:56 UTC 2025","passed","Wed Nov 19 08:15:58 UTC 2025","","test_get_siblings_doc_access","",""
+"","260","Валидация поля group description: None (optional) → ожидали 200","tests.test_backend.board","Wed Nov 19 08:12:41 UTC 2025","passed","Wed Nov 19 08:12:42 UTC 2025","","board_validation_test","",""
+"
+    Негативный сценарий: разные некорректные document_id.
+    ","213","Негативный экспорт Y-Doc для document_id=None","tests.test_backend.document","Wed Nov 19 08:18:41 UTC 2025","passed","Wed Nov 19 08:18:41 UTC 2025","","test_get_y_document","",""
+"
+    Проверяем что разные роли могут получить списки документов из пространства и проекта.
+    Тест параметризован для проверки разных типов клиентов и контейнеров документов.
+
+    Проверяется получение и наличие в ответе всех созданных документов с учетом
+    ожидаемого статуса запроса для каждой роли.
+    ","1145","Проверка доступа к списку документов в Space для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:15:01 UTC 2025","passed","Wed Nov 19 08:15:02 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"","466","Авторизация: валидный токен и в Authorization и в Cookie - статус 200","tests.test_backend.authServis","Wed Nov 19 08:12:26 UTC 2025","passed","Wed Nov 19 08:12:27 UTC 2025","","test_token","",""
+"","733","Повторный запрос одного и того же документа (kind=Project)","tests.test_backend.document","Wed Nov 19 08:17:33 UTC 2025","passed","Wed Nov 19 08:17:34 UTC 2025","","test_get_document","",""
+"
+    Проверяет функциональность архивации Space-документа с разными ролями и уровнями доступа.
+
+    Тест создает Space-документ, используя случайного клиента с повышенными правами (владелец, менеджер или участник),
+    и оценивает возможность архивации документа на основе предоставленной роли client_fixture.
+    Проверяется, что возвращаются корректные коды состояния в зависимости от прав пользователя.
+    Дополнительно, в случаях, когда доступ запрещен и ожидаемый статус 403, документ архивируется после теста
+    с использованием случайного клиента с повышенными правами.
+    ","1030","Архивирование Space-документа для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:12:57 UTC 2025","passed","Wed Nov 19 08:12:58 UTC 2025","","test_archive_doc","",""
+"","234","Валидация поля limit для board group: 123","tests.test_backend.board","Wed Nov 19 08:12:43 UTC 2025","passed","Wed Nov 19 08:12:43 UTC 2025","","board_validation_test","",""
+"","500","Попытка получить документ из чужого space (kind=Space) — должен вернуться AccessDenied","tests.test_backend.document.access_doc","Wed Nov 19 08:13:15 UTC 2025","passed","Wed Nov 19 08:13:16 UTC 2025","","test_doc_access_for_foreign","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","738","Редактирование Project-документа: создание member, редактирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:29 UTC 2025","passed","Wed Nov 19 08:14:30 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Негативные сценарии: разные варианты некорректного document_id.
+    ","387","Негативный: некорректный document_id=","tests.test_backend.document","Wed Nov 19 08:18:29 UTC 2025","passed","Wed Nov 19 08:18:29 UTC 2025","","test_get_siblings","",""
+"","188","Попытка редактировать документ из чужого space (kind=Member)— должен вернуться MemberDidNotFound","tests.test_backend.document","Wed Nov 19 08:17:14 UTC 2025","passed","Wed Nov 19 08:17:14 UTC 2025","","test_edit_document","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1929","Редактирование Project-документа: создание owner, редактирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:14 UTC 2025","passed","Wed Nov 19 08:14:16 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Тест проверяет корректное уменьшение счетчика total сабтасок после удаления подзадач.
+    ","6017","Проверка уменьшения счетчика сабтасок после удаления сабтасок в родительской задаче","create_task","Wed Nov 19 08:20:14 UTC 2025","passed","Wed Nov 19 08:20:21 UTC 2025","","test_taskTable_total_subtask_counter","",""
+"","890","Редактирование Personal-документа: создание owner, редактирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:32 UTC 2025","passed","Wed Nov 19 08:14:33 UTC 2025","","test_edit_doc_access_by_roles","",""
+"Тест проверки siblins и родителей для родительского документа","465","Проверка отсутствия siblins и родителей для одного корневого документа (kind=Space)","tests.test_backend.document","Wed Nov 19 08:17:58 UTC 2025","passed","Wed Nov 19 08:17:59 UTC 2025","","test_get_siblings","",""
+"","228","Ошибка при создании борды с None вместо списков в полях groups/typesList/customFields","tests.test_backend.board","Wed Nov 19 08:12:45 UTC 2025","passed","Wed Nov 19 08:12:46 UTC 2025","","test_create_board","",""
+"","439","Тест: Проверка разархивации проекта","tests.test_backend.project","Wed Nov 19 08:18:47 UTC 2025","passed","Wed Nov 19 08:18:47 UTC 2025","","test_project","",""
+"
+    Тест проверяет корректность позиционирования задач при создании новой задачи в группе на доске (board).
+    ","18695","Проверка index -> ожидаемая позиция задачи в колонке| Группа из 10 тасок, индекс=10 ","create_task","Wed Nov 19 08:21:26 UTC 2025","passed","Wed Nov 19 08:21:45 UTC 2025","","test_task_indexing_in_group","",""
+"","0","test_get_document_foreign_access_denied[project]","tests.test_backend.document","Wed Nov 19 08:17:33 UTC 2025","skipped","Wed Nov 19 08:17:33 UTC 2025","","test_get_document","",""
+"","243","Создание документа в роли owner - с передачей kind=Member и kindId (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:53 UTC 2025","passed","Wed Nov 19 08:16:53 UTC 2025","","test_create_document","",""
+" ","699","Попытка экспортировать Y-Doc из чужого space(kind=Project)— должен вернуться SpaceIdNotSpecified","tests.test_backend.document","Wed Nov 19 08:18:42 UTC 2025","passed","Wed Nov 19 08:18:42 UTC 2025","","test_get_y_document","",""
+"
+    Проверка универсальна для всех эндпоинтов. Выполнена на GetSpaces.
+    ","387","Авторизация: отсутствие токена (в Authorization и Cookie,) приводит к Unauthorized 401)","tests.test_backend.authServis","Wed Nov 19 08:12:27 UTC 2025","passed","Wed Nov 19 08:12:27 UTC 2025","","test_token","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","735","Дублирование Space-документа: создание manager, дублирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:37 UTC 2025","passed","Wed Nov 19 08:13:38 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1616","Проверка доступа к siblings персонального документа: создатель - member, просматривающий - member","tests.test_backend.document.access_doc","Wed Nov 19 08:16:27 UTC 2025","passed","Wed Nov 19 08:16:29 UTC 2025","","test_get_siblings_doc_access","",""
+"","829","Архивирование Personal-документа для роли owner, документ создан в роли Member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:04 UTC 2025","passed","Wed Nov 19 08:13:05 UTC 2025","","test_archive_doc","",""
+"","703","Редактирование Personal-документа: создание owner, редактирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:33 UTC 2025","passed","Wed Nov 19 08:14:33 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1027","Дублирование Space-документа: создание manager, дублирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:36 UTC 2025","passed","Wed Nov 19 08:13:37 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","813","Создание дочерних документов, Проверка status_code и title","tests.test_backend.document","Wed Nov 19 08:16:51 UTC 2025","passed","Wed Nov 19 08:16:52 UTC 2025","","test_create_document","",""
+"
+    Test to verify negative access scenarios for a board.
+
+    ","623","Негативный тест на доступ к борде: клиент=foreign_client, ожидаемый статус=403","tests.test_backend.board.access_board","Wed Nov 19 08:12:34 UTC 2025","passed","Wed Nov 19 08:12:35 UTC 2025","","test_matrix_access_board","",""
+"","0","test_get_document_foreign_access_denied[space]","tests.test_backend.document","Wed Nov 19 08:17:33 UTC 2025","skipped","Wed Nov 19 08:17:33 UTC 2025","","test_get_document","",""
+"","210","Авторизован, но не участник пространства — дублирование запрещено Member","tests.test_backend.document","Wed Nov 19 08:17:07 UTC 2025","passed","Wed Nov 19 08:17:07 UTC 2025","","test_duplicate_document","",""
+"","474","Получение документов — кейс: kind=Space","tests.test_backend.document","Wed Nov 19 08:17:36 UTC 2025","passed","Wed Nov 19 08:17:37 UTC 2025","","test_get_documents","",""
+"","201","Проверка что пользователь без доступа к спейсу не имеет доступ к задачам board","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:06 UTC 2025","passed","Wed Nov 19 08:23:06 UTC 2025","","test_get_tasks_board_filters","",""
+"
+    Тест проверки создания задачи с минимальным набором полей в системе управления проектами под разными ролями.
+
+    Цель теста — убедиться, что можно успешно создать задачу, указав только минимально необходимые данные, и что поведение API зависит от прав пользователя (типа клиента).
+    В процессе теста дополнительно валидируются структура созданной задачи, значения по умолчанию, связи (creator, board и пр.), а также удаление задачи после проверки.
+    assert_task_keys обеспечивает падение теста при добавлении/удалении ключей с понятным сообщением.
+
+    Ход теста:
+        1. Получение клиента согласно переданной роли через фикстуру.
+        2. Получение id пользователя, с помощью которого осуществляется создание задачи.
+        3. Формирование минимального payload и попытка создать задачу через API.
+        4. Проверка статус-кода ответа.
+        5. Если задача успешно создана (ответ 200):
+            - Проверка наполнения и структуры ответа
+    ","1114","Create task with minimal payload: клиент=manager_client, ожидаемый статус=200","access_task","Wed Nov 19 08:19:03 UTC 2025","passed","Wed Nov 19 08:19:04 UTC 2025","","test_create_task","",""
+"
+    Негативный сценарий: разные некорректные document_id.
+    ","219","Негативный экспорт Y-Doc для document_id=bad_format","tests.test_backend.document","Wed Nov 19 08:18:41 UTC 2025","passed","Wed Nov 19 08:18:42 UTC 2025","","test_get_y_document","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1665","Редактирование Space-документа: создание member, редактирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:08 UTC 2025","passed","Wed Nov 19 08:14:10 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","2262","Дублирование Project-документа: создание owner, дублирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:20 UTC 2025","passed","Wed Nov 19 08:13:22 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Тестирование создания подзадачи разными пользовательскими ролями и проверка
+    ожидаемого поведения на основе прав доступа роли.
+
+    Этот тест оценивает может ли клиент с разными уровнями доступа создавать
+    подзадачу для родительской задачи. Также проверяются корректные связи между
+    родительской задачей и подзадачей, включая поля `parentTask` и `subtasks`.
+
+    ","3558","Тестирование создания подзадачи разными пользовательскими ролями: клиент=guest_client, ожидаемый статус=403","access_task","Wed Nov 19 08:18:58 UTC 2025","passed","Wed Nov 19 08:19:02 UTC 2025","","test_create_sub","",""
+"","202","Создание документа — кейс: [bool as title] (ожидается 400)","tests.test_backend.document","Wed Nov 19 08:16:50 UTC 2025","passed","Wed Nov 19 08:16:50 UTC 2025","","test_create_document","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","769","Дублирование Project-документа: создание manager, дублирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:25 UTC 2025","passed","Wed Nov 19 08:13:26 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверяем что разные роли могут получить списки документов из пространства и проекта.
+    Тест параметризован для проверки разных типов клиентов и контейнеров документов.
+
+    Проверяется получение и наличие в ответе всех созданных документов с учетом
+    ожидаемого статуса запроса для каждой роли.
+    ","1027","Проверка доступа к списку документов в Project для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:15:18 UTC 2025","passed","Wed Nov 19 08:15:19 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","2133","Проверка доступа к siblings персонального документа: создатель - owner, просматривающий - member","tests.test_backend.document.access_doc","Wed Nov 19 08:16:12 UTC 2025","passed","Wed Nov 19 08:16:14 UTC 2025","","test_get_siblings_doc_access","",""
+"","266","Создание документа — кейс: [cyrillic] (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:50 UTC 2025","passed","Wed Nov 19 08:16:50 UTC 2025","","test_create_document","",""
+"","883","Проверка граничной валидации длины title: LENGTH = 2049 for Member","tests.test_backend.document","Wed Nov 19 08:17:28 UTC 2025","passed","Wed Nov 19 08:17:29 UTC 2025","","test_edit_document","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1095","Дублирование Project-документа: создание member, дублирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:27 UTC 2025","passed","Wed Nov 19 08:13:28 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","1027","Негативный сценарий: дублирование с некорректным documentId, invalid id=","tests.test_backend.document","Wed Nov 19 08:16:59 UTC 2025","passed","Wed Nov 19 08:17:00 UTC 2025","","test_duplicate_document","",""
+"","249","Валидация поля group name: empty string → ожидали 400","tests.test_backend.board","Wed Nov 19 08:12:39 UTC 2025","passed","Wed Nov 19 08:12:40 UTC 2025","","board_validation_test","",""
+"","240","Валидация поля limit для board group: 999","tests.test_backend.board","Wed Nov 19 08:12:42 UTC 2025","passed","Wed Nov 19 08:12:42 UTC 2025","","board_validation_test","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1036","Дублирование Project-документа: создание member, дублирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:26 UTC 2025","passed","Wed Nov 19 08:13:27 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1022","Дублирование Project-документа: создание manager, дублирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:24 UTC 2025","passed","Wed Nov 19 08:13:25 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","222","Валидация поля group description: too long (1025 chars) → ожидали 400","tests.test_backend.board","Wed Nov 19 08:12:41 UTC 2025","passed","Wed Nov 19 08:12:41 UTC 2025","","board_validation_test","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","728","Редактирование Project-документа: создание owner, редактирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:18 UTC 2025","passed","Wed Nov 19 08:14:18 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1797","Проверка доступа к siblings Project-документа: создатель - owner, просматривающий - member","tests.test_backend.document.access_doc","Wed Nov 19 08:15:48 UTC 2025","passed","Wed Nov 19 08:15:50 UTC 2025","","test_get_siblings_doc_access","",""
+"","248","Проверка сортировки задач по dueStart: ненулевые по убыванию, затем null (в пределах лимита)","tests.test_backend.task_service.get_tasks.tasks_sort_сriteria_derections.desc","Wed Nov 19 08:23:54 UTC 2025","passed","Wed Nov 19 08:23:55 UTC 2025","","test_get_tasks_sorting_by_due_start_desc","",""
+"Проверяем что пользователи могут получить только свои personal документы","456","Проверка доступа к personal документу для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:58 UTC 2025","passed","Wed Nov 19 08:14:58 UTC 2025","","test_get_doc_access_by_roles","",""
+"","206","Несоответствие kind и kindId — kind=Member с kindId от Project","tests.test_backend.document","Wed Nov 19 08:17:44 UTC 2025","passed","Wed Nov 19 08:17:44 UTC 2025","","test_get_documents","",""
+"","222","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Number","tests.test_backend.board","Wed Nov 19 08:12:43 UTC 2025","passed","Wed Nov 19 08:12:43 UTC 2025","","board_validation_test","",""
+"","183","Попытка редактировать документ из чужого space (kind=Project)— должен вернуться MemberDidNotFound","tests.test_backend.document","Wed Nov 19 08:17:12 UTC 2025","passed","Wed Nov 19 08:17:13 UTC 2025","","test_edit_document","",""
+"","239","Успешное редактирование полей title и icon. Project","tests.test_backend.document","Wed Nov 19 08:17:08 UTC 2025","passed","Wed Nov 19 08:17:08 UTC 2025","","test_edit_document","",""
+"","246","Создание документа: Project","tests.test_backend.document","Wed Nov 19 08:16:48 UTC 2025","passed","Wed Nov 19 08:16:48 UTC 2025","","test_create_document","",""
+"
+    Глубокая вложенность: проверяем цепочку parents.
+    ","1385","Проверяем глубокую вложенность для Grandchild = [root_id, parent_id, child_id] (kind=Space)","tests.test_backend.document","Wed Nov 19 08:18:12 UTC 2025","passed","Wed Nov 19 08:18:14 UTC 2025","","test_get_siblings","",""
+"
+    Данный тест проверяет возможность создания задачи с заранее определённым набором данных (payload) через API
+     управления задачами для различных ролей пользователей, а также корректность и полноту возвращаемого ответа.
+     Тест эмулирует действия разных типов клиентов (владелец, менеджер, участник, гость) и сравнивает фактический результат с ожидаемым HTTP-статусом.
+    ","2061","Проверка создания задачи с конкретным payload и структурой ответа : клиент=owner_client, ожидаемый статус=200","access_task","Wed Nov 19 08:19:06 UTC 2025","passed","Wed Nov 19 08:19:08 UTC 2025","","test_create_task","",""
+"","462","Редактирование кастомного поля типа: Text","tests.test_backend.board","Wed Nov 19 08:12:49 UTC 2025","passed","Wed Nov 19 08:12:49 UTC 2025","","test_create_board","",""
+"","466","Валидация поля group name: valid name → ожидали 200","tests.test_backend.board","Wed Nov 19 08:12:40 UTC 2025","passed","Wed Nov 19 08:12:41 UTC 2025","","board_validation_test","",""
+"
+    Проверка фильтрации по конкретной борде для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указанной борде;
+    ","7022","Доступ к таскам с фильтрацией по board под ролью Owner (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:22:37 UTC 2025","passed","Wed Nov 19 08:22:44 UTC 2025","","test_get_tasks_board_filters","",""
+"
+    Проверяем что разные роли могут получить документы из пространства и проекта. Тест параметризован
+    для проверки разных типов клиентов и контейнеров документов.
+    ","1423","Проверка доступа к документу в Space для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:46 UTC 2025","passed","Wed Nov 19 08:14:48 UTC 2025","","test_get_doc_access_by_roles","",""
+"
+    Тест проверяет корректность позиционирования задач при создании новой задачи в группе на доске (board).
+    ","20213","Проверка index -> ожидаемая позиция задачи в колонке| Группа из 10 тасок, индекс=2 ","create_task","Wed Nov 19 08:20:29 UTC 2025","passed","Wed Nov 19 08:20:49 UTC 2025","","test_task_indexing_in_group","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","2006","Проверка доступа к siblings Project-документа: создатель - owner, просматривающий - manager","tests.test_backend.document.access_doc","Wed Nov 19 08:15:46 UTC 2025","passed","Wed Nov 19 08:15:48 UTC 2025","","test_get_siblings_doc_access","",""
+"","219","Негативные сценарии: некорректный documentId. id=000000000000000000000000","tests.test_backend.document","Wed Nov 19 08:17:11 UTC 2025","passed","Wed Nov 19 08:17:11 UTC 2025","","test_edit_document","",""
+"","728","Дублирование Personal-документа: создание manager, дублирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:47 UTC 2025","passed","Wed Nov 19 08:13:47 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","693","Дублирование Personal-документа: создание member, дублирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:48 UTC 2025","passed","Wed Nov 19 08:13:49 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","2287","Проверка доступа к siblings Project-документа: создатель - member, просматривающий - manager","tests.test_backend.document.access_doc","Wed Nov 19 08:16:02 UTC 2025","passed","Wed Nov 19 08:16:04 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяем что разные роли могут получить списки документов из пространства и проекта.
+    Тест параметризован для проверки разных типов клиентов и контейнеров документов.
+
+    Проверяется получение и наличие в ответе всех созданных документов с учетом
+    ожидаемого статуса запроса для каждой роли.
+    ","1347","Проверка доступа к списку документов в Space для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:15:03 UTC 2025","passed","Wed Nov 19 08:15:04 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"
+    Проверяем доступ к списку недавних документов для ролей owner, manager, member, guest.
+    Создаются тестовые документы, проверяется их доступность
+    и корректный порядок отображения после повторной маркировки.
+    ","0","test_get_recent_documents_access_by_roles[project_docs-owner]","tests.test_backend.document.access_doc","Wed Nov 19 08:15:23 UTC 2025","skipped","Wed Nov 19 08:15:23 UTC 2025","","test_get_recent_documents_access_by_roles","",""
+"","225","GetTasks skip: skip=0, limit=20 → возвращаются первые 20","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:50 UTC 2025","passed","Wed Nov 19 08:24:50 UTC 2025","","test_get_tasks_skip","",""
+"
+    Проверяем доступ к списку недавних документов для ролей owner, manager, member, guest.
+    Создаются тестовые документы, проверяется их доступность
+    и корректный порядок отображения после повторной маркировки.
+    ","0","test_get_recent_documents_access_by_roles[project_docs-manager]","tests.test_backend.document.access_doc","Wed Nov 19 08:15:23 UTC 2025","skipped","Wed Nov 19 08:15:23 UTC 2025","","test_get_recent_documents_access_by_roles","",""
+"","197","Тест: Проверка списка проектов","tests.test_backend.project","Wed Nov 19 08:18:46 UTC 2025","passed","Wed Nov 19 08:18:46 UTC 2025","","test_project","",""
+"","262","Проверка структуры ответа при создании документа","tests.test_backend.document","Wed Nov 19 08:16:54 UTC 2025","passed","Wed Nov 19 08:16:54 UTC 2025","","test_create_document","",""
+"","223","GetTasks assignees: пустой массив — без фильтра по исполнителям","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:01 UTC 2025","passed","Wed Nov 19 08:24:01 UTC 2025","","test_get_tasks_assignees","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1761","Проверка доступа к siblings персонального документа: создатель - guest, просматривающий - manager","tests.test_backend.document.access_doc","Wed Nov 19 08:16:32 UTC 2025","passed","Wed Nov 19 08:16:34 UTC 2025","","test_get_siblings_doc_access","",""
+"Проверяет что множественные запросы возвращают одинаковый результат","22769","Проверка стабильности ответа при множественных запросах","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:51 UTC 2025","passed","Wed Nov 19 08:25:14 UTC 2025","","test_get_tasks_stable_response","",""
+"
+        Проверяет, что пользователи без доступа к проекту или доске получают пустой список задач,
+        но при этом запрос выполняется успешно (HTTP 200).
+        ","410","Тестирование получения задач под ролью Client_with_access_only_in_project","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:05 UTC 2025","passed","Wed Nov 19 08:23:06 UTC 2025","","test_get_tasks_board_filters","",""
+"","0","Создание документа в чужом space","tests.test_backend.document","Wed Nov 19 08:16:54 UTC 2025","skipped","Wed Nov 19 08:16:54 UTC 2025","","test_create_document","",""
+"","504","Позитивный сценарий: успешный экспорт Y-Doc для документа. Project","tests.test_backend.document","Wed Nov 19 08:18:39 UTC 2025","passed","Wed Nov 19 08:18:40 UTC 2025","","test_get_y_document","",""
+"","206","Негативный кейс: documentId=","tests.test_backend.document","Wed Nov 19 08:17:32 UTC 2025","passed","Wed Nov 19 08:17:32 UTC 2025","","test_get_document","",""
+"","204","Несоответствие kind и kindId — kind=Project с kindId от Member","tests.test_backend.document","Wed Nov 19 08:17:44 UTC 2025","passed","Wed Nov 19 08:17:44 UTC 2025","","test_get_documents","",""
+"","218","Негативные сценарии: некорректный documentId. id=","tests.test_backend.document","Wed Nov 19 08:17:11 UTC 2025","passed","Wed Nov 19 08:17:12 UTC 2025","","test_edit_document","",""
+"","215","Тест: Проверка получения проекта по ID","tests.test_backend.project","Wed Nov 19 08:18:46 UTC 2025","passed","Wed Nov 19 08:18:46 UTC 2025","","test_project","",""
+"
+    Проверяет функциональность архивации Space-документа с разными ролями и уровнями доступа.
+
+    Тест создает Space-документ, используя случайного клиента с повышенными правами (владелец, менеджер или участник),
+    и оценивает возможность архивации документа на основе предоставленной роли client_fixture.
+    Проверяется, что возвращаются корректные коды состояния в зависимости от прав пользователя.
+    Дополнительно, в случаях, когда доступ запрещен и ожидаемый статус 403, документ архивируется после теста
+    с использованием случайного клиента с повышенными правами.
+    ","712","Архивирование Space-документа для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:12:58 UTC 2025","passed","Wed Nov 19 08:12:59 UTC 2025","","test_archive_doc","",""
+"","216","GetTasks project: project без задач — ожидаем пустой список","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:44 UTC 2025","passed","Wed Nov 19 08:24:44 UTC 2025","","test_get_tasks_project","",""
+"","7476","Проверка сортировки задач по completedAt: ненулевые по возрастанию, затем null (в пределах лимита)","tests.test_backend.task_service.get_tasks.tasks_sort_сriteria_derections.asc","Wed Nov 19 08:23:36 UTC 2025","passed","Wed Nov 19 08:23:43 UTC 2025","","test_get_tasks_sorting_by_completed_at_asc","",""
+"","738","Дублирование Personal-документа: создание guest, дублирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:53 UTC 2025","passed","Wed Nov 19 08:13:54 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","295","Тест: Проверка предельной длины slug","tests.test_backend.project","Wed Nov 19 08:18:44 UTC 2025","passed","Wed Nov 19 08:18:44 UTC 2025","","test_project","",""
+"","228","Создание проекта с невалидным slug (не латиница)","tests.test_backend.project","Wed Nov 19 08:18:45 UTC 2025","passed","Wed Nov 19 08:18:45 UTC 2025","","test_project","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1732","Проверка доступа к siblings персонального документа: создатель - manager, просматривающий - member","tests.test_backend.document.access_doc","Wed Nov 19 08:16:20 UTC 2025","passed","Wed Nov 19 08:16:22 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяем что разные роли могут получить списки документов из пространства и проекта.
+    Тест параметризован для проверки разных типов клиентов и контейнеров документов.
+
+    Проверяется получение и наличие в ответе всех созданных документов с учетом
+    ожидаемого статуса запроса для каждой роли.
+    ","981","Проверка доступа к списку документов в Project для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:15:17 UTC 2025","passed","Wed Nov 19 08:15:18 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1585","Редактирование Project-документа: создание member, редактирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:28 UTC 2025","passed","Wed Nov 19 08:14:29 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","279","Создание борды в существующем проекте и корректность возвращаемого имени","tests.test_backend.board","Wed Nov 19 08:12:45 UTC 2025","passed","Wed Nov 19 08:12:45 UTC 2025","","test_create_board","",""
+"
+    Тест проверки создания задачи с минимальным набором полей в системе управления проектами под разными ролями.
+
+    Цель теста — убедиться, что можно успешно создать задачу, указав только минимально необходимые данные, и что поведение API зависит от прав пользователя (типа клиента).
+    В процессе теста дополнительно валидируются структура созданной задачи, значения по умолчанию, связи (creator, board и пр.), а также удаление задачи после проверки.
+    assert_task_keys обеспечивает падение теста при добавлении/удалении ключей с понятным сообщением.
+
+    Ход теста:
+        1. Получение клиента согласно переданной роли через фикстуру.
+        2. Получение id пользователя, с помощью которого осуществляется создание задачи.
+        3. Формирование минимального payload и попытка создать задачу через API.
+        4. Проверка статус-кода ответа.
+        5. Если задача успешно создана (ответ 200):
+            - Проверка наполнения и структуры ответа
+    ","1355","Create task with minimal payload: клиент=member_client, ожидаемый статус=200","access_task","Wed Nov 19 08:19:04 UTC 2025","passed","Wed Nov 19 08:19:05 UTC 2025","","test_create_task","",""
+"","752","Test edit space name","tests.test_backend.space","Wed Nov 19 08:18:47 UTC 2025","passed","Wed Nov 19 08:18:48 UTC 2025","","test_space","",""
+"
+    Единственный ребёнок: нет prevSibling/nextSibling, parents содержит родителя.
+    ","821","Проверяем siblins для единственного SoloChild (kind=Space)","tests.test_backend.document","Wed Nov 19 08:18:19 UTC 2025","passed","Wed Nov 19 08:18:20 UTC 2025","","test_get_siblings","",""
+"
+    Проверяем что разные роли могут получить документы из пространства и проекта. Тест параметризован
+    для проверки разных типов клиентов и контейнеров документов.
+    ","1361","Проверка доступа к документу в Project для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:53 UTC 2025","passed","Wed Nov 19 08:14:54 UTC 2025","","test_get_doc_access_by_roles","",""
+"
+    Test to verify negative access scenarios for a board.
+
+    ","728","Негативный тест на доступ к борде: клиент=client_with_access_only_in_project, ожидаемый статус=403","tests.test_backend.board.access_board","Wed Nov 19 08:12:36 UTC 2025","passed","Wed Nov 19 08:12:36 UTC 2025","","test_matrix_access_board","",""
+"
+    Проверка фильтрации по конкретному проекту для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указаному проекту;
+    ","6483","Доступ к таскам с фильтрацией по project под ролью Member (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:19 UTC 2025","passed","Wed Nov 19 08:23:26 UTC 2025","","test_get_tasks_project_filters","",""
+"","739","Два последовательных запроса на редактирование одного документа- проверяем что последнее изменение сохранилось.Space","tests.test_backend.document","Wed Nov 19 08:17:16 UTC 2025","passed","Wed Nov 19 08:17:16 UTC 2025","","test_edit_document","",""
+"","232","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Text","tests.test_backend.board","Wed Nov 19 08:12:43 UTC 2025","passed","Wed Nov 19 08:12:43 UTC 2025","","board_validation_test","",""
+"","514","Создание документа с дублирующимся title","tests.test_backend.document","Wed Nov 19 08:16:53 UTC 2025","passed","Wed Nov 19 08:16:54 UTC 2025","","test_create_document","",""
+"Проверяем что пользователи могут получить только свои personal документы","497","Проверка доступа к personal документам для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:15:22 UTC 2025","passed","Wed Nov 19 08:15:22 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"","1625","Проверяем siblins для нескольктих Child (kind=Space)","tests.test_backend.document","Wed Nov 19 08:18:24 UTC 2025","passed","Wed Nov 19 08:18:26 UTC 2025","","test_get_siblings","",""
+"
+    Тест проверяет корректность позиционирования задач при создании новой задачи в группе на доске (board).
+    ","18582","Проверка index -> ожидаемая позиция задачи в колонке| Группа из 10 тасок, индекс=999 ","create_task","Wed Nov 19 08:20:49 UTC 2025","passed","Wed Nov 19 08:21:08 UTC 2025","","test_task_indexing_in_group","",""
+"","227","Негативный кейс: documentId=None","tests.test_backend.document","Wed Nov 19 08:17:32 UTC 2025","passed","Wed Nov 19 08:17:32 UTC 2025","","test_get_document","",""
+"","230","Создание кастомного поля типа: TaskRelations","tests.test_backend.board","Wed Nov 19 08:12:49 UTC 2025","passed","Wed Nov 19 08:12:49 UTC 2025","","test_create_board","",""
+"","238","Создание Project-документа для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:11 UTC 2025","passed","Wed Nov 19 08:13:11 UTC 2025","","test_create_doc_access_by_roles","",""
+"","220","Авторизован, но не участник пространства — дублирование запрещено Project","tests.test_backend.document","Wed Nov 19 08:17:06 UTC 2025","passed","Wed Nov 19 08:17:06 UTC 2025","","test_duplicate_document","",""
+"","223","Создание кастомного поля типа: Number","tests.test_backend.board","Wed Nov 19 08:12:48 UTC 2025","passed","Wed Nov 19 08:12:48 UTC 2025","","test_create_board","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1715","Проверка доступа к siblings Space-документа: создатель - member, просматривающий - manager","tests.test_backend.document.access_doc","Wed Nov 19 08:15:39 UTC 2025","passed","Wed Nov 19 08:15:41 UTC 2025","","test_get_siblings_doc_access","",""
+"","6985","GetTasks limit: равен 0 —  означает отсутствие ограничения, выводится весь список","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:13 UTC 2025","passed","Wed Nov 19 08:24:20 UTC 2025","","test_get_tasks_limit","",""
+"","202","Негативный кейс: documentId=abc","tests.test_backend.document","Wed Nov 19 08:17:33 UTC 2025","passed","Wed Nov 19 08:17:33 UTC 2025","","test_get_document","",""
+"","233","Валидация поля limit для board group: 1000","tests.test_backend.board","Wed Nov 19 08:12:42 UTC 2025","passed","Wed Nov 19 08:12:43 UTC 2025","","board_validation_test","",""
+"
+        Проверяет, что пользователи без доступа к проекту получают пустой список задач,
+        но при этом запрос выполняется успешно (HTTP 200).
+        ","406","Тестирование получения задач под ролью Client_with_access_only_in_space","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:32 UTC 2025","passed","Wed Nov 19 08:23:33 UTC 2025","","test_get_tasks_project_filters","",""
+"","756","Архивирование Personal-документа для роли member, документ создан в роли Member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:06 UTC 2025","passed","Wed Nov 19 08:13:06 UTC 2025","","test_archive_doc","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1631","Проверка доступа к siblings персонального документа: создатель - member, просматривающий - guest","tests.test_backend.document.access_doc","Wed Nov 19 08:16:29 UTC 2025","passed","Wed Nov 19 08:16:30 UTC 2025","","test_get_siblings_doc_access","",""
+"","248","Валидация имени борды: chinese → ожидали 200","tests.test_backend.board","Wed Nov 19 08:12:39 UTC 2025","passed","Wed Nov 19 08:12:39 UTC 2025","","board_validation_test","",""
+"
+    Тест проверяет корректность позиционирования задач при создании новой задачи в группе на доске (board).
+    ","19565","Проверка index -> ожидаемая позиция задачи в колонке| Группа из 10 тасок, индекс=9 ","create_task","Wed Nov 19 08:21:45 UTC 2025","passed","Wed Nov 19 08:22:05 UTC 2025","","test_task_indexing_in_group","",""
+"
+    Данный тест проверяет возможность создания задачи с заранее определённым набором данных (payload) через API
+     управления задачами для различных ролей пользователей, а также корректность и полноту возвращаемого ответа.
+     Тест эмулирует действия разных типов клиентов (владелец, менеджер, участник, гость) и сравнивает фактический результат с ожидаемым HTTP-статусом.
+    ","2204","Проверка создания задачи с конкретным payload и структурой ответа : клиент=member_client, ожидаемый статус=200","access_task","Wed Nov 19 08:19:10 UTC 2025","passed","Wed Nov 19 08:19:12 UTC 2025","","test_create_task","",""
+"","207","Создание документа — кейс: [title > MAX length (2049)] (ожидается 400)","tests.test_backend.document","Wed Nov 19 08:16:49 UTC 2025","passed","Wed Nov 19 08:16:49 UTC 2025","","test_create_document","",""
+"","226","GetTasks board: неверный формат идентификатора — ожидаем ошибку валидации 'board must be a mongodb id'","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:10 UTC 2025","passed","Wed Nov 19 08:24:10 UTC 2025","","test_get_tasks_board","",""
+"
+    Создание сабтаска с собственным milestone.
+    Сабтаск отображает milestone B (из payload), а не наследует milestone A от родителя.
+    ","3698","Новая логика: Milestone у сабтаска берется из payload, а не наследуются от родителя","create_task","Wed Nov 19 08:19:44 UTC 2025","passed","Wed Nov 19 08:19:48 UTC 2025","","test_subtask_milestones_from_payload","",""
+"","221","Негативный кейс: missing kind","tests.test_backend.document","Wed Nov 19 08:17:38 UTC 2025","passed","Wed Nov 19 08:17:38 UTC 2025","","test_get_documents","",""
+"
+    Данный тест проверяет возможность создания задачи с заранее определённым набором данных (payload) через API
+     управления задачами для различных ролей пользователей, а также корректность и полноту возвращаемого ответа.
+     Тест эмулирует действия разных типов клиентов (владелец, менеджер, участник, гость) и сравнивает фактический результат с ожидаемым HTTP-статусом.
+    ","2346","Проверка создания задачи с конкретным payload и структурой ответа : клиент=manager_client, ожидаемый статус=200","access_task","Wed Nov 19 08:19:08 UTC 2025","passed","Wed Nov 19 08:19:10 UTC 2025","","test_create_task","",""
+"
+    Проверяем доступ к списку недавних документов для ролей owner, manager, member, guest.
+    Создаются тестовые документы, проверяется их доступность
+    и корректный порядок отображения после повторной маркировки.
+    ","0","test_get_recent_documents_access_by_roles[space_docs-member]","tests.test_backend.document.access_doc","Wed Nov 19 08:15:23 UTC 2025","skipped","Wed Nov 19 08:15:23 UTC 2025","","test_get_recent_documents_access_by_roles","",""
+"","236","Валидация поля group description: max valid (1024 chars) → ожидали 200","tests.test_backend.board","Wed Nov 19 08:12:41 UTC 2025","passed","Wed Nov 19 08:12:41 UTC 2025","","board_validation_test","",""
+"","756","Негативный сценарий: дублирование с некорректным documentId, invalid id=bad_format","tests.test_backend.document","Wed Nov 19 08:17:04 UTC 2025","passed","Wed Nov 19 08:17:05 UTC 2025","","test_duplicate_document","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1807","Проверка доступа к siblings Space-документа: создатель - manager, просматривающий - owner","tests.test_backend.document.access_doc","Wed Nov 19 08:15:30 UTC 2025","passed","Wed Nov 19 08:15:32 UTC 2025","","test_get_siblings_doc_access","",""
+"","205","Негативный кейс: invalid kind","tests.test_backend.document","Wed Nov 19 08:17:38 UTC 2025","passed","Wed Nov 19 08:17:38 UTC 2025","","test_get_documents","",""
+"","191","Попытка редактировать документ из чужого space (kind=Space)— должен вернуться MemberDidNotFound","tests.test_backend.document","Wed Nov 19 08:17:13 UTC 2025","passed","Wed Nov 19 08:17:13 UTC 2025","","test_edit_document","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1058","Дублирование Space-документа: создание owner, дублирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:30 UTC 2025","passed","Wed Nov 19 08:13:31 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","800","Тест создания доски: клиент=guest_client, ожидаемый статус=403","tests.test_backend.board.access_board","Wed Nov 19 08:12:33 UTC 2025","passed","Wed Nov 19 08:12:34 UTC 2025","","test_create_board","",""
+"","452","Пустой результат при отсутствии документов (kind=Member)","tests.test_backend.document","Wed Nov 19 08:17:40 UTC 2025","passed","Wed Nov 19 08:17:41 UTC 2025","","test_get_documents","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1772","Редактирование Space-документа: создание manager, редактирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:02 UTC 2025","passed","Wed Nov 19 08:14:04 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","239","Валидация имени борды: exactly 50 chars → ожидали 200","tests.test_backend.board","Wed Nov 19 08:12:38 UTC 2025","passed","Wed Nov 19 08:12:38 UTC 2025","","board_validation_test","",""
+"Проверяем что пользователи могут получить только свои personal документы","484","Проверка доступа к personal документам для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:15:20 UTC 2025","passed","Wed Nov 19 08:15:21 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"","210","Создание документа в роли owner - с передачей kind=WrongKind и kindId (ожидается 400)","tests.test_backend.document","Wed Nov 19 08:16:53 UTC 2025","passed","Wed Nov 19 08:16:53 UTC 2025","","test_create_document","",""
+"
+    Проверяем, что project_client имеет доступ к main_space_doc и main_project_doc, но не имеет доступа к main_personal_doc.
+    ","928","Проверка доступа project_client к основному документу, проектному документу и отсутствия доступа к персональному документу","tests.test_backend.document.access_doc","Wed Nov 19 08:16:45 UTC 2025","passed","Wed Nov 19 08:16:46 UTC 2025","","test_matrix_access_docs","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1684","Редактирование Space-документа: создание owner, редактирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:58 UTC 2025","passed","Wed Nov 19 08:14:00 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Единственный ребёнок: нет prevSibling/nextSibling, parents содержит родителя.
+    ","1059","Проверяем siblins для единственного SoloChild (kind=Member)","tests.test_backend.document","Wed Nov 19 08:18:21 UTC 2025","passed","Wed Nov 19 08:18:22 UTC 2025","","test_get_siblings","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","691","Дублирование Space-документа: создание member, дублирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:41 UTC 2025","passed","Wed Nov 19 08:13:41 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","240","Создание кастомного поля типа: Date","tests.test_backend.board","Wed Nov 19 08:12:48 UTC 2025","passed","Wed Nov 19 08:12:48 UTC 2025","","test_create_board","",""
+"
+    Тест проверки получения задачи под разными ролями с валидацией набора полей и типов.
+    ","518","Get task: клиент=foreign_client, ожидаемый статус=403","tests.test_backend.task_service.get_task.access_get_task","Wed Nov 19 08:22:35 UTC 2025","passed","Wed Nov 19 08:22:36 UTC 2025","","test_get_task","",""
+"
+    Проверяет функциональность архивации Space-документа с разными ролями и уровнями доступа.
+
+    Тест создает Space-документ, используя случайного клиента с повышенными правами (владелец, менеджер или участник),
+    и оценивает возможность архивации документа на основе предоставленной роли client_fixture.
+    Проверяется, что возвращаются корректные коды состояния в зависимости от прав пользователя.
+    Дополнительно, в случаях, когда доступ запрещен и ожидаемый статус 403, документ архивируется после теста
+    с использованием случайного клиента с повышенными правами.
+    ","960","Архивирование Space-документа для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:12:56 UTC 2025","passed","Wed Nov 19 08:12:57 UTC 2025","","test_archive_doc","",""
+"","201","Негативный кейс: invalid kindId","tests.test_backend.document","Wed Nov 19 08:17:38 UTC 2025","passed","Wed Nov 19 08:17:38 UTC 2025","","test_get_documents","",""
+"Проверяет поведение при передаче пустых строк в качестве параметров","157","Проверка поведения при передачи пустой строки в space_id","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:25:15 UTC 2025","passed","Wed Nov 19 08:25:15 UTC 2025","","test_get_tasks_vlidation","",""
+"","10039","Проверка сортировки задач по dueStart: ненулевые по убыванию, затем null (в пределах лимита)","tests.test_backend.task_service.get_tasks.tasks_sort_сriteria_derections.asc","Wed Nov 19 08:23:44 UTC 2025","passed","Wed Nov 19 08:23:54 UTC 2025","","test_get_tasks_sorting_by_due_start_asc","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1879","Редактирование Space-документа: создание manager, редактирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:04 UTC 2025","passed","Wed Nov 19 08:14:06 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Тест для проверки создания и архивирования Space-документа с разными клиентскими ролями.
+    Тест выполняет следующие шаги для каждой роли:
+    1. Создает Space-документ с использованием предоставленной клиентской роли.
+    2. Проверяет, что статус ответа соответствует ожидаемому результату.
+    3. Если создание документа успешно (статус 200):
+       - Проверяет, что заголовок созданного документа соответствует ожидаемому.
+       - Архивирует созданный Space-документ и проверяет статус запроса на архивирование.
+    ","239","Создание Space-документа для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:09 UTC 2025","passed","Wed Nov 19 08:13:09 UTC 2025","","test_create_doc_access_by_roles","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1968","Проверка доступа к siblings Project-документа: создатель - owner, просматривающий - guest","tests.test_backend.document.access_doc","Wed Nov 19 08:15:50 UTC 2025","passed","Wed Nov 19 08:15:52 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Негативный сценарий: разные некорректные document_id.
+    ","208","Негативный экспорт Y-Doc для document_id=000000000000000000000000","tests.test_backend.document","Wed Nov 19 08:18:41 UTC 2025","passed","Wed Nov 19 08:18:41 UTC 2025","","test_get_y_document","",""
+"","226","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Member","tests.test_backend.board","Wed Nov 19 08:12:44 UTC 2025","passed","Wed Nov 19 08:12:44 UTC 2025","","board_validation_test","",""
+"","754","Негативный сценарий: гостевой пользователь не может получить siblings (kind=Member)","tests.test_backend.document","Wed Nov 19 08:18:38 UTC 2025","passed","Wed Nov 19 08:18:39 UTC 2025","","test_get_siblings","",""
+"","672","Проверка граничной валидации длины title: LENGTH = 2048 for Space","tests.test_backend.document","Wed Nov 19 08:17:20 UTC 2025","passed","Wed Nov 19 08:17:21 UTC 2025","","test_edit_document","",""
+"","208","GetTasks project: неверный формат идентификатора — ожидаем ошибку валидации 'project must be a mongodb id'","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:44 UTC 2025","passed","Wed Nov 19 08:24:44 UTC 2025","","test_get_tasks_project","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","2115","Проверка доступа к siblings Project-документа: создатель - owner, просматривающий - owner","tests.test_backend.document.access_doc","Wed Nov 19 08:15:44 UTC 2025","passed","Wed Nov 19 08:15:46 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяем доступ к списку недавних документов для ролей owner, manager, member, guest.
+    Создаются тестовые документы, проверяется их доступность
+    и корректный порядок отображения после повторной маркировки.
+    ","0","test_get_recent_documents_access_by_roles[space_docs-guest]","tests.test_backend.document.access_doc","Wed Nov 19 08:15:23 UTC 2025","skipped","Wed Nov 19 08:15:23 UTC 2025","","test_get_recent_documents_access_by_roles","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1662","Проверка доступа к siblings персонального документа: создатель - guest, просматривающий - member","tests.test_backend.document.access_doc","Wed Nov 19 08:16:34 UTC 2025","passed","Wed Nov 19 08:16:36 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1599","Редактирование Project-документа: создание owner, редактирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:16 UTC 2025","passed","Wed Nov 19 08:14:18 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Проверяет запрет доступа к документам для стороннего пользователя при попытке
+    получить документы, связанные с определенным типом сущности (например, 'Project',
+    'Space' или 'Member'). Тест проверяет, что сторонний клиент получает статус 403
+    и код ошибки 'AccessDenied' в ответе.
+    ","192","Отказ в доступе к Space документам другим пользователем","tests.test_backend.document.access_doc","Wed Nov 19 08:13:14 UTC 2025","passed","Wed Nov 19 08:13:14 UTC 2025","","test_doc_access_for_foreign","",""
+"
+    Проверяет ограничения доступа при попытке получения siblings документов через чужое пространство.
+    Тест удостоверяется, что попытка получить siblings документов через пространство, где у пользователя
+    нет прав, завершается ошибкой доступа.
+
+    Тест обрабатывает три типа документов: Project, Space и Member. Создается последовательность
+    из трех документов указанного типа в основном пространстве, после чего выполняется попытка
+    получить siblings среднего документа через чужое пространство и проверяется, что доступ запрещен.
+    ","1759","Проверка запрета доступа к siblings Space-документа через чужой space","tests.test_backend.document.access_doc","Wed Nov 19 08:16:40 UTC 2025","passed","Wed Nov 19 08:16:42 UTC 2025","","test_get_siblings_doc_access","",""
+"","512","Попытка получить документ из чужого space (kind=Project) — должен вернуться AccessDenied","tests.test_backend.document.access_doc","Wed Nov 19 08:13:15 UTC 2025","passed","Wed Nov 19 08:13:15 UTC 2025","","test_doc_access_for_foreign","",""
+"","155","Запрос документов с kind=Member, но с чужим spaceId","tests.test_backend.document","Wed Nov 19 08:17:44 UTC 2025","passed","Wed Nov 19 08:17:44 UTC 2025","","test_get_documents","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","986","Дублирование Space-документа: создание owner, дублирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:32 UTC 2025","passed","Wed Nov 19 08:13:33 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверяем сиблинги для нескольких корневых документов (без parent_document_id).
+    ","1790","Проверяем siblins для нескольких корневых документов (kind=Space)","tests.test_backend.document","Wed Nov 19 08:18:03 UTC 2025","passed","Wed Nov 19 08:18:05 UTC 2025","","test_get_siblings","",""
+"","203","Проверка что пользователь без доступа к спейсу не имеет доступ к задачам","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:36 UTC 2025","passed","Wed Nov 19 08:23:36 UTC 2025","","test_get_tasks_space_all","",""
+"","222","Создание кастомного поля типа: Member","tests.test_backend.board","Wed Nov 19 08:12:48 UTC 2025","passed","Wed Nov 19 08:12:49 UTC 2025","","test_create_board","",""
+"","1004","GetTasks assignees: несколько валидных исполнителей (OR-фильтр)","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:03 UTC 2025","passed","Wed Nov 19 08:24:04 UTC 2025","","test_get_tasks_assignees","",""
+"
+    Проверяем что разные роли могут получить списки документов из пространства и проекта.
+    Тест параметризован для проверки разных типов клиентов и контейнеров документов.
+
+    Проверяется получение и наличие в ответе всех созданных документов с учетом
+    ожидаемого статуса запроса для каждой роли.
+    ","1181","Проверка доступа к списку документов в Space для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:15:07 UTC 2025","passed","Wed Nov 19 08:15:09 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"","1679","Успешное получение документа по documentId (kind=Project)","tests.test_backend.document","Wed Nov 19 08:17:29 UTC 2025","passed","Wed Nov 19 08:17:31 UTC 2025","","test_get_document","",""
+"","716","Два последовательных запроса на редактирование одного документа- проверяем что последнее изменение сохранилось.Member","tests.test_backend.document","Wed Nov 19 08:17:17 UTC 2025","passed","Wed Nov 19 08:17:18 UTC 2025","","test_edit_document","",""
+"","1069","Project: изолированность документов по kindId проектов","tests.test_backend.document","Wed Nov 19 08:17:41 UTC 2025","passed","Wed Nov 19 08:17:42 UTC 2025","","test_get_documents","",""
+"Проверяет поведение при передаче очень длинного board_id","211","Проверка максимальной длины board_id","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:25:15 UTC 2025","passed","Wed Nov 19 08:25:15 UTC 2025","","test_get_tasks_vlidation","",""
+"
+    Проверяем доступ к списку недавних документов для ролей owner, manager, member, guest.
+    Создаются тестовые документы, проверяется их доступность
+    и корректный порядок отображения после повторной маркировки.
+    ","0","test_get_recent_documents_access_by_roles[project_docs-guest]","tests.test_backend.document.access_doc","Wed Nov 19 08:15:23 UTC 2025","skipped","Wed Nov 19 08:15:23 UTC 2025","","test_get_recent_documents_access_by_roles","",""
+"","746","Пустой результат при отсутствии документов (kind=Project)","tests.test_backend.document","Wed Nov 19 08:17:39 UTC 2025","passed","Wed Nov 19 08:17:40 UTC 2025","","test_get_documents","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1036","Дублирование Project-документа: создание owner, дублирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:19 UTC 2025","passed","Wed Nov 19 08:13:20 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","2013","Проверка доступа к siblings персонального документа: создатель - manager, просматривающий - owner","tests.test_backend.document.access_doc","Wed Nov 19 08:16:16 UTC 2025","passed","Wed Nov 19 08:16:18 UTC 2025","","test_get_siblings_doc_access","",""
+"","450","Успешное получение документа по documentId (kind=Member)","tests.test_backend.document","Wed Nov 19 08:17:31 UTC 2025","passed","Wed Nov 19 08:17:32 UTC 2025","","test_get_document","",""
+"","634","Создание и дублирование документа (Project)","tests.test_backend.document","Wed Nov 19 08:16:54 UTC 2025","passed","Wed Nov 19 08:16:55 UTC 2025","","test_duplicate_document","",""
+"","188","Авторизован, но не участник пространства — дублирование запрещено Space","tests.test_backend.document","Wed Nov 19 08:17:07 UTC 2025","passed","Wed Nov 19 08:17:07 UTC 2025","","test_duplicate_document","",""
+"","222","GetTasks project: project не принадлежит space — ожидаем пустой список задач","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:44 UTC 2025","passed","Wed Nov 19 08:24:44 UTC 2025","","test_get_tasks_project","",""
+"","235","GetTasks limit: 1","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:12 UTC 2025","passed","Wed Nov 19 08:24:12 UTC 2025","","test_get_tasks_limit","",""
+"","265","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Select","tests.test_backend.board","Wed Nov 19 08:12:44 UTC 2025","passed","Wed Nov 19 08:12:45 UTC 2025","","board_validation_test","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1784","Проверка доступа к siblings персонального документа: создатель - manager, просматривающий - manager","tests.test_backend.document.access_doc","Wed Nov 19 08:16:18 UTC 2025","passed","Wed Nov 19 08:16:20 UTC 2025","","test_get_siblings_doc_access","",""
+"","217","GetTasks ids: один существующий id -> ровно одна задача","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:11 UTC 2025","passed","Wed Nov 19 08:24:11 UTC 2025","","test_get_tasks_ids","",""
+"","0","Создание документа без авторизации","tests.test_backend.document","Wed Nov 19 08:16:54 UTC 2025","skipped","Wed Nov 19 08:16:54 UTC 2025","","test_create_document","",""
+"Ожидаем валидационную ошибку при передаче skip='five'","219","GetTasks skip: негатив — skip не число (строка)","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:51 UTC 2025","passed","Wed Nov 19 08:24:51 UTC 2025","","test_get_tasks_skip","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1763","Редактирование Project-документа: создание member, редактирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:24 UTC 2025","passed","Wed Nov 19 08:14:26 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","214","Тест: Проверка редактирования имени проекта","tests.test_backend.project","Wed Nov 19 08:18:46 UTC 2025","passed","Wed Nov 19 08:18:46 UTC 2025","","test_project","",""
+"","977","Дублирование Personal-документа: создание member, дублирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:50 UTC 2025","passed","Wed Nov 19 08:13:51 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","495","Попытка получить документ из чужого space (kind=Member) — должен вернуться AccessDenied","tests.test_backend.document.access_doc","Wed Nov 19 08:13:16 UTC 2025","passed","Wed Nov 19 08:13:16 UTC 2025","","test_doc_access_for_foreign","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","975","Дублирование Space-документа: создание member, дублирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:38 UTC 2025","passed","Wed Nov 19 08:13:39 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1025","Дублирование Space-документа: создание manager, дублирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:34 UTC 2025","passed","Wed Nov 19 08:13:35 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверяем что разные роли могут получить списки документов из пространства и проекта.
+    Тест параметризован для проверки разных типов клиентов и контейнеров документов.
+
+    Проверяется получение и наличие в ответе всех созданных документов с учетом
+    ожидаемого статуса запроса для каждой роли.
+    ","1131","Проверка доступа к списку документов в Project для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:15:11 UTC 2025","passed","Wed Nov 19 08:15:13 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"","483","Проверка что пользователь без доступа к спейсу не имеет доступ к задачам project","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:33 UTC 2025","passed","Wed Nov 19 08:23:34 UTC 2025","","test_get_tasks_project_filters","",""
+"","456","Редактирование кастомного поля типа: TaskRelations","tests.test_backend.board","Wed Nov 19 08:12:52 UTC 2025","passed","Wed Nov 19 08:12:52 UTC 2025","","test_create_board","",""
+"
+    Проверяем что разные роли могут получить документы из пространства и проекта. Тест параметризован
+    для проверки разных типов клиентов и контейнеров документов.
+    ","1366","Проверка доступа к документу в Space для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:40 UTC 2025","passed","Wed Nov 19 08:14:41 UTC 2025","","test_get_doc_access_by_roles","",""
+"Проверяет сортировку задач по дате создания в порядке убывания (новые сверху)","269","Проверка сортировки задач по createdAt: по убыванию (новые сверху)","tests.test_backend.task_service.get_tasks.tasks_sort_сriteria_derections.desc","Wed Nov 19 08:23:54 UTC 2025","passed","Wed Nov 19 08:23:54 UTC 2025","","test_get_tasks_sorting_by_created_at_desc","",""
+"
+    Тест проверки получения задачи под разными ролями с валидацией набора полей и типов.
+    ","442","Get task: клиент=client_with_access_only_in_space, ожидаемый статус=400","tests.test_backend.task_service.get_task.access_get_task","Wed Nov 19 08:22:35 UTC 2025","passed","Wed Nov 19 08:22:35 UTC 2025","","test_get_task","",""
+"","959","Получение списка борд: проверка созданных борд и их обязательных полей(name, projectId, createdAt)","tests.test_backend.board","Wed Nov 19 08:12:55 UTC 2025","passed","Wed Nov 19 08:12:56 UTC 2025","","test_get_boards","",""
+"","357","Test create space visible in list","tests.test_backend.space","Wed Nov 19 08:18:47 UTC 2025","passed","Wed Nov 19 08:18:47 UTC 2025","","test_space","",""
+"
+    Проверяем сиблинги для нескольких корневых документов (без parent_document_id).
+    ","3147","Проверяем siblins для нескольких корневых документов (kind=Member)","tests.test_backend.document","Wed Nov 19 08:18:06 UTC 2025","passed","Wed Nov 19 08:18:09 UTC 2025","","test_get_siblings","",""
+"","481","Редактирование поля Select: добавление новых опций с валидным _id","tests.test_backend.board","Wed Nov 19 08:12:52 UTC 2025","passed","Wed Nov 19 08:12:53 UTC 2025","","test_create_board","",""
+"","202","Создание проекта с пустым названием","tests.test_backend.project","Wed Nov 19 08:18:45 UTC 2025","passed","Wed Nov 19 08:18:45 UTC 2025","","test_project","",""
+"","1187","GetTasks assignees: один валидный исполнитель","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:01 UTC 2025","passed","Wed Nov 19 08:24:03 UTC 2025","","test_get_tasks_assignees","",""
+"","230","GetTasks limit: -10","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:12 UTC 2025","passed","Wed Nov 19 08:24:13 UTC 2025","","test_get_tasks_limit","",""
+"","223","Негативные сценарии: некорректный documentId. id=None","tests.test_backend.document","Wed Nov 19 08:17:12 UTC 2025","passed","Wed Nov 19 08:17:12 UTC 2025","","test_edit_document","",""
+"
+    Проверяем что разные роли могут получить документы из пространства и проекта. Тест параметризован
+    для проверки разных типов клиентов и контейнеров документов.
+    ","1401","Проверка доступа к документу в Project для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:49 UTC 2025","passed","Wed Nov 19 08:14:50 UTC 2025","","test_get_doc_access_by_roles","",""
+"","479","Авторизация: токен пользователя без доступа к спейсу (foreign_client) => 400","tests.test_backend.authServis","Wed Nov 19 08:12:28 UTC 2025","passed","Wed Nov 19 08:12:28 UTC 2025","","test_token","",""
+"
+    Проверяем что разные роли могут получить документы из пространства и проекта. Тест параметризован
+    для проверки разных типов клиентов и контейнеров документов.
+    ","1759","Проверка доступа к документу в Project для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:55 UTC 2025","passed","Wed Nov 19 08:14:57 UTC 2025","","test_get_doc_access_by_roles","",""
+"
+    Тест для проверки создания и архивирования Space-документа с разными клиентскими ролями.
+    Тест выполняет следующие шаги для каждой роли:
+    1. Создает Space-документ с использованием предоставленной клиентской роли.
+    2. Проверяет, что статус ответа соответствует ожидаемому результату.
+    3. Если создание документа успешно (статус 200):
+       - Проверяет, что заголовок созданного документа соответствует ожидаемому.
+       - Архивирует созданный Space-документ и проверяет статус запроса на архивирование.
+    ","475","Создание Space-документа для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:08 UTC 2025","passed","Wed Nov 19 08:13:09 UTC 2025","","test_create_doc_access_by_roles","",""
+"","215","GetTasks ids: несуществующие id -> 200 и пустой tasks","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:12 UTC 2025","passed","Wed Nov 19 08:24:12 UTC 2025","","test_get_tasks_ids","",""
+"
+    Тест проверки получения задачи под разными ролями с валидацией набора полей и типов.
+    ","524","Get task: клиент=guest_client, ожидаемый статус=200","tests.test_backend.task_service.get_task.access_get_task","Wed Nov 19 08:22:34 UTC 2025","passed","Wed Nov 19 08:22:35 UTC 2025","","test_get_task","",""
+"
+    Проверка фильтрации по конкретному проекту для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указаному проекту;
+    ","6606","Доступ к таскам с фильтрацией по project под ролью Guest (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:26 UTC 2025","passed","Wed Nov 19 08:23:32 UTC 2025","","test_get_tasks_project_filters","",""
+"
+    Проверяем, что owner_client имеет доступ к main_space_doc и main_project_doc,
+    но не имеет доступа к main_personal_doc.
+    ","672","Проверка доступа owner_client к документам пространства, проекта и персональному документу","tests.test_backend.document.access_doc","Wed Nov 19 08:16:46 UTC 2025","passed","Wed Nov 19 08:16:46 UTC 2025","","test_matrix_access_docs","",""
+"","697","Редактирование Personal-документа: создание member, редактирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:37 UTC 2025","passed","Wed Nov 19 08:14:37 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","463","Создание Personal-документа для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:12 UTC 2025","passed","Wed Nov 19 08:13:12 UTC 2025","","test_create_doc_access_by_roles","",""
+"","609","Негативный сценарий: дублирование с некорректным documentId, invalid id=None","tests.test_backend.document","Wed Nov 19 08:17:03 UTC 2025","passed","Wed Nov 19 08:17:03 UTC 2025","","test_duplicate_document","",""
+"
+    Тест для проверки создания и архивирования Space-документа с разными клиентскими ролями.
+    Тест выполняет следующие шаги для каждой роли:
+    1. Создает Space-документ с использованием предоставленной клиентской роли.
+    2. Проверяет, что статус ответа соответствует ожидаемому результату.
+    3. Если создание документа успешно (статус 200):
+       - Проверяет, что заголовок созданного документа соответствует ожидаемому.
+       - Архивирует созданный Space-документ и проверяет статус запроса на архивирование.
+    ","553","Создание Space-документа для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:08 UTC 2025","passed","Wed Nov 19 08:13:08 UTC 2025","","test_create_doc_access_by_roles","",""
+"
+    Тест проверяет:
+    - увеличение счетчика total задач у milestone после создания задач,
+    - и что completed-задачи учитываются корректно (через get_milestone_completed).
+    ","13479","Проверка увеличения счетчика задач у milestone после создания задач и соответствия completed","create_task","Wed Nov 19 08:19:27 UTC 2025","passed","Wed Nov 19 08:19:41 UTC 2025","","test_milestone_tasks_total_and_completed","",""
+"","645","GetTasks project: валидный проект — успешный ответ и массив tasks","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:43 UTC 2025","passed","Wed Nov 19 08:24:44 UTC 2025","","test_get_tasks_project","",""
+"
+    Проверка фильтрации по конкретному проекту для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указаному проекту;
+    ","6200","Доступ к таскам с фильтрацией по project под ролью Manager (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:13 UTC 2025","passed","Wed Nov 19 08:23:19 UTC 2025","","test_get_tasks_project_filters","",""
+"
+    Проверяет ограничения доступа при попытке получения siblings документов через чужое пространство.
+    Тест удостоверяется, что попытка получить siblings документов через пространство, где у пользователя
+    нет прав, завершается ошибкой доступа.
+
+    Тест обрабатывает три типа документов: Project, Space и Member. Создается последовательность
+    из трех документов указанного типа в основном пространстве, после чего выполняется попытка
+    получить siblings среднего документа через чужое пространство и проверяется, что доступ запрещен.
+    ","1956","Проверка запрета доступа к siblings Project-документа через чужой space","tests.test_backend.document.access_doc","Wed Nov 19 08:16:38 UTC 2025","passed","Wed Nov 19 08:16:40 UTC 2025","","test_get_siblings_doc_access","",""
+"","1030","Дублирование Personal-документа: создание manager, дублирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:45 UTC 2025","passed","Wed Nov 19 08:13:47 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Негативный сценарий: разные некорректные document_id.
+    ","204","Негативный экспорт Y-Doc для document_id=","tests.test_backend.document","Wed Nov 19 08:18:41 UTC 2025","passed","Wed Nov 19 08:18:41 UTC 2025","","test_get_y_document","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1751","Редактирование Space-документа: создание manager, редактирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:01 UTC 2025","passed","Wed Nov 19 08:14:02 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","589","Создание Project-документа для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:10 UTC 2025","passed","Wed Nov 19 08:13:11 UTC 2025","","test_create_doc_access_by_roles","",""
+"
+    Тест проверки создания задачи с минимальным набором полей в системе управления проектами под разными ролями.
+
+    Цель теста — убедиться, что можно успешно создать задачу, указав только минимально необходимые данные, и что поведение API зависит от прав пользователя (типа клиента).
+    В процессе теста дополнительно валидируются структура созданной задачи, значения по умолчанию, связи (creator, board и пр.), а также удаление задачи после проверки.
+    assert_task_keys обеспечивает падение теста при добавлении/удалении ключей с понятным сообщением.
+
+    Ход теста:
+        1. Получение клиента согласно переданной роли через фикстуру.
+        2. Получение id пользователя, с помощью которого осуществляется создание задачи.
+        3. Формирование минимального payload и попытка создать задачу через API.
+        4. Проверка статус-кода ответа.
+        5. Если задача успешно создана (ответ 200):
+            - Проверка наполнения и структуры ответа
+    ","533","Create task with minimal payload: клиент=guest_client, ожидаемый статус=403","access_task","Wed Nov 19 08:19:05 UTC 2025","passed","Wed Nov 19 08:19:06 UTC 2025","","test_create_task","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","805","Дублирование Project-документа: создание member, дублирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:29 UTC 2025","passed","Wed Nov 19 08:13:30 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","248","Валидация имени борды: valid name with spaces → ожидали 200","tests.test_backend.board","Wed Nov 19 08:12:39 UTC 2025","passed","Wed Nov 19 08:12:39 UTC 2025","","board_validation_test","",""
+"","663","Редактирование группы через /EditBoardGroup: проверка обновления имени, описания, лимита и скрытия","tests.test_backend.board","Wed Nov 19 08:12:47 UTC 2025","passed","Wed Nov 19 08:12:47 UTC 2025","","test_create_board","",""
+"","306","Создание проекта с пустым slug","tests.test_backend.project","Wed Nov 19 08:18:44 UTC 2025","passed","Wed Nov 19 08:18:45 UTC 2025","","test_project","",""
+"","221","Негативные сценарии: некорректный documentId. id=bad_format","tests.test_backend.document","Wed Nov 19 08:17:12 UTC 2025","passed","Wed Nov 19 08:17:12 UTC 2025","","test_edit_document","",""
+"","227","Создание кастомного поля типа: Boolean","tests.test_backend.board","Wed Nov 19 08:12:48 UTC 2025","passed","Wed Nov 19 08:12:48 UTC 2025","","test_create_board","",""
+"","1608","Проверяем siblins для нескольктих Child (kind=Member)","tests.test_backend.document","Wed Nov 19 08:18:26 UTC 2025","passed","Wed Nov 19 08:18:27 UTC 2025","","test_get_siblings","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1824","Проверка доступа к siblings персонального документа: создатель - owner, просматривающий - owner","tests.test_backend.document.access_doc","Wed Nov 19 08:16:08 UTC 2025","passed","Wed Nov 19 08:16:10 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1643","Проверка доступа к siblings Space-документа: создатель - member, просматривающий - owner","tests.test_backend.document.access_doc","Wed Nov 19 08:15:37 UTC 2025","passed","Wed Nov 19 08:15:39 UTC 2025","","test_get_siblings_doc_access","",""
+"","251","GetTasks assignees: если указать пользователя невалидного(из другой борды) — ожидаем пустой список задач","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:04 UTC 2025","passed","Wed Nov 19 08:24:04 UTC 2025","","test_get_tasks_assignees","",""
+"","750","Дублирование Personal-документа: создание guest, дублирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:51 UTC 2025","passed","Wed Nov 19 08:13:52 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"Проверяет поведение при запросе с некорректным форматом space_id","161","Проверка получения задач с некорректным форматом space_id","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:25:14 UTC 2025","passed","Wed Nov 19 08:25:14 UTC 2025","","test_get_tasks_vlidation","",""
+"","214","Негативный кейс: documentId=nonexistent_id","tests.test_backend.document","Wed Nov 19 08:17:32 UTC 2025","passed","Wed Nov 19 08:17:32 UTC 2025","","test_get_document","",""
+"","701","Редактирование Personal-документа: создание member, редактирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:37 UTC 2025","passed","Wed Nov 19 08:14:38 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Создание сабтаска без milestone в payload.
+    Сабтаск не наследует milestone A автоматически у родителя.
+    Поле milestone у сабтаска пустое.
+    После теста задачи удаляются.
+    ","4350","Если поле milestone у сабтаска пустое, оно также не наследует milestone от родителя.","create_task","Wed Nov 19 08:19:48 UTC 2025","passed","Wed Nov 19 08:19:52 UTC 2025","","test_subtask_milestones_from_payload","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1701","Проверка доступа к siblings персонального документа: создатель - guest, просматривающий - owner","tests.test_backend.document.access_doc","Wed Nov 19 08:16:30 UTC 2025","passed","Wed Nov 19 08:16:32 UTC 2025","","test_get_siblings_doc_access","",""
+"","218","Валидация поля group name: too long (51 chars) → ожидали 400","tests.test_backend.board","Wed Nov 19 08:12:40 UTC 2025","passed","Wed Nov 19 08:12:40 UTC 2025","","board_validation_test","",""
+"","261","Создание документа — кейс: [special chars] (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:51 UTC 2025","passed","Wed Nov 19 08:16:51 UTC 2025","","test_create_document","",""
+"","208","Пустой результат при отсутствии документов (kind=Space)","tests.test_backend.document","Wed Nov 19 08:17:40 UTC 2025","passed","Wed Nov 19 08:17:40 UTC 2025","","test_get_documents","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1694","Проверка доступа к siblings Space-документа: создатель - owner, просматривающий - manager","tests.test_backend.document.access_doc","Wed Nov 19 08:15:25 UTC 2025","passed","Wed Nov 19 08:15:26 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1768","Редактирование Project-документа: создание owner, редактирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:12 UTC 2025","passed","Wed Nov 19 08:14:14 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","214","Валидация имени борды:   → ожидали 400","tests.test_backend.board","Wed Nov 19 08:12:38 UTC 2025","passed","Wed Nov 19 08:12:38 UTC 2025","","board_validation_test","",""
+"
+    Единственный ребёнок: нет prevSibling/nextSibling, parents содержит родителя.
+    ","1106","Проверяем siblins для единственного SoloChild (kind=Project)","tests.test_backend.document","Wed Nov 19 08:18:17 UTC 2025","passed","Wed Nov 19 08:18:18 UTC 2025","","test_get_siblings","",""
+"","366","Запрос документов с kind=Project, но с чужим spaceId","tests.test_backend.document","Wed Nov 19 08:17:43 UTC 2025","passed","Wed Nov 19 08:17:43 UTC 2025","","test_get_documents","",""
+"","209","Негативный кейс: missing kindId","tests.test_backend.document","Wed Nov 19 08:17:38 UTC 2025","passed","Wed Nov 19 08:17:39 UTC 2025","","test_get_documents","",""
+"Проверяет поведение при запросе с некорректным форматом board_id","211","Проверка получения задач с некорректным форматом board_id","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:25:14 UTC 2025","passed","Wed Nov 19 08:25:14 UTC 2025","","test_get_tasks_vlidation","",""
+"
+    Проверяем что разные роли могут получить списки документов из пространства и проекта.
+    Тест параметризован для проверки разных типов клиентов и контейнеров документов.
+
+    Проверяется получение и наличие в ответе всех созданных документов с учетом
+    ожидаемого статуса запроса для каждой роли.
+    ","1057","Проверка доступа к списку документов в Project для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:15:13 UTC 2025","passed","Wed Nov 19 08:15:14 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1065","Дублирование Project-документа: создание owner, дублирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:18 UTC 2025","passed","Wed Nov 19 08:13:19 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверка структуры и типов полей задач только для owner_client.
+    ","5811","GetTasks: Проверка структуры и типов полей задач в ответе","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:44 UTC 2025","passed","Wed Nov 19 08:24:50 UTC 2025","","test_get_tasks_schema","",""
+"","199","Негативный кейс: documentId=123","tests.test_backend.document","Wed Nov 19 08:17:32 UTC 2025","passed","Wed Nov 19 08:17:33 UTC 2025","","test_get_document","",""
+"","700","Дублирование Personal-документа: создание member, дублирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:49 UTC 2025","passed","Wed Nov 19 08:13:49 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Тест проверяет корректное уменьшение счетчика total после удаления задач и ожидает total=0 в конце.
+    ","3327","Проверка уменьшения счетчика задач milestone после удаления задач","create_task","Wed Nov 19 08:19:41 UTC 2025","passed","Wed Nov 19 08:19:44 UTC 2025","","test_milestone_tasks_total_and_completed","",""
+"","1015","Редактирование Personal-документа: создание owner, редактирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:30 UTC 2025","passed","Wed Nov 19 08:14:31 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1633","Проверка доступа к siblings Space-документа: создатель - owner, просматривающий - member","tests.test_backend.document.access_doc","Wed Nov 19 08:15:26 UTC 2025","passed","Wed Nov 19 08:15:28 UTC 2025","","test_get_siblings_doc_access","",""
+"","248","Валидация поля group description: regular description → ожидали 200","tests.test_backend.board","Wed Nov 19 08:12:41 UTC 2025","passed","Wed Nov 19 08:12:41 UTC 2025","","board_validation_test","",""
+"
+    Проверка доступа ко всем таскам в спейсе для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указанному спейсу;
+
+    TODO: после исправления бага добавить проверку, что заархивированные задачи не попадают в выборку
+    (сейчас указан спейс в котором нет архивных тасок)
+    ","452","Доступ к таскам спейса под ролью Owner (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:34 UTC 2025","passed","Wed Nov 19 08:23:35 UTC 2025","","test_get_tasks_space_all","",""
+"","280","Создание документа: Space","tests.test_backend.document","Wed Nov 19 08:16:47 UTC 2025","passed","Wed Nov 19 08:16:48 UTC 2025","","test_create_document","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1646","Редактирование Project-документа: создание manager, редактирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:20 UTC 2025","passed","Wed Nov 19 08:14:22 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","17140","GetTasks limit: превышает доступное кол-во задач — возвращается не больше фактического","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:20 UTC 2025","passed","Wed Nov 19 08:24:37 UTC 2025","","test_get_tasks_limit","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1942","Проверка доступа к siblings персонального документа: создатель - owner, просматривающий - guest","tests.test_backend.document.access_doc","Wed Nov 19 08:16:14 UTC 2025","passed","Wed Nov 19 08:16:16 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1116","Дублирование Project-документа: создание owner, дублирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:17 UTC 2025","passed","Wed Nov 19 08:13:18 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","5827","GetTasks board: валидная доска — успешный ответ и задачи этой доски","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:04 UTC 2025","passed","Wed Nov 19 08:24:10 UTC 2025","","test_get_tasks_board","",""
+"","221","Тест: Проверка предельной длины имени проекта","tests.test_backend.project","Wed Nov 19 08:18:45 UTC 2025","passed","Wed Nov 19 08:18:45 UTC 2025","","test_project","",""
+"
+    Проверяем сиблинги для нескольких корневых документов (без parent_document_id).
+    ","2116","Проверяем siblins для нескольких корневых документов (kind=Project)","tests.test_backend.document","Wed Nov 19 08:18:00 UTC 2025","passed","Wed Nov 19 08:18:02 UTC 2025","","test_get_siblings","",""
+"","610","Тест создания доски: клиент=owner_client, ожидаемый статус=200","tests.test_backend.board.access_board","Wed Nov 19 08:12:31 UTC 2025","passed","Wed Nov 19 08:12:31 UTC 2025","","test_create_board","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1053","Дублирование Project-документа: создание member, дублирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:28 UTC 2025","passed","Wed Nov 19 08:13:29 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Негативный тест: создание задачи с отрицательным индексом должно возвращать ошибку по полю index.
+    ","296","Негативный тест: создание задачи с отрицательным индексом (index=-10) Ожидался статус 400","create_task","Wed Nov 19 08:22:23 UTC 2025","failed","Wed Nov 19 08:22:24 UTC 2025","","test_task_indexing_in_group","",""
+"","458","Редактирование кастомного поля типа: Member","tests.test_backend.board","Wed Nov 19 08:12:51 UTC 2025","passed","Wed Nov 19 08:12:52 UTC 2025","","test_create_board","",""
+"","432","GetTasks board: доска не принадлежит space — ожидаем пустой список задач","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:10 UTC 2025","passed","Wed Nov 19 08:24:10 UTC 2025","","test_get_tasks_board","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1030","Дублирование Space-документа: создание manager, дублирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:35 UTC 2025","passed","Wed Nov 19 08:13:36 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Негативные сценарии: разные варианты некорректного document_id.
+    ","328","Негативный: некорректный document_id=notAnObjectId1234567890","tests.test_backend.document","Wed Nov 19 08:18:31 UTC 2025","passed","Wed Nov 19 08:18:31 UTC 2025","","test_get_siblings","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1790","Проверка доступа к siblings Project-документа: создатель - member, просматривающий - guest","tests.test_backend.document.access_doc","Wed Nov 19 08:16:07 UTC 2025","passed","Wed Nov 19 08:16:08 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1614","Проверка доступа к siblings персонального документа: создатель - member, просматривающий - owner","tests.test_backend.document.access_doc","Wed Nov 19 08:16:24 UTC 2025","passed","Wed Nov 19 08:16:25 UTC 2025","","test_get_siblings_doc_access","",""
+"Проверяем что пользователи могут получить только свои personal документы","487","Проверка доступа к personal документам для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:15:22 UTC 2025","passed","Wed Nov 19 08:15:23 UTC 2025","","test_get_docs_list_access_by_roles","",""
+"","552","Создание и дублирование документа (Member)","tests.test_backend.document","Wed Nov 19 08:16:56 UTC 2025","passed","Wed Nov 19 08:16:57 UTC 2025","","test_duplicate_document","",""
+"
+    Проверяет, что запросы с некорректными document_id или space_id вызывают ошибку.
+    ","168","Проверка доступа с некорректным ID документа","tests.test_backend.document.access_doc","Wed Nov 19 08:16:46 UTC 2025","passed","Wed Nov 19 08:16:47 UTC 2025","","test_matrix_access_docs","",""
+"","721","Редактирование Personal-документа: создание manager, редактирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:35 UTC 2025","passed","Wed Nov 19 08:14:36 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","219","Валидация поля group name: None value → ожидали 400","tests.test_backend.board","Wed Nov 19 08:12:40 UTC 2025","passed","Wed Nov 19 08:12:40 UTC 2025","","board_validation_test","",""
+"","257","Создание документа в роли owner - с передачей kind=Project и kindId (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:52 UTC 2025","passed","Wed Nov 19 08:16:52 UTC 2025","","test_create_document","",""
+"
+        Проверяет, что пользователи без доступа к проекту или доске получают пустой список задач,
+        но при этом запрос выполняется успешно (HTTP 200).
+        ","208","Тестирование получения задач под ролью Client_with_access_only_in_space","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:05 UTC 2025","passed","Wed Nov 19 08:23:05 UTC 2025","","test_get_tasks_board_filters","",""
+"","1903","Негативный сценарий: гостевой пользователь не может получить siblings (kind=Space)","tests.test_backend.document","Wed Nov 19 08:18:35 UTC 2025","passed","Wed Nov 19 08:18:37 UTC 2025","","test_get_siblings","",""
+"","1032","Дублирование Personal-документа: создание guest, дублирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:54 UTC 2025","passed","Wed Nov 19 08:13:55 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"Проверяем что пользователи могут получить только свои personal документы","482","Проверка доступа к personal документу для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:15:00 UTC 2025","passed","Wed Nov 19 08:15:00 UTC 2025","","test_get_doc_access_by_roles","",""
+"","266","Создание документа — кейс: [empty string] (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:49 UTC 2025","passed","Wed Nov 19 08:16:49 UTC 2025","","test_create_document","",""
+"
+    тест проверяет связи родительской задачи и подзадачи через get_task_endpoint,
+    а также корректное заполнение полей 'parentTask' и 'subtasks'.
+    ","3881","Проверка связи родительской задачи и подзадачи, корректность отображения 'parentTask' и 'subtasks'","create_task","Wed Nov 19 08:19:58 UTC 2025","passed","Wed Nov 19 08:20:02 UTC 2025","","test_subtask_parent_relationships","",""
+"","810","Негативный сценарий: гостевой пользователь не может получить siblings (kind=Project)","tests.test_backend.document","Wed Nov 19 08:18:34 UTC 2025","passed","Wed Nov 19 08:18:34 UTC 2025","","test_get_siblings","",""
+"
+    Проверяем доступ к списку недавних документов для ролей owner, manager, member, guest.
+    Создаются тестовые документы, проверяется их доступность
+    и корректный порядок отображения после повторной маркировки.
+    ","0","test_get_recent_documents_access_by_roles[space_docs-owner]","tests.test_backend.document.access_doc","Wed Nov 19 08:15:23 UTC 2025","skipped","Wed Nov 19 08:15:23 UTC 2025","","test_get_recent_documents_access_by_roles","",""
+"","833","Архивирование Project-документа для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:00 UTC 2025","passed","Wed Nov 19 08:13:01 UTC 2025","","test_archive_doc","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1352","Дублирование Project-документа: создание manager, дублирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:23 UTC 2025","passed","Wed Nov 19 08:13:24 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Создаём родительскую задачу с milestone parent_ms_1,
+    затем три подзадачи:
+    - первая с milestone subtask_ms_1
+    - вторая с milestone subtask_ms_2
+    - третья без milestone
+    Проверяем, что все задачи корректно видны в соответствующих milestones.
+    ","8543","Проверка что все задачи корректно видны в соответствующих milestones.","create_task","Wed Nov 19 08:22:24 UTC 2025","passed","Wed Nov 19 08:22:32 UTC 2025","","test_tasks_visibility_in_correct_milestones","",""
+"Проверяет что без указания sortDirection сортировка происходит по возрастанию","239","Проверка сортировки по умолчанию (должна быть по возрастанию)","tests.test_backend.task_service.get_tasks.tasks_sort_сriteria_derections.asc","Wed Nov 19 08:23:44 UTC 2025","passed","Wed Nov 19 08:23:44 UTC 2025","","test_get_tasks_sorting_by_created_at_asc","",""
+"
+    Проверка доступа ко всем таскам в спейсе для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указанному спейсу;
+
+    TODO: после исправления бага добавить проверку, что заархивированные задачи не попадают в выборку
+    (сейчас указан спейс в котором нет архивных тасок)
+    ","222","Доступ к таскам спейса под ролью Manager (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:35 UTC 2025","passed","Wed Nov 19 08:23:35 UTC 2025","","test_get_tasks_space_all","",""
+"
+        Проверка обработки некорректных значений slug при получении задачи.
+        Ожидаем корректные коды ошибок для разных невалидных входных данных.
+        ","221","Негативные сценарии: Get task с invalid slug | slug='' -> 400","tests.test_backend.task_service.get_task","Wed Nov 19 08:22:36 UTC 2025","passed","Wed Nov 19 08:22:36 UTC 2025","","test_get_task_wrong_slug","",""
+"","254","Валидация имени борды: @#$%^&*()! → ожидали 200","tests.test_backend.board","Wed Nov 19 08:12:38 UTC 2025","passed","Wed Nov 19 08:12:39 UTC 2025","","board_validation_test","",""
+"
+    Тест проверяет корректность позиционирования задач при создании новой задачи в группе на доске (board).
+    ","18419","Проверка index -> ожидаемая позиция задачи в колонке| Группа из 10 тасок, индекс=0 ","create_task","Wed Nov 19 08:21:08 UTC 2025","passed","Wed Nov 19 08:21:26 UTC 2025","","test_task_indexing_in_group","",""
+"","204","Негативный кейс: documentId=!@#$","tests.test_backend.document","Wed Nov 19 08:17:33 UTC 2025","passed","Wed Nov 19 08:17:33 UTC 2025","","test_get_document","",""
+"","232","APP-2763: Ошибка при создании борды с длинным заголовком custom field: TaskRelations","tests.test_backend.board","Wed Nov 19 08:12:44 UTC 2025","passed","Wed Nov 19 08:12:44 UTC 2025","","board_validation_test","",""
+"","443","Редактирование борды: изменение имени через /EditBoard","tests.test_backend.board","Wed Nov 19 08:12:46 UTC 2025","passed","Wed Nov 19 08:12:46 UTC 2025","","test_create_board","",""
+"Проверяет что запрос выполняется за разумное время","6276","Проверка производительности запроса","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:37 UTC 2025","passed","Wed Nov 19 08:24:43 UTC 2025","","test_get_tasks_performance","",""
+"","936","Получение документов — кейс: kind=Member","tests.test_backend.document","Wed Nov 19 08:17:37 UTC 2025","passed","Wed Nov 19 08:17:38 UTC 2025","","test_get_documents","",""
+"
+    Проверяет запрет доступа к документам для стороннего пользователя при попытке
+    получить документы, связанные с определенным типом сущности (например, 'Project',
+    'Space' или 'Member'). Тест проверяет, что сторонний клиент получает статус 403
+    и код ошибки 'AccessDenied' в ответе.
+    ","453","Отказ в доступе к Project документам другим пользователем","tests.test_backend.document.access_doc","Wed Nov 19 08:13:13 UTC 2025","passed","Wed Nov 19 08:13:14 UTC 2025","","test_doc_access_for_foreign","",""
+"
+    Проверяем удаление всех документов в пространстве и проекте.
+    ","236","test_archive_all_documents[space_docs]","tests.test_backend.document","Wed Nov 19 08:16:47 UTC 2025","passed","Wed Nov 19 08:16:47 UTC 2025","","test_archive_all_docs","",""
+"","243","Создание проекта с пустым описанием","tests.test_backend.project","Wed Nov 19 08:18:46 UTC 2025","passed","Wed Nov 19 08:18:46 UTC 2025","","test_project","",""
+"
+    Проверка доступа ко всем таскам в спейсе для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указанному спейсу;
+
+    TODO: после исправления бага добавить проверку, что заархивированные задачи не попадают в выборку
+    (сейчас указан спейс в котором нет архивных тасок)
+    ","537","Доступ к таскам спейса под ролью Guest (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:35 UTC 2025","passed","Wed Nov 19 08:23:36 UTC 2025","","test_get_tasks_space_all","",""
+"
+    Тест проверяет корректность позиционирования задач при создании новой задачи в группе на доске (board).
+    ","18286","Проверка index -> ожидаемая позиция задачи в колонке| Группа из 10 тасок, индекс не указан ","create_task","Wed Nov 19 08:22:05 UTC 2025","failed","Wed Nov 19 08:22:23 UTC 2025","","test_task_indexing_in_group","",""
+"","666","Повторный запрос одного и того же документа (kind=Member)","tests.test_backend.document","Wed Nov 19 08:17:35 UTC 2025","passed","Wed Nov 19 08:17:35 UTC 2025","","test_get_document","",""
+"","1030","Дублирование Personal-документа: создание owner, дублирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:41 UTC 2025","passed","Wed Nov 19 08:13:43 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1682","Редактирование Space-документа: создание owner, редактирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:56 UTC 2025","passed","Wed Nov 19 08:13:58 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1966","Проверка доступа к siblings персонального документа: создатель - manager, просматривающий - guest","tests.test_backend.document.access_doc","Wed Nov 19 08:16:22 UTC 2025","passed","Wed Nov 19 08:16:24 UTC 2025","","test_get_siblings_doc_access","",""
+"","223","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Date","tests.test_backend.board","Wed Nov 19 08:12:44 UTC 2025","passed","Wed Nov 19 08:12:44 UTC 2025","","board_validation_test","",""
+"","958","Редактирование Personal-документа: создание member, редактирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:38 UTC 2025","passed","Wed Nov 19 08:14:39 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","774","Дублирование Personal-документа: создание owner, дублирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:44 UTC 2025","passed","Wed Nov 19 08:13:45 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","1007","Проверка граничной валидации длины title: LENGTH = 2048 for Project","tests.test_backend.document","Wed Nov 19 08:17:18 UTC 2025","passed","Wed Nov 19 08:17:19 UTC 2025","","test_edit_document","",""
+"","656","Добавление новой группы в борду через /CreateBoardGroup: проверка имени, описания и изменения количества групп","tests.test_backend.board","Wed Nov 19 08:12:46 UTC 2025","passed","Wed Nov 19 08:12:47 UTC 2025","","test_create_board","",""
+"","254","Проверка сортировки задач по completedAt: ненулевые по убыванию, затем null (в пределах лимита)","tests.test_backend.task_service.get_tasks.tasks_sort_сriteria_derections.desc","Wed Nov 19 08:23:54 UTC 2025","passed","Wed Nov 19 08:23:54 UTC 2025","","test_get_tasks_sorting_by_completed_at_desc","",""
+"","504","Создание Personal-документа для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:11 UTC 2025","passed","Wed Nov 19 08:13:12 UTC 2025","","test_create_doc_access_by_roles","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1640","Редактирование Space-документа: создание member, редактирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:10 UTC 2025","passed","Wed Nov 19 08:14:12 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Проверяем доступ к списку недавних документов для ролей owner, manager, member, guest.
+    Создаются тестовые документы, проверяется их доступность
+    и корректный порядок отображения после повторной маркировки.
+    ","0","test_get_recent_documents_access_by_roles[project_docs-member]","tests.test_backend.document.access_doc","Wed Nov 19 08:15:23 UTC 2025","skipped","Wed Nov 19 08:15:23 UTC 2025","","test_get_recent_documents_access_by_roles","",""
+"","467","Успешное получение документа по documentId (kind=Space)","tests.test_backend.document","Wed Nov 19 08:17:31 UTC 2025","passed","Wed Nov 19 08:17:31 UTC 2025","","test_get_document","",""
+"
+    Тест проверки получения задачи под разными ролями с валидацией набора полей и типов.
+    ","476","Get task: клиент=member_client, ожидаемый статус=200","tests.test_backend.task_service.get_task.access_get_task","Wed Nov 19 08:22:34 UTC 2025","passed","Wed Nov 19 08:22:34 UTC 2025","","test_get_task","",""
+"
+    Проверяет, что пользователь foreign_client без доступа к Space получает ошибку.
+    ","440","Проверка доступа к документам: пользователь без доступа (foreign_client)","tests.test_backend.document.access_doc","Wed Nov 19 08:16:44 UTC 2025","passed","Wed Nov 19 08:16:44 UTC 2025","","test_matrix_access_docs","",""
+"","163","Запрос документов с kind=Space, но с чужим spaceId","tests.test_backend.document","Wed Nov 19 08:17:43 UTC 2025","passed","Wed Nov 19 08:17:44 UTC 2025","","test_get_documents","",""
+"","216","Несоответствие kind и kindId — kind=Space с kindId от Member","tests.test_backend.document","Wed Nov 19 08:17:44 UTC 2025","passed","Wed Nov 19 08:17:44 UTC 2025","","test_get_documents","",""
+"
+    Проверка фильтрации по конкретной борде для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указанной борде;
+    ","7121","Доступ к таскам с фильтрацией по board под ролью Manager (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:22:44 UTC 2025","passed","Wed Nov 19 08:22:51 UTC 2025","","test_get_tasks_board_filters","",""
+"","599","Создание и дублирование документа (Space)","tests.test_backend.document","Wed Nov 19 08:16:55 UTC 2025","passed","Wed Nov 19 08:16:56 UTC 2025","","test_duplicate_document","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1829","Проверка доступа к siblings Space-документа: создатель - member, просматривающий - guest","tests.test_backend.document.access_doc","Wed Nov 19 08:15:42 UTC 2025","passed","Wed Nov 19 08:15:44 UTC 2025","","test_get_siblings_doc_access","",""
+"","729","Архивирование Personal-документа для роли guest, документ создан в роли Member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:06 UTC 2025","passed","Wed Nov 19 08:13:07 UTC 2025","","test_archive_doc","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1659","Редактирование Project-документа: создание manager, редактирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:18 UTC 2025","passed","Wed Nov 19 08:14:20 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1922","Проверка доступа к siblings Project-документа: создатель - manager, просматривающий - manager","tests.test_backend.document.access_doc","Wed Nov 19 08:15:54 UTC 2025","passed","Wed Nov 19 08:15:56 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1939","Проверка доступа к siblings Project-документа: создатель - member, просматривающий - owner","tests.test_backend.document.access_doc","Wed Nov 19 08:16:00 UTC 2025","passed","Wed Nov 19 08:16:02 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","844","Редактирование Project-документа: создание manager, редактирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:24 UTC 2025","passed","Wed Nov 19 08:14:24 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","221","GetTasks ids: дубликаты во входных ids","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:12 UTC 2025","passed","Wed Nov 19 08:24:12 UTC 2025","","test_get_tasks_ids","",""
+"","479","Создание нескольких борд с одинаковым именем в одном проекте","tests.test_backend.board","Wed Nov 19 08:12:45 UTC 2025","passed","Wed Nov 19 08:12:45 UTC 2025","","test_create_board","",""
+"
+    Негативные сценарии: разные варианты некорректного document_id.
+    ","301","Негативный: некорректный document_id=000000000000000000000000","tests.test_backend.document","Wed Nov 19 08:18:28 UTC 2025","passed","Wed Nov 19 08:18:28 UTC 2025","","test_get_siblings","",""
+"
+    Тест проверяет корректность позиционирования задач при создании новой задачи в группе на доске (board).
+    ","2840","Проверка index -> ожидаемая позиция задачи в колонке| Пустая группа, индекс не указан ","create_task","Wed Nov 19 08:20:21 UTC 2025","passed","Wed Nov 19 08:20:23 UTC 2025","","test_task_indexing_in_group","",""
+"","269","Создание документа — кейс: [None] (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:48 UTC 2025","passed","Wed Nov 19 08:16:49 UTC 2025","","test_create_document","",""
+"
+    Негативный тест: создание задачи с отрицательным индексом должно возвращать ошибку по полю index.
+    ","275","Негативный тест: создание задачи с отрицательным индексом (index=-1) Ожидался статус 400","create_task","Wed Nov 19 08:22:23 UTC 2025","failed","Wed Nov 19 08:22:23 UTC 2025","","test_task_indexing_in_group","",""
+"","3984","Сортировка документов по createdAt (kind=Member)","tests.test_backend.document","Wed Nov 19 08:17:53 UTC 2025","passed","Wed Nov 19 08:17:57 UTC 2025","","test_get_documents","",""
+"","492","Редактирование кастомного поля типа: Date","tests.test_backend.board","Wed Nov 19 08:12:51 UTC 2025","passed","Wed Nov 19 08:12:51 UTC 2025","","test_create_board","",""
+"","438","GetTasks skip: skip=5, limit=20 → элементы начинаются с 5-го","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:50 UTC 2025","passed","Wed Nov 19 08:24:51 UTC 2025","","test_get_tasks_skip","",""
+"","1703","Проверяем siblins для нескольктих Child (kind=Project)","tests.test_backend.document","Wed Nov 19 08:18:22 UTC 2025","passed","Wed Nov 19 08:18:24 UTC 2025","","test_get_siblings","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1972","Проверка доступа к siblings Space-документа: создатель - owner, просматривающий - guest","tests.test_backend.document.access_doc","Wed Nov 19 08:15:28 UTC 2025","passed","Wed Nov 19 08:15:30 UTC 2025","","test_get_siblings_doc_access","",""
+"","690","Редактирование Personal-документа: создание owner, редактирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:31 UTC 2025","passed","Wed Nov 19 08:14:32 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","211","Создание документа — кейс: [list as title] (ожидается 400)","tests.test_backend.document","Wed Nov 19 08:16:50 UTC 2025","passed","Wed Nov 19 08:16:50 UTC 2025","","test_create_document","",""
+"","711","Два последовательных запроса на редактирование одного документа- проверяем что последнее изменение сохранилось.Project","tests.test_backend.document","Wed Nov 19 08:17:14 UTC 2025","passed","Wed Nov 19 08:17:15 UTC 2025","","test_edit_document","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","727","Редактирование Space-документа: создание member, редактирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:12 UTC 2025","passed","Wed Nov 19 08:14:12 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1641","Редактирование Project-документа: создание member, редактирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:26 UTC 2025","passed","Wed Nov 19 08:14:28 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Проверяем удаление всех документов в пространстве и проекте.
+    ","270","test_archive_all_documents[project_docs]","tests.test_backend.document","Wed Nov 19 08:16:47 UTC 2025","passed","Wed Nov 19 08:16:47 UTC 2025","","test_archive_all_docs","",""
+"","217","Создание документа в роли owner - с передачей kind=Project и kindId (ожидается 400)","tests.test_backend.document","Wed Nov 19 08:16:53 UTC 2025","passed","Wed Nov 19 08:16:53 UTC 2025","","test_create_document","",""
+"
+    Тестирование создания подзадачи разными пользовательскими ролями и проверка
+    ожидаемого поведения на основе прав доступа роли.
+
+    Этот тест оценивает может ли клиент с разными уровнями доступа создавать
+    подзадачу для родительской задачи. Также проверяются корректные связи между
+    родительской задачей и подзадачей, включая поля `parentTask` и `subtasks`.
+
+    ","2529","Тестирование создания подзадачи разными пользовательскими ролями: клиент=owner_client, ожидаемый статус=200","access_task","Wed Nov 19 08:18:50 UTC 2025","passed","Wed Nov 19 08:18:53 UTC 2025","","test_create_sub","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1691","Редактирование Space-документа: создание owner, редактирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:55 UTC 2025","passed","Wed Nov 19 08:13:56 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","995","Дублирование Space-документа: создание member, дублирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:39 UTC 2025","passed","Wed Nov 19 08:13:40 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверяет ограничения доступа при попытке получения siblings документов через чужое пространство.
+    Тест удостоверяется, что попытка получить siblings документов через пространство, где у пользователя
+    нет прав, завершается ошибкой доступа.
+
+    Тест обрабатывает три типа документов: Project, Space и Member. Создается последовательность
+    из трех документов указанного типа в основном пространстве, после чего выполняется попытка
+    получить siblings среднего документа через чужое пространство и проверяется, что доступ запрещен.
+    ","1756","Проверка запрета доступа к siblings Member-документа через чужой space","tests.test_backend.document.access_doc","Wed Nov 19 08:16:42 UTC 2025","passed","Wed Nov 19 08:16:43 UTC 2025","","test_get_siblings_doc_access","",""
+"","657","Проверка граничной валидации длины title: LENGTH = 2049 for Space","tests.test_backend.document","Wed Nov 19 08:17:26 UTC 2025","passed","Wed Nov 19 08:17:27 UTC 2025","","test_edit_document","",""
+"
+    Проверка фильтрации по конкретному проекту для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указаному проекту;
+    ","7266","Доступ к таскам с фильтрацией по project под ролью Owner (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:06 UTC 2025","passed","Wed Nov 19 08:23:13 UTC 2025","","test_get_tasks_project_filters","",""
+"","247","Валидация имени борды: valid name → ожидали 200","tests.test_backend.board","Wed Nov 19 08:12:38 UTC 2025","passed","Wed Nov 19 08:12:38 UTC 2025","","board_validation_test","",""
+"
+    Данный тест проверяет возможность создания задачи с заранее определённым набором данных (payload) через API
+     управления задачами для различных ролей пользователей, а также корректность и полноту возвращаемого ответа.
+     Тест эмулирует действия разных типов клиентов (владелец, менеджер, участник, гость) и сравнивает фактический результат с ожидаемым HTTP-статусом.
+    ","1438","Проверка создания задачи с конкретным payload и структурой ответа : клиент=guest_client, ожидаемый статус=403","access_task","Wed Nov 19 08:19:12 UTC 2025","passed","Wed Nov 19 08:19:14 UTC 2025","","test_create_task","",""
+"","763","Архивирование Project-документа для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:03 UTC 2025","passed","Wed Nov 19 08:13:03 UTC 2025","","test_archive_doc","",""
+"
+    Проверяет запрет доступа к документам для стороннего пользователя при попытке
+    получить документы, связанные с определенным типом сущности (например, 'Project',
+    'Space' или 'Member'). Тест проверяет, что сторонний клиент получает статус 403
+    и код ошибки 'AccessDenied' в ответе.
+    ","424","Отказ в доступе к Member документам другим пользователем","tests.test_backend.document.access_doc","Wed Nov 19 08:13:14 UTC 2025","passed","Wed Nov 19 08:13:15 UTC 2025","","test_doc_access_for_foreign","",""
+"","217","GetTasks ids: несколько существующих id -> соответствующие задачи в ответе","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:11 UTC 2025","passed","Wed Nov 19 08:24:11 UTC 2025","","test_get_tasks_ids","",""
+"","228","GetTasks ids: неверный формат id внутри массива -> 400 и корректная ошибка","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:12 UTC 2025","passed","Wed Nov 19 08:24:12 UTC 2025","","test_get_tasks_ids","",""
+"","812","Дублирование Personal-документа: создание guest, дублирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:52 UTC 2025","passed","Wed Nov 19 08:13:53 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","4016","Сортировка документов по createdAt (kind=Space)","tests.test_backend.document","Wed Nov 19 08:17:49 UTC 2025","passed","Wed Nov 19 08:17:53 UTC 2025","","test_get_documents","",""
+"","1176","Получение документов — кейс: kind=Project","tests.test_backend.document","Wed Nov 19 08:17:35 UTC 2025","passed","Wed Nov 19 08:17:36 UTC 2025","","test_get_documents","",""
+"
+    Глубокая вложенность: проверяем цепочку parents.
+    ","1680","Проверяем глубокую вложенность для Grandchild = [root_id, parent_id, child_id] (kind=Member)","tests.test_backend.document","Wed Nov 19 08:18:15 UTC 2025","passed","Wed Nov 19 08:18:16 UTC 2025","","test_get_siblings","",""
+"
+    Проверка фильтрации по конкретной борде для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указанной борде;
+    ","7611","Доступ к таскам с фильтрацией по board под ролью Guest (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:22:57 UTC 2025","passed","Wed Nov 19 08:23:05 UTC 2025","","test_get_tasks_board_filters","",""
+"","696","Редактирование кастомного поля типа: Boolean","tests.test_backend.board","Wed Nov 19 08:12:50 UTC 2025","passed","Wed Nov 19 08:12:51 UTC 2025","","test_create_board","",""
+"","735","Редактирование Personal-документа: создание manager, редактирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:33 UTC 2025","passed","Wed Nov 19 08:14:34 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1770","Проверка доступа к siblings Space-документа: создатель - manager, просматривающий - guest","tests.test_backend.document.access_doc","Wed Nov 19 08:15:35 UTC 2025","passed","Wed Nov 19 08:15:37 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Удаляет все задачи на основной доске (main_board).
+    ","12028","Проверка удаление всех задач на доске","create_task","Wed Nov 19 08:19:15 UTC 2025","passed","Wed Nov 19 08:19:27 UTC 2025","","test_delete_all_tasks_on_main_board","",""
+"","750","Дублирование Personal-документа: создание manager, дублирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:45 UTC 2025","passed","Wed Nov 19 08:13:45 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","212","Создание документа — кейс: [int as title] (ожидается 400)","tests.test_backend.document","Wed Nov 19 08:16:49 UTC 2025","passed","Wed Nov 19 08:16:50 UTC 2025","","test_create_document","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1076","Дублирование Project-документа: создание manager, дублирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:22 UTC 2025","passed","Wed Nov 19 08:13:23 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","711","Редактирование Personal-документа: создание member, редактирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:39 UTC 2025","passed","Wed Nov 19 08:14:40 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+        Проверка обработки некорректных значений slug при получении задачи.
+        Ожидаем корректные коды ошибок для разных невалидных входных данных.
+        ","221","Негативные сценарии: Get task с invalid slug | slug='<script>' -> 400","tests.test_backend.task_service.get_task","Wed Nov 19 08:22:37 UTC 2025","passed","Wed Nov 19 08:22:37 UTC 2025","","test_get_task_wrong_slug","",""
+"
+        Проверяет, что пользователи без доступа к проекту получают пустой список задач,
+        но при этом запрос выполняется успешно (HTTP 200).
+        ","414","Тестирование получения задач под ролью Client_with_access_only_in_project","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:33 UTC 2025","passed","Wed Nov 19 08:23:33 UTC 2025","","test_get_tasks_project_filters","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1777","Проверка доступа к siblings персонального документа: создатель - owner, просматривающий - manager","tests.test_backend.document.access_doc","Wed Nov 19 08:16:10 UTC 2025","passed","Wed Nov 19 08:16:12 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","2020","Проверка доступа к siblings персонального документа: создатель - member, просматривающий - manager","tests.test_backend.document.access_doc","Wed Nov 19 08:16:25 UTC 2025","passed","Wed Nov 19 08:16:27 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","790","Редактирование Space-документа: создание manager, редактирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:06 UTC 2025","passed","Wed Nov 19 08:14:07 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Тест проверки получения задачи под разными ролями с валидацией набора полей и типов.
+    ","226","Get task: клиент=client_with_access_only_in_project, ожидаемый статус=400","tests.test_backend.task_service.get_task.access_get_task","Wed Nov 19 08:22:35 UTC 2025","passed","Wed Nov 19 08:22:35 UTC 2025","","test_get_task","",""
+"
+    Тест проверяет увеличение счетчика total сабтасок у родительской задачи после добавления сабтасок.
+    ","12252","Проверка счетчика сабтасок в taskTable в родительской задаче","create_task","Wed Nov 19 08:20:02 UTC 2025","passed","Wed Nov 19 08:20:14 UTC 2025","","test_taskTable_total_subtask_counter","",""
+"
+    Проверяем что разные роли могут получить документы из пространства и проекта. Тест параметризован
+    для проверки разных типов клиентов и контейнеров документов.
+    ","1830","Проверка доступа к документу в Space для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:42 UTC 2025","passed","Wed Nov 19 08:14:44 UTC 2025","","test_get_doc_access_by_roles","",""
+"","1178","Архивирование Project-документа для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:02 UTC 2025","passed","Wed Nov 19 08:13:03 UTC 2025","","test_archive_doc","",""
+"","155","Test space name cannot be empty","tests.test_backend.space","Wed Nov 19 08:18:48 UTC 2025","passed","Wed Nov 19 08:18:48 UTC 2025","","test_space","",""
+"
+        Проверка обработки некорректных значений slug при получении задачи.
+        Ожидаем корректные коды ошибок для разных невалидных входных данных.
+        ","210","Негативные сценарии: Get task с invalid slug | slug=None -> 400","tests.test_backend.task_service.get_task","Wed Nov 19 08:22:36 UTC 2025","passed","Wed Nov 19 08:22:36 UTC 2025","","test_get_task_wrong_slug","",""
+"","516","Тест создания доски: клиент=member_client, ожидаемый статус=403","tests.test_backend.board.access_board","Wed Nov 19 08:12:33 UTC 2025","passed","Wed Nov 19 08:12:33 UTC 2025","","test_create_board","",""
+"","2157","Получение списка борд: проверка, что все созданные борды присутствуют в ответе(board_names)","tests.test_backend.board","Wed Nov 19 08:12:53 UTC 2025","passed","Wed Nov 19 08:12:55 UTC 2025","","test_get_boards","",""
+"
+    Проверка универсальна для всех эндпоинтов. Выполнена на GetSpaces.
+    ","393","Авторизация: невалидный токен приводит к отказу в доступе Bad Request 400","tests.test_backend.authServis","Wed Nov 19 08:12:27 UTC 2025","passed","Wed Nov 19 08:12:27 UTC 2025","","test_token","",""
+"Проверка, что эндпоинт возвращает 200 и тело с полем tasks (массив).","6622","GetTasks: базовый смоук — успешный ответ и массив tasks","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:23:55 UTC 2025","passed","Wed Nov 19 08:24:01 UTC 2025","","test_get_tasks","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1633","Редактирование Space-документа: создание member, редактирование owner","tests.test_backend.document.access_doc","Wed Nov 19 08:14:07 UTC 2025","passed","Wed Nov 19 08:14:08 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","493","Создание Project-документа для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:09 UTC 2025","passed","Wed Nov 19 08:13:09 UTC 2025","","test_create_doc_access_by_roles","",""
+"","532","Создание Project-документа для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:13:09 UTC 2025","passed","Wed Nov 19 08:13:10 UTC 2025","","test_create_doc_access_by_roles","",""
+"Тест проверки siblins и родителей для родительского документа","709","Проверка отсутствия siblins и родителей для одного корневого документа (kind=Member)","tests.test_backend.document","Wed Nov 19 08:17:59 UTC 2025","passed","Wed Nov 19 08:18:00 UTC 2025","","test_get_siblings","",""
+"","215","GetTasks ids: пустой массив -> 200 и пустой tasks","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:24:11 UTC 2025","passed","Wed Nov 19 08:24:12 UTC 2025","","test_get_tasks_ids","",""
+"Проверяем что пользователи могут получить только свои personal документы","424","Проверка доступа к personal документу для роли member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:59 UTC 2025","passed","Wed Nov 19 08:14:59 UTC 2025","","test_get_doc_access_by_roles","",""
+"
+    Тест проверяет корректность позиционирования задач при создании новой задачи в группе на доске (board).
+    ","2784","Проверка index -> ожидаемая позиция задачи в колонке| Пустая группа, индекс=0 ","create_task","Wed Nov 19 08:20:23 UTC 2025","passed","Wed Nov 19 08:20:26 UTC 2025","","test_task_indexing_in_group","",""
+"","237","Валидация поля limit для board group: 0","tests.test_backend.board","Wed Nov 19 08:12:42 UTC 2025","passed","Wed Nov 19 08:12:42 UTC 2025","","board_validation_test","",""
+"","254","Создание документа в роли owner - с передачей kind=Space и kindId (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:52 UTC 2025","passed","Wed Nov 19 08:16:53 UTC 2025","","test_create_document","",""
+"
+    Проверяет функциональность архивации Space-документа с разными ролями и уровнями доступа.
+
+    Тест создает Space-документ, используя случайного клиента с повышенными правами (владелец, менеджер или участник),
+    и оценивает возможность архивации документа на основе предоставленной роли client_fixture.
+    Проверяется, что возвращаются корректные коды состояния в зависимости от прав пользователя.
+    Дополнительно, в случаях, когда доступ запрещен и ожидаемый статус 403, документ архивируется после теста
+    с использованием случайного клиента с повышенными правами.
+    ","780","Архивирование Space-документа для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:12:59 UTC 2025","passed","Wed Nov 19 08:13:00 UTC 2025","","test_archive_doc","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","1732","Редактирование Project-документа: создание manager, редактирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:14:22 UTC 2025","passed","Wed Nov 19 08:14:24 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","1429","Тест создания доски: клиент=manager_client, ожидаемый статус=200","tests.test_backend.board.access_board","Wed Nov 19 08:12:31 UTC 2025","passed","Wed Nov 19 08:12:33 UTC 2025","","test_create_board","",""
+"","238","Успешное редактирование полей title и icon. Member","tests.test_backend.document","Wed Nov 19 08:17:11 UTC 2025","passed","Wed Nov 19 08:17:11 UTC 2025","","test_edit_document","",""
+"","241","Создание документа — кейс: [single space] (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:49 UTC 2025","passed","Wed Nov 19 08:16:49 UTC 2025","","test_create_document","",""
+"","871","Тест: Проверка slug: уникальность до создания, неуникальность после создания, и ошибка при дубликате","tests.test_backend.project","Wed Nov 19 08:18:43 UTC 2025","passed","Wed Nov 19 08:18:44 UTC 2025","","test_project","",""
+"","226","Создание кастомного поля типа: Select","tests.test_backend.board","Wed Nov 19 08:12:49 UTC 2025","passed","Wed Nov 19 08:12:49 UTC 2025","","test_create_board","",""
+"Проверяет поведение при запросе с несуществующим space_id","169","Проверка получения задач с невалидным space_id","tests.test_backend.task_service.get_tasks","Wed Nov 19 08:25:14 UTC 2025","passed","Wed Nov 19 08:25:14 UTC 2025","","test_get_tasks_vlidation","",""
+" ","412","Попытка экспортировать Y-Doc из чужого space(kind=Member)— должен вернуться SpaceIdNotSpecified","tests.test_backend.document","Wed Nov 19 08:18:43 UTC 2025","passed","Wed Nov 19 08:18:43 UTC 2025","","test_get_y_document","",""
+"","418","Негативный сценарий: дублирование с некорректным documentId, invalid id=000000000000000000000000","tests.test_backend.document","Wed Nov 19 08:16:58 UTC 2025","passed","Wed Nov 19 08:16:58 UTC 2025","","test_duplicate_document","",""
+"","237","Валидация поля limit для board group: None","tests.test_backend.board","Wed Nov 19 08:12:43 UTC 2025","passed","Wed Nov 19 08:12:43 UTC 2025","","board_validation_test","",""
+"","215","Тест: Проверка архивации проекта","tests.test_backend.project","Wed Nov 19 08:18:46 UTC 2025","passed","Wed Nov 19 08:18:47 UTC 2025","","test_project","",""
+"","252","Создание документа: Member","tests.test_backend.document","Wed Nov 19 08:16:48 UTC 2025","passed","Wed Nov 19 08:16:48 UTC 2025","","test_create_document","",""
+"Проверяет сортировку задач по дате создания в порядке возрастания (старые сверху)","289","Проверка сортировки задач по дате создания (по возрастанию)","tests.test_backend.task_service.get_tasks.tasks_sort_сriteria_derections.asc","Wed Nov 19 08:23:43 UTC 2025","passed","Wed Nov 19 08:23:44 UTC 2025","","test_get_tasks_sorting_by_created_at_asc","",""
+" ","436","Попытка экспортировать Y-Doc из чужого space(kind=Space)— должен вернуться SpaceIdNotSpecified","tests.test_backend.document","Wed Nov 19 08:18:42 UTC 2025","passed","Wed Nov 19 08:18:43 UTC 2025","","test_get_y_document","",""
+"
+    Проверяет доступ к siblings персональных (Member) документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+
+    Особенность: к персональным документам имеет доступ только их владелец
+    ","1707","Проверка доступа к siblings персонального документа: создатель - guest, просматривающий - guest","tests.test_backend.document.access_doc","Wed Nov 19 08:16:36 UTC 2025","passed","Wed Nov 19 08:16:37 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1891","Проверка доступа к siblings Project-документа: создатель - manager, просматривающий - owner","tests.test_backend.document.access_doc","Wed Nov 19 08:15:52 UTC 2025","passed","Wed Nov 19 08:15:54 UTC 2025","","test_get_siblings_doc_access","",""
+"","284","Валидация поля limit для board group: -1","tests.test_backend.board","Wed Nov 19 08:12:42 UTC 2025","passed","Wed Nov 19 08:12:42 UTC 2025","","board_validation_test","",""
+"","656","Повторный запрос одного и того же документа (kind=Space)","tests.test_backend.document","Wed Nov 19 08:17:34 UTC 2025","passed","Wed Nov 19 08:17:35 UTC 2025","","test_get_document","",""
+"","0","test_get_document_foreign_access_denied[member]","tests.test_backend.document","Wed Nov 19 08:17:33 UTC 2025","skipped","Wed Nov 19 08:17:33 UTC 2025","","test_get_document","",""
+"","779","Создание Personal-документа для роли guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:12 UTC 2025","passed","Wed Nov 19 08:13:13 UTC 2025","","test_create_doc_access_by_roles","",""
+"","1459","Test remove space success","tests.test_backend.space","Wed Nov 19 08:18:49 UTC 2025","passed","Wed Nov 19 08:18:50 UTC 2025","","test_space","",""
+"","268","Создание документа — кейс: [emoji] (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:50 UTC 2025","passed","Wed Nov 19 08:16:51 UTC 2025","","test_create_document","",""
+"
+        Проверка обработки некорректных значений slug при получении задачи.
+        Ожидаем корректные коды ошибок для разных невалидных входных данных.
+        ","266","Негативные сценарии: Get task с invalid slug | slug='NOT-EXIST-999999' -> 400","tests.test_backend.task_service.get_task","Wed Nov 19 08:22:36 UTC 2025","passed","Wed Nov 19 08:22:37 UTC 2025","","test_get_task_wrong_slug","",""
+"","211","Негативный кейс: documentId={'id': '123'}","tests.test_backend.document","Wed Nov 19 08:17:33 UTC 2025","passed","Wed Nov 19 08:17:33 UTC 2025","","test_get_document","",""
+"
+    Глубокая вложенность: проверяем цепочку parents.
+    ","1685","Проверяем глубокую вложенность для Grandchild = [root_id, parent_id, child_id] (kind=Project)","tests.test_backend.document","Wed Nov 19 08:18:10 UTC 2025","passed","Wed Nov 19 08:18:12 UTC 2025","","test_get_siblings","",""
+"
+    Проверяет, что запросы с некорректными document_id или space_id вызывают ошибку.
+    ","177","Проверка доступа с некорректным ID документа","tests.test_backend.document.access_doc","Wed Nov 19 08:16:47 UTC 2025","passed","Wed Nov 19 08:16:47 UTC 2025","","test_matrix_access_docs","",""
+"","442","Получение борды по boardId через /GetBoard","tests.test_backend.board","Wed Nov 19 08:12:53 UTC 2025","passed","Wed Nov 19 08:12:53 UTC 2025","","test_get_board","",""
+"
+        Проверка обработки некорректных значений slug при получении задачи.
+        Ожидаем корректные коды ошибок для разных невалидных входных данных.
+        ","213","Негативные сценарии: Get task с invalid slug | slug='1 OR 1=1' -> 400","tests.test_backend.task_service.get_task","Wed Nov 19 08:22:37 UTC 2025","passed","Wed Nov 19 08:22:37 UTC 2025","","test_get_task_wrong_slug","",""
+"","249","Создание документа — кейс: [title = MAX length (2048)] (ожидается 200)","tests.test_backend.document","Wed Nov 19 08:16:49 UTC 2025","passed","Wed Nov 19 08:16:49 UTC 2025","","test_create_document","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","919","Дублирование Space-документа: создание member, дублирование member","tests.test_backend.document.access_doc","Wed Nov 19 08:13:40 UTC 2025","passed","Wed Nov 19 08:13:41 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"","966","Редактирование Personal-документа: создание manager, редактирование manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:34 UTC 2025","passed","Wed Nov 19 08:14:35 UTC 2025","","test_edit_doc_access_by_roles","",""
+"","739","Документы разных kind не попадают в результаты других kind","tests.test_backend.document","Wed Nov 19 08:17:42 UTC 2025","passed","Wed Nov 19 08:17:42 UTC 2025","","test_get_documents","",""
+"
+    Тест для проверки создания и архивирования Space-документа с разными клиентскими ролями.
+    Тест выполняет следующие шаги для каждой роли:
+    1. Создает Space-документ с использованием предоставленной клиентской роли.
+    2. Проверяет, что статус ответа соответствует ожидаемому результату.
+    3. Если создание документа успешно (статус 200):
+       - Проверяет, что заголовок созданного документа соответствует ожидаемому.
+       - Архивирует созданный Space-документ и проверяет статус запроса на архивирование.
+    ","508","Создание Space-документа для роли owner","tests.test_backend.document.access_doc","Wed Nov 19 08:13:07 UTC 2025","passed","Wed Nov 19 08:13:08 UTC 2025","","test_create_doc_access_by_roles","",""
+"
+    Тестирование создания подзадачи разными пользовательскими ролями и проверка
+    ожидаемого поведения на основе прав доступа роли.
+
+    Этот тест оценивает может ли клиент с разными уровнями доступа создавать
+    подзадачу для родительской задачи. Также проверяются корректные связи между
+    родительской задачей и подзадачей, включая поля `parentTask` и `subtasks`.
+
+    ","2614","Тестирование создания подзадачи разными пользовательскими ролями: клиент=member_client, ожидаемый статус=200","access_task","Wed Nov 19 08:18:55 UTC 2025","passed","Wed Nov 19 08:18:58 UTC 2025","","test_create_sub","",""
+"
+    Проверяет функциональность создания и редактирования документов для разных ролей в системе. Тест проверяет,
+    могут ли пользователи с определенными ролями (владелец, менеджер, участник и гость) создавать и редактировать
+    документы, обеспечивая правильное поведение контроля доступа на основе ролей. Использует параметризацию для
+    тестирования различных комбинаций ролей создателей и редакторов документов.
+    ","756","Редактирование Space-документа: создание owner, редактирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:14:00 UTC 2025","passed","Wed Nov 19 08:14:01 UTC 2025","","test_edit_doc_access_by_roles","",""
+"
+    Тестирование создания подзадачи разными пользовательскими ролями и проверка
+    ожидаемого поведения на основе прав доступа роли.
+
+    Этот тест оценивает может ли клиент с разными уровнями доступа создавать
+    подзадачу для родительской задачи. Также проверяются корректные связи между
+    родительской задачей и подзадачей, включая поля `parentTask` и `subtasks`.
+
+    ","2871","Тестирование создания подзадачи разными пользовательскими ролями: клиент=manager_client, ожидаемый статус=200","access_task","Wed Nov 19 08:18:53 UTC 2025","passed","Wed Nov 19 08:18:55 UTC 2025","","test_create_sub","",""
+"
+    Негативные сценарии: разные варианты некорректного document_id.
+    ","325","Негативный: некорректный document_id=123","tests.test_backend.document","Wed Nov 19 08:18:30 UTC 2025","passed","Wed Nov 19 08:18:30 UTC 2025","","test_get_siblings","",""
+"
+    Создание сабтасков с разными milestone.
+
+    Шаги:
+    1. Получить ID milestone для родителя (A), сабтасков (B и C).
+    2. Создать родительскую задачу.
+    3. Сформировать payload с несколькими сабтасками (разные milestone, пустой milestone).
+    4. Создать сабтаски.
+    5. Проверить, что у каждого сабтаска свой milestone/отсутствие milestone.
+    6. Удалить все созданные сабтаски и родителя.
+    ","6274","Проверка создания нескольких сабтасков с разными milestone, также не наследует milestone родителя.","create_task","Wed Nov 19 08:19:52 UTC 2025","passed","Wed Nov 19 08:19:58 UTC 2025","","test_subtask_milestones_from_payload","",""
+"","1612","Успешное редактирование полей title и icon. Space","tests.test_backend.document","Wed Nov 19 08:17:09 UTC 2025","passed","Wed Nov 19 08:17:10 UTC 2025","","test_edit_document","",""
+"","951","Проверка граничной валидации длины title: LENGTH = 2049 for Project","tests.test_backend.document","Wed Nov 19 08:17:25 UTC 2025","passed","Wed Nov 19 08:17:25 UTC 2025","","test_edit_document","",""
+"
+    Проверяет, что запросы с некорректными document_id или space_id вызывают ошибку.
+    ","167","Проверка доступа с некорректным ID документа","tests.test_backend.document.access_doc","Wed Nov 19 08:16:47 UTC 2025","passed","Wed Nov 19 08:16:47 UTC 2025","","test_matrix_access_docs","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","2089","Проверка доступа к siblings Project-документа: создатель - manager, просматривающий - guest","tests.test_backend.document.access_doc","Wed Nov 19 08:15:58 UTC 2025","passed","Wed Nov 19 08:16:00 UTC 2025","","test_get_siblings_doc_access","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","761","Дублирование Space-документа: создание owner, дублирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:33 UTC 2025","passed","Wed Nov 19 08:13:34 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Тест проверки получения задачи под разными ролями с валидацией набора полей и типов.
+    ","260","Get task: клиент=owner_client, ожидаемый статус=200","tests.test_backend.task_service.get_task.access_get_task","Wed Nov 19 08:22:33 UTC 2025","passed","Wed Nov 19 08:22:33 UTC 2025","","test_get_task","",""
+"
+    Негативные сценарии: разные варианты некорректного document_id.
+    ","393","Негативный: некорректный document_id=None","tests.test_backend.document","Wed Nov 19 08:18:32 UTC 2025","passed","Wed Nov 19 08:18:33 UTC 2025","","test_get_siblings","",""
+"","490","Редактирование кастомного поля типа: Number","tests.test_backend.board","Wed Nov 19 08:12:49 UTC 2025","passed","Wed Nov 19 08:12:50 UTC 2025","","test_create_board","",""
+"","756","Дублирование Personal-документа: создание manager, дублирование guest","tests.test_backend.document.access_doc","Wed Nov 19 08:13:47 UTC 2025","passed","Wed Nov 19 08:13:48 UTC 2025","","test_duplicate_doc_access_by_roles","",""
+"
+    Проверяет доступ к siblings документов при разных комбинациях:
+    - Создателя документа
+    - Просматривающего пользователя
+    - Типа документа (Space/Project)
+
+    Проверки:
+        1. Создание трёх последовательных документов указанной ролью
+        2. Запрос siblings для среднего документа другой ролью
+        3. Проверка статуса ответа и корректности данных siblings
+    ","1819","Проверка доступа к siblings Space-документа: создатель - member, просматривающий - member","tests.test_backend.document.access_doc","Wed Nov 19 08:15:41 UTC 2025","passed","Wed Nov 19 08:15:42 UTC 2025","","test_get_siblings_doc_access","",""
+"","1538","Проверка граничной валидации длины title: LENGTH = 2048 for Member","tests.test_backend.document","Wed Nov 19 08:17:22 UTC 2025","passed","Wed Nov 19 08:17:24 UTC 2025","","test_edit_document","",""
+"
+    Проверяем что разные роли могут получить документы из пространства и проекта. Тест параметризован
+    для проверки разных типов клиентов и контейнеров документов.
+    ","1479","Проверка доступа к документу в Project для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:51 UTC 2025","passed","Wed Nov 19 08:14:52 UTC 2025","","test_get_doc_access_by_roles","",""
+"Проверяем что пользователи могут получить только свои personal документы","453","Проверка доступа к personal документу для роли manager","tests.test_backend.document.access_doc","Wed Nov 19 08:14:58 UTC 2025","passed","Wed Nov 19 08:14:59 UTC 2025","","test_get_doc_access_by_roles","",""
+"
+    Проверка доступа ко всем таскам в спейсе для всех ролей:
+    - роли с доступом: HTTP 200 и все задачи принадлежат указанному спейсу;
+
+    TODO: после исправления бага добавить проверку, что заархивированные задачи не попадают в выборку
+    (сейчас указан спейс в котором нет архивных тасок)
+    ","199","Доступ к таскам спейса под ролью Member (HTTP 200)","tests.test_backend.task_service.get_tasks.access_get_tasks","Wed Nov 19 08:23:35 UTC 2025","passed","Wed Nov 19 08:23:35 UTC 2025","","test_get_tasks_space_all","",""
