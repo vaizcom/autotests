@@ -2,7 +2,7 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
-from test_backend.task_service.create_task.utils import get_client
+from test_backend.task_service.utils import get_client
 
 pytestmark = [pytest.mark.backend]
 

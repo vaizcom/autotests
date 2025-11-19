@@ -2,7 +2,7 @@
 import allure
 import pytest
 
-from tests.test_backend.task_service.create_task.utils import delete_task_with_retry, get_milestone_id, create_parent_and_subtasks
+from test_backend.task_service.utils import delete_task_with_retry, get_milestone_id, create_parent_and_subtasks
 
 pytestmark = [pytest.mark.backend]
 
