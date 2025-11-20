@@ -17,7 +17,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['creator: owner' , 'creator: manager', 'creator: member', 'creator: guest'],
 )
-def test_get_tasks_filtered_by_creator(request, member_client, client_fixture, main_space, expected_status, expected_name_prefix, board_with_tasks_created_all_clients):
+def test_get_tasks_filtered_by_creator(request, member_client, client_fixture, main_space, expected_status, expected_name_prefix, main_board_with_tasks):
     allure.dynamic.title(
         f"GetTasks: фильтр по creator: creator={expected_name_prefix}_id, ожидаемый статус={expected_status}")
     client = request.getfixturevalue(client_fixture)
@@ -26,7 +26,7 @@ def test_get_tasks_filtered_by_creator(request, member_client, client_fixture, m
         member_id = get_member_profile(space_id=main_space, client=client)
 
     with allure.step(f"Вызвать GetTasks с фильтром creator: {expected_name_prefix}_id"):
-        resp = member_client.post(**get_tasks_endpoint(space_id=main_space, creator=member_id, board=board_with_tasks_created_all_clients))
+        resp = member_client.post(**get_tasks_endpoint(space_id=main_space, creator=member_id, board=main_board_with_tasks))
 
     with allure.step(f"Проверить HTTP {expected_status}"):
         assert resp.status_code == expected_status
@@ -72,7 +72,7 @@ def test_get_tasks_creator_limited_access(
     expected_name_prefix,
     main_space,
     member_client,
-    board_with_tasks_created_all_clients,
+    main_board_with_tasks,
 ):
     allure.dynamic.title(
         f"GetTasks: фильтр по creator — {expected_name_prefix} (ожидаемый HTTP {expected_status})"
@@ -87,7 +87,7 @@ def test_get_tasks_creator_limited_access(
         resp = member_client.post(**get_tasks_endpoint(
             space_id=main_space,
             creator=member_id,
-            board=board_with_tasks_created_all_clients
+            board=main_board_with_tasks
         ))
 
     with allure.step(f"Проверить HTTP {expected_status} и отсутствие задач (нет прав на проект/доску)"):
@@ -98,9 +98,9 @@ def test_get_tasks_creator_limited_access(
         assert not tasks, "Ожидался пустой список задач при ограниченных правах доступа"
 
 @allure.title("GetTasks: фильтр по creator — creator_id из non-existent-id")
-def test_get_tasks_filtered_non_existent_creator(owner_client, main_space, board_with_tasks_created_all_clients):
+def test_get_tasks_filtered_non_existent_creator(owner_client, main_space, main_board_with_tasks):
     with allure.step("Вызвать GetTasks с несуществующим creator_id"):
-        resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, creator="non-existent-id-123", board=board_with_tasks_created_all_clients))
+        resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, creator="non-existent-id-123", board=main_board_with_tasks))
     with allure.step("Ожидаем 400, 'creator must be a mongodb id'"):
         body = resp.json()
         assert body.get("payload") is None
@@ -118,7 +118,7 @@ def test_get_tasks_creator_two_valid_ids(
     main_space,
     owner_client,
     member_client,
-    board_with_tasks_created_all_clients,
+    main_board_with_tasks,
 ):
     with allure.step("Получить два валидных creator_id (owner, member)"):
         owner_id = get_member_profile(space_id=main_space, client=owner_client)
@@ -129,7 +129,7 @@ def test_get_tasks_creator_two_valid_ids(
         resp = member_client.post(**get_tasks_endpoint(
             space_id=main_space,
             creator=creators,
-            board=board_with_tasks_created_all_clients
+            board=main_board_with_tasks
         ))
     with allure.step("Ожидаем 400, InvalidForm"):
         assert resp.status_code == 400

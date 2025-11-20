@@ -1,7 +1,7 @@
 import pytest
 import allure
 
-from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_TASKS_CREATED_ALL_USERS
+from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
@@ -110,7 +110,7 @@ def second_project(main_client, second_space):
     assert resp.status_code == 200, f'Space {SECOND_PROJECT_ID} not found: {resp.text}'
     return SECOND_PROJECT_ID
 
-
+# Доска в которой проверяются доступы для разных ролей
 @pytest.fixture(scope='session')
 def main_board(main_client, main_space):
     assert MAIN_BOARD_ID, 'Не задана переменная окружения MAIN_BOARD_ID'
@@ -126,13 +126,15 @@ def board_with_tasks(main_client, main_space):
     assert resp.status_code == 200, f'Board {BOARD_WITH_TASKS} not found: {resp.text}'
     return BOARD_WITH_TASKS
 
-# Доска в которой таски создавались всеми участниками проекта
+# Доска в которой заготовлены таски для разных сценариев
+# (участвует в тестировании: creator, parentTask)
 @pytest.fixture(scope='session')
-def board_with_tasks_created_all_clients(main_client, main_space):
-    assert BOARD_TASKS_CREATED_ALL_USERS, 'Не задана переменная окружения MAIN_BOARD_ID'
-    resp = main_client.post(**get_board_endpoint(board_id=BOARD_TASKS_CREATED_ALL_USERS, space_id=main_space))
+def main_board_with_tasks(main_client, main_space):
+    assert BOARD_FOR_TEST, 'Не задана переменная окружения MAIN_BOARD_ID'
+    resp = main_client.post(**get_board_endpoint(board_id=BOARD_FOR_TEST, space_id=main_space))
     assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {resp.text}'
-    return BOARD_TASKS_CREATED_ALL_USERS
+    return BOARD_FOR_TEST
+
 
 # Возвращает tasks_ids с board_with_tasks == 10.000 тасок в main_space
 @pytest.fixture(scope='session')
