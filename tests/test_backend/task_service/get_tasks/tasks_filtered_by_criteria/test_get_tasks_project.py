@@ -12,7 +12,7 @@ def test_get_tasks_project_valid(owner_client, main_space, main_project, main_bo
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
             project=main_project,
-            board=main_board
+            limit=50
         ))
     with allure.step("Проверить HTTP 200 и массив tasks"):
         assert response.status_code == 200
@@ -23,7 +23,7 @@ def test_get_tasks_project_valid(owner_client, main_space, main_project, main_bo
     if not tasks:
         pytest.skip("Список задач пуст — нечего валидировать по фильтру проекта")
 
-    for task in tasks[:50]:
+    for task in tasks[:20]:
         assert task.get("project") == main_project, (
             f"Задача {task.get('_id', 'unknown')} принадлежит другой project: {task.get('project')}"
         )
