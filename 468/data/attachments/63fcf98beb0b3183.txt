@@ -1,0 +1,6 @@
+Не удалось удалить задачу 69207486a7aaf6c6a8aaa7b3 после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"},"level":"error"}}
+Не удалось удалить задачу 69207487a7aaf6c6a8aaa88c после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"},"level":"error"}}
+Не удалось удалить задачу 69207488a7aaf6c6a8aaa964 после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"},"level":"error"}}
+Не удалось удалить задачу 69207489a7aaf6c6a8aaaa3c после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"},"level":"error"}}
+Не удалось удалить задачу 6920748aa7aaf6c6a8aaab14 после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"},"level":"error"}}
+Не удалось удалить задачу 6920748ba7aaf6c6a8aaabec после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"},"level":"error"}}
