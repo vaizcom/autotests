@@ -3,7 +3,7 @@ import allure
 import pytest
 
 from tests.test_backend.data.endpoints.milestone.milestones_endpoints import get_milestone_endpoint
-from tests.test_backend.task_service.create_task.utils import delete_task_with_retry, get_named_milestone_id
+from test_backend.task_service.utils import delete_task_with_retry, get_named_milestone_id
 
 pytestmark = [pytest.mark.backend]
 

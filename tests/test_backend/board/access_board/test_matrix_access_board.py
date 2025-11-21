@@ -12,8 +12,8 @@ pytestmark = [pytest.mark.backend]
     'client_fixture, expected_status, expected_error_code',
     [
         ('foreign_client', 403, 'AccessDenied'),  # Пользователь не имеет доступа к space
-        ('space_client_memb', 403, 'AccessDenied'),  # Пользователь имеет доступ к space, но не к проекту и борде
-        ('project_client', 403, 'AccessDenied'),  # Пользователь имеет доступ к space и проекту, но не к борде
+        ('client_with_access_only_in_space', 403, 'AccessDenied'),  # Пользователь имеет доступ к space, но не к проекту и борде
+        ('client_with_access_only_in_project', 403, 'AccessDenied'),  # Пользователь имеет доступ к space и проекту, но не к борде
     ],
     ids=['foreign_client', 'space_client', 'project_client'],
 )
@@ -23,9 +23,6 @@ def test_negative_access_to_board(
     """
     Test to verify negative access scenarios for a board.
 
-    This test validates that a client cannot access a board in various scenarios
-    when they do not have sufficient permissions. The test ensures that an appropriate
-    error response is returned along with the correct status code and error structure.
     """
     allure.dynamic.title(
         f'Негативный тест на доступ к борде: клиент={client_fixture}, ожидаемый статус={expected_status}'

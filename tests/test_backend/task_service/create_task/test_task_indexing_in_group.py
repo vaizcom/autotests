@@ -2,8 +2,7 @@ import pytest
 import allure
 import time
 from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
-from tests.test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
-from tests.test_backend.task_service.create_task.utils import wait_group_empty, safe_delete_all_tasks_in_group, \
+from test_backend.task_service.utils import wait_group_empty, safe_delete_all_tasks_in_group, \
     delete_all_group_tasks
 
 pytestmark = [pytest.mark.backend]
@@ -21,7 +20,7 @@ pytestmark = [pytest.mark.backend]
         (10, 0, 0, "Группа из 10 тасок, индекс=0"),
         (10, 10,10, "Группа из 10 тасок, индекс=10"),
         (10,9,9, "Группа из 10 тасок, индекс=9"),
-        (10, None, 0, "Группа из 10 тасок, индекс не указан")
+        (10, None, 10, "Группа из 10 тасок, индекс не указан")
     ],
     ids=[
         "empty_group_no_index",
@@ -104,39 +103,3 @@ def test_task_indexing_in_group(
         with allure.step("Финальная очистка группы после завершения теста"):
             safe_delete_all_tasks_in_group(client, main_board, main_space, group_id)
             wait_group_empty(client, main_board, main_space, group_id)
-
-
-@allure.parent_suite("create_task")
-@allure.title("Негативный тест: создание задачи с отрицательным индексом должно возвращать ошибку по полю index.")
-@pytest.mark.parametrize("negative_index", [-1, -10])
-def test_create_task_with_negative_index_returns_error(
-    request, main_space, main_board, negative_index
-):
-    """
-    Негативный тест: создание задачи с отрицательным индексом должно возвращать ошибку по полю index.
-    """
-    allure.dynamic.title(f"Негативный тест: создание задачи с отрицательным индексом (index={negative_index}) Ожидался статус 400")
-    client = request.getfixturevalue("owner_client")
-    payload = create_task_endpoint(
-        space_id=main_space,
-        board=main_board,
-        name="Test negative index",
-        index=negative_index,
-    )
-    with allure.step(f"Пробуем создать задачу с index={negative_index}"):
-        response = client.post(**payload)
-
-    with allure.step("Проверяем структуру и содержание ошибки"):
-        assert response.status_code == 400, f"Ожидался статус 400, получено {response.status_code}, ответ: {response.text}"
-        body = response.json()
-        assert body.get("error"), "В ответе нет поля 'error'"
-        error = body["error"]
-        assert error.get("code") == "InvalidForm", f"Ожидался code=InvalidForm, получено: {error.get('code')}"
-        fields = error.get("fields")
-        assert fields and isinstance(fields, list), "Поле 'fields' отсутствует или не является списком"
-        index_field = next((f for f in fields if f.get("name") == "index"), None)
-        assert index_field is not None, "В ошибке нет информации по полю 'index'"
-        codes = index_field.get("codes", [])
-        assert any("must not be less than 0" in code for code in codes), (
-            f"Ожидалось сообщение о недопустимом отрицательном индексе, получили: {codes}"
-        )

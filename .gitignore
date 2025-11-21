@@ -165,3 +165,5 @@ allure-report/
 
 # Allure results (raw report files)
 allure-results/
+
+**/allure-results/
