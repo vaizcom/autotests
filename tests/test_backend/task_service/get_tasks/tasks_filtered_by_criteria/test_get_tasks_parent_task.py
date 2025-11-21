@@ -9,13 +9,13 @@ pytestmark = [pytest.mark.backend]
 def test_get_tasks_filter_by_parent_task(
     member_client,
     main_space,
-    board_with_tasks,  # фикстура с идентификатором борды
+    board_with_10000_tasks,
 ):
     with allure.step("Подготовка данных: сделать запрос GetTasks к board_with_tasks и собрать все непустые parentId"):
         # 1) Получаем все задачи на борде
         params_all = get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=board_with_10000_tasks,
             limit=20
         )
         resp_all = member_client.post(**params_all)
@@ -32,7 +32,7 @@ def test_get_tasks_filter_by_parent_task(
         for parent_id in list(parent_ids)[:10]:
             params_filtered = get_tasks_endpoint(
                 space_id=main_space,
-                board=board_with_tasks,
+                board=board_with_10000_tasks,
                 parentTask=parent_id
             )
             resp_filtered = member_client.post(**params_filtered)

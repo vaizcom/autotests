@@ -20,7 +20,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['owner', 'manager', 'member', 'guest','no_access_to_project', 'no_access_to_board', 'no_access_to_space'],
 )
-def test_get_task(request, main_space, board_with_tasks, client_fixture, expected_status, main_project):
+def test_get_task(request, main_space, board_with_10000_tasks, client_fixture, expected_status, main_project):
     """
     Тест проверки получения задачи под разными ролями с валидацией набора полей и типов.
     """
@@ -136,7 +136,7 @@ def test_get_task(request, main_space, board_with_tasks, client_fixture, expecte
             # Несколько бизнес-проверок значения (по возможности стабильных)
             with allure.step("Бизнес-проверки стабильных значений"):
                 # соответствие известным контекстным ID
-                assert task["board"] == board_with_tasks, "Ошибка: неверное значение поля 'board'"
+                assert task["board"] == board_with_10000_tasks, "Ошибка: неверное значение поля 'board'"
                 assert task["project"] == main_project, "Ошибка: неверное значение поля 'project'"
 
     else:

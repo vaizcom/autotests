@@ -7,12 +7,12 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 pytestmark = [pytest.mark.backend]
 
 @allure.title("Проверка сортировки задач по dueStart: ненулевые по убыванию, затем null (в пределах лимита)")
-def test_get_tasks_sorting_by_due_start_asc(owner_client, main_space, board_with_tasks, main_board):
+def test_get_tasks_sorting_by_due_start_asc(owner_client, main_space, board_with_10000_tasks, main_board):
 
     with allure.step("Запрос задач: dueStart ASC"):
         resp = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=board_with_10000_tasks,
             sortCriteria="dueStart",
             sortDirection=1
         ))
