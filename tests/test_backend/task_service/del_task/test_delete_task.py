@@ -32,7 +32,7 @@ def test_delete_task_access_control(request, main_space, main_board, client_fixt
 
     try:
         client = get_client(request, client_fixture)
-        with allure.step(f"Пытаемся удалить задачу под ролью: {client_fixture}"):
+        with allure.step(f"Пытаемся удалить задачу под ролью: {client_fixture}, {expected_status}"):
             del_resp = client.post(**delete_task_endpoint(space_id=main_space, task_id=task_id))
             assert del_resp.status_code == expected_status, (
                 f"Ожидали {expected_status}, получили {del_resp.status_code}: {del_resp.text}"
@@ -41,5 +41,6 @@ def test_delete_task_access_control(request, main_space, main_board, client_fixt
         # Если не удалили в тесте — удаляем владельцем
         check_resp = owner_client.post(**delete_task_endpoint(space_id=main_space, task_id=task_id))
         if expected_status != 200:
-            # Для негативных ролей задача должна существовать и удалиться владельцем
-            assert check_resp.status_code == 200, f"Финальное удаление владельцем не удалось: {check_resp.text}"
+            with allure.step(f"Удаляем владельцем"):
+                # Для негативных ролей задача должна существовать и удалиться владельцем
+                assert check_resp.status_code == 200, f"Финальное удаление владельцем не удалось: {check_resp.text}"
