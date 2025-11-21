@@ -41,6 +41,6 @@ def test_delete_task_access_control(request, main_space, main_board, client_fixt
         # Если не удалили в тесте — удаляем владельцем
         check_resp = owner_client.post(**delete_task_endpoint(space_id=main_space, task_id=task_id))
         if expected_status != 200:
-            with allure.step(f"Удаляем владельцем"):
+            with allure.step("Удаляем владельцем"):
                 # Для негативных ролей задача должна существовать и удалиться владельцем
                 assert check_resp.status_code == 200, f"Финальное удаление владельцем не удалось: {check_resp.text}"
