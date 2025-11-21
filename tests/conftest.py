@@ -159,7 +159,7 @@ def main_personal(main_client, main_space):
     response.raise_for_status()
 
     members = response.json()['payload']['members']
-    roles = ['owner', 'manager', 'member', 'guest']
+    roles = ['owner', 'manager', 'member', 'guest', 'main']
 
     # Собираем _id участников для каждой роли по имени (или другому признаку)
     member_id = {role: [m['_id'] for m in members if m.get('fullName') == role] for role in roles}

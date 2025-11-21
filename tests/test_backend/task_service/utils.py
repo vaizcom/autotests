@@ -116,9 +116,13 @@ def get_assignee(client, space_id):
     filtered_members = [member for member in members if member.get("nickName") != "automation_bot"]
     assert filtered_members, "Ошибка: после фильтрации список участников пуст"
 
+    roles = ['owner', 'manager', 'member', 'guest', 'main']
+    # Собираем _id участников для каждой роли по имени (или другому признаку)
+    member_id = {role: [m['_id'] for m in members if m.get('fullName') == role] for role in roles}
+
     # Рандомно выбираем member_id из отфильтрованного списка
-    random_member = random.choice(filtered_members)
-    return random_member["_id"]
+    random_member = random.choice(roles)
+    return member_id[random_member]
 
 
 def get_milestone(client, space_id, board_id):

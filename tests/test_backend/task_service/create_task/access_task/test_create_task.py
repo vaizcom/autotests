@@ -205,7 +205,7 @@ def test_create_task_with_specific_payload_and_response(
                 # Проверка полей, переданные в payload
                 with allure.step("Проверяем переданные поля в payload"):
                     assert task["types"] == [random_type_id], "Ошибка: неверное значение types"
-                    assert task["assignees"] == [random_member_id], "Ошибка: неверное значение assignees"
+                    assert task["assignees"] == random_member_id, "Ошибка: неверное значение assignees"
                     assert task["milestones"] == [get_random_milestone], "Ошибка: неверное значение milestones"
                     assert task["subtasks"] == [], "Ошибка: поле с подзадачами должно быть пустым"
                     assert task["milestone"] == get_random_milestone, "Ошибка: неверный milestone"
