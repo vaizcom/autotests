@@ -120,7 +120,7 @@ def main_board(main_client, main_space):
 
 # Доска с 10.000 тасок в main_space
 @pytest.fixture(scope='session')
-def board_with_tasks(main_client, main_space):
+def board_with_10000_tasks(main_client, main_space):
     assert BOARD_WITH_TASKS, 'Не задана переменная окружения MAIN_BOARD_ID'
     resp = main_client.post(**get_board_endpoint(board_id=BOARD_WITH_TASKS, space_id=main_space))
     assert resp.status_code == 200, f'Board {BOARD_WITH_TASKS} not found: {resp.text}'
@@ -129,7 +129,7 @@ def board_with_tasks(main_client, main_space):
 # Доска в которой заготовлены таски для разных сценариев
 # (участвует в тестировании: creator, parentTask)
 @pytest.fixture(scope='session')
-def main_board_with_tasks(main_client, main_space):
+def board_with_tasks(main_client, main_space):
     assert BOARD_FOR_TEST, 'Не задана переменная окружения MAIN_BOARD_ID'
     resp = main_client.post(**get_board_endpoint(board_id=BOARD_FOR_TEST, space_id=main_space))
     assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {resp.text}'
@@ -138,10 +138,10 @@ def main_board_with_tasks(main_client, main_space):
 
 # Возвращает tasks_ids с board_with_tasks == 10.000 тасок в main_space
 @pytest.fixture(scope='session')
-def task_id_list(owner_client, main_space, board_with_tasks):
+def task_id_list(owner_client, main_space, board_with_10000_tasks):
     resp = owner_client.post(**get_tasks_endpoint(
         space_id=main_space,
-        board=board_with_tasks,
+        board=board_with_10000_tasks,
         limit=20
     ))
     assert resp.status_code == 200
@@ -159,7 +159,7 @@ def main_personal(main_client, main_space):
     response.raise_for_status()
 
     members = response.json()['payload']['members']
-    roles = ['owner', 'manager', 'member', 'guest']
+    roles = ['owner', 'manager', 'member', 'guest', 'main']
 
     # Собираем _id участников для каждой роли по имени (или другому признаку)
     member_id = {role: [m['_id'] for m in members if m.get('fullName') == role] for role in roles}

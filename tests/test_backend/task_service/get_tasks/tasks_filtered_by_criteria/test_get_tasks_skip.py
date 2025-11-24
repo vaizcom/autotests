@@ -6,11 +6,11 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.title("GetTasks skip: skip=0, limit=20 → возвращаются первые 20")
-def test_get_tasks_skip_zero(owner_client, main_space, board_with_tasks):
+def test_get_tasks_skip_zero(owner_client, main_space, board_with_10000_tasks):
     with allure.step("Выполнить запрос с limit=20 и skip=0"):
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=board_with_10000_tasks,
             limit=20,
             skip=0
         ))
@@ -22,11 +22,11 @@ def test_get_tasks_skip_zero(owner_client, main_space, board_with_tasks):
         assert len(tasks) == 20
 
 @allure.title("GetTasks skip: skip=5, limit=20 → элементы начинаются с 5-го")
-def test_get_tasks_skip_five(owner_client, main_space, board_with_tasks):
+def test_get_tasks_skip_five(owner_client, main_space, board_with_10000_tasks):
     with allure.step("Получить опорный список задач без skip (большой limit)"):
         resp_all = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=board_with_10000_tasks,
             limit=100
         ))
         assert resp_all.status_code == 200
@@ -37,7 +37,7 @@ def test_get_tasks_skip_five(owner_client, main_space, board_with_tasks):
     with allure.step("Выполнить запрос с limit=20 и skip=5"):
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=board_with_10000_tasks,
             limit=20,
             skip=5
         ))
@@ -51,11 +51,11 @@ def test_get_tasks_skip_five(owner_client, main_space, board_with_tasks):
 
 @allure.title("GetTasks skip: негатив — skip не число (строка)")
 @allure.description("Ожидаем валидационную ошибку при передаче skip='five'")
-def test_get_tasks_skip_not_number_string(owner_client, main_space, board_with_tasks):
+def test_get_tasks_skip_not_number_string(owner_client, main_space, board_with_10000_tasks):
     with allure.step("Выполнить запрос с skip='five'"):
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=board_with_10000_tasks,
             limit=20,
             skip="five"
         ))

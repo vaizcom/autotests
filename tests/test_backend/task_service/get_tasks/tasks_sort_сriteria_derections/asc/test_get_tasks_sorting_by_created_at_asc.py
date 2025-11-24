@@ -7,13 +7,13 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 pytestmark = [pytest.mark.backend]
 
 @allure.title("Проверка сортировки задач по дате создания (по возрастанию)")
-def test_get_tasks_sorting_by_created_at_asc(owner_client, main_space, board_with_tasks):
+def test_get_tasks_sorting_by_created_at_asc(owner_client, main_space, board_with_10000_tasks):
     """Проверяет сортировку задач по дате создания в порядке возрастания (старые сверху)"""
 
     with allure.step("Выполнить запрос с сортировкой по createdAt ASC и лимитом 10"):
         resp = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=board_with_10000_tasks,
             sortCriteria="createdAt",
             sortDirection=1,
             limit=20
@@ -49,13 +49,13 @@ def test_get_tasks_sorting_by_created_at_asc(owner_client, main_space, board_wit
         )
 
 @allure.title("Проверка сортировки по умолчанию (должна быть по возрастанию)")
-def test_get_tasks_default_sorting(owner_client, main_space, board_with_tasks):
+def test_get_tasks_default_sorting(owner_client, main_space, board_with_10000_tasks):
     """Проверяет что без указания sortDirection сортировка происходит по возрастанию"""
 
     with allure.step("Выполнить запрос с sortCriteria без sortDirection"):
         resp = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=board_with_10000_tasks,
             limit=30
             # sortCriteria="createdAt", sortDirection НЕ указываем - проверяем поведение по умолчанию
         ))

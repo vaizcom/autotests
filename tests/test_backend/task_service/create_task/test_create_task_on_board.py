@@ -20,7 +20,7 @@ def test_create_task_and_verify_on_board(request, create_task_in_main, main_spac
     random_client = random.choice(["owner_client", "manager_client", "member_client"])
     client = get_client(request, random_client)
     random_group_id = get_random_group_id(client, main_board, main_space)
-    task_index = 0
+    index_task = 0
     created_task_id = []
 
     try:
@@ -28,7 +28,7 @@ def test_create_task_and_verify_on_board(request, create_task_in_main, main_spac
             task = create_task_in_main(
                 client_fixture=random_client,
                 group=random_group_id,
-                index=task_index
+                index=index_task
             )
             task_id = task["_id"]
             created_task_id.append(task_id)
@@ -66,8 +66,8 @@ def test_create_task_and_verify_on_board(request, create_task_in_main, main_spac
         with allure.step("Проверяем корректность индекса задачи в группе"):
             ids_in_group = board_data["taskOrderByGroups"].get(random_group_id, [])
             position_in_group = ids_in_group.index(task_id) if task_id in ids_in_group else None
-            assert position_in_group == task_index, (
-                f"Ошибка: индекс задачи в группе {random_group_id} = {position_in_group}, ожидалось {task_index}. "
+            assert position_in_group == index_task, (
+                f"Ошибка: индекс задачи в группе {random_group_id} = {position_in_group}, ожидалось {index_task}. "
                 f"taskOrderByGroups[{random_group_id}] = {ids_in_group}"
             )
     finally:

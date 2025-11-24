@@ -6,14 +6,14 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 pytestmark = [pytest.mark.backend]
 
 @allure.title("Проверка сортировки задач по createdAt: по убыванию (новые сверху)")
-def test_get_tasks_sorting_by_created_at_desc(owner_client, main_space, board_with_tasks):
+def test_get_tasks_sorting_by_created_at_desc(owner_client, main_space, board_with_10000_tasks):
     """Проверяет сортировку задач по дате создания в порядке убывания (новые сверху)"""
     LIMIT = 20
 
     with allure.step(f"Запрос задач: createdAt DESC, limit={LIMIT}"):
         resp = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=board_with_10000_tasks,
             sortCriteria="createdAt",
             sortDirection=-1,
             limit=LIMIT

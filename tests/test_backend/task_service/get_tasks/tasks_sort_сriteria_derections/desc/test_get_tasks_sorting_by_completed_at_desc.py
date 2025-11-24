@@ -7,13 +7,13 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 pytestmark = [pytest.mark.backend]
 
 @allure.title("Проверка сортировки задач по completedAt: ненулевые по убыванию, затем null (в пределах лимита)")
-def test_get_tasks_sorting_by_completed_at_desc(owner_client, main_space, board_with_tasks, main_board):
+def test_get_tasks_sorting_by_completed_at_desc(owner_client, main_space, board_with_10000_tasks, main_board):
     limit = 20
 
     with allure.step(f"Запрос задач: completedAt DESC, limit={limit}"):
         resp = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=board_with_10000_tasks,
             sortCriteria="completedAt",
             sortDirection=-1,
             limit=limit

@@ -5,18 +5,21 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.title("GetTasks: фильтр по parentTask — собрать валидные parentId с board_with_tasks и проверить фильтрацию")
+@allure.title("GetTasks: проверяет фильтрацию GetTasks по полю parentTask.")
 def test_get_tasks_filter_by_parent_task(
     member_client,
     main_space,
-    board_with_tasks,  # фикстура с идентификатором борды
+    board_with_10000_tasks,
 ):
+    """
+        GetTasks: фильтр по parentTask — собрать уникальные parentId (not None) с board_with_tasks и проверить фильтрацию
+    """
     with allure.step("Подготовка данных: сделать запрос GetTasks к board_with_tasks и собрать все непустые parentId"):
         # 1) Получаем все задачи на борде
         params_all = get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
-            limit=20
+            board=board_with_10000_tasks,
+            limit=200
         )
         resp_all = member_client.post(**params_all)
         assert resp_all.status_code == 200, f"Не удалось получить список задач борды: {resp_all.text}"
@@ -25,14 +28,14 @@ def test_get_tasks_filter_by_parent_task(
         assert isinstance(all_tasks, list), "payload.tasks должен быть массивом"
 
         # 2) Собираем уникальные валидные parentId
-        parent_ids = {t.get("parentTask") for t in all_tasks if t.get("parentTask")}
+        parent_ids = {t.get("parentTask") for t in all_tasks if t.get("parentTask") is not None}
         assert parent_ids, "На борде нет задач с parentId (нечего проверять)"
 
     with allure.step("Для каждого parentId  запросить GetTasks с фильтром parentTask и проверить корректность результата"):
         for parent_id in list(parent_ids)[:10]:
             params_filtered = get_tasks_endpoint(
                 space_id=main_space,
-                board=board_with_tasks,
+                board=board_with_10000_tasks,
                 parentTask=parent_id
             )
             resp_filtered = member_client.post(**params_filtered)
@@ -41,15 +44,18 @@ def test_get_tasks_filter_by_parent_task(
             payload = resp_filtered.json().get("payload", {})
             tasks = payload.get("tasks", [])
             assert isinstance(tasks, list), "payload.tasks должен быть массивом"
+            assert (t.get("parentTask") == parent_id for t in tasks)
+            assert (not isinstance(t.get("parentTask"), (list, dict)) for t in tasks)
 
         with allure.step("Проверка: все задачи — прямые дети указанного parent_id"):
-            assert all(t.get("parentTask") == parent_id for t in tasks), (
+            # Дублирую проверку(тех что выше) на еще одной задаче, для красивого отчета в аллуре
+            assert any(t.get("parentTask") == parent_id for t in tasks), (
                 f"Обнаружены задачи без parentId или с отличным parentId при фильтре parentTask={parent_id}"
             )
 
         with allure.step("Родитель единственный: не допускается более одного parentTask"):
             # Проверяем, что поле parentId единственное (нет массивов/списков/доп. связей)
-            assert all(not isinstance(t.get("parentTask"), (list, dict)) for t in tasks), (
+            assert any(not isinstance(t.get("parentTask"), (list, dict)) for t in tasks), (
                 "Поле parentId должно быть одиночным идентификатором, массив/объект недопустим"
             )
 

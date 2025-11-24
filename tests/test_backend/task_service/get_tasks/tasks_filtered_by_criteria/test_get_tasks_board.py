@@ -7,11 +7,11 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.title("GetTasks board: валидная доска — успешный ответ и задачи этой доски")
-def test_get_tasks_board_valid(owner_client, main_space, board_with_tasks):
+def test_get_tasks_board_valid(owner_client, main_space, board_with_10000_tasks):
     with allure.step("Выполнить POST /GetTasks с валидными space_id и board"):
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_tasks
+            board=board_with_10000_tasks
         ))
     with allure.step("Проверить HTTP 200 и массив tasks"):
         assert response.status_code == 200
@@ -21,14 +21,14 @@ def test_get_tasks_board_valid(owner_client, main_space, board_with_tasks):
         if not tasks:
             pytest.skip("Список задач пуст — нечего валидировать по фильтру проекта")
         for task in tasks[:50]:
-            assert task.get("board") == board_with_tasks
+            assert task.get("board") == board_with_10000_tasks
 
 @allure.title("GetTasks board: доска не принадлежит space — ожидаем пустой список задач")
-def test_get_tasks_board_mismatched_space(owner_client, second_space, board_with_tasks):
+def test_get_tasks_board_mismatched_space(owner_client, second_space, board_with_10000_tasks):
     with allure.step("Выполнить POST /GetTasks с space_id другого пространства и board текущей доски"):
         response = owner_client.post(**get_tasks_endpoint(
             space_id=second_space,
-            board=board_with_tasks
+            board=board_with_10000_tasks
         ))
     with allure.step("Проверить контракт: HTTP 200 и пустой tasks"):
         if response.status_code == 200:

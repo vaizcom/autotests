@@ -30,14 +30,6 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
     Цель теста — убедиться, что можно успешно создать задачу, указав только минимально необходимые данные, и что поведение API зависит от прав пользователя (типа клиента).
     В процессе теста дополнительно валидируются структура созданной задачи, значения по умолчанию, связи (creator, board и пр.), а также удаление задачи после проверки.
     assert_task_keys обеспечивает падение теста при добавлении/удалении ключей с понятным сообщением.
-
-    Ход теста:
-        1. Получение клиента согласно переданной роли через фикстуру.
-        2. Получение id пользователя, с помощью которого осуществляется создание задачи.
-        3. Формирование минимального payload и попытка создать задачу через API.
-        4. Проверка статус-кода ответа.
-        5. Если задача успешно создана (ответ 200):
-            - Проверка наполнения и структуры ответа
     """
     allure.dynamic.title(
         f"Create task with minimal payload: клиент={client_fixture}, ожидаемый статус={expected_status}")
@@ -205,7 +197,7 @@ def test_create_task_with_specific_payload_and_response(
                 # Проверка полей, переданные в payload
                 with allure.step("Проверяем переданные поля в payload"):
                     assert task["types"] == [random_type_id], "Ошибка: неверное значение types"
-                    assert task["assignees"] == [random_member_id], "Ошибка: неверное значение assignees"
+                    assert task["assignees"] == random_member_id, "Ошибка: неверное значение assignees"
                     assert task["milestones"] == [get_random_milestone], "Ошибка: неверное значение milestones"
                     assert task["subtasks"] == [], "Ошибка: поле с подзадачами должно быть пустым"
                     assert task["milestone"] == get_random_milestone, "Ошибка: неверный milestone"

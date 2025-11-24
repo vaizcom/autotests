@@ -6,7 +6,7 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 pytestmark = [pytest.mark.backend]
 
 @allure.title("Проверка производительности запроса")
-def test_get_tasks_response_time(request, board_with_tasks, main_space):
+def test_get_tasks_response_time(request, board_with_10000_tasks, main_space):
     """Проверяет что запрос выполняется за разумное время"""
     import time
 
@@ -15,7 +15,7 @@ def test_get_tasks_response_time(request, board_with_tasks, main_space):
     start_time = time.time()
 
     with allure.step("owner_client: вызвать GetTasks"):
-        resp = client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_tasks))
+        resp = client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_10000_tasks))
 
     end_time = time.time()
     response_time = end_time - start_time
