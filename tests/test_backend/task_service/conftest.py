@@ -34,7 +34,7 @@ def create_task_in_main(request, main_space, main_board, main_project):
         current_timestamp = kwargs.get("due_start") or get_current_timestamp()
         due_end = kwargs.get("due_end") or get_due_end()
         priority = kwargs.get("priority") if "priority" in kwargs else get_priority()
-        random_member_id = kwargs.get("assignees") or [get_assignee(client, main_space)]
+        random_member_id = kwargs.get("assignees") or get_assignee(client, main_space)
         get_random_complete = kwargs.get("completed") if "completed" in kwargs else random.choice([True, False])
 
         if "milestones" in kwargs:
