@@ -129,7 +129,7 @@ def board_with_10000_tasks(main_client, main_space):
 # Доска в которой заготовлены таски для разных сценариев
 # (участвует в тестировании: creator, parentTask)
 @pytest.fixture(scope='session')
-def main_board_with_tasks(main_client, main_space):
+def board_with_tasks(main_client, main_space):
     assert BOARD_FOR_TEST, 'Не задана переменная окружения MAIN_BOARD_ID'
     resp = main_client.post(**get_board_endpoint(board_id=BOARD_FOR_TEST, space_id=main_space))
     assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {resp.text}'
