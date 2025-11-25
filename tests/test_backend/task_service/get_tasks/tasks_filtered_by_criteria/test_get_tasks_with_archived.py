@@ -7,7 +7,7 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.title("Фильтрация задач: withArchived=false — возвращаются только неархивные задачи")
-def test_get_tasks_with_archived_false_returns_only_active(owner_client, main_space, board_with_10000_tasks):
+def test_get_tasks_with_archived_false(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при withArchived=false API возвращает только неархивные задачи.
 
@@ -33,7 +33,7 @@ def test_get_tasks_with_archived_false_returns_only_active(owner_client, main_sp
 
 
 @allure.title("Фильтрация задач: withArchived=true — возвращаются и архивные, и неархивные задачи")
-def test_get_tasks_with_archived_true_includes_archived(owner_client, main_space, board_with_10000_tasks):
+def test_get_tasks_with_archived_true(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при withArchived=true API возвращает архивные и неархивные задачи, и валидирует поля у архивных.
 
@@ -74,6 +74,7 @@ def test_get_tasks_with_archived_true_includes_archived(owner_client, main_space
             assert isinstance(archiver,
                               str) and archiver.strip(), f"У архивной задачи {t.get('_id')} отсутствует/пустой archiver: {archiver!r}"
 
+            # Фильтруем Неархивные задачи (у которых archivedAt не строка -> None)
     with allure.step("Проверяем корректность archivedAt у неархивных задач"):
         non_archived_tasks = [t for t in tasks if not (isinstance(t.get("archivedAt"), str) and t.get("archivedAt").strip())]
         for t in non_archived_tasks:
@@ -85,3 +86,19 @@ def test_get_tasks_with_archived_true_includes_archived(owner_client, main_space
     with allure.step("Проверяем отсутствие дубликатов среди всех задач ответа"):
         ids = [t.get("_id") for t in tasks]
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
+
+
+@allure.title("Фильтрация задач: withArchived некорректного типа — ошибка валидации (400)")
+def test_get_tasks_with_archived_invalid_type(owner_client, main_space, board_with_10000_tasks):
+    """
+    Проверяет, что при передаче некорректного значения параметра withArchived (не boolean)
+    API возвращает 400 и сообщение: 'withArchived must be a boolean value'.
+    """
+    with allure.step("Отправляем запрос с withArchived=[] (не boolean)"):
+        response = owner_client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_10000_tasks, withArchived=[]))
+
+    with allure.step("Проверяем код ответа и структуру ошибки валидации"):
+        with allure.step("Проверить HTTP 400 и наличие валидационной ошибки"):
+            assert response.status_code == 400, f"Ожидался статус 400, получено: {response.status_code}"
+            error = response.json().get("error", {})
+            assert error.get("code") == "InvalidForm", "Ожидался код ошибки валидации формы"
