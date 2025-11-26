@@ -43,7 +43,7 @@ def test_create_subtask_per_role(
             parent_req = create_task_endpoint(
                 space_id=main_space,
                 board=main_board,
-                name="parent_task for subtask access test"
+                name="parent task for subtask access test"
             )
             parent_resp = owner_client.post(**parent_req)
             assert parent_resp.status_code == 200, f"Не удалось создать родительскую задачу: {parent_resp.text}"
