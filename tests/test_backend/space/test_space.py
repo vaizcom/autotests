@@ -60,7 +60,7 @@ def test_space_name_length_limit(owner_client):
 
 
 @allure.title('Test remove space success')
-def test_remove_space_success(owner_client):
+def test_remove_space_success(owner_client):  # userId закрыт под Feature Toggle
     client = owner_client
     name = generate_space_name()
     with allure.step('Create space'):

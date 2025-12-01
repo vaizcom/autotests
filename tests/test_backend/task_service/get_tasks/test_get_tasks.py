@@ -9,10 +9,10 @@ pytestmark = [pytest.mark.backend]
 # Базовые smoke-тесты
 
 @allure.title("GetTasks: базовый смоук — успешный ответ и массив tasks")
-@allure.description("Проверка, что эндпоинт возвращает 200 и тело с полем tasks (массив).")
+@allure.description("Проверка, что эндпоинт возвращает статус 200 и тело с полем tasks (массив).")
 def test_get_tasks_minimal(owner_client, board_with_10000_tasks, main_space):
     with allure.step("Выполнить POST /GetTasks без доп. параметров"):
-        response = owner_client.post(**get_tasks_endpoint(board=board_with_10000_tasks, space_id=main_space))
+        response = owner_client.post(**get_tasks_endpoint(board=board_with_10000_tasks, space_id=main_space, limit=100))
     with allure.step("Проверить статус и контракт ответа"):
         assert response.status_code == 200
         data = response.json()['payload']
