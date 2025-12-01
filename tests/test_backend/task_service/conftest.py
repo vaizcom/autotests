@@ -89,7 +89,7 @@ def create_30_tasks(owner_client, main_space, main_board):
         for i in range(count):
             title = f"Multiple Edit Tasks #{i + 1}"
             resp = owner_client.post(
-                **create_task_endpoint(space_id=main_space, board=main_board, name=title))
+                **create_task_endpoint(space_id=main_space, board=main_board, name=title, completed=False))
             resp.raise_for_status()
             body = resp.json()
             task = (body.get("payload") or {}).get("task") or body.get("task") or {}

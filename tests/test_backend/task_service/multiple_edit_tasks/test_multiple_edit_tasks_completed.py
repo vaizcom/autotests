@@ -1,6 +1,7 @@
 import pytest
 import allure
-from tests.test_backend.data.endpoints.Task.task_endpoints import multiple_edit_tasks_endpoint, get_task_endpoint
+
+from tests.test_backend.data.endpoints.Task.task_endpoints import multiple_edit_tasks_endpoint, get_task_endpoint, create_task_endpoint, delete_task_endpoint
 
 pytestmark = [pytest.mark.backend]
 
@@ -77,3 +78,83 @@ def test_multiple_edit_tasks_completed_limit(owner_client, main_space, create_30
             f"Ожидали 400 или error.code=TooManyTasksSelected при 21 задаче. "
             f"status={resp_true.status_code}, error={err!r}"
         )
+
+def test_multiple_tasks_sets_completed_only_incomplete(owner_client, main_space, main_board):
+    allure.dynamic.title("Multiple Tasks: completed=True меняет только незавершённую таску, завершённая остаётся без изменений")
+
+    """
+    Создаём 2 задачи:
+    - task_done: заранее ставим completed=True
+    - task_todo: оставляем completed=False
+    Применяем MultipleEditTasks с completed=True к обеим таскам.
+    Проверяем:
+    - в payload.success присутствуют task_todo и task_done
+    - состояния по get_task: task_done остался True, task_todo стал True
+    Удаляем созданные задачи.
+    """
+
+    t_true = None
+    t_false = None
+    try:
+        with allure.step("предусловие: Создаём 2 задачи  task_completed_true, task_completed_false"):
+            _true = owner_client.post(
+                **create_task_endpoint(main_space, board=main_board, completed=True, name="task_completed_true"))
+            _false = owner_client.post(
+                **create_task_endpoint(main_space, board=main_board, completed=False, name="task_completed_false"))
+            t_true = (((_true.json().get("payload") or {}).get("task")) or {}).get("_id")
+            t_false = (((_false.json().get("payload") or {}).get("task")) or {}).get("_id")
+
+        with allure.step("Проверяем предусловие корректно выставленных completed: используем для проверки get_task"):
+            r_true = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=t_true))
+            r_true.raise_for_status()
+            t_true_body = ((r_true.json().get("payload") or {}).get("task")) or {}
+            assert t_true_body.get(
+                "completed") is True, f"task_done должен быть completed=True, получено {t_true_body.get('completed')!r}"
+
+            r_false = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=t_false))
+            r_false.raise_for_status()
+            r_false_body = ((r_false.json().get("payload") or {}).get("task")) or {}
+            assert r_false_body.get(
+                "completed") is False, f"task_todo должен быть не завершён, получено {r_false_body.get('completed')!r}"
+
+        with allure.step("Применяем completed=True к обеим задачам через MultipleEditTasks"):
+            payload = [
+                {"taskId": t_true, "completed": True},
+                {"taskId": t_false, "completed": True},
+            ]
+            resp = owner_client.post(**multiple_edit_tasks_endpoint(space_id=main_space, tasks=payload))
+            assert resp.status_code == 200, f"Ожидали 200, получили {resp.status_code}"
+            body = resp.json() or {}
+            payload_body = body.get("payload") or {}
+            success = payload_body.get("success") or []
+            failed = payload_body.get("failed") or []
+
+        with allure.step("Проверяем, что в success обе задачи, а в failed список пуст"):
+            assert (t_true in success) and (t_false in success), f"Обе задачи должны быть в success, success={success}"
+            assert (t_true not in failed) and (
+                        t_false not in failed), f"Список failed должен быть пуст, failed={failed}"
+
+        with allure.step("Проверяем состояния по get_task после операции"):
+            r_done_after = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=t_true))
+            r_done_after.raise_for_status()
+            t_done_after = ((r_done_after.json().get("payload") or {}).get("task")) or {}
+            assert t_done_after.get(
+                "completed") is True, f"task_done должен остаться completed=True, получено {t_done_after.get('completed')!r}"
+
+            r_todo_after = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=t_false))
+            r_todo_after.raise_for_status()
+            t_todo_after = ((r_todo_after.json().get("payload") or {}).get("task")) or {}
+            assert t_todo_after.get(
+                "completed") is True, f"task_todo должен стать completed=True, получено {t_todo_after.get('completed')!r}"
+    finally:
+        # Удаляем созданные задачи даже при падении теста
+        try:
+            if t_true:
+                owner_client.post(**delete_task_endpoint(space_id=main_space, task_id=t_true))
+        except Exception:
+            pass
+        try:
+            if t_false:
+                owner_client.delete(**delete_task_endpoint(space_id=main_space, task_id=t_false))
+        except Exception:
+            pass
