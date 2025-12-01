@@ -5,6 +5,7 @@ from tests.test_backend.data.endpoints.Task.task_endpoints import multiple_edit_
 
 pytestmark = [pytest.mark.backend]
 
+@allure.parent_suite("multiple_edit_tasks")
 @pytest.mark.parametrize(
     "count, expect_status",
     [
@@ -60,7 +61,7 @@ def test_multiple_edit_tasks_completed(owner_client, main_space, create_30_tasks
             t = (tb.get("payload") or {}).get("task") or tb.get("task") or {}
             assert t.get("completed") is False, f"После completed=False задача {tid} имеет completed={t.get('completed')!r}"
 
-
+@allure.parent_suite("multiple_edit_tasks")
 def test_multiple_edit_tasks_completed_limit(owner_client, main_space, create_30_tasks):
     allure.dynamic.title("Multiple Edit Tasks: completed=True для 21 задачи — ожидаем 400 или TooManyTasksSelected")
     with allure.step("Создаём 21 задачу"):
@@ -79,8 +80,9 @@ def test_multiple_edit_tasks_completed_limit(owner_client, main_space, create_30
             f"status={resp_true.status_code}, error={err!r}"
         )
 
-def test_multiple_tasks_sets_completed_only_incomplete(owner_client, main_space, main_board):
-    allure.dynamic.title("Multiple Tasks: completed=True меняет только незавершённую таску, завершённая остаётся без изменений")
+@allure.parent_suite("multiple_edit_tasks")
+def test_multiple_edit_tasks_sets_completed_only_uncompleted(owner_client, main_space, main_board):
+    allure.dynamic.title("Multiple edit Tasks: completed=True меняет только незавершённую таску, завершённая остаётся без изменений")
 
     """
     Создаём 2 задачи:
