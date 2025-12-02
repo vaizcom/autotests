@@ -33,7 +33,7 @@ def test_multiple_edit_tasks_set_assignees(owner_client, main_space, main_projec
         })
         task2_id = task2["_id"]
 
-    with allure.step("Массово обновляем ассайни у обеих задач"):
+    with allure.step("Применяем multiple_edit_tasks с установленным ассайни у обеих задач"):
         payload = [
             {"taskId": task1_id, "assignees": target_assignee},
             {"taskId": task2_id, "assignees": target_assignee},
@@ -159,3 +159,46 @@ def test_multiple_edit_tasks_invalid_assignee_id(owner_client, main_space, main_
         ))
         assert resp.status_code == 200, resp.text # CCSS-31512 400
 
+
+@allure.parent_suite("multiple_edit_tasks")
+@allure.title("Multiple edit Tasks: снятие ассайни (передача пустого массива)")
+def test_multiple_edit_tasks_clear_assignees(owner_client, main_space, main_board, main_personal, make_task_in_main):
+    """
+    Снимаем ассайни у задач, передав пустой список assignees.
+    Ожидаем HTTP 200 и пустые списки ассайни в задачах.
+    """
+    with allure.step("Создаём задачи с заранее установленными ассайни"):
+        a1 = main_personal["member"][0]
+        a2 = main_personal["owner"][0]
+        task1 = make_task_in_main({"name": "Task clear A", "assignees": [a1, a2]})
+        task2 = make_task_in_main({"name": "Task clear B", "assignees": a1})
+        task3 = make_task_in_main({"name": "Task clear C"})
+        task1_id, task2_id, task3_id = task1["_id"], task2["_id"], task3["_id"]
+
+    with allure.step("Снимаем ассайни, передав пустой массив"):
+        payload = [
+            {"taskId": task1_id, "assignees": []},
+            {"taskId": task2_id, "assignees": []},
+            {"taskId":task3_id, "assignees": []}
+        ]
+        resp = owner_client.post(**multiple_edit_tasks_endpoint(
+            space_id=main_space,
+            tasks=payload,
+        ))
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["payload"]["success"] == [task1_id, task2_id, task3_id]
+        assert resp.json()["payload"]["failed"] == []
+
+    with allure.step("Проверяем, что у обеих задач ассайни сняты"):
+        r1 = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=task1_id))
+        r2 = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=task2_id))
+        r3 = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=task3_id))
+        assert r1.status_code == 200, r1.text
+        assert r2.status_code == 200, r2.text
+        assert r3.status_code == 200, r3.text
+        assignees_1 = r1.json()["payload"]["task"].get("assignees", [])
+        assignees_2 = r2.json()["payload"]["task"].get("assignees", [])
+        assignees_3 = r3.json()["payload"]["task"].get("assignees", [])
+        assert assignees_1 == [], f"Task1: ожидали пустой список ассайни, получили {assignees_1}"
+        assert assignees_2 == [], f"Task2: ожидали пустой список ассайни, получили {assignees_2}"
+        assert assignees_3 == [], f"Task3: ожидали пустой список ассайни, получили {assignees_3}"
