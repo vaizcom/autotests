@@ -28,8 +28,8 @@ def test_get_tasks_assignees_empty(owner_client, main_space, board_with_10000_ta
 
 
 @allure.title("GetTasks assignees: один валидный исполнитель")
-def test_get_tasks_assignees_single_member(owner_client, main_space, board_with_10000_tasks, main_personal):
-    member_id = main_personal["member"][0]
+def test_get_tasks_assignees_single_member(owner_client, main_space, board_with_10000_tasks, main_personal, random_main_personal_id):
+    member_id = random_main_personal_id
     with allure.step("Выполнить POST /GetTasks с assignees=[member]"):
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,

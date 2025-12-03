@@ -72,3 +72,68 @@ def get_task_endpoint(slug_id: str, space_id: str):
         "json": {"slug": slug_id},
         "headers": {"Content-Type": "application/json", "Current-Space-Id": space_id}
     }
+
+def multiple_edit_tasks_endpoint1(space_id: str, tasks: list):
+    return {
+        "path": "/MultipleEditTasks",
+        "json": {"tasks": tasks},
+        "headers": {"Content-Type": "application/json", "Current-Space-Id": space_id}
+    }
+
+
+def multiple_edit_tasks_endpoint(
+    space_id: str,
+    tasks: List[Dict[str, Any]],
+    # Значения по умолчанию (None)
+    taskId: Optional[str] = None,
+    assignees: Optional[List[str]] = None,
+    completed: Optional[bool] = None,
+    dueStart: Optional[str] = None,
+    dueEnd: Optional[str] = None,
+    priority: Optional[str] = None,
+    types: Optional[List[str]] = None,
+    milestone: Optional[str] = None,
+    archivedAt: Optional[str] = None,  # ISO-строка или None
+) -> dict:
+    """
+    Эндпоинт массового редактирования задач (MultipleEditTasksInputDto).
+    """
+    if tasks is None:
+        # Сборка одного изменения из именованных параметров.
+        if not taskId:
+            raise ValueError("taskId обязателен при использовании именованных параметров (без tasks=...)")
+
+        single_change: Dict[str, Any] = {"taskId": taskId}
+        # Добавляем только те поля, что заданы (не None), чтобы соответствовать Partial<>
+        if assignees is not None:
+            single_change["assignees"] = assignees
+        if completed is not None:
+            single_change["completed"] = completed
+        if dueStart is not None:
+            single_change["dueStart"] = dueStart
+        if dueEnd is not None:
+            single_change["dueEnd"] = dueEnd
+        if priority is not None:
+            single_change["priority"] = priority
+        if types is not None:
+            single_change["types"] = types
+        if milestone is not None:
+            single_change["milestone"] = milestone
+        # archivedAt допускает None как валидное значение (сброс), поэтому ключ отправляем всегда, если аргумент передан
+        if archivedAt is not None:
+            single_change["archivedAt"] = archivedAt
+
+        tasks_payload = [single_change]
+    else:
+        tasks_payload = tasks
+
+    return {
+        "path": "/MultipleEditTasks",
+        "headers": {
+            "Current-Space-Id": space_id,
+            "Content-Type": "application/json",
+        },
+        "json": {
+            "tasks": tasks,
+        },
+    }

@@ -1,9 +1,10 @@
 import random
 from datetime import datetime
+from typing import List
 
 import pytest
 
-from tests.test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
+from tests.test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
 from test_backend.task_service.utils import get_client, create_task, get_random_type_id, get_random_group_id, \
     get_current_timestamp, get_due_end, get_priority, get_assignee
 
@@ -11,12 +12,7 @@ from test_backend.task_service.utils import get_client, create_task, get_random_
 @pytest.fixture
 def create_task_in_main(request, main_space, main_board, main_project):
     """
-    Фикстура для создания задачи в main_board.
-    :param request: фикстура для доступа к другим данным через request.getfixturevalue.
-    :param main_space: ID основного пространства.
-    :param main_board: ID основной борды (обязательный параметр).
-    :param main_project: ID основного проекта.
-    :return: функция для создания задачи с заданным payload.
+    Фикстура для создания задачи в main_board с установленными параметрами.
     """
 
     def _create_task(client_fixture, **kwargs):
@@ -71,3 +67,76 @@ def create_task_in_main(request, main_space, main_board, main_project):
         return task
 
     return _create_task
+
+@pytest.fixture
+def create_30_tasks(owner_client, main_space, main_board):
+    """
+    Фикстура создаёт N задач и гарантированно удаляет их по завершении теста.
+    Использование:
+        task_ids = create_30_tasks()           # по умолчанию 30 задач
+        task_ids = create_30_tasks(count=10)   # создать 10 задач
+    """
+    created_ids: List[str] = []
+
+    def _factory(count: int = 30) -> List[str]:
+        nonlocal created_ids
+        created_ids = []
+        for i in range(count):
+            title = f"Multiple Edit Tasks #{i + 1}"
+            resp = owner_client.post(
+                **create_task_endpoint(space_id=main_space, board=main_board, name=title, completed=False))
+            resp.raise_for_status()
+            body = resp.json()
+            task = (body.get("payload") or {}).get("task") or body.get("task") or {}
+            task_id = task.get("_id") or task.get("id")
+            assert task_id, f"Не удалось получить _id созданной задачи: {body!r}"
+            created_ids.append(task_id)
+        return created_ids
+
+    yield _factory
+
+    # Teardown: удаление созданных задач
+    if created_ids:
+        for tid in created_ids:
+            try:
+                resp = owner_client.post(**delete_task_endpoint(task_id=tid, space_id=main_space))
+                # допускаем 2xx/404 (если задача уже удалена в тесте)
+                if resp.status_code >= 400 and resp.status_code != 404:
+                    pass
+            except Exception:
+                pass
+
+
+@pytest.fixture
+def make_task_in_main(owner_client, main_space, main_board):
+    """
+    Фикстура-конструктор задачи.
+    Возвращает функцию create -> dict с данными созданной задачи.
+    В body передаются только необходимые для теста поля. После использования задача удаляется.
+    """
+    created_ids = []
+
+    def _create_task(body_overrides: dict):
+        body = {
+            "space_id": main_space,
+            "board": main_board
+        }
+        # объединим остальные поля в create_task_endpoint через kwargs
+        resp = owner_client.post(**create_task_endpoint(**body, **body_overrides))
+        assert resp.status_code == 200, resp.text
+        task = resp.json()["payload"]["task"]
+        created_ids.append(task["_id"])
+        return task
+
+    yield _create_task
+
+    # Teardown: удаление созданных задач
+    if created_ids:
+        for tid in created_ids:
+            try:
+                resp = owner_client.post(**delete_task_endpoint(task_id=tid, space_id=main_space))
+                # допускаем 2xx/404 (если задача уже удалена в тесте)
+                if resp.status_code >= 400 and resp.status_code != 404:
+                    pass
+            except Exception:
+                pass

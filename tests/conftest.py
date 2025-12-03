@@ -1,3 +1,5 @@
+import random
+
 import pytest
 import allure
 
@@ -165,6 +167,11 @@ def main_personal(main_client, main_space):
     member_id = {role: [m['_id'] for m in members if m.get('fullName') == role] for role in roles}
     return member_id
 
+@pytest.fixture(scope='session')
+def random_main_personal_id(main_personal: dict) -> str:
+    """Возвращает случайный ID из словаря main_personal (из всех ролей)."""
+    ids = [member_id for ids_by_role in main_personal.values() for member_id in ids_by_role]
+    return random.choice(ids)
 
 # Фикстура: создает временный спейс и возвращает member_id после прохождения тестов удаляет этот временный спейс
 @pytest.fixture(scope='session')
