@@ -19,11 +19,13 @@ def test_multiple_edit_tasks_set_assignees(owner_client, main_space, main_projec
     with allure.step("Определяем целевого ассайни"):
         # Берём один валидный id из фикстуры main_personal по указанной роли
         target_assignee = main_personal["member"][0]
+        a1 = main_personal["manager"][0]
+        a2 = main_personal["owner"][0]
 
     with allure.step("Создаём задачу №1 c заранее установленным ассайни"):
         task1 = make_task_in_main({
             "name": "Task with assignee",
-            "assignees": main_personal["manager"][0],
+            "assignees": [a1, a2]
         })
         task1_id = task1["_id"]
 
@@ -171,7 +173,7 @@ def test_multiple_edit_tasks_clear_assignees(owner_client, main_space, main_boar
         a1 = main_personal["member"][0]
         a2 = main_personal["owner"][0]
         task1 = make_task_in_main({"name": "Task clear A", "assignees": [a1, a2]})
-        task2 = make_task_in_main({"name": "Task clear B", "assignees": a1})
+        task2 = make_task_in_main({"name": "Task clear B", "assignees": [a1]})
         task3 = make_task_in_main({"name": "Task clear C"})
         task1_id, task2_id, task3_id = task1["_id"], task2["_id"], task3["_id"]
 
