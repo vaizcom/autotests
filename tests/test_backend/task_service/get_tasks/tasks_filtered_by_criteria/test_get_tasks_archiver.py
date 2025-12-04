@@ -1,11 +1,10 @@
 import allure
-
+import pytest
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 from test_backend.data.endpoints.archive.archive_task_endpoint import archive_task_endpoint
-
-import pytest
-
 from test_backend.task_service.utils import get_member_profile
+
+pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks: фильтр по archiver")

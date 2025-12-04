@@ -40,7 +40,7 @@ def test_get_tasks_filtered_by_project_by_role(request, client_fixture, expected
         if not tasks:
             pytest.skip("Список задач пуст — нечего валидировать по фильтру проекта")
 
-        for task in tasks[:50]:
+        for task in tasks[:100]:
             assert task.get("project") == main_project, (
                 f"Задача {task.get('_id', 'unknown')} принадлежит другой project: {task.get('project')}"
             )
@@ -48,9 +48,10 @@ def test_get_tasks_filtered_by_project_by_role(request, client_fixture, expected
         with allure.step("Дополнительная проверка: отсутствие задач из соседнего проекта (этого же спейса)"):
             another_project_id = "6866309d85fb8d104544a62d"
             for task in tasks[100:]:
-                assert task.get("board") != another_project_id, (
-                    f"Найдена задача {task.get('_id', 'unknown')} из чужой борды {another_project_id}"
+                assert task.get("project") != another_project_id, (
+                    f"Найдена задача {task.get('_id', 'unknown')} из чужой project {another_project_id}"
                 )
+                assert task.get("project") == main_project
 
 
 @allure.title("GetTasks: Проверка что список задач пустой для пользователей которые не имеют доступ к project")
