@@ -1,1 +1,0 @@
-Не удалось удалить задачу 692054b7a7aaf6c6a8a88d3f после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"},"level":"error"}}
