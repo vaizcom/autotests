@@ -47,7 +47,7 @@ def test_get_tasks_filter_by_archiver(request, manager_client, client_fixture, m
 
     with allure.step(f"Вызвать GetTasks с фильтром archiver: {expected_name_prefix}_id"):
         resp = manager_client.post(
-            **get_tasks_endpoint(space_id=main_space, archiver=archiver_id, board=main_board))
+            **get_tasks_endpoint(space_id=main_space, archiver=archiver_id))
 
     with allure.step("Проверить статус ответа GetTasks"):
         if expected_status == 200:  # Ожидалось успешное архивирование и поиск задачи
@@ -59,7 +59,7 @@ def test_get_tasks_filter_by_archiver(request, manager_client, client_fixture, m
                 assert found_archived_task is not None, f"Заархивированная задача с ID {task_id} не найдена при фильтрации по archiver."
                 assert found_archived_task.get("archiver") == archiver_id, \
                     f"Неверный archiverId для задачи {task_id}. Ожидалось {archiver_id}, получено {found_archived_task.get('archiver')}."
-        elif expected_status == 403:  # Ожидалось, что архивирование не произойдет (например, для guest_client)
+        elif expected_status == 403:  # Ожидалось, что архивирование не произойдет (для guest_client)
             # В этом случае GetTasks с фильтром по archiver_id должен вернуть 200 OK, но список задач должен быть пустым.
             assert resp.status_code == 200, \
                 f"При неуспешном архивировании (статус {expected_status}) GetTasks с фильтром по archiver={archiver_id} вернул статус {resp.status_code} {resp.text}. Ожидался 200."
