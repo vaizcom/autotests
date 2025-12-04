@@ -133,12 +133,13 @@ def test_multiple_edit_tasks_multiple_assignees(owner_client, main_space, main_b
 
 
 @allure.parent_suite("multiple_edit_tasks")
-@allure.title("Multiple edit Tasks: некорректный assigneeId статус 400")
+@allure.title("Multiple edit Tasks: некорректный assigneeId статус 400 !!! тест должен упасть после исправления бага CCSS-31512 !!! ")
 def test_multiple_edit_tasks_invalid_assignee_id(owner_client, main_space, main_board, main_personal, make_task_in_main):
     """
     Передаём валидный и заведомо некорректный идентификаторы ассайни (у второго последняя цифра заменена на 0).
     Ожидаем HTTP 400 и корректное сообщение об ошибке.
-    Баг: CCSS-31512
+    Баг: CCSS-31512. сейчас статус 200 !!!! тест должен упасть после исправления бага !!!
+    так как Api только для внутреннего использования баг не сильно кретичен, но нужно будет учесть в OpenApi
     """
     with allure.step("Готовим валидные данные и генерируем невалидный assigneeId"):
         valid_assignee = main_personal["member"][0]
@@ -163,7 +164,7 @@ def test_multiple_edit_tasks_invalid_assignee_id(owner_client, main_space, main_
 
 
 @allure.parent_suite("multiple_edit_tasks")
-@allure.title("Multiple edit Tasks: снятие ассайни (передача пустого массива)")
+@allure.title("Multiple edit Tasks: снятие ассайни (передача пустого массива) !! Не реализовано на фронте !!")
 def test_multiple_edit_tasks_clear_assignees(owner_client, main_space, main_board, main_personal, make_task_in_main):
     """
     Снимаем ассайни у задач, передав пустой список assignees.
