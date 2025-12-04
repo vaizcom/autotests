@@ -50,7 +50,7 @@ def test_get_tasks_filtered_by_creator(request, member_client, client_fixture, m
 
         if not tasks:
             with allure.step(
-                    "Проверка что пустой список допустим для гостя, который может просматривать и не может создавать таски"):
+                    "Проверка что список пустой для гостя, который не может создавать таски"):
                 assert client_fixture =='guest_client', (
                     f"Пустой список задач допустим только для ограниченных клиентов, но текущий клиент: {client_fixture}"
                 )
