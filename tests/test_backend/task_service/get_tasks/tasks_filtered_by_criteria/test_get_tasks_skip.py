@@ -4,7 +4,7 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks skip: skip=0, limit=20 → возвращаются первые 20")
 def test_get_tasks_skip_zero(owner_client, main_space, board_with_10000_tasks):
     with allure.step("Выполнить запрос с limit=20 и skip=0"):
@@ -21,6 +21,7 @@ def test_get_tasks_skip_zero(owner_client, main_space, board_with_10000_tasks):
         assert isinstance(tasks, list)
         assert len(tasks) == 20
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks skip: skip=5, limit=20 → элементы начинаются с 5-го")
 def test_get_tasks_skip_five(owner_client, main_space, board_with_10000_tasks):
     with allure.step("Получить опорный список задач без skip (большой limit)"):
@@ -49,6 +50,7 @@ def test_get_tasks_skip_five(owner_client, main_space, board_with_10000_tasks):
         if all_tasks[5:6]:
             assert tasks[:1] == all_tasks[5:6], "Первый элемент должен совпадать с элементом под индексом 5 полного списка"
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks skip: негатив — skip не число (строка)")
 @allure.description("Ожидаем валидационную ошибку при передаче skip='five'")
 def test_get_tasks_skip_not_number_string(owner_client, main_space, board_with_10000_tasks):

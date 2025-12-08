@@ -4,6 +4,7 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks ids: один существующий id -> ровно одна задача")
 def test_get_tasks_ids_single(owner_client, main_space, board_with_10000_tasks, task_id_list):
     expected_id = task_id_list[0]
@@ -25,6 +26,7 @@ def test_get_tasks_ids_single(owner_client, main_space, board_with_10000_tasks, 
         assert actual_id == expected_id, f"ID единственной задачи некорректен: {actual_id} != {expected_id}"
         assert [t.get("_id") for t in tasks] == [expected_id], "Список id в ответе не соответствует ожидаемому"
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks ids: несколько существующих id -> соответствующие задачи в ответе")
 def test_get_tasks_ids_multiple(owner_client, main_space, board_with_10000_tasks, task_id_list):
     # Берём первые три id (или столько, сколько есть)
@@ -47,6 +49,7 @@ def test_get_tasks_ids_multiple(owner_client, main_space, board_with_10000_tasks
         assert len(tasks) == len(expected_ids), f"Ожидалось {len(expected_ids)} задач, получено: {len(tasks)}"
         assert set(returned_ids) == set(expected_ids), f"Набор id не совпадает: {returned_ids} != {expected_ids}"
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks ids: пустой массив -> 200 и пустой tasks")
 def test_get_tasks_ids_empty_array(owner_client, main_space, board_with_10000_tasks):
     with allure.step("Выполнить запрос с ids=[]"):
@@ -62,6 +65,7 @@ def test_get_tasks_ids_empty_array(owner_client, main_space, board_with_10000_ta
         assert isinstance(tasks, list), "payload.tasks должен быть массивом"
         assert len(tasks) == 0, f"Ожидался пустой список задач, получено: {len(tasks)}"
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks ids: дубликаты во входных ids")
 def test_get_tasks_ids_with_duplicates(owner_client, main_space, board_with_10000_tasks, task_id_list):
     # Берём два валидных id (или один, если доступен только один, дублируем его)
@@ -84,6 +88,7 @@ def test_get_tasks_ids_with_duplicates(owner_client, main_space, board_with_1000
         # И набор _id должен совпадать с уникальным множеством входных id
         assert set(returned_ids) == set(duplicated_ids), "Набор _id не совпадает с запрошенными (без дублей)"
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks ids: несуществующие id -> 200 и пустой tasks")
 def test_get_tasks_ids_nonexistent(owner_client, main_space, board_with_10000_tasks):
     nonexistent_ids = ["1" * 24, "2" * 24]  # валидные по формату ObjectId, но несуществующие
@@ -101,7 +106,7 @@ def test_get_tasks_ids_nonexistent(owner_client, main_space, board_with_10000_ta
         assert isinstance(tasks, list)
         assert len(tasks) == 0, f"Ожидался пустой список задач, получено: {len(tasks)}"
 
-
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks ids: неверный формат id внутри массива -> 400 и корректная ошибка")
 def test_get_tasks_ids_invalid_format(owner_client, main_space, board_with_10000_tasks, task_id_list):
     # Формируем массив с одним корректным и несколькими некорректными элементами

@@ -5,6 +5,7 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация задач: completed=false — возвращаются только незавершённые задачи")
 def test_get_tasks_completed_false(owner_client, main_space, board_with_10000_tasks):
     """
@@ -29,7 +30,7 @@ def test_get_tasks_completed_false(owner_client, main_space, board_with_10000_ta
         ids = [t.get("_id") for t in tasks]
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
 
-
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация задач: completed=true — возвращаются только завершенные задачи")
 def test_get_tasks_completed_true(owner_client, main_space, board_with_10000_tasks):
     """
@@ -64,7 +65,7 @@ def test_get_tasks_completed_true(owner_client, main_space, board_with_10000_tas
         ids = [t.get("_id") for t in tasks]
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
 
-
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация задач: completed некорректного типа — ошибка валидации (400)")
 def test_get_tasks_completed_invalid_type(owner_client, main_space, board_with_10000_tasks):
     """

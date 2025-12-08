@@ -9,6 +9,7 @@ from tests.test_backend.data.endpoints.Task.task_endpoints import get_tasks_endp
 
 pytestmark = [pytest.mark.backend]
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация задач по одному milestone")
 def test_get_tasks_filtered_by_single_milestone(owner_client):
     """
@@ -41,6 +42,7 @@ def test_get_tasks_filtered_by_single_milestone(owner_client):
                 task_ms = [task_ms]
             assert ms_id in task_ms, f"Задача {t.get('_id')} не соответствует фильтру по milestone {ms_id}"
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация задач по нескольким milestones (OR-поведение)")
 def test_get_tasks_filtered_by_multiple_milestones(owner_client):
     """
@@ -76,7 +78,7 @@ def test_get_tasks_filtered_by_multiple_milestones(owner_client):
                 task_ms = [task_ms]
             assert any(m in task_ms for m in (ms1, ms2)), f"Задача {t.get('_id')} не соответствует фильтру по {ms1}|{ms2}"
 
-
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация с multiselect milestones - задачи с двумя или более milestones присутствует и БЕЗ дубликатов")
 def test_get_tasks_task_contains_both_milestones(owner_client):
     """
@@ -130,7 +132,7 @@ def test_get_tasks_task_contains_both_milestones(owner_client):
         ids = [t.get("_id") for t in tasks]
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
 
-
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация задач: milestone из другой доски не возвращает задачи")
 def test_get_tasks_filtered_by_another_board_milestone(owner_client):
     """
@@ -152,6 +154,3 @@ def test_get_tasks_filtered_by_another_board_milestone(owner_client):
 
     with allure.step("Ожидаем пустой список"):
         assert tasks == [] or len(tasks) == 0
-
-
-
