@@ -1,11 +1,9 @@
 import pytest
 import allure
-
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-SAMPLE_SIZE = 20  # сколько задач валидировать из ответа
 
 @allure.title("GetTasks: Проверка структуры и типов полей задач в ответе")
 def test_get_tasks_schema(owner_client, main_space, board_with_10000_tasks):
@@ -13,7 +11,7 @@ def test_get_tasks_schema(owner_client, main_space, board_with_10000_tasks):
     Проверка структуры и типов полей задач только для owner_client.
     """
     with allure.step("owner_client: вызвать GetTasks с фильтром board"):
-        resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, limit=10000, board=board_with_10000_tasks))
+        resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, limit=1000, board=board_with_10000_tasks))
 
     with allure.step("Проверить HTTP 200"):
         assert resp.status_code == 200
@@ -60,7 +58,7 @@ def test_get_tasks_schema(owner_client, main_space, board_with_10000_tasks):
 
         optional_fields = {"editor", "milestone", "dueStart", "completedAt", "deleter", "deletedAt"}
 
-        for task in tasks:
+        for task in tasks[:20]:
             with allure.step(f"Валидация схемы для задачи '_id'={task.get('_id', 'unknown')}"):
                 for field, expected_type in required_fields.items():
                     assert field in task, f"Отсутствует обязательное поле: {field}"

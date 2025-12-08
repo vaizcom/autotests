@@ -31,7 +31,7 @@ def test_get_tasks_completed_false(owner_client, main_space, board_with_10000_ta
 
 
 @allure.title("Фильтрация задач: completed=true — возвращаются только завершенные задачи")
-def test_get_tasks_completed_true_includes_completed(owner_client, main_space, board_with_10000_tasks):
+def test_get_tasks_completed_true(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при completed=true выдача включает только завершённые задачи и корректность их completedAt
     Если завершённых задач нет — тест заскипан с сообщением.

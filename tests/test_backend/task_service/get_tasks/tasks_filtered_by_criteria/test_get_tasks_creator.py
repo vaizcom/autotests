@@ -119,7 +119,7 @@ def test_get_tasks_creator_two_valid_ids(
     main_space,
     owner_client,
     member_client,
-        board_with_tasks,
+    board_with_tasks,
 ):
     with allure.step("Получить два валидных creator_id (owner, member)"):
         owner_id = get_member_profile(space_id=main_space, client=owner_client)

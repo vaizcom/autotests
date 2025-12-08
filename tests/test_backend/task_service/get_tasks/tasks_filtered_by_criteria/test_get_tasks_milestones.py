@@ -77,7 +77,7 @@ def test_get_tasks_filtered_by_multiple_milestones(owner_client):
             assert any(m in task_ms for m in (ms1, ms2)), f"Задача {t.get('_id')} не соответствует фильтру по {ms1}|{ms2}"
 
 
-@allure.title("Фильтрация с multiselect milestones - задачи с двумя или более milestones присутствует и без дубликатов")
+@allure.title("Фильтрация с multiselect milestones - задачи с двумя или более milestones присутствует и БЕЗ дубликатов")
 def test_get_tasks_task_contains_both_milestones(owner_client):
     """
         Тест проверяет корректность выборки при multiselect milestones и отсутствие дубликатов.
