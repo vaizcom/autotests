@@ -1,16 +1,16 @@
 import allure
 from datetime import datetime
-
 import pytest
-
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
+pytestmark = [pytest.mark.backend]
 
 def test_get_tasks_due_start(main_space, owner_client, board_with_10000_tasks):
     """
     Проверяет, что фильтр `dueStart` корректно включает задачи,
     дата выполнения которых точно совпадает с `dueStart` (или позже),
     и исключает задачи с более ранней датой выполнения.
+    В ответе всегда указан интервал дат, т.к. указав дату она интерпритируется как dueEnd
     """
     due_start_str = "2025-12-05T21:00:00.000Z"
     due_start_datetime = datetime.fromisoformat(due_start_str.replace("Z", "+00:00"))
@@ -39,7 +39,7 @@ def test_get_tasks_due_start(main_space, owner_client, board_with_10000_tasks):
                     f"которая раньше указанной dueStart {due_start_str}"
 
 
-@pytest.mark.skip(reason="Тест временно отключен из-за бага APP-3983")
+@pytest.mark.skip(reason="Тест skip из-за бага APP-3983")
 def test_get_tasks_due_end(main_space, owner_client, board_with_10000_tasks):
     """
     Проверяет, что фильтр `dueEnd` корректно включает задачи,
