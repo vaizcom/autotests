@@ -18,7 +18,7 @@ def test_get_tasks_filter_by_right_connectors(owner_client, main_space, board_wi
     target_right_connector_id = "6936aa59be4152d4a15dc510"
     target_task_id = "6936aa02be4152d4a15dc357"
 
-    with allure.step(f"Выполнить запрос с фильтрацией по rightConnectors"):
+    with allure.step("Выполнить запрос с фильтрацией по rightConnectors"):
         resp = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
             board=board_with_tasks,
@@ -66,7 +66,7 @@ def test_get_tasks_filter_by_left_connectors(owner_client, main_space, board_wit
     target_left_connector_id = '6936aa4ebe4152d4a15dc435'
     target_task_id = "6936aa02be4152d4a15dc357"
 
-    with allure.step(f"Выполнить запрос с фильтрацией по leftConnectors"):
+    with allure.step("Выполнить запрос с фильтрацией по leftConnectors"):
         resp = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
             board=board_with_tasks,

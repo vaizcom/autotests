@@ -15,9 +15,12 @@ def test_get_tasks_archived_false(owner_client, main_space, board_with_10000_tas
     - Нет архивных задач
     - Все задачи имеют archived/archiver is None.
     """
-
     with allure.step("Запрашиваем задачи с Archived=false"):
-        resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, archived=False, limit=20))
+        resp = owner_client.post(**get_tasks_endpoint(
+            space_id=main_space,
+            archived=False,
+            limit=20,
+            board=board_with_10000_tasks))
         resp.raise_for_status()
         tasks = resp.json()["payload"].get("tasks", [])
 
@@ -49,7 +52,7 @@ def test_get_tasks_archived_true(owner_client, main_space, board_with_10000_task
     """
 
     with allure.step("Запрашиваем задачи с Archived=true"):
-        resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, archived=True))
+        resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, archived=True, board=board_with_10000_tasks))
         resp.raise_for_status()
         tasks = resp.json()["payload"].get("tasks", [])
 
