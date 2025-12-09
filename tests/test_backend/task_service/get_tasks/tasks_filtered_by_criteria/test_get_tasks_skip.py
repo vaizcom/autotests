@@ -47,8 +47,9 @@ def test_get_tasks_skip_five(owner_client, main_space, board_with_10000_tasks):
         assert response.status_code == 200
         tasks = response.json().get("payload", {}).get("tasks", [])
         assert isinstance(tasks, list)
-        if all_tasks[5:6]:
-            assert tasks[:1] == all_tasks[5:6], "Первый элемент должен совпадать с элементом под индексом 5 полного списка"
+        assert len(tasks) == 20
+        assert tasks[:1] == all_tasks[5:6], "Первый элемент должен совпадать с элементом под индексом 5 полного списка"
+
 
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks skip: негатив — skip не число (строка)")

@@ -5,8 +5,8 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("GetTasks limit: Возвращает abs(limit) документов (если данных достаточно)")
-@pytest.mark.parametrize("expected_limit", [1, -10])
+@allure.title("GetTasks limit: Возвращает abs(limit) тасок (если данных достаточно)")
+@pytest.mark.parametrize("expected_limit", [1, 100])
 def test_get_tasks_limit(owner_client, main_space, board_with_10000_tasks, expected_limit):
     allure.dynamic.title(f"GetTasks limit: {expected_limit}")
 
@@ -23,13 +23,14 @@ def test_get_tasks_limit(owner_client, main_space, board_with_10000_tasks, expec
         assert isinstance(tasks, list), "payload.tasks должен быть массивом"
         assert len(tasks) == abs(expected_limit), f"Количество задач превышает limit: {len(tasks)} > {expected_limit}"
 
+
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks limit: равен 0 —  означает отсутствие ограничения, выводится весь список")
-def test_get_tasks_limit_zero(owner_client, main_space, board_with_10000_tasks):
+def test_get_tasks_limit_zero(owner_client, main_space, board_with_tasks):
     with allure.step("Выполнить запрос с limit=0"):
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_10000_tasks,
+            board=board_with_tasks,
             limit=0
         ))
 

@@ -87,6 +87,7 @@ def test_get_tasks_with_archived_true(owner_client, main_space, board_with_10000
         ids = [t.get("_id") for t in tasks]
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
 
+
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация задач: withArchived некорректного типа — ошибка валидации (400)")
 def test_get_tasks_with_archived_invalid_type(owner_client, main_space, board_with_10000_tasks):

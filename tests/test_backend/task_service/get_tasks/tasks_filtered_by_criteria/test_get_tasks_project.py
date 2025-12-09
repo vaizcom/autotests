@@ -43,6 +43,7 @@ def test_get_tasks_project_mismatched_space(owner_client, second_space, main_pro
             assert isinstance(tasks, list)
             assert tasks == []
 
+
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks project: неверный формат идентификатора — ожидаем ошибку валидации 'project must be a mongodb id'")
 def test_get_tasks_project_non_existing(owner_client, main_space):
@@ -61,6 +62,7 @@ def test_get_tasks_project_non_existing(owner_client, main_space):
             board_field = next((f for f in fields if f.get("name") == "project"), None)
             codes = board_field.get("codes", [])
             assert "project must be a mongodb id" in codes
+
 
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks project: project без задач — ожидаем пустой список")

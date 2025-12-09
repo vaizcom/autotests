@@ -27,6 +27,7 @@ def test_get_tasks_assignees_empty(owner_client, main_space, board_with_10000_ta
         assert isinstance(tasks, list)
         assert len(tasks) == 0 #  пустой массив возвращает пустой список задач
 
+
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks assignees: один валидный исполнитель")
 def test_get_tasks_assignees_single_member(owner_client, main_space, board_with_10000_tasks, main_personal, random_main_personal_id):
@@ -47,6 +48,7 @@ def test_get_tasks_assignees_single_member(owner_client, main_space, board_with_
         for task in to_check:
             assignees = task.get("assignees", [])
             assert member_id in assignees
+
 
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks assignees: несколько валидных исполнителей (OR-фильтр)")
@@ -70,6 +72,7 @@ def test_get_tasks_assignees_multiple_members(owner_client, main_space, board_wi
             assignees = task.get("assignees", [])
             assert member_1 in assignees or member_2 in assignees
 
+
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks assignees: если указать пользователя невалидного(из другой борды) — ожидаем пустой список задач")
 def test_get_tasks_assignees_user_without_access(owner_client, main_space, board_with_10000_tasks, temp_member):
@@ -86,6 +89,7 @@ def test_get_tasks_assignees_user_without_access(owner_client, main_space, board
         tasks = data.get("tasks", [])
         assert isinstance(tasks, list)
         assert tasks == []
+
 
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks assignees: если указать невалидный формат — ожидаем пустой список задач")

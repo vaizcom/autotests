@@ -9,7 +9,8 @@ pytestmark = [pytest.mark.backend]
 @allure.title("Проверка фильтрации задач по rightConnectors")
 def test_get_tasks_filter_by_right_connectors(owner_client, main_space, board_with_tasks):
     """
-    Подготовлены заренее таски для проверки на борде(board_with_tasks)
+    Подготовлены заренее таски для проверки на борде(board_with_tasks),
+    т.к. на бэке нет создания left/right Connectors (только на фронте)
 
     Проверяет, что при запросе задач с фильтром по rightConnectors
     в ответе содержатся только те задачи, у которых есть хотя бы один
@@ -57,7 +58,8 @@ def test_get_tasks_filter_by_right_connectors(owner_client, main_space, board_wi
 @allure.title("Проверка фильтрации задач по leftConnectors")
 def test_get_tasks_filter_by_left_connectors(owner_client, main_space, board_with_tasks):
     """
-    Подготовлены заренее таски для проверки на борде(board_with_tasks)
+    Подготовлены заренее таски для проверки на борде(board_with_tasks),
+    т.к. на бэке нет создания left/right Connectors (только на фронте)
 
     Проверяет, что при запросе задач с фильтром по leftConnectors
     в ответе содержатся только те задачи, у которых есть хотя бы один

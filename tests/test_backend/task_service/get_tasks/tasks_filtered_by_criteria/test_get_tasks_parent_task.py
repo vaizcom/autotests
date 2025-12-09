@@ -6,7 +6,7 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("GetTasks: проверяет фильтрацию GetTasks по полю parentTask.")
+@allure.title("GetTasks: проверяет фильтрацию GetTasks по parentTask.")
 def test_get_tasks_filter_by_parent_task(
     member_client,
     main_space,

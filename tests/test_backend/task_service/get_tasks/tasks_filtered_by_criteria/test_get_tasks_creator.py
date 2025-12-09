@@ -7,7 +7,7 @@ from test_backend.task_service.utils import get_member_profile
 pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("GetTasks: фильтр по creator")
+@allure.title("GetTasks: проверка задач с фильтрацией по creator")
 @pytest.mark.parametrize(
     'client_fixture, expected_status, expected_name_prefix',
     [
@@ -49,7 +49,7 @@ def test_get_tasks_filtered_by_creator(request, member_client, client_fixture, m
                 f"Доступные имена: {[t.get('name') for t in tasks]}"
         )
 
-        if not tasks:
+        if not tasks: # Для пустого списка tasks=[]
             with allure.step(
                     "Проверка что список пустой для гостя, который не может создавать таски"):
                 assert client_fixture =='guest_client', (
@@ -58,8 +58,9 @@ def test_get_tasks_filtered_by_creator(request, member_client, client_fixture, m
             return
         assert all(t.get("creator") == member_id for t in tasks), "Обнаружены задачи с иным creator"
 
+
 @allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("GetTasks: фильтр по creator — ограниченные уровни доступа (space/project)")
+@allure.title("GetTasks: фильтр по creator — ограниченные уровни доступа (space/project). Ожидаеся пустой список задач")
 @pytest.mark.parametrize(
     'client_fixture, expected_status, expected_name_prefix',
     [
@@ -101,7 +102,7 @@ def test_get_tasks_creator_limited_access(
         assert not tasks, "Ожидался пустой список задач при ограниченных правах доступа"
 
 @allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("GetTasks: фильтр по creator — creator_id из non-existent-id")
+@allure.title("GetTasks: фильтр по creator — creator_id из non-exist-id. Ожидаем понятное сообщение об ошибке")
 def test_get_tasks_filtered_non_existent_creator(owner_client, main_space, board_with_tasks):
     with allure.step("Вызвать GetTasks с несуществующим creator_id"):
         resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, creator="non-existent-id-123", board=board_with_tasks))

@@ -144,7 +144,7 @@ def task_id_list(owner_client, main_space, board_with_10000_tasks):
     resp = owner_client.post(**get_tasks_endpoint(
         space_id=main_space,
         board=board_with_10000_tasks,
-        limit=20
+        limit=30
     ))
     assert resp.status_code == 200
     payload = resp.json().get("payload", {})

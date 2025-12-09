@@ -12,7 +12,7 @@ def test_get_tasks_due_start(main_space, owner_client, board_with_10000_tasks):
     Проверяет, что фильтр `dueStart` корректно включает задачи,
     дата выполнения которых точно совпадает с `dueStart` (или позже),
     и исключает задачи с более ранней датой выполнения.
-    В ответе всегда указан интервал дат, т.к. указав дату она интерпритируется как dueEnd
+    В ответе всегда указан интервал дат, т.к. указав только дату (не интервал дат) она интерпритируется как dueEnd
     """
     due_start_str = "2025-12-05T21:00:00.000Z"
     due_start_datetime = datetime.fromisoformat(due_start_str.replace("Z", "+00:00"))
@@ -74,3 +74,5 @@ def test_get_tasks_due_end(main_space, owner_client, board_with_10000_tasks):
                 assert task_due_date_datetime <= due_end_datetime, \
                     f"Задача {task.get('id')} имеет dueDate {task_due_date_str}, " \
                     f"которая позже указанной dueEnd {due_end_str}"
+
+#   TO DO : после исправления бага APP-3983 добавть тест в котором будет передан интервал дат (dueStart/dueEnd)

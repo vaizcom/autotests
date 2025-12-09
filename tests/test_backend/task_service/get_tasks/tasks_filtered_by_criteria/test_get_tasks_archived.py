@@ -5,6 +5,7 @@ from tests.test_backend.data.endpoints.Task.task_endpoints import get_tasks_endp
 
 pytestmark = [pytest.mark.backend]
 
+
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks: фильтр по archived=false — возвращаются только неархивные задачи")
 def test_get_tasks_archived_false(owner_client, main_space, board_with_10000_tasks):

@@ -6,6 +6,7 @@ from test_backend.task_service.utils import get_member_profile
 
 pytestmark = [pytest.mark.backend]
 
+
 @allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks: фильтр по archiver")
 @pytest.mark.parametrize(
@@ -37,7 +38,6 @@ def test_get_tasks_filter_by_archiver(request, manager_client, client_fixture, m
             "name": "GetTasks: фильтр по archiver",
         })
         task_id = created_task.get("_id")
-
 
     with allure.step(f"Архивирование задачи в роли {expected_name_prefix} и проверка статуса {expected_status}"):
         arch_resp = client.post(**archive_task_endpoint(task_id=task_id, space_id=main_space))
