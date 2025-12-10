@@ -1,3 +1,4 @@
+import datetime
 import secrets
 import random
 import string
@@ -12,10 +13,11 @@ from tests.test_backend.data.endpoints.Board.constants import (
 
 def generate_space_name() -> str:
     """
-    Генерирует уникальное имя для Space.
-    Пример: space_1a2b3c
+    Генерирует имя для Space, включающее текущую дату и время до секунд в человеко-читаемом формате.
+    Пример: space_2025-12-10_10-30-45
     """
-    return f'space_{uuid.uuid4().hex[:12]}'
+    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    return f'space_{current_datetime}'
 
 
 def generate_project_name() -> str:

@@ -188,15 +188,14 @@ def temp_member(owner_client, temp_space):
 # Фикстура: создает временный спейс и после прохождения тестов удаляет этот временный спейс
 @pytest.fixture(scope='session')
 def temp_space(owner_client):
-    client = owner_client
     name = generate_space_name()
-    response = client.post(**create_space_endpoint(name=name))
+    response = owner_client.post(**create_space_endpoint(name=name))
     assert response.status_code == 200
     space_id = response.json()['payload']['space']['_id']
 
     yield space_id
 
-    client.post(**remove_space_endpoint(space_id=space_id))
+    owner_client.post(**remove_space_endpoint(space_id=space_id))
 
 
 @pytest.fixture(scope='session')

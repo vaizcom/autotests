@@ -65,7 +65,7 @@ def test_get_project_and_space_doc_access_by_roles(
     [
         ('owner_client', 403),  # владелец не может получить чужой personal doc
         ('manager_client', 403),  # менеджер не может получить чужой personal doc
-        ('member_client', 200),  # участник может получить свой personal doc
+        ('member_client', 200),  # мембер может получить свой personal doc
         ('guest_client', 403),  # гость не может получить чужой personal doc
     ],
     ids=['owner', 'manager', 'member', 'guest'],

@@ -27,17 +27,19 @@ def test_project_slug_unique(owner_client, temp_space):
     with allure.step('Убедиться, что slug уникален'):
         check_response_1 = client.post(**is_project_slug_unique_endpoint(slug=slug, space_id=temp_space))
     assert check_response_1.status_code == 200
-    assert check_response_1.json()['payload']['isUnique']
+    assert check_response_1.json()['payload']['isUnique'] == True
     with allure.step('Создать проект с этим slug'):
         response_1 = client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
     assert response_1.status_code == 200
     with allure.step('Проверить, что slug стал неуникальным'):
         check_response_2 = client.post(**is_project_slug_unique_endpoint(slug=slug, space_id=temp_space))
     assert check_response_2.status_code == 200
-    assert not check_response_2.json()['payload']['isUnique']
+    assert check_response_2.json()['payload']['isUnique'] == False
     with allure.step('Попытка создать второй проект с тем же slug'):
         response_2 = client.post(**create_project_endpoint(name=name + '_copy', slug=slug, **common_kwargs))
     assert response_2.status_code == 400
+    r = response_2.json()
+    assert response_2.json()['error']['code'] == 'InvalidForm'
 
 
 @allure.title('Тест: Проверка предельной длины slug')
@@ -128,7 +130,7 @@ def test_get_project(owner_client, temp_project, temp_space):
     assert 'project' in payload
 
 
-@allure.title('Тест: Проверка списка проектов')
+@allure.title('Тест: Проверка получения списка проектов')
 def test_get_projects(owner_client, temp_project, temp_space):
     client = owner_client
     response = client.post(**get_projects_endpoint(space_id=temp_space))
@@ -149,10 +151,18 @@ def test_edit_project_name(owner_client, temp_project, temp_space):
 
 @allure.title('Тест: Проверка архивации проекта')
 def test_archive_project(owner_client, temp_project, temp_space):
-    client = owner_client
-    archive_response = client.post(**archive_project_endpoint(project_id=temp_project, space_id=temp_space))
+    # Получаем данные проекта до архивации
+    initial_response = owner_client.post(**get_project_endpoint(project_id=temp_project, space_id=temp_space))
+    assert initial_response.status_code == 200
+    initial_project_data = initial_response.json()['payload']['project']
+    # Убеждаемся, что до архивации поле 'archivedAt' было None
+    assert initial_project_data.get('archivedAt') is None
+
+    archive_response = owner_client.post(**archive_project_endpoint(project_id=temp_project, space_id=temp_space))
     assert archive_response.status_code == 200
-    assert archive_response.json()['payload']['project'].get('archivedAt')
+    project_data = archive_response.json()['payload']['project']
+    # Проверяем, что после архивации поле 'archivedAt' имеет значение
+    assert project_data.get('archivedAt')
 
 
 @allure.title('Тест: Проверка разархивации проекта')
