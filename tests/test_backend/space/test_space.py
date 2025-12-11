@@ -1,6 +1,6 @@
 import allure
 
-from tests.config.generators import generate_project_name, generate_space_name
+from tests.config.generators import generate_space_name
 from tests.test_backend.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
     get_space_endpoint,
@@ -30,7 +30,7 @@ def test_create_space_visible_in_list(owner_client, temp_space):
 def test_edit_space_name(owner_client, temp_space):
     client = owner_client
     space_id = temp_space
-    new_name = generate_project_name()
+    new_name = generate_space_name() + '_edit'
     with allure.step('Edit space name'):
         response = client.post(**edit_space_endpoint(name=new_name, space_id=space_id))
         assert response.status_code == 200
