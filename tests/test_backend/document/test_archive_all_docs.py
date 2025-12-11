@@ -44,5 +44,4 @@ def test_archive_all_documents(request, owner_client, kind, container_fixture, m
                 continue
             archive_resp = owner_client.post(**archive_document_endpoint(document_id=doc_id, space_id=main_space))
             assert archive_resp.status_code == 200, (
-                f'Не удалось архивировать документ {doc_id}: ' f'статус {archive_resp.status_code}'
-            )
+                f'Не удалось архивировать документ {doc_id}: ' f'статус {archive_resp.status_code}'            )

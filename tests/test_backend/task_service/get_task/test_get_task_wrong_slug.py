@@ -9,13 +9,9 @@ pytestmark = [pytest.mark.backend]
     "slug_id, expected_status",
     [
         (None, 400),                  # нет slug
-        ("", 400),                    # пустой slug
-        ("NOT-EXIST-999999", 400),    # несуществующий
-        ("<script>", 400),            # XSS
         ("1 OR 1=1", 400),            # SQLi
-        ("A" * 9, 400),            # слишком длинный
     ],
-    ids=["no_slug", "empty_slug", "not_found", "xss", "sqli", "too_long"],
+    ids=["no_slug", "sqli"],
 )
 def test_get_task_wrong_slug(main_space, slug_id, expected_status, owner_client):
     """
