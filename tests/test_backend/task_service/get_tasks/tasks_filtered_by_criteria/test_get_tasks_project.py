@@ -5,7 +5,7 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks project: валидный проект — успешный ответ и массив tasks")
 def test_get_tasks_project_valid(owner_client, main_space, main_project, main_board):
     with allure.step("Выполнить POST /GetTasks с валидными space_id и project"):
@@ -28,6 +28,7 @@ def test_get_tasks_project_valid(owner_client, main_space, main_project, main_bo
             f"Задача {task.get('_id', 'unknown')} принадлежит другой project: {task.get('project')}"
         )
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks project: project не принадлежит space — ожидаем пустой список задач")
 def test_get_tasks_project_mismatched_space(owner_client, second_space, main_project):
     with allure.step("Выполнить POST /GetTasks с space_id другого пространства и project текущей доски"):
@@ -43,6 +44,7 @@ def test_get_tasks_project_mismatched_space(owner_client, second_space, main_pro
             assert tasks == []
 
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks project: неверный формат идентификатора — ожидаем ошибку валидации 'project must be a mongodb id'")
 def test_get_tasks_project_non_existing(owner_client, main_space):
     with allure.step("Выполнить POST /GetTasks с несуществующим board"):
@@ -61,6 +63,8 @@ def test_get_tasks_project_non_existing(owner_client, main_space):
             codes = board_field.get("codes", [])
             assert "project must be a mongodb id" in codes
 
+
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("GetTasks project: project без задач — ожидаем пустой список")
 def test_get_tasks_project_without_tasks(owner_client, main_space):
     with allure.step("Выполнить POST /GetTasks для project без задач"):

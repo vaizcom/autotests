@@ -144,7 +144,7 @@ def task_id_list(owner_client, main_space, board_with_10000_tasks):
     resp = owner_client.post(**get_tasks_endpoint(
         space_id=main_space,
         board=board_with_10000_tasks,
-        limit=20
+        limit=30
     ))
     assert resp.status_code == 200
     payload = resp.json().get("payload", {})
@@ -188,15 +188,14 @@ def temp_member(owner_client, temp_space):
 # Фикстура: создает временный спейс и после прохождения тестов удаляет этот временный спейс
 @pytest.fixture(scope='session')
 def temp_space(owner_client):
-    client = owner_client
     name = generate_space_name()
-    response = client.post(**create_space_endpoint(name=name))
+    response = owner_client.post(**create_space_endpoint(name=name))
     assert response.status_code == 200
     space_id = response.json()['payload']['space']['_id']
 
     yield space_id
 
-    client.post(**remove_space_endpoint(space_id=space_id))
+    owner_client.post(**remove_space_endpoint(space_id=space_id))
 
 
 @pytest.fixture(scope='session')

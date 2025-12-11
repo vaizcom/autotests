@@ -5,12 +5,13 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
+
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация задач: completed=false — возвращаются только незавершённые задачи")
 def test_get_tasks_completed_false(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при completed=false API возвращает только незавершённые задачи.
     """
-
     with allure.step("Запрашиваем задачи с completed=false"):
         resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_10000_tasks, completed=False, limit=20))
         resp.raise_for_status()
@@ -30,13 +31,13 @@ def test_get_tasks_completed_false(owner_client, main_space, board_with_10000_ta
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
 
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация задач: completed=true — возвращаются только завершенные задачи")
-def test_get_tasks_completed_true_includes_completed(owner_client, main_space, board_with_10000_tasks):
+def test_get_tasks_completed_true(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при completed=true выдача включает только завершённые задачи и корректность их completedAt
     Если завершённых задач нет — тест заскипан с сообщением.
     """
-
     with allure.step("Запрашиваем задачи с completed=true"):
         resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_10000_tasks, completed=True, limit=20))
         resp.raise_for_status()
@@ -65,13 +66,13 @@ def test_get_tasks_completed_true_includes_completed(owner_client, main_space, b
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
 
 
+@allure.parent_suite("tasks_filtered_by_criteria")
 @allure.title("Фильтрация задач: completed некорректного типа — ошибка валидации (400)")
 def test_get_tasks_completed_invalid_type(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при передаче некорректного значения параметра completed (не boolean)
     API возвращает 400 и сообщение об ошибке валидации для поля completed.
     """
-
     with allure.step("Отправляем запрос с completed='' (пустая строка, не boolean)"):
         resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, board=main_space, completed=""))
         status = resp.status_code

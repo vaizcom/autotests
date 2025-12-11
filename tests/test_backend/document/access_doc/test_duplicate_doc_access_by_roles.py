@@ -16,20 +16,20 @@ pytestmark = [pytest.mark.backend]
     'creator_fixture, duplicator_fixture, expected_status',
     [
         # Owner создает документ
-        ('owner_client', 'owner_client', 200),  # владелец дублирует свой документ
-        ('owner_client', 'manager_client', 200),  # владелец создает, менеджер дублирует
-        ('owner_client', 'member_client', 200),  # владелец создает, участник дублирует
-        ('owner_client', 'guest_client', 403),  # владелец создает, гость дублирует
+        ('owner_client', 'owner_client', 200),  # Owner дублирует свой документ
+        ('owner_client', 'manager_client', 200),  # Owner создает, менеджер дублирует
+        ('owner_client', 'member_client', 200),  # Owner создает, Member дублирует
+        ('owner_client', 'guest_client', 403),  # Owner создает, гость дублирует
         # Manager создает документ
-        ('manager_client', 'owner_client', 200),  # менеджер создает, владелец дублирует
+        ('manager_client', 'owner_client', 200),  # менеджер создает, Owner дублирует
         ('manager_client', 'manager_client', 200),  # менеджер дублирует свой документ
-        ('manager_client', 'member_client', 200),  # менеджер создает, участник дублирует
+        ('manager_client', 'member_client', 200),  # менеджер создает, Member дублирует
         ('manager_client', 'guest_client', 403),  # менеджер создает, гость дублирует
         # Member создает документ
-        ('member_client', 'owner_client', 200),  # участник создает, владелец дублирует
-        ('member_client', 'manager_client', 200),  # участник создает, менеджер дублирует
-        ('member_client', 'member_client', 200),  # участник дублирует свой документ
-        ('member_client', 'guest_client', 403),  # участник создает, гость дублирует
+        ('member_client', 'owner_client', 200),  # Member создает, Owner дублирует
+        ('member_client', 'manager_client', 200),  # Member создает, менеджер дублирует
+        ('member_client', 'member_client', 200),  # Member дублирует свой документ
+        ('member_client', 'guest_client', 403),  # Member создает, гость дублирует
     ],
     ids=[
         # Owner создает

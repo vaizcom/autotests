@@ -17,7 +17,7 @@ pytestmark = [pytest.mark.backend]
     ids=['owner', 'manager', 'member', 'guest'],
 )
 @allure.parent_suite("access_task")
-@allure.title("Проверка удаления задачи: разрешено владельцу и менеджеру, запрещено мемберу и гостю")
+@allure.title("Проверка удаления задачи: разрешено owner и менеджеру, запрещено мемберу и гостю")
 def test_delete_task_access_control(request, main_space, main_board, client_fixture, expected_status, owner_client):
     """
     Быстрая проверка прав на удаление задачи:

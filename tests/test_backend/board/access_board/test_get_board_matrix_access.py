@@ -1,11 +1,39 @@
 import pytest
 import allure
 
+from conftest import main_board
 from tests.test_backend.data.endpoints.Board.board_endpoints import (
-    get_board_endpoint,
+    get_board_endpoint, delete_board_endpoint,
 )
 
 pytestmark = [pytest.mark.backend]
+
+
+@pytest.mark.parametrize(
+    'client_fixture, expected_status',
+    [
+        ('owner_client', 200),
+        ('manager_client', 200),
+        ('member_client', 200),
+        ('guest_client', 200),
+    ],
+    ids=['owner', 'manager', 'member', 'guest'],
+)
+def test_get_board_access_by_roles(request, client_fixture, expected_status, board_with_tasks, main_space):
+    allure.dynamic.title(f'Тест получения доски: клиент={client_fixture}, ожидаемый статус={expected_status}')
+
+    with allure.step(f'Получение клиента: {client_fixture}'):
+        client = request.getfixturevalue(client_fixture)
+
+    with allure.step(f"Отправка запроса на получение борды"):
+        payload = get_board_endpoint(
+            space_id=main_space,
+            board_id=board_with_tasks
+        )
+        response = client.post(**payload)
+
+    with allure.step(f'Проверка статус-кода: ожидаемый {expected_status}'):
+        assert response.status_code == expected_status, response.text
 
 
 @pytest.mark.parametrize(

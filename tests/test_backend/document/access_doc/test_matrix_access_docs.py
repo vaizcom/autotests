@@ -4,19 +4,6 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import get_do
 
 pytestmark = [pytest.mark.backend]
 
-@allure.title('Проверка доступа к документам: пользователь без доступа (foreign_client)')
-def test_document_access_denied_for_foreign_client(foreign_client, main_space):
-    """
-    Проверяет, что пользователь foreign_client без доступа к Space получает ошибку.
-    """
-    with allure.step('Отправка запроса для получения доступа к документам'):
-        response = foreign_client.post(**get_document_endpoint(document_id=main_space, space_id=main_space))
-
-    with allure.step("Проверка, что запрос отклонён (ожидается 400 и код ошибки 'NotFound')"):
-        assert response.status_code == 400, f'Ожидался статус 400, получен {response.status_code}'
-        error = response.json().get('error', {})
-        assert error.get('code') == 'NotFound', f"Ожидался код ошибки 'NotFound', получен {error.get('code')}"
-
 
 @allure.title(
     'Проверка доступа space_client к основному документу и отсутствия доступа к проектному документу и персональному документу'

@@ -36,7 +36,7 @@ def clear_milestone_tasks(client, space_id, milestone_id):
 
 
 @allure.parent_suite("create_task")
-@allure.title("Проверка увеличения счетчика задач у milestone после создания задач и соответствия completed")
+@allure.title("Проверка увеличения счетчика задач в milestone после создания задач и соответствия completed")
 def test_milestone_total_and_completed_after_task_creation(owner_client, main_space, create_task_in_main, main_board):
     """
     Тест проверяет:
@@ -89,7 +89,7 @@ def test_milestone_total_and_completed_after_task_creation(owner_client, main_sp
 
 
 @allure.parent_suite("create_task")
-@allure.title("Проверка уменьшения счетчика задач milestone после удаления задач")
+@allure.title("Проверка уменьшения счетчика задач в milestone после удаления задач")
 def test_milestone_total_task_count_decrease_after_task_deletion(owner_client, main_space, create_task_in_main, main_board):
     """
     Тест проверяет корректное уменьшение счетчика total после удаления задач и ожидает total=0 в конце.
