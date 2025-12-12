@@ -9,7 +9,7 @@ from tests.test_backend.data.endpoints.Project.project_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 @allure.title('Тест: Проверка получения проекта по ID, payload ответа соответствует ожидаемой структуре')
-def test_get_project(owner_client, temp_project, temp_space):
+def test_get_project_output_payload(owner_client, temp_project, temp_space):
     """
     Этот тест проверяет функциональность получения проекта по его идентификатору и идентификатору пространства.
     Он отправляет POST-запрос на эндпоинт получения проекта, используя предварительно созданные
