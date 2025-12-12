@@ -6,6 +6,7 @@ from test_backend.data.endpoints.Project.project_endpoints import create_project
 
 pytestmark = [pytest.mark.backend]
 
+
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -35,5 +36,5 @@ def test_create_project_access_by_roles(request, client_fixture, expected_status
                 assert response.json()['payload']['project']['slug'] == slug.upper()
     finally:
         if prj_id:  # Если проект был создан, архивируем его (в созданном проекте пользователь становится в роли оунера)
-            with allure.step(f'Архивирование проекта'):
+            with allure.step('Архивирование проекта'):
                 client.post(**archive_project_endpoint(project_id=prj_id, space_id=main_space))
