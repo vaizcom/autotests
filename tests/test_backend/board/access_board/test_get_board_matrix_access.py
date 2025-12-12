@@ -1,9 +1,8 @@
 import pytest
 import allure
 
-from conftest import main_board
 from tests.test_backend.data.endpoints.Board.board_endpoints import (
-    get_board_endpoint, delete_board_endpoint,
+    get_board_endpoint,
 )
 
 pytestmark = [pytest.mark.backend]
@@ -25,7 +24,7 @@ def test_get_board_access_by_roles(request, client_fixture, expected_status, boa
     with allure.step(f'Получение клиента: {client_fixture}'):
         client = request.getfixturevalue(client_fixture)
 
-    with allure.step(f"Отправка запроса на получение борды"):
+    with allure.step("Отправка запроса на получение борды"):
         payload = get_board_endpoint(
             space_id=main_space,
             board_id=board_with_tasks

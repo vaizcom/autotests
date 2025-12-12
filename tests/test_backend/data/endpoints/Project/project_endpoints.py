@@ -2,10 +2,6 @@ import pytest
 
 pytestmark = [pytest.mark.backend]
 
-MAX_PROJECT_NAME_LENGTH = 25
-MAX_PROJECT_SLUG_LENGTH = 8
-MAX_PROJECT_DESCRIPTION_LENGTH = 1024
-
 
 def create_project_endpoint(name: str, color: str, icon: str, description: str, slug: str, space_id: str):
     return {
