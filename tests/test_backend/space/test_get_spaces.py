@@ -9,10 +9,10 @@ pytestmark = [pytest.mark.backend]
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
-        ('owner_client', 200, ),
-        ('manager_client', 200, ),
-        ('member_client', 200, ),
-        ('guest_client', 200, )
+        ('owner_client', 200),
+        ('manager_client', 200),
+        ('member_client', 200),
+        ('guest_client', 200)
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
