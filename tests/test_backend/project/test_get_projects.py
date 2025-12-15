@@ -11,23 +11,31 @@ pytestmark = [pytest.mark.backend]
 
 @allure.title('Тест: Проверка получения списка проектов, проверка что payload ответа соответствует ожидаемой структуре')
 def test_get_projects(owner_client, temp_project, temp_space):
-    client = owner_client
-    response = client.post(**get_projects_endpoint(space_id=temp_space))
-    assert response.status_code == 200
-    projects = response.json()['payload']['projects']
-    project_ids = [p['_id'] for p in projects]
-    assert temp_project in project_ids
+    with allure.step(f"Отправка запроса на получение списка проектов для пространства ID: {temp_space}"):
+        response = owner_client.post(**get_projects_endpoint(space_id=temp_space))
 
-    with allure.step("Парсинг ответа и проверка полезной нагрузки списка проектов"):
+    with allure.step("Проверка статуса ответа и общей структуры ответа"):
+        assert response.status_code == 200, f"Ожидался статус 200, получен {response.status_code}"
         payload = response.json()['payload']
-        # Предполагаем, что payload содержит ключ 'projects', который является списком
         assert 'projects' in payload, "Ответ не содержит ключ 'projects'"
         assert isinstance(payload['projects'], list), "Значение 'projects' не является списком"
 
-        if len(payload['projects']) > 0:
-            for project in payload['projects']:
-                with allure.step(f"Проверка структуры проекта с ID: {project.get('_id', 'N/A')}"):
-                    assert_project_payload({'project': project}) # Оборачиваем каждый проект в словарь с ключом 'project' для assert_project_payload
+    projects_list = payload['projects']
+
+    with allure.step(f"Проверка наличия проекта в списке и того что все проекты в списке принадлежат нужному спейсу."):
+        # Убеждаемся, что temp_project присутствует в списке
+        assert any(p['_id'] == temp_project for p in projects_list), \
+            f"Временный проект с ID {temp_project} не найден в списке полученных проектов."
+
+        for project in projects_list:
+            assert project['space'] == temp_space, \
+                f"Проект с ID {project['_id']} привязан к пространству '{project['space']}', ожидалось '{temp_space}'."
+
+    with allure.step("Пошаговая проверка структуры каждого проекта в списке"):
+        if projects_list:
+            for project in projects_list:
+                with allure.step(f"Проверка структуры проекта"):
+                    # assert_project_payload ожидает полезную нагрузку в формате {'project': {...}}
+                    assert_project_payload({'project': project})
         else:
-            with allure.step("Список проектов пуст, структура каждого проекта не проверяется"):
-                pass
+            allure.attach("Список проектов пуст, структура каждого проекта не проверяется.", name="Информация")
