@@ -8,18 +8,9 @@ from tests.test_backend.data.endpoints.Project.project_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
+
 @allure.title('Тест: Проверка получения проекта по ID, payload ответа соответствует ожидаемой структуре')
 def test_get_project_output_payload(owner_client, temp_project, temp_space):
-    """
-    Этот тест проверяет функциональность получения проекта по его идентификатору и идентификатору пространства.
-    Он отправляет POST-запрос на эндпоинт получения проекта, используя предварительно созданные
-    temp_project и temp_space.
-    Затем тест проверяет:
-    - Что HTTP-статус ответа равен 200.
-    - Что полезная нагрузка (payload) ответа соответствует ожидаемой структуре с помощью assert_project_payload.
-    - Что возвращенные ID проекта и Space ID в ответе точно совпадают с теми, что были использованы в запросе,
-      гарантируя корректность полученных данных.
-    """
     with allure.step(f"Отправка запроса на получение проекта с ID: {temp_project} и Space ID: {temp_space}"):
         response = owner_client.post(**get_project_endpoint(project_id=temp_project, space_id=temp_space))
 
