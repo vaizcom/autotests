@@ -2,7 +2,6 @@ import datetime
 import secrets
 import random
 import string
-import uuid
 
 from tests.test_backend.data.endpoints.Board.constants import (
     MAX_BOARD_NAME_LENGTH,
@@ -25,7 +24,8 @@ def generate_project_name() -> str:
     Генерирует уникальное имя для Project.
     Пример: project_abc123
     """
-    return f'project_{uuid.uuid4().hex[:12]}'
+    current_datetime = datetime.datetime.now().strftime("%m-%d_%H-%M-%S")
+    return f'proj_{current_datetime}'
 
 
 def generate_slug(min_len: int = 4, max_len: int = 8) -> str:
@@ -35,6 +35,15 @@ def generate_slug(min_len: int = 4, max_len: int = 8) -> str:
     """
     length = random.randint(min_len, max_len)
     return ''.join(random.choices(string.ascii_letters, k=length))
+
+
+def generate_project_description() -> str:
+    """
+    Генерирует уникальное description для Project.
+    Пример: project_abc123
+    """
+    current_datetime = datetime.datetime.now().strftime("%m-%d_%H-%M-%S")
+    return f'description_{current_datetime}'
 
 
 def generate_board_name(min_len: int = 1, max_len=MAX_BOARD_NAME_LENGTH):

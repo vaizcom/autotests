@@ -22,7 +22,7 @@ def test_get_project_access_by_roles(request, client_fixture, expected_status, m
     with allure.step(f'Получение клиента: {client_fixture}'):
         client = request.getfixturevalue(client_fixture)
 
-    with allure.step(f"Отправка запроса на получение project"):
+    with allure.step("Отправка запроса на получение project"):
         payload = get_project_endpoint(
             project_id=main_project,
             space_id=main_space
@@ -55,7 +55,7 @@ def test_negative_access_to_project(
     with allure.step(f'Получение клиента: {client_fixture}'):
         client = request.getfixturevalue(client_fixture)
 
-    with allure.step(f"Отправка запроса на получение данных projectID"):
+    with allure.step("Отправка запроса на получение данных projectID"):
         payload = get_project_endpoint(
             project_id=main_project,
             space_id=main_space

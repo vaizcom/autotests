@@ -2,10 +2,6 @@ import pytest
 
 pytestmark = [pytest.mark.backend]
 
-MAX_PROJECT_NAME_LENGTH = 25
-MAX_PROJECT_SLUG_LENGTH = 8
-MAX_PROJECT_DESCRIPTION_LENGTH = 1024
-
 
 def create_project_endpoint(name: str, color: str, icon: str, description: str, slug: str, space_id: str):
     return {
@@ -48,10 +44,30 @@ def create_board_endpoint(
     }
 
 
-def edit_project_endpoint(project_id: str, name: str, space_id: str):
+def edit_project_endpoint(
+    project_id: str,
+    name: str = None,
+    color: str = None,
+    description: str = None,
+    icon: str = None,
+    slug: str = None,
+    space_id: str = None,
+):
+    payload = {'projectId': project_id}
+    if name is not None:
+        payload['name'] = name
+    if color is not None:
+        payload['color'] = color
+    if description is not None:
+        payload['description'] = description
+    if icon is not None:
+        payload['icon'] = icon
+    if slug is not None:
+        payload['slug'] = slug
+
     return {
         'path': '/EditProject',
-        'json': {'projectId': project_id, 'name': name},
+        'json': payload,
         'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
     }
 

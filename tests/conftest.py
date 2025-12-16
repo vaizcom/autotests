@@ -3,7 +3,7 @@ import random
 import pytest
 import allure
 
-from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST
+from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST, MAIN_PROJECT_2_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
@@ -12,7 +12,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import create
 from tests.test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from tests.core.client import APIClient
 from tests.core.auth import get_token
-from tests.config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID
+from tests.config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID, MAIN_PROJECT_2_ID
 from tests.test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
 from tests.test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint,
@@ -104,6 +104,14 @@ def main_project(main_client, main_space):
     resp = main_client.post(**get_project_endpoint(project_id=MAIN_PROJECT_ID, space_id=main_space))
     assert resp.status_code == 200, f'Space {MAIN_PROJECT_ID} not found: {resp.text}'
     return MAIN_PROJECT_ID
+
+# Проект в котором есть пользователи с разными ролями, для разных сценариев (архивация, редактирования и пр)
+@pytest.fixture(scope='session')
+def main_project_2(main_client, main_space):
+    assert MAIN_PROJECT_2_ID, 'Не задана переменная окружения MAIN_PROJECT_2_ID'
+    resp = main_client.post(**get_project_endpoint(project_id=MAIN_PROJECT_2_ID, space_id=main_space))
+    assert resp.status_code == 200, f'Space {MAIN_PROJECT_2_ID} not found: {resp.text}'
+    return MAIN_PROJECT_2_ID
 
 @pytest.fixture(scope='session')
 def second_project(main_client, second_space):
