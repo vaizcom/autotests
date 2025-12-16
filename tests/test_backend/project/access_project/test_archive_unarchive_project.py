@@ -32,7 +32,6 @@ def test_archive_unarchive_project(request, client_fixture, expected_status, own
 
         project_needs_unarchive = False
         if current_get_response.status_code == 400:
-            # Проверяем, что это ошибка "ItemInArchive", как указано в задании
             error_code = current_get_response.json().get('error', {}).get('code')
             assert error_code == 'ItemInArchive', f"Неожиданная ошибка при получении проекта"
             project_needs_unarchive = True
@@ -119,10 +118,7 @@ def test_archive_unarchive_project(request, client_fixture, expected_status, own
                 assert get_project_status_after_failed_unarchive.json().get('error', {}).get('code') == 'ItemInArchive', \
                     f"Ожидался код ошибки 'ItemInArchive', получен {get_project_status_after_failed_unarchive.json().get('error', {}).get('code')})"
             with allure.step(
-                    f'Шаг 3.4: Архивация проекта owner\'ом для очистки состояния после теста {client_fixture}'):
+                    f'Шаг 3.4 clin up : Разархивация проекта owner\'ом для очистки состояния после теста {client_fixture}'):
                 owner_archive_response_final = owner_client.post(
-                    **archive_project_endpoint(project_id=project_id, space_id=main_space))
+                    **unarchive_project_endpoint(project_id=project_id, space_id=main_space))
                 assert owner_archive_response_final.status_code == 200, f"Не удалось повторно архивировать проект с owner для очистки"
-                owner_archived_project_data_final = owner_archive_response_final.json()['payload']['project']
-                assert owner_archived_project_data_final.get(
-                    'archivedAt') is not None, "Проект не был архивирован owner-ом для очистки."
