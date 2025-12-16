@@ -14,19 +14,23 @@ pytestmark = [pytest.mark.backend]
 @allure.title('remove space success')
 def remove_space_success(owner_client):  # userId закрыт под Feature Toggle
     name = generate_space_name()
+
     with allure.step('Create space'):
         create_response = owner_client.post(**create_space_endpoint(name=name))
         assert create_response.status_code == 200
         space_id = create_response.json()['payload']['space']['_id']
+
     with allure.step('Remove space'):
         remove_response = owner_client.post(**remove_space_endpoint(space_id=space_id))
         assert remove_response.status_code == 200
         assert remove_response.json()['payload']['success']
+
     with allure.step('Ensure space is no longer in list'):
         list_response = owner_client.post(**get_spaces_endpoint())
         assert all(
             (s['_id'] != space_id for s in list_response.json()['payload']['spaces'])
         ), f'Removed space {space_id} всё ещё найден в GetSpaces'
+
     with allure.step('Ensure GetSpace returns error for deleted space'):
         get_response = owner_client.post(**get_space_endpoint(space_id=space_id))
         assert get_response.status_code != 200, 'GetSpace по удалённому space вернул 200'
