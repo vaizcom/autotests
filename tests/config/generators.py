@@ -37,6 +37,15 @@ def generate_slug(min_len: int = 4, max_len: int = 8) -> str:
     return ''.join(random.choices(string.ascii_letters, k=length))
 
 
+def generate_project_description() -> str:
+    """
+    Генерирует уникальное description для Project.
+    Пример: project_abc123
+    """
+    current_datetime = datetime.datetime.now().strftime("%m-%d_%H-%M-%S")
+    return f'description_{current_datetime}'
+
+
 def generate_board_name(min_len: int = 1, max_len=MAX_BOARD_NAME_LENGTH):
     """
     Генерирует уникальное имя для Project.
