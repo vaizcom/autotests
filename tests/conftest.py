@@ -12,7 +12,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import create
 from tests.test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from tests.core.client import APIClient
 from tests.core.auth import get_token
-from tests.config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID, MAIN_PROJECT_2_ID
+from tests.config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID
 from tests.test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
 from tests.test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint,

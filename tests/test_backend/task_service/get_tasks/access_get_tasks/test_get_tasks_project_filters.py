@@ -1,7 +1,6 @@
 import pytest
 import allure
 
-from test_backend.data.endpoints.Task.assert_task_payload import assert_task_payload
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]

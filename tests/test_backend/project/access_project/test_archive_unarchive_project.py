@@ -1,7 +1,6 @@
 import allure
 import pytest
 
-from conftest import main_project_2
 from tests.test_backend.data.endpoints.Project.project_endpoints import (
     get_project_endpoint,
     archive_project_endpoint,
@@ -33,7 +32,7 @@ def test_archive_unarchive_project(request, client_fixture, expected_status, own
         project_needs_unarchive = False
         if current_get_response.status_code == 400:
             error_code = current_get_response.json().get('error', {}).get('code')
-            assert error_code == 'ItemInArchive', f"Неожиданная ошибка при получении проекта"
+            assert error_code == 'ItemInArchive', "Неожиданная ошибка при получении проекта"
             project_needs_unarchive = True
         elif current_get_response.status_code == 200:
             current_project_data = current_get_response.json()['payload']['project']
@@ -95,7 +94,7 @@ def test_archive_unarchive_project(request, client_fixture, expected_status, own
             with allure.step(f'Шаг 3.1: В роли owner архивируем проект для проверки разархивации {client_fixture}'):
                 owner_archive_response = owner_client.post(
                     **archive_project_endpoint(project_id=main_project_2, space_id=main_space))
-                assert owner_archive_response.status_code == 200, f"Не удалось архивировать проект с owner перед тестом разархивации"
+                assert owner_archive_response.status_code == 200, "Не удалось архивировать проект с owner перед тестом разархивации"
                 owner_archived_project_data = owner_archive_response.json()['payload']['project']
                 assert owner_archived_project_data.get('archivedAt') is not None, "Проект не был архивирован owner-ом."
 
@@ -121,4 +120,4 @@ def test_archive_unarchive_project(request, client_fixture, expected_status, own
                     f'Шаг 3.4 clin up : Разархивация проекта owner\'ом для очистки состояния после теста {client_fixture}'):
                 owner_archive_response_final = owner_client.post(
                     **unarchive_project_endpoint(project_id=main_project_2, space_id=main_space))
-                assert owner_archive_response_final.status_code == 200, f"Не удалось повторно архивировать проект с owner для очистки"
+                assert owner_archive_response_final.status_code == 200, "Не удалось повторно архивировать проект с owner для очистки"

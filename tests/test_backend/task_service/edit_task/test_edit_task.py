@@ -3,30 +3,39 @@ import pytest
 
 from test_backend.data.endpoints.Task.assert_task_payload import assert_task_payload
 from test_backend.data.endpoints.Task.task_endpoints import edit_task_endpoint
+from test_backend.task_service.utils import get_assignee, get_current_timestamp, get_due_end, get_priority, \
+    get_random_type_id
 
 pytestmark = [pytest.mark.backend]
 
 
-def test_edit_task_minimal_payload(main_space, board_with_tasks, owner_client, main_project):
-    """Проверяет минимальный вызов без опциональных полей."""
+@allure.title("Edit Task: Проверка минимального редактирования задачи без опциональных полей")
+def test_edit_task_minimal_payload(main_space, main_board, owner_client, main_project, make_task_in_main):
+    """
+    Проверяет минимальный вызов эндпоинта редактирования задачи,
+    убеждаясь, что редактирование без опциональных полей проходит успешно
+    и базовая информация о задаче остается корректной.
+    """
+    with allure.step("Создаем новую задачу с минимальными данными"):
+        initial_task_data = make_task_in_main({
+            "name": "Edit Task: Задача для редактирования",
+        })
+    task_id = initial_task_data.get("_id")
 
-    task_id = "6939320d06e0921cfd8aeaab"
-
-    resp = owner_client.post(**edit_task_endpoint(space_id=main_space, task_id=task_id))
+    with allure.step(f"Отправляем запрос на редактирование задачи {task_id} без дополнительных полей"):
+        resp = owner_client.post(**edit_task_endpoint(space_id=main_space, task_id=task_id))
 
     with allure.step("Проверяем успешный статус и содержимое ответа"):
         assert resp.status_code == 200
         task = resp.json()["payload"]["task"]
         assert task.get("_id") == task_id, f"Некорректный _id задачи: {task.get('_id')!r}, ожидался {task_id!r}"
-
-        assert_task_payload(task, board_with_tasks, main_project)
+        assert_task_payload(task, main_board, main_project)
 
 
 @allure.title("Edit Task: проверка редактирования всех опциональных полей задачи")
-def test_edit_task_endpoint_all_fields_provided(owner_client, main_space, make_task_in_main):
+def test_edit_task_endpoint_all_fields(owner_client, main_space, make_task_in_main, main_board):
     """
     Проверяет успешное редактирование задачи, передав все возможные опциональные поля.
-    Использует фикстуру make_task_in_main для создания задачи.
     """
     initial_task_data = make_task_in_main({
         "name": "Edit Task: Задача для редактирования",
@@ -51,25 +60,25 @@ def test_edit_task_endpoint_all_fields_provided(owner_client, main_space, make_t
             f"Начальное 'name' не соответствует ожидаемому: {initial_task_data.get('name')!r}"
 
     # Данные для обновления, включая новые поля
-    new_assignees = ["6866313985fb8d104544ab6c"]  # Назначаем текущего пользователя
+    new_assignees = get_assignee(owner_client, main_space)  # случайный member_id
     new_completed_status = True
-    new_name = "New Task Name Updated"  # Немного изменено для уникальности
-    new_due_start = "2025-01-01T10:00:00.000Z"  # Добавлены миллисекунды для соответствия ISO
-    new_due_end = "2025-01-01T12:00:00.000Z"
-    new_priority = 2
-    new_types = ["6866731185fb8d104544e82c"]
-    new_cover_image = "6942c052a4dffd8a128af316"  # Немного изменено для уникальности
+    new_name = "New Task Name Updated"
+    new_due_start = get_current_timestamp()
+    new_due_end = get_due_end()
+    new_priority = get_priority()
+    new_types = get_random_type_id(owner_client, main_board, main_space)
+    new_cover_image = "69440700136ecd5583dae514"  # coverImage должен быть в базе
 
-    with allure.step(f"Отправляем запрос EditTask для редактирования задачи {task_id} со всеми полями"):
+    with allure.step("Отправляем запрос EditTask для редактирования задачи со всеми полями"):
         edit_payload = {
             "name": new_name,
             "completed": new_completed_status,
-            "dueStart": new_due_start,  # Имя поля в camelCase
-            "dueEnd": new_due_end,  # Имя поля в camelCase
+            "dueStart": new_due_start,
+            "dueEnd": new_due_end,
             "priority": new_priority,
-            "types": new_types,
+            "types": [new_types],
             "assignees": new_assignees,
-            "coverImage": new_cover_image,  # Имя поля в camelCase
+            "coverImage": new_cover_image,
             # Добавьте другие поля для редактирования здесь, если необходимо
         }
 
@@ -98,7 +107,7 @@ def test_edit_task_endpoint_all_fields_provided(owner_client, main_space, make_t
         # Для списков (assignees, types) важно проверить содержимое, а не порядок
         assert set(task.get("assignees")) == set(new_assignees), \
             f"Исполнители не обновлены или не совпадают: {task.get('assignees')!r}"
-        assert set(task.get("types")) == set(new_types), \
+        assert set(task.get("types")) == set([new_types]), \
             f"Типы задачи не обновлены или не совпадают: {task.get('types')!r}"
 
         # Для дат - API может возвращать их в слегка отличающемся формате (например, с миллисекундами)

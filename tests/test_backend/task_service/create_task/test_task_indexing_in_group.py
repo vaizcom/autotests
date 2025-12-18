@@ -58,7 +58,8 @@ def test_task_indexing_in_group(
                 if not task_ids:
                     break
                 time.sleep(1)
-            assert not task_ids, f"Группа не пуста после очистки! Остались: {task_ids}"
+            assert not task_ids, (f"Группа не пуста после очистки! Остались: {task_ids} "
+                                  f"Придется почистить вручную в базе boards ('6866731185fb8d104544e826')->taskOrderByGroups(make empty)")
 
         with allure.step("Добавить стартовые задачи в группу для сценариев где initial_tasks != 0 (Только если требуется по сценарию)"):
             for i in range(initial_tasks):
