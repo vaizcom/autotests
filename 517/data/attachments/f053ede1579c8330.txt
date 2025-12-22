@@ -1,0 +1,1 @@
+Не удалось удалить задачу 69492a2b1011b16db7023a6d после 1 попыток: статус 403, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"AccessDenied","originalType":"DeleteTask","meta":{"kind":"Board","kindId":"6866731185fb8d104544e826"}}}
