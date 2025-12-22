@@ -139,6 +139,6 @@ def test_multiple_edit_tasks_sets_completed_only_uncompleted(owner_client, main_
             pass
         try:
             if t_false:
-                owner_client.delete(**delete_task_endpoint(space_id=main_space, task_id=t_false))
+                owner_client.post(**delete_task_endpoint(space_id=main_space, task_id=t_false))
         except Exception:
             pass

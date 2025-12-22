@@ -1,6 +1,7 @@
 import allure
 import pytest
 
+from test_backend.data.endpoints.Task.assert_task_payload import assert_task_payload
 from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
 from test_backend.task_service.utils import get_client
 
@@ -52,92 +53,7 @@ def test_get_task(request, main_space, board_with_10000_tasks, client_fixture, e
 
             task = body["payload"]["task"]
 
-            # Ожидаемые ключи и типы
-            expected_schema = {
-                # строки
-                "_id": str,
-                "name": str,
-                "group": str,
-                "board": str,
-                "project": str,
-                "hrid": str,
-                "creator": str,
-                "createdAt": str,
-                "updatedAt": str,
-                "document": str,
-                #"editor": str,
-
-
-                # допускают None или строку
-                "parentTask": (str, type(None)),
-                "archiver": (str, type(None)),
-                "dueStart": (str, type(None)),
-                "dueEnd": (str, type(None)),
-                "archivedAt": (str, type(None)),
-                "completedAt": (str, type(None)),
-                "deleter": (str, type(None)),
-                "deletedAt": (str, type(None)),
-                "milestone": (str, type(None)),
-
-                # булево
-                "completed": bool,
-
-                # числа
-                "priority": int,
-
-                # массивы
-                "types": list,
-                "assignees": list,
-                "subtasks": list,
-                "milestones": list,
-                "rightConnectors": list,
-                "leftConnectors": list,
-                "customFields": list,
-
-                # словари
-                "followers": dict,
-            }
-
-            # Проверяем, что набор ключей совпадает ровно
-            with allure.step("Проверка полного совпадения набора полей задачи"):
-                actual_keys = set(task.keys())
-                expected_keys = set(expected_schema.keys())
-                missing = expected_keys - actual_keys
-                extra = actual_keys - expected_keys
-                assert not missing, f"Отсутствуют обязательные поля: {sorted(missing)}"
-                assert not extra - {"editor"}, f"Найдены лишние поля: {sorted(extra - {'editor'})}"
-                # "editor" допустим как дополнительное поле
-                if "editor" in actual_keys:
-                    assert isinstance(task["editor"], str), "Поле 'editor' (если присутствует) должно быть строкой"
-
-            # Проверка типов по схеме
-            with allure.step("Проверка типов данных всех полей задачи"):
-                for field, expected_type in expected_schema.items():
-                    value = task[field]
-                    assert isinstance(value, expected_type), (
-                        f"Поле '{field}' имеет неверный тип: {type(value).__name__}, ожидается {expected_type}"
-                    )
-
-            # Дополнительные уточнения по элементам коллекций
-            with allure.step("Дополнительные проверки содержимого коллекций"):
-                # Массивы строк
-                list_of_strings_fields = [
-                    "assignees", "subtasks", "milestones",
-                    "rightConnectors", "leftConnectors", "types", "customFields"
-                ]
-                for f in list_of_strings_fields:
-                    assert isinstance(task[f], list), f"Поле '{f}' должно быть массивом"
-                    assert all(isinstance(x, str) for x in task[f]), f"Элементы поля '{f}' должны быть строками"
-
-                # followers: ключи и значения строки
-                assert all(isinstance(k, str) for k in task["followers"].keys()), "Ключи 'followers' должны быть строками"
-                assert all(isinstance(v, str) for v in task["followers"].values()), "Значения 'followers' должны быть строками"
-
-            # Несколько бизнес-проверок значения (по возможности стабильных)
-            with allure.step("Бизнес-проверки стабильных значений"):
-                # соответствие известным контекстным ID
-                assert task["board"] == board_with_10000_tasks, "Ошибка: неверное значение поля 'board'"
-                assert task["project"] == main_project, "Ошибка: неверное значение поля 'project'"
+            assert_task_payload(task, board_with_10000_tasks, main_project)
 
     else:
         task_err = response.json()["error"]

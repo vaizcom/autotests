@@ -137,3 +137,48 @@ def multiple_edit_tasks_endpoint(
             "tasks": tasks,
         },
     }
+
+
+def edit_task_endpoint(
+    space_id: str,
+    task_id: str,
+    assignees: Optional[List[str]] = None,
+    completed: Optional[bool] = None,
+    name: Optional[str] = None,
+    dueStart: Optional[str] = None,
+    dueEnd: Optional[str] = None,
+    priority: Optional[int] = None,
+    types: Optional[List[str]] = None,
+    coverImage: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Эндпоинт для редактирования одной задачи.
+    """
+    payload: Dict[str, Any] = {
+        "taskId": task_id,
+    }
+
+    if assignees is not None:
+        payload["assignees"] = assignees
+    if completed is not None:
+        payload["completed"] = completed
+    if name is not None:
+        payload["name"] = name
+    if dueStart is not None:
+        payload["dueStart"] = dueStart
+    if dueEnd is not None:
+        payload["dueEnd"] = dueEnd
+    if priority is not None:
+        payload["priority"] = priority
+    if types is not None:
+        payload["types"] = types
+    if coverImage is not None:
+        payload["coverImage"] = coverImage
+
+    return {
+        "path": "/EditTask",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json","Current-Space-Id": space_id,
+        },
+    }
