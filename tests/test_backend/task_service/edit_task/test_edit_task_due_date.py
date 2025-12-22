@@ -22,7 +22,7 @@ def test_edit_task_due_start(owner_client, main_space, make_task_in_main, main_b
 
     new_due_start = (datetime.fromisoformat(get_current_timestamp()) + timedelta(weeks=1)).isoformat(timespec='seconds')
 
-    with allure.step(f"Отправляем запрос EditTask для редактирования даты начала, увеличив на неделю от ранее установленной даты"):
+    with allure.step("Отправляем запрос EditTask для редактирования даты начала, увеличив на неделю от ранее установленной даты"):
         edit_payload = {"dueStart": new_due_start}
         resp = owner_client.post(**edit_task_endpoint(space_id=main_space, task_id=task_id, **edit_payload))
 
@@ -77,7 +77,7 @@ def test_edit_task_due_start_after_due_end_error(owner_client, main_space, make_
     initial_task_data = make_task_in_main({"name": "Task with due end", "due_start": due_start, "due_end": due_end})
     task_id = initial_task_data.get("_id")
 
-    with allure.step(f"Отправляем запрос EditTask с dueStart позже dueEnd"):
+    with allure.step("Отправляем запрос EditTask с dueStart позже dueEnd"):
         resp = owner_client.post(**edit_task_endpoint(space_id=main_space, task_id=task_id, dueStart= due_end, dueEnd= due_start))
 
     with allure.step("Проверяем статус ошибки и содержимое тела ответа"):

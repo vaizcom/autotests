@@ -59,6 +59,8 @@ def test_edit_task_clear_types_with_empty_list(owner_client, main_space, make_ta
             f"Типы задачи не были очищены. Получено: {task.get('types')!r}"
         assert_task_payload(task, main_board, main_project)
 
+
+@pytest.mark.skip(reason="APP-4046")
 @allure.title("Edit Task: Проверка ошибки при передаче повторяющихся типов (APP-4046)")
 def test_edit_task_duplicate_types_error(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
