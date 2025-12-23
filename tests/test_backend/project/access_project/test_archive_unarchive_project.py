@@ -9,7 +9,8 @@ from tests.test_backend.data.endpoints.Project.project_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Project Service")
+@allure.suite("Access project")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -20,7 +21,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-@allure.title('Тест: Проверка архивации и разархивации проекта по ролям')
+@allure.title('Archive/Unarchive project: Проверка архивации и разархивации проекта по ролям')
 def test_archive_unarchive_project(request, client_fixture, expected_status, owner_client, main_space, main_project_2):
     allure.dynamic.title(f'Тест архивации и разархивации project: клиент={client_fixture}, ожидаемый статус={expected_status}')
     client = request.getfixturevalue(client_fixture)

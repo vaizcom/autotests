@@ -10,6 +10,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
@@ -20,7 +21,7 @@ pytestmark = [pytest.mark.backend]
     ids=['project', 'space', 'member'],
 )
 def test_edit_document_success(owner_client, kind, kind_id_fixture, temp_space, temp_document):
-    allure.dynamic.title(f'Успешное редактирование полей title и icon. {kind}')
+    allure.dynamic.title(f'Edit document: Успешное редактирование полей title и icon. {kind}')
 
     # Редактируем title и icon
     new_title = 'EditedTitle'
@@ -43,6 +44,7 @@ def test_edit_document_success(owner_client, kind, kind_id_fixture, temp_space, 
         assert updated['icon'] == new_icon
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'fake_id, expected_status',
     [
@@ -54,7 +56,7 @@ def test_edit_document_success(owner_client, kind, kind_id_fixture, temp_space, 
     ids=['not_found', 'empty', 'null', 'bad_format'],
 )
 def test_edit_document_invalid_id(owner_client, temp_space, fake_id, expected_status):
-    allure.dynamic.title(f'Негативные сценарии: некорректный documentId. id={fake_id}')
+    allure.dynamic.title(f'Edit document Validation: Негативные сценарии: некорректный documentId. id={fake_id}')
     with allure.step('Attempt edit with invalid id'):
         resp = owner_client.post(
             **edit_document_endpoint(
@@ -72,40 +74,7 @@ def test_edit_document_invalid_id(owner_client, temp_space, fake_id, expected_st
         else:
             assert payload is None
 
-
-@pytest.mark.parametrize(
-    'kind, kind_id_fixture',
-    [
-        ('Project', 'temp_project'),
-        ('Space', 'temp_space'),
-        ('Member', 'temp_member'),
-    ],
-    ids=['project', 'space', 'member'],
-)
-def test_edit_document_forbidden_no_membership(
-    owner_client, guest_client, kind, kind_id_fixture, temp_space, temp_document
-):
-    allure.dynamic.title(
-        f'Попытка редактировать документ из чужого space (kind={kind})— должен вернуться MemberDidNotFound'
-    )
-    # Создаем документ владельцем temp_document
-    # Гость пытается редактировать
-    with allure.step('Guest edit attempt'):
-        resp2 = guest_client.post(
-            **edit_document_endpoint(
-                document_id=temp_document['_id'],
-                title='X',
-                icon='Y',
-                space_id=temp_space,
-            )
-        )
-        assert resp2.status_code == 400
-        body2 = resp2.json()
-        assert 'error' in body2
-        assert not body2.get('payload')
-        assert body2['error']['code'] == 'MemberDidNotFound'
-
-
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
@@ -117,7 +86,7 @@ def test_edit_document_forbidden_no_membership(
 )
 def test_edit_document_overwrite(owner_client, kind, kind_id_fixture, temp_space, temp_document):
     allure.dynamic.title(
-        f'Два последовательных запроса на редактирование одного документа- проверяем что последнее изменение сохранилось.{kind}'
+        f'Edit document: Два последовательных запроса на редактирование одного документа- проверяем что последнее изменение сохранилось.{kind}'
     )
     # 1) Создаём документ temp_document["_id"]
     # 2) Первый апдейт
@@ -163,7 +132,7 @@ def test_edit_document_overwrite(owner_client, kind, kind_id_fixture, temp_space
         assert final['title'] == second_title
         assert final['icon'] == second_icon
 
-
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
@@ -184,7 +153,7 @@ def test_edit_document_overwrite(owner_client, kind, kind_id_fixture, temp_space
 def test_edit_document_title_length(
     owner_client, request, kind, kind_id_fixture, space_id_function, length, expected_status
 ):
-    allure.dynamic.title(f'Проверка граничной валидации длины title: LENGTH = {length} for {kind}')
+    allure.dynamic.title(f'Edit document title: Проверка граничной валидации длины title: LENGTH = {length} for {kind}')
     kind_id = request.getfixturevalue(kind_id_fixture)
 
     # Создаём документ

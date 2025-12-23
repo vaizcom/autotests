@@ -16,6 +16,8 @@ def excluded_documents(main_space_doc, main_project_doc):
     return {main_space_doc, main_project_doc}
 
 
+@allure.parent_suite("Document Service")
+@allure.title('Document Service: Проверяем архивирование всех документов в спейсе и проекте')
 @pytest.mark.parametrize(
     'kind, container_fixture',
     [
@@ -26,7 +28,7 @@ def excluded_documents(main_space_doc, main_project_doc):
 )
 def test_archive_all_documents(request, owner_client, kind, container_fixture, main_space, excluded_documents):
     """
-    Проверяем удаление всех документов в пространстве и проекте.
+    Проверяем архивирование всех документов в пространстве и проекте.
     """
     with allure.step(f'Подготовка к удалению документов в {kind}'):
         container_id = request.getfixturevalue(container_fixture)
@@ -37,7 +39,7 @@ def test_archive_all_documents(request, owner_client, kind, container_fixture, m
         # Получаем список ID документов
         doc_ids = [doc['_id'] for doc in docs_resp.json()['payload']['documents']]
 
-    with allure.step(f'Удаление всех документов в {kind}, кроме исключений'):
+    with allure.step(f'Архивирование всех документов в {kind}, кроме исключений'):
         for doc_id in doc_ids:
             if doc_id in excluded_documents:
                 allure.step(f'Пропуск документа {doc_id}, т.к. он в списке исключений.')

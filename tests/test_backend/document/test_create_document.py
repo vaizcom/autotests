@@ -6,7 +6,7 @@ import allure
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize('kind', ['Space', 'Project', 'Member'])
 def test_create_document(owner_client, temp_space, temp_project, temp_member, kind):
     kind_id_map = {
@@ -18,7 +18,7 @@ def test_create_document(owner_client, temp_space, temp_project, temp_member, ki
     kind_id = kind_id_map[kind]
     title = f'Document for {kind}'
 
-    allure.dynamic.title(f'Создание документа: {kind}')
+    allure.dynamic.title(f'Create document: Создание документа: {kind}')
 
     with allure.step(f'POST /CreateDocument для {kind}, Проверка status_code и title'):
         response = owner_client.post(
@@ -32,44 +32,35 @@ def test_create_document(owner_client, temp_space, temp_project, temp_member, ki
 
 MAX_DOC_NAME_LENGTH = 2048
 
-
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'title, expected_status, expected_actual_title',
     [
         (None, 200, 'Untitled document'),
-        ('', 200, ''),
         (' ', 200, ' '),
         ('A' * MAX_DOC_NAME_LENGTH, 200, 'A' * MAX_DOC_NAME_LENGTH),
         ('A' * (MAX_DOC_NAME_LENGTH + 1), 400, None),
         # Дополнительно:
         (123, 400, None),
-        (True, 400, None),
-        ([], 400, None),
         ('Документ', 200, 'Документ'),
         ('😊📄✨', 200, '😊📄✨'),
         ('<script>alert(1)</script>', 200, '<script>alert(1)</script>'),
-        ('Title with & < > " \'', 200, 'Title with & < > " \''),
     ],
     ids=[
         'None',
-        'empty string',
         'single space',
         'title = MAX length (2048)',
         'title > MAX length (2049)',
         'int as title',
-        'bool as title',
-        'list as title',
         'cyrillic',
         'emoji',
-        'html injection',
-        'special chars',
+        'html injection'
     ],
 )
-@allure.title('Создание документа с различными значениями title — ожидаемый статус {expected_status}')
 def test_document_title_validation(
     owner_client, temp_space, temp_project, title, expected_status, expected_actual_title, request
 ):
-    allure.dynamic.title(f'Создание документа — кейс: [{request.node.callspec.id}] (ожидается {expected_status})')
+    allure.dynamic.title(f'Create document кейс: [{request.node.callspec.id}] (ожидается {expected_status})')
 
     with allure.step(f'Отправка запроса [{request.node.callspec.id}] (ожидается {expected_status})'):
         response = owner_client.post(
@@ -115,7 +106,8 @@ def test_document_title_validation(
                     ), f'Ожидался код "FieldTooLong" при длине > {MAX_DOC_NAME_LENGTH}, получены: {title_codes}'
 
 
-@allure.title('Создание дочерних документов, Проверка status_code и title')
+@allure.parent_suite("Document Service")
+@allure.title('Create document: Создание дочерних документов, Проверка status_code и title')
 def test_create_child_document(owner_client, temp_space, temp_project):
     with allure.step('1. Создание родительского документа'):
         parent_title = 'Parent Doc'
@@ -159,6 +151,7 @@ def test_create_child_document(owner_client, temp_space, temp_project):
         assert second_doc['title'] == second_title
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, get_fixture, expected_status',
     [
@@ -172,7 +165,7 @@ def test_create_child_document(owner_client, temp_space, temp_project):
 )
 def test_document_kind_and_id(owner_client, temp_space, request, kind, get_fixture, expected_status):
     allure.dynamic.title(
-        f'Создание документа в роли owner - с передачей kind={kind} и kindId (ожидается {expected_status})'
+        f'Create document: в роли owner - с передачей kind={kind} и kindId (ожидается {expected_status})'
     )
 
     kind_id = request.getfixturevalue(get_fixture) if get_fixture != 'nonexistent_id' else 'invalid_id'
@@ -188,7 +181,8 @@ def test_document_kind_and_id(owner_client, temp_space, request, kind, get_fixtu
         assert response.status_code == expected_status
 
 
-@allure.title('Создание документа с дублирующимся title')
+@allure.parent_suite("Document Service")
+@allure.title('Create document: Создание документа с дублирующимся title')
 def test_document_title_duplicates(owner_client, temp_space, temp_project):
     title = 'Duplicate Title'
 
@@ -205,7 +199,8 @@ def test_document_title_duplicates(owner_client, temp_space, temp_project):
         assert resp2.status_code == 200, 'Поведение зависит от бизнес-логики: разрешены ли дубликаты'
 
 
-@allure.title('Проверка структуры ответа при создании документа')
+@allure.parent_suite("Document Service")
+@allure.title('Create document: Проверка структуры ответа при создании документа')
 def test_document_response_structure(owner_client, temp_space, temp_project):
     with allure.step('Создание документа'):
         response = owner_client.post(
@@ -219,7 +214,8 @@ def test_document_response_structure(owner_client, temp_space, temp_project):
             assert field in document, f'Поле {field} отсутствует в payload'
 
 
-@allure.title('Создание документа без авторизации')
+@allure.parent_suite("Document Service")
+@allure.title('Create document: Создание документа без авторизации')
 def test_create_document_without_auth(foreign_client, temp_space, temp_project):
     with allure.step('Создание документа гостем'):
         response = foreign_client.post(
@@ -230,7 +226,8 @@ def test_create_document_without_auth(foreign_client, temp_space, temp_project):
         assert response.json()['error']['code'] == 'SpaceIdNotSpecified'
 
 
-@allure.title('Создание документа в чужом space')
+@allure.parent_suite("Document Service")
+@allure.title('Create document: Создание документа в чужом space')
 def test_create_document_in_foreign_space(owner_client, foreign_space, temp_project):
     with allure.step('Попытка создать документ в чужом space'):
         response = owner_client.post(

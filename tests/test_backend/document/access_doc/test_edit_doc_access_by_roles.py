@@ -223,3 +223,36 @@ def test_edit_personal_doc_different_roles(
         if doc_id:
             with allure.step('Архивация документа'):
                 creator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
+
+
+@pytest.mark.parametrize(
+    'kind, kind_id_fixture',
+    [
+        ('Project', 'temp_project'),
+        ('Space', 'temp_space'),
+        ('Member', 'temp_member'),
+    ],
+    ids=['project', 'space', 'member'],
+)
+def test_edit_document_forbidden_no_membership(
+    owner_client, foreign_client, kind, kind_id_fixture, temp_space, temp_document
+):
+    allure.dynamic.title(
+        f'Edit document: Попытка редактировать документ из чужого space (kind={kind})— должен вернуться MemberDidNotFound'
+    )
+    # Создаем документ владельцем temp_document
+    # foreign_client пытается редактировать
+    with allure.step('foreign_client edit doc'):
+        resp2 = foreign_client.post(
+            **edit_document_endpoint(
+                document_id=temp_document['_id'],
+                title='X',
+                icon='Y',
+                space_id=temp_space,
+            )
+        )
+        assert resp2.status_code == 400
+        body2 = resp2.json()
+        assert 'error' in body2
+        assert not body2.get('payload')
+        assert body2['error']['code'] == 'MemberDidNotFound'

@@ -11,7 +11,9 @@ from tests.test_backend.data.endpoints.Project.project_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 
-@allure.title('Тест: Проверка slug: уникальность до создания, неуникальность после создания, и ошибка при дубликате')
+@allure.parent_suite("Project Service")
+@allure.suite("Validation project")
+@allure.title('Validation project Slug: Проверка slug - уникальность до создания, неуникальность после создания, и ошибка при дубликате')
 def test_project_slug_unique(owner_client, temp_space):
     client = owner_client
     slug = generate_slug()
@@ -35,7 +37,9 @@ def test_project_slug_unique(owner_client, temp_space):
     assert response_2.json()['error']['code'] == 'InvalidForm'
 
 
-@allure.title('Тест: Проверка предельной длины slug')
+@allure.parent_suite("Project Service")
+@allure.suite("Validation project")
+@allure.title('Validation project: Проверка предельной длины slug')
 def test_project_slug_too_long(owner_client, temp_space):
     slug = generate_slug(MAX_PROJECT_SLUG_LENGTH + 1, MAX_PROJECT_SLUG_LENGTH + 1)
     name = generate_project_name()
@@ -44,7 +48,9 @@ def test_project_slug_too_long(owner_client, temp_space):
     assert response.status_code == 400
 
 
-@allure.title('Создание проекта с пустым slug')
+@allure.parent_suite("Project Service")
+@allure.suite("Validation project")
+@allure.title('Validation project: Создание проекта с пустым slug')
 def test_project_slug_empty(owner_client, temp_space):
     slug = ''
     name = generate_project_name()
@@ -54,8 +60,9 @@ def test_project_slug_empty(owner_client, temp_space):
     with allure.step('Проверка, что API вернул 404 – ошибка валидации'):
         assert response.status_code == 400
 
-
-@allure.title('Создание проекта с невалидным slug (не латиница)')
+@allure.parent_suite("Project Service")
+@allure.suite("Validation project")
+@allure.title('Validation project: Создание проекта с невалидным slug (не латиница)')
 def test_project_slug_only_latin_letter(owner_client, temp_space):
     slug = 'некорректный'
     name = generate_project_name()

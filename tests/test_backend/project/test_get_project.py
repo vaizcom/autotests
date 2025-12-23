@@ -8,8 +8,9 @@ from tests.test_backend.data.endpoints.Project.project_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
-@allure.title('Тест: Проверка получения проекта по ID, payload ответа соответствует ожидаемой структуре')
+@allure.parent_suite("Project Service")
+@allure.suite("Get project")
+@allure.title('Get project: Проверка получения проекта по ID, payload ответа соответствует ожидаемой структуре')
 def test_get_project(owner_client, main_project, main_space):
     with allure.step(f"Отправка запроса на получение проекта ID: {main_project} для пространства ID: {main_space}"):
         response = owner_client.post(**get_project_endpoint(project_id=main_project, space_id=main_space))

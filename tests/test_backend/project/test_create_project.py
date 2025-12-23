@@ -9,8 +9,9 @@ from tests.test_backend.data.endpoints.Project.project_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
-@allure.title('Тест: Создание проекта, проверка что payload ответа соответствует ожидаемой структуре')
+@allure.parent_suite("Project Service")
+@allure.suite("Create project")
+@allure.title('Create project: Создание проекта, проверка что payload ответа соответствует ожидаемой структуре')
 def test_create_project_output_payload(owner_client, temp_space):
     name = generate_project_name()
     slug = generate_slug()

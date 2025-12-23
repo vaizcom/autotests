@@ -7,8 +7,9 @@ from test_backend.project import MAX_PROJECT_NAME_LENGTH
 
 pytestmark = [pytest.mark.backend]
 
-
-@allure.title('Тест: Проверка предельной длины имени проекта')
+@allure.parent_suite("Project Service")
+@allure.suite("Validation project")
+@allure.title('Validation project name: Проверка предельной длины имени проекта')
 def test_project_name_too_long(owner_client, temp_space):
     name = 'P' * (MAX_PROJECT_NAME_LENGTH + 1)
     slug = generate_slug()
@@ -17,7 +18,9 @@ def test_project_name_too_long(owner_client, temp_space):
     assert response.status_code == 400
 
 
-@allure.title('Создание проекта с пустым названием')
+@allure.parent_suite("Project Service")
+@allure.suite("Validation project")
+@allure.title('Validation project empty name: Создание проекта с пустым названием')
 def test_project_name_empty(owner_client, temp_space):
     name = ''
     slug = generate_slug()
