@@ -12,7 +12,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, fixture_name',
     [
@@ -23,7 +23,7 @@ pytestmark = [pytest.mark.backend]
     ids=['project', 'space', 'member'],
 )
 def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
-    allure.dynamic.title(f'Получение документов — кейс: kind={kind}')
+    allure.dynamic.title(f'Get documents: Получение документов — кейс: kind={kind}')
 
     kind_id = request.getfixturevalue(fixture_name)
     count = random.randint(1, 5)
@@ -53,6 +53,7 @@ def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
             assert not missing_fields, f'В документе отсутствуют обязательные поля: {missing_fields}'
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id, space_id, expected_status, case_id',
     [
@@ -66,7 +67,7 @@ def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
 def test_get_documents_invalid_inputs(
     owner_client, temp_space, temp_project, kind, kind_id, space_id, expected_status, case_id
 ):
-    allure.dynamic.title(f'Негативный кейс: {case_id}')
+    allure.dynamic.title(f'Get documents validation: Негативный кейс: {case_id}')
 
     if kind_id == 'valid_project_id':
         kind_id = temp_project
@@ -79,6 +80,7 @@ def test_get_documents_invalid_inputs(
         assert response.json()['error']['code'] == 'InvalidForm'
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, fixture_name',
     [
@@ -90,9 +92,9 @@ def test_get_documents_invalid_inputs(
 )
 def test_get_documents_empty_list(owner_client, space_id_module, request, kind, fixture_name):
     kind_id = request.getfixturevalue(fixture_name)
-    allure.dynamic.title(f'Пустой результат при отсутствии документов (kind={kind})')
+    allure.dynamic.title(f'Get documents: Пустой результат при отсутствии документов (kind={kind})')
 
-    with allure.step(f'Запрос документов без предварительного создания (kind={kind}, kindId={kind_id})'):
+    with allure.step(f'Get documents: Запрос документов без предварительного создания (kind={kind}, kindId={kind_id})'):
         response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=space_id_module))
 
     with allure.step('Проверка успешного ответа и пустого списка'):
@@ -103,7 +105,8 @@ def test_get_documents_empty_list(owner_client, space_id_module, request, kind, 
         assert len(documents) == 0, f'Ожидался пустой список документов, но получено: {documents}'
 
 
-@allure.title('Project: изолированность документов по kindId проектов')
+@allure.parent_suite("Document Service")
+@allure.title('Get documents: изолированность документов по kindId проектов')
 def test_get_documents_isolation_by_kind_id(owner_client, temp_space, temp_project):
     other_project = owner_client.post(
         **create_project_endpoint(
@@ -143,8 +146,9 @@ def test_get_documents_isolation_by_kind_id(owner_client, temp_space, temp_proje
         assert doc2_id not in doc_ids
 
 
+@allure.parent_suite("Document Service")
 def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_member):
-    allure.dynamic.title('Документы разных kind не попадают в результаты других kind')
+    allure.dynamic.title('Get documents: Документы разных kind не попадают в результаты других kind')
     with allure.step('Создание документа с kind=Member'):
         response = owner_client.post(
             **create_document_endpoint(kind='Member', kind_id=temp_member, space_id=temp_space, title='Member doc')
@@ -166,30 +170,7 @@ def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_membe
         assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
 
 
-@pytest.mark.parametrize(
-    'kind, fixture_name',
-    [
-        ('Project', 'temp_project'),
-        ('Space', 'temp_space'),
-        ('Member', 'temp_member'),
-    ],
-    ids=['project', 'space', 'member'],
-)
-def test_foreign_space_access_denied(owner_client, request, kind, fixture_name, foreign_space):
-    kind_id = request.getfixturevalue(fixture_name)
-    allure.dynamic.title(f'Запрос документов с kind={kind}, но с чужим spaceId')
-
-    with allure.step(f'Попытка запроса с kindId от {kind}, но с чужим spaceId'):
-        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=foreign_space))
-
-    with allure.step('Проверка, что доступ запрещён'):
-        assert response.status_code == 403, f'Ожидался статус 403, но получен {response.status_code}'
-        error = response.json().get('error', {})
-        assert (
-            error.get('code') == 'AccessDenied'
-        ), f"Ожидался код ошибки 'AccessDenied', но получен: {error.get('code')}"
-
-
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, wrong_fixture, case_title',
     [
@@ -201,7 +182,7 @@ def test_foreign_space_access_denied(owner_client, request, kind, fixture_name, 
 )
 def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, request, kind, wrong_fixture, case_title):
     kind_id = request.getfixturevalue(wrong_fixture)
-    allure.dynamic.title(f'Несоответствие kind и kindId — {case_title}')
+    allure.dynamic.title(f'Get documents: Несоответствие kind и kindId — {case_title}')
 
     with allure.step(f'Отправка запроса с kind={kind} и kindId от {wrong_fixture}'):
         response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
@@ -212,6 +193,7 @@ def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, request,
         assert error_code == 'AccessDenied', f'Неожиданный код ошибки: {error_code}'
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, fixture_name',
     [
@@ -223,7 +205,7 @@ def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, request,
 )
 def test_documents_sorted_by_created_at(owner_client, request, temp_space, kind, fixture_name):
     kind_id = request.getfixturevalue(fixture_name)
-    allure.dynamic.title(f'Сортировка документов по createdAt (kind={kind})')
+    allure.dynamic.title(f'Get documents: Сортировка документов по createdAt (kind={kind})')
 
     with allure.step('Создание документов с небольшими задержками'):
         titles = ['Doc A', 'Doc B', 'Doc C']

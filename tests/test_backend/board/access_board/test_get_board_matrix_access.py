@@ -7,7 +7,8 @@ from tests.test_backend.data.endpoints.Board.board_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Board Service")
+@allure.suite("Access board")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -34,7 +35,8 @@ def test_get_board_access_by_roles(request, client_fixture, expected_status, boa
     with allure.step(f'Проверка статус-кода: ожидаемый {expected_status}'):
         assert response.status_code == expected_status, response.text
 
-
+@allure.parent_suite("Board Service")
+@allure.suite("Access board")
 @pytest.mark.parametrize(
     'client_fixture, expected_status, expected_error_code',
     [

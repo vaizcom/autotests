@@ -4,8 +4,9 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-
-@allure.title("GetTasks: Проверка структуры и типов полей задач в ответе")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.title("GetTasks schema: Проверка структуры и типов полей задач в ответе")
 def test_get_tasks_schema(owner_client, main_space, board_with_10000_tasks):
     """
     Проверка структуры и типов полей задач только для owner_client.

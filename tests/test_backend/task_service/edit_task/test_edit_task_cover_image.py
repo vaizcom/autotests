@@ -5,8 +5,10 @@ from test_backend.data.endpoints.Task.task_endpoints import edit_task_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-
-@allure.title("Edit Task: Проверка редактирования поля 'coverImage'")
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Cover_image edit Task")
+@allure.title("Edit Task Cover_image: Проверка редактирования поля 'coverImage'")
 def test_edit_task_only_cover_image(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет успешное редактирование поля 'coverImage' задачи.

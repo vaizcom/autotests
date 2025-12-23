@@ -6,8 +6,10 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("Фильтрация задач: completed=false — возвращаются только незавершённые задачи")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks completed: completed=false — возвращаются только незавершённые задачи")
 def test_get_tasks_completed_false(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при completed=false API возвращает только незавершённые задачи.
@@ -31,8 +33,10 @@ def test_get_tasks_completed_false(owner_client, main_space, board_with_10000_ta
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("Фильтрация задач: completed=true — возвращаются только завершенные задачи")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks completed: completed=true — возвращаются только завершенные задачи")
 def test_get_tasks_completed_true(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при completed=true выдача включает только завершённые задачи и корректность их completedAt
@@ -66,8 +70,10 @@ def test_get_tasks_completed_true(owner_client, main_space, board_with_10000_tas
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("Фильтрация задач: completed некорректного типа — ошибка валидации (400)")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks completed: completed некорректного типа — ошибка валидации (400)")
 def test_get_tasks_completed_invalid_type(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при передаче некорректного значения параметра completed (не boolean)

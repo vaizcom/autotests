@@ -11,7 +11,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'creator_fixture, duplicator_fixture, expected_status',
     [
@@ -134,6 +135,9 @@ def test_duplicate_project_and_space_docs_different_roles(
                 duplicator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_copy_id))
 
 
+
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'creator_fixture, duplicator_fixture, expected_status',
     [
@@ -237,6 +241,11 @@ def test_duplicate_personal_doc_different_roles(
                 with allure.step('Проверка названия дублированного документа'):
                     expected_title = f'{original_title} (copy)'
                     assert doc_copy['title'] == expected_title
+            else:
+                body2 = duplicate_response.json()
+                assert 'error' in body2
+                assert body2['error']['code'] == 'AccessDenied'
+                assert not body2.get('payload')
 
     finally:
         # Очистка тестовых данных
@@ -247,3 +256,35 @@ def test_duplicate_personal_doc_different_roles(
         if doc_copy_id:
             with allure.step('Архивация копии документа'):
                 duplicator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_copy_id))
+
+
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
+@pytest.mark.parametrize(
+    'kind, kind_id_fixture',
+    [
+        ('Project', 'temp_project'),
+        ('Space', 'temp_space'),
+        ('Member', 'temp_member'),
+    ],
+    ids=['project', 'space', 'member'],
+)
+def test_duplicate_document_forbidden_no_membership(
+    owner_client, foreign_client, kind, kind_id_fixture, temp_space, temp_document
+):
+    allure.dynamic.title(f'Duplicate document: Авторизован, но не участник пространства — дублирование запрещено {kind}')
+
+    # Создаём оригинал temp_document
+    # foreign_client пытается дублировать
+    with allure.step('foreign_client пытается дублировать, ошибка SpaceIdNotSpecified'):
+        dup_resp = foreign_client.post(
+            **duplicate_document_endpoint(
+                document_id=temp_document['_id'],
+                space_id=temp_space,
+            )
+        )
+        assert dup_resp.status_code == 400
+        body2 = dup_resp.json()
+        assert 'error' in body2
+        assert body2['error']['code'] == 'SpaceIdNotSpecified'
+        assert not body2.get('payload')

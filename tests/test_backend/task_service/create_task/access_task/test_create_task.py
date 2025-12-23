@@ -10,7 +10,9 @@ from test_backend.task_service.utils import validate_hrid, get_client, get_membe
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("access_task")
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
+@allure.sub_suite("Access Task")
 @allure.title("Тестирование создания задачи разными пользовательскими ролями с минимальным набором полей."
               " Проверка полного совпадения набора ключей задачи")
 @pytest.mark.parametrize(
@@ -111,7 +113,10 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
                     f"Не удалось удалить задачу {task_id}: {del_resp.status_code} {del_resp.text}"
                 )
 
-@allure.parent_suite("access_task")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
+@allure.sub_suite("Access Task")
 @allure.title("Тестирование создания задачи разными пользовательскими ролями с заранее определённым набором данных (payload). Проверка содержимого ответа")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',

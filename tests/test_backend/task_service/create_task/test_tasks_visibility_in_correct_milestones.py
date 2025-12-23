@@ -6,8 +6,10 @@ from test_backend.task_service.utils import delete_task_with_retry, get_mileston
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("create_task")
-@allure.title('Проверка что все задачи корректно видны в соответствующих milestones.')
+
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
+@allure.title('Create Task: Проверка что все задачи корректно видны в соответствующих milestones.')
 def test_tasks_visibility_in_correct_milestones(create_task_in_main, owner_client, main_space, main_board):
     """
     Создаём родительскую задачу с milestone parent_ms_1,

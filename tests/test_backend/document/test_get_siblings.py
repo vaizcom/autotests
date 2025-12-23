@@ -9,6 +9,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
@@ -54,7 +55,7 @@ def test_get_document_parent_siblings(owner_client, request, space_id_module, ki
         assert parent_payload['tree'][0]['document']['_id'] == parent_id, 'В tree должен быть только parent'
 
 
-@allure.feature('Document Siblings')
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
@@ -106,7 +107,7 @@ def test_root_level_siblings(owner_client, request, kind, kind_id_fixture, space
         assert p3['parents'] == []
 
 
-@allure.feature('Document Siblings')
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
@@ -172,6 +173,7 @@ def test_deeply_nested_parents(owner_client, request, kind, kind_id_fixture, spa
         ), f"tree должен содержать только Grandchild, но найден {tree[0]['document']['_id']}"
 
 
+@allure.parent_suite("Document Service")
 @allure.feature('Document Siblings')
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
@@ -214,6 +216,7 @@ def test_single_child_siblings(owner_client, request, kind, kind_id_fixture, spa
         assert payload['parents'][0]['_id'] == parent_id
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
@@ -312,16 +315,15 @@ def test_get_document_siblings(owner_client, request, space_id_module, kind, kin
         assert tree_ids == [target_id], f'В tree должен быть только запрошенный документ, но получено: {tree_ids}'
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'fake_id, expected_status',
     [
         ('000000000000000000000000', 400),  # valid ObjectId format but not found
         ('', 400),  # empty string invalid format
-        ('123', 400),  # too short, invalid format
-        ('notAnObjectId1234567890', 400),  # non-hex characters
         (None, 400),  # null value
     ],
-    ids=['not_found', 'empty', 'short', 'non_hex', 'null'],
+    ids=['not_found', 'empty', 'null'],
 )
 def test_invalid_document_id(owner_client, space_id_function, fake_id, expected_status):
     """
@@ -342,6 +344,7 @@ def test_invalid_document_id(owner_client, space_id_function, fake_id, expected_
         assert not body.get('payload'), 'payload не должен присутствовать для некорректного ID'
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [

@@ -8,8 +8,10 @@ from tests.test_backend.data.endpoints.Task.task_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("create_task")
-@allure.title("Проверка связи родительской задачи и подзадачи, корректность отображения 'parentTask' и 'subtasks'")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
+@allure.title("Create Task: Проверка связи родительской задачи и подзадачи, корректность отображения 'parentTask' и 'subtasks'")
 def test_subtask_parent_child_relationships(
     owner_client, main_space, create_task_in_main
 ):

@@ -5,8 +5,11 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("Проверка фильтрации задач по rightConnectors")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks rightConnectors: Проверка фильтрации задач по rightConnectors")
 def test_get_tasks_filter_by_right_connectors(owner_client, main_space, board_with_tasks):
     """
     Подготовлены заренее таски для проверки на борде(board_with_tasks),
@@ -54,8 +57,10 @@ def test_get_tasks_filter_by_right_connectors(owner_client, main_space, board_wi
     )
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("Проверка фильтрации задач по leftConnectors")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks leftConnectors: Проверка фильтрации задач по leftConnectors")
 def test_get_tasks_filter_by_left_connectors(owner_client, main_space, board_with_tasks):
     """
     Подготовлены заренее таски для проверки на борде(board_with_tasks),

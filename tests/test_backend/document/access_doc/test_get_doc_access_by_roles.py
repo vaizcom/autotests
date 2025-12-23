@@ -8,6 +8,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -60,6 +62,8 @@ def test_get_project_and_space_doc_access_by_roles(
                     assert doc_data['title'] == doc['title'], 'Неверное название документа'
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [

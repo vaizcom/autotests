@@ -5,7 +5,9 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("tasks_filtered_by_criteria")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks dueStart: Проверяет фильтр dueStart")
 def test_get_tasks_due_start(main_space, owner_client, board_with_10000_tasks):
     """
@@ -40,7 +42,10 @@ def test_get_tasks_due_start(main_space, owner_client, board_with_10000_tasks):
                     f"Задача {task.get('id')} имеет dueDate {task_due_date_str}, " \
                     f"которая раньше указанной dueStart {due_start_str}"
 
-@allure.parent_suite("tasks_filtered_by_criteria")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks dueEnd: Проверяет фильтр dueEnd")
 @pytest.mark.skip(reason="Тест skip из-за бага APP-3983")
 def test_get_tasks_due_end(main_space, owner_client, board_with_10000_tasks):

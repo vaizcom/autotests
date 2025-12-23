@@ -5,6 +5,9 @@ from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
 
 pytestmark = [pytest.mark.backend]
 
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Task")
 @pytest.mark.parametrize(
     "slug_id, expected_status",
     [

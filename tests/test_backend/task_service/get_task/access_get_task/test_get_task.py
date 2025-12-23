@@ -7,6 +7,9 @@ from test_backend.task_service.utils import get_client
 
 pytestmark = [pytest.mark.backend]
 
+@allure.parent_suite("Task Service")
+@allure.suite("Get Task")
+@allure.sub_suite("Access get Task")
 @allure.title("Тестирование получения задачи(get_task) под разными ролями с валидацией набора полей и типов")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',

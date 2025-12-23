@@ -5,8 +5,9 @@ from test_backend.task_service.utils import get_subtask_ms_1, get_subtask_ms_2, 
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("create_task")
-@allure.title("Новая логика: Milestone у сабтаска берется из payload, а не наследуются от родителя")
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
+@allure.title("Create Task Новая логика: Milestone у сабтаска берется из payload, а не наследуются от родителя")
 def test_subtask_milestone_with_own_milestone(
     create_task_in_main,
     owner_client,
@@ -49,8 +50,9 @@ def test_subtask_milestone_with_own_milestone(
             delete_task_with_retry(owner_client, parent["_id"], main_space)
 
 
-@allure.parent_suite("create_task")
-@allure.title("Если поле milestone у сабтаска пустое, оно также не наследует milestone от родителя.")
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
+@allure.title("Create Task: Если поле milestone у сабтаска пустое, оно также не наследует milestone от родителя.")
 def test_subtask_milestone_without_own_milestone(
     create_task_in_main,
     owner_client,
@@ -90,8 +92,9 @@ def test_subtask_milestone_without_own_milestone(
             delete_task_with_retry(owner_client, parent["_id"], main_space)
 
 
-@allure.parent_suite("create_task")
-@allure.title("Проверка создания нескольких сабтасков с разными milestone, также не наследует milestone родителя.")
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
+@allure.title("Create Task: Проверка создания нескольких сабтасков с разными milestone, также не наследует milestone родителя.")
 def test_create_subtasks_with_various_milestones(
     create_task_in_main, owner_client, main_space, main_board
 ):
@@ -142,5 +145,3 @@ def test_create_subtasks_with_various_milestones(
             for subtask in subtasks:
                 delete_task_with_retry(owner_client, subtask["_id"], main_space)
             delete_task_with_retry(owner_client, parent_id, main_space)
-
-

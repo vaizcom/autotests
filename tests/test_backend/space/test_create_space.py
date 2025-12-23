@@ -5,8 +5,9 @@ from test_backend.data.endpoints.Space.space_endpoints import get_spaces_endpoin
 
 pytestmark = [pytest.mark.backend]
 
-
-@allure.title('Test create space visible in list. Создается спейс в котором роль owner')
+@allure.parent_suite("Space Service")
+@allure.suite("Create space")
+@allure.title('Create space: Test create space visible in list. Создается спейс в котором роль owner')
 def test_create_space_visible_in_list(owner_client, temp_space):
     with allure.step('Create space'):
         space_id = temp_space

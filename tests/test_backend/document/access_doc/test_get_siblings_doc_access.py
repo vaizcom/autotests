@@ -11,6 +11,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'creator_fixture, client_fixture, expected_status',
     [
@@ -118,6 +120,8 @@ def test_get_project_and_space_siblings_docs_access_by_roles(
             assert archive_resp.status_code == 200
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'creator_fixture, client_fixture, expected_status',
     [
@@ -233,6 +237,8 @@ def test_get_personal_siblings_docs_access_by_roles(
             assert archive_resp.status_code == 200
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'kind, container_fixture',
     [

@@ -5,7 +5,9 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.title("Проверка получения задач с невалидным space_id")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.title("GetTasks validation: Проверка получения задач с невалидным space_id")
 def test_get_tasks_invalid_space_id(owner_client, board_with_10000_tasks):
     """Проверяет поведение при запросе с несуществующим space_id"""
     invalid_space_id = "1" * 24  # Валидный ObjectId, но не существующий
@@ -17,7 +19,9 @@ def test_get_tasks_invalid_space_id(owner_client, board_with_10000_tasks):
         assert resp.status_code == 400
         assert resp.json()["error"]["code"] == "SpaceIdNotSpecified"
 
-@allure.title("Проверка получения задач с некорректным форматом board_id")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.title("GetTasks validation: Проверка получения задач с некорректным форматом board_id")
 def test_get_tasks_invalid_format_board_id(owner_client, main_space):
     """Проверяет поведение при запросе с некорректным форматом board_id"""
     malformed_board_id = "invalid_board_id"
@@ -30,7 +34,10 @@ def test_get_tasks_invalid_format_board_id(owner_client, main_space):
         assert resp.json()["error"]["code"] == "InvalidForm"
         assert resp.json()["error"]["fields"][0]["codes"] == ["board must be a mongodb id"]
 
-@allure.title("Проверка получения задач с некорректным форматом space_id")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.title("GetTasks validation: Проверка получения задач с некорректным форматом space_id")
 def test_get_tasks_invalid_format_space_id(request, board_with_10000_tasks):
     """Проверяет поведение при запросе с некорректным форматом space_id"""
     client = request.getfixturevalue('owner_client')
@@ -44,7 +51,9 @@ def test_get_tasks_invalid_format_space_id(request, board_with_10000_tasks):
         assert resp.json()["error"]["code"] == "SpaceIdNotSpecified"
 
 
-@allure.title("Проверка структуры ответа при пустом списке задач")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.title("GetTasks validation: Проверка структуры ответа при пустом списке задач")
 def test_get_tasks_empty_response_structure(request, board_with_10000_tasks, main_space):
     """Проверяет корректность структуры ответа когда задач нет"""
     # Используем клиента без доступа, чтобы гарантировать пустой список
@@ -67,7 +76,9 @@ def test_get_tasks_empty_response_structure(request, board_with_10000_tasks, mai
         assert len(payload["tasks"]) == 0, "Список задач должен быть пустым"
 
 
-@allure.title("Проверка поведения при передачи пустой строки в space_id")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.title("GetTasks validation: Проверка поведения при передачи пустой строки в space_id")
 def test_get_tasks_empty_string_params(request, board_with_10000_tasks, main_space):
     """Проверяет поведение при передаче пустых строк в качестве параметров"""
     client = request.getfixturevalue('owner_client')
@@ -82,7 +93,9 @@ def test_get_tasks_empty_string_params(request, board_with_10000_tasks, main_spa
         assert resp.json()["error"]["code"] == "SpaceIdNotSpecified"
 
 
-@allure.title("Проверка максимальной длины board_id")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.title("GetTasks validation: Проверка максимальной длины board_id")
 def test_get_tasks_max_id_length(request, main_space):
     """Проверяет поведение при передаче очень длинного board_id"""
     client = request.getfixturevalue('owner_client')
@@ -96,4 +109,3 @@ def test_get_tasks_max_id_length(request, main_space):
     with allure.step("Проверить HTTP 400"):
         assert resp.status_code == 400
         assert resp.json()["error"]["fields"][0]["codes"] == ["board must be a mongodb id"]
-

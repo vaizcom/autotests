@@ -6,8 +6,11 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("asc")
-@allure.title("Проверка сортировки задач по completedAt: ненулевые по возрастанию, затем null (в пределах лимита)")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.sub_suite("Sort by Direction ASC")
+@allure.title("GetTasks completedAt_asc: Проверка сортировки задач по completedAt- ненулевые по возрастанию, затем null (в пределах лимита)")
 def test_get_tasks_sorting_by_completed_at_asc(owner_client, main_space, board_with_10000_tasks, main_board):
 
     with allure.step("Запрос задач: completedAt ASC"):

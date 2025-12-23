@@ -11,7 +11,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -37,7 +38,7 @@ def test_archive_space_doc(request, main_space, client_fixture, expected_status)
     current_date = datetime.now().strftime('%d.%m_%H:%M:%S')
     title = f'{current_date} Space Doc For Archive Check'
 
-    allure.dynamic.title(f'Архивирование Space-документа для роли {role}')
+    allure.dynamic.title(f'Archive document: Архивирование Space-документа для роли {role}')
 
     selected_client_name = random.choice(['owner_client', 'manager_client', 'member_client'])
     random_client = request.getfixturevalue(selected_client_name)
@@ -58,7 +59,7 @@ def test_archive_space_doc(request, main_space, client_fixture, expected_status)
 
         doc_id = create_resp.json()['payload']['document']['_id']
 
-    with allure.step(f'Архивация Space-документа в роли {role}, {expected_status}'):
+    with allure.step(f'Archive document: Архивация Space-документа в роли {role}, {expected_status}'):
         archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
         assert archive_resp.status_code == expected_status
 
@@ -76,7 +77,8 @@ def test_archive_space_doc(request, main_space, client_fixture, expected_status)
             assert archive.status_code == 200
 
 
-
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -93,7 +95,7 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
     current_date = datetime.now().strftime('%d.%m_%H:%M:%S')
     title = f'{current_date} Project Doc For archive Check'
 
-    allure.dynamic.title(f'Архивирование Project-документа для роли {role}')
+    allure.dynamic.title(f'Archive document: Архивирование Project-документа для роли {role}')
     selected_client_name = random.choice(['owner_client', 'manager_client', 'member_client'])
 
     random_client = request.getfixturevalue(selected_client_name)
@@ -132,6 +134,8 @@ def test_archive_project_doc(request, main_project, main_space, client_fixture, 
             assert archive.status_code == 200
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -149,7 +153,7 @@ def test_archive_personal_doc(request, main_personal, main_space, client_fixture
     current_date = datetime.now().strftime('%d.%m_%H:%M:%S')
     title = f'{current_date} Doc For archive Check'
 
-    allure.dynamic.title(f'Архивирование Personal-документа для роли {role}, документ создан в роли Member')
+    allure.dynamic.title(f'Archive document: Архивирование Personal-документа для роли {role}, документ создан в роли Member')
 
     with allure.step(f'member_client создаёт Personal-документ для архивации ({title})'):
         create_resp = member_client.post(

@@ -5,6 +5,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import get_do
 pytestmark = [pytest.mark.backend]
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @allure.title(
     'Проверка доступа space_client к основному документу и отсутствия доступа к проектному документу и персональному документу'
 )
@@ -34,6 +36,8 @@ def test_space_client_document_access(
         assert response_personal.status_code == 403, 'Доступ к MAIN_PERSONAL_DOC_ID должен быть запрещён'
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @allure.title(
     'Проверка доступа project_client к основному документу, проектному документу и отсутствия доступа к персональному документу'
 )
@@ -61,6 +65,8 @@ def test_project_client_document_access(
         assert response_personal.status_code == 403, 'Доступ к MAIN_PERSONAL_DOC_ID должен быть запрещён'
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @allure.title('Проверка доступа owner_client к документам пространства, проекта и персональному документу')
 def test_owner_client_document_access(owner_client, main_space, main_space_doc, main_project_doc, main_personal_doc):
     """
@@ -82,6 +88,8 @@ def test_owner_client_document_access(owner_client, main_space, main_space_doc, 
         assert response_personal.status_code == 403, 'Доступ к MAIN_PERSONAL_DOC_ID должен быть запрещён'
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @allure.title('Проверка доступа с некорректным ID документа')
 @pytest.mark.parametrize(
     'document_id, space_id, expected_status, expected_error_code',

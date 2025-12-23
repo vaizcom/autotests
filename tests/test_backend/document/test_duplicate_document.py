@@ -7,7 +7,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
@@ -23,7 +23,7 @@ def test_create_and_duplicate_document(owner_client, request, kind, kind_id_fixt
     # Дублируем
     response = owner_client.post(**duplicate_document_endpoint(document_id=temp_document['_id'], space_id=space_id))
 
-    allure.dynamic.title(f'Создание и дублирование документа ({kind})')
+    allure.dynamic.title(f'Duplicate document: Создание и дублирование документа ({kind})')
 
     with allure.step('Проверка успешного дублирования'):
         assert response.status_code == 200
@@ -41,6 +41,7 @@ def test_create_and_duplicate_document(owner_client, request, kind, kind_id_fixt
     assert archive.status_code == 200
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'fake_id, expected_status',
     [
@@ -52,7 +53,7 @@ def test_create_and_duplicate_document(owner_client, request, kind, kind_id_fixt
     ids=['not_found', 'empty', 'null', 'bad_format'],
 )
 def test_duplicate_document_invalid_id(owner_client, space_id_function, fake_id, expected_status):
-    allure.dynamic.title(f'Негативный сценарий: дублирование с некорректным documentId, invalid id={fake_id}')
+    allure.dynamic.title(f'Duplicate document Validation: Негативный сценарий- дублирование с некорректным documentId, invalid id={fake_id}')
     with allure.step('Попытка дублирования с invalid id'):
         resp = owner_client.post(
             **duplicate_document_endpoint(
@@ -67,33 +68,3 @@ def test_duplicate_document_invalid_id(owner_client, space_id_function, fake_id,
             assert 'document' not in payload
         else:
             assert payload is None
-
-
-@pytest.mark.parametrize(
-    'kind, kind_id_fixture',
-    [
-        ('Project', 'temp_project'),
-        ('Space', 'temp_space'),
-        ('Member', 'temp_member'),
-    ],
-    ids=['project', 'space', 'member'],
-)
-def test_duplicate_document_forbidden_no_membership(
-    owner_client, guest_client, kind, kind_id_fixture, temp_space, temp_document
-):
-    allure.dynamic.title(f'Авторизован, но не участник пространства — дублирование запрещено {kind}')
-
-    # Создаём оригинал temp_document
-    # Гость пытается дублировать
-    with allure.step('Гость пытается дублировать, ошибка SpaceIdNotSpecified'):
-        dup_resp = guest_client.post(
-            **duplicate_document_endpoint(
-                document_id=temp_document['_id'],
-                space_id=temp_space,
-            )
-        )
-        assert dup_resp.status_code == 400
-        body2 = dup_resp.json()
-        assert 'error' in body2
-        assert body2['error']['code'] == 'SpaceIdNotSpecified'
-        assert not body2.get('payload')

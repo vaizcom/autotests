@@ -6,8 +6,11 @@ from test_backend.task_service.utils import get_member_profile
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("GetTasks: проверка задач с фильтрацией по creator")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks creator: проверка задач с фильтрацией по creator")
 @pytest.mark.parametrize(
     'client_fixture, expected_status, expected_name_prefix',
     [
@@ -59,8 +62,10 @@ def test_get_tasks_filtered_by_creator(request, member_client, client_fixture, m
         assert all(t.get("creator") == member_id for t in tasks), "Обнаружены задачи с иным creator"
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("GetTasks: фильтр по creator — ограниченные уровни доступа (space/project). Ожидаеся пустой список задач")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks creator: фильтр по creator — ограниченные уровни доступа (space/project). Ожидаеся пустой список задач")
 @pytest.mark.parametrize(
     'client_fixture, expected_status, expected_name_prefix',
     [
@@ -101,8 +106,10 @@ def test_get_tasks_creator_limited_access(
         assert isinstance(tasks, list)
         assert not tasks, "Ожидался пустой список задач при ограниченных правах доступа"
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("GetTasks: фильтр по creator — creator_id из non-exist-id. Ожидаем понятное сообщение об ошибке")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks creator: фильтр по creator — creator_id из non-exist-id. Ожидаем понятное сообщение об ошибке")
 def test_get_tasks_filtered_non_existent_creator(owner_client, main_space, board_with_tasks):
     with allure.step("Вызвать GetTasks с несуществующим creator_id"):
         resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, creator="non-existent-id-123", board=board_with_tasks))
@@ -117,8 +124,10 @@ def test_get_tasks_filtered_non_existent_creator(owner_client, main_space, board
         assert "creator must be a mongodb id" in codes
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("GetTasks: фильтр по creator — 2 валидных id - HTTP 400, допускается фильтрация только по одному creator")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks creator: фильтр по creator — 2 валидных id - HTTP 400, допускается фильтрация только по одному creator")
 def test_get_tasks_creator_two_valid_ids(
     main_space,
     owner_client,

@@ -6,7 +6,8 @@ from test_backend.data.endpoints.Project.project_endpoints import create_project
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Project Service")
+@allure.suite("Access project")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -18,7 +19,7 @@ pytestmark = [pytest.mark.backend]
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_create_project_access_by_roles(request, client_fixture, expected_status, main_space):
-    allure.dynamic.title(f'Тест создания project: клиент={client_fixture}, ожидаемый статус={expected_status}')
+    allure.dynamic.title(f'Create project: клиент={client_fixture}, ожидаемый статус={expected_status}')
     prj_id = None
     try:
         client = request.getfixturevalue(client_fixture)

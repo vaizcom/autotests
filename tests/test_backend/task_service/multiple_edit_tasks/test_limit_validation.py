@@ -5,7 +5,9 @@ from test_backend.data.endpoints.Task.task_endpoints import multiple_edit_tasks_
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("multiple_edit_tasks")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Multiple Edit Tasks")
 def test_multiple_edit_tasks_limit(owner_client, main_space, create_30_tasks):
     allure.dynamic.title("Multiple Edit Tasks: Проверка установленного лимита в 21 задачу — ожидаем 400 или TooManyTasksSelected")
     with allure.step("Создаём 21 задачу"):

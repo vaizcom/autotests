@@ -10,6 +10,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.skip('BUG: APP-3037 mark_recent_document не перемещает документ вверх списка recent')
 @pytest.mark.parametrize(
     'client_fixture, expected_status',

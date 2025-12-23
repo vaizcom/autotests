@@ -5,8 +5,12 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("desc")
-@allure.title("GetTasks: проверка сортировки по priority (убывание)")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.sub_suite("Sort by Direction DESC")
+@allure.title("GetTasks priority: проверка сортировки по priority (убывание)")
 def test_get_tasks_sorted_by_priority_desc(owner_client, main_space, board_with_tasks):
     """
     Проверяет, что при сортировке по 'priority' в убывающем порядке,

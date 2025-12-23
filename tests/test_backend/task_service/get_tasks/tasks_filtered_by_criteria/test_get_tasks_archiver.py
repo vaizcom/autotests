@@ -7,8 +7,10 @@ from test_backend.task_service.utils import get_member_profile
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("GetTasks: фильтр по archiver")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks archiver: фильтр по archiver")
 @pytest.mark.parametrize(
     'client_fixture, expected_status, expected_name_prefix',
     [

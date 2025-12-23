@@ -8,6 +8,10 @@ from test_backend.task_service.utils import get_assignee, get_current_timestamp,
 
 pytestmark = [pytest.mark.backend]
 
+
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Access edit Task")
 @pytest.mark.parametrize(
     "client_fixture_name, expected_status_code",
     [
@@ -55,6 +59,9 @@ def test_edit_task_minimal_payload(
             assert error_message.get("error", {}).get("code") == "AccessDenied"
 
 
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Access edit Task")
 @pytest.mark.parametrize(
     "client_fixture_name, expected_status_code",
     [

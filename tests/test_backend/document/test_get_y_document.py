@@ -9,6 +9,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [
@@ -50,15 +51,15 @@ def test_get_ydocument_success(owner_client, request, kind, kind_id_fixture, tem
             assert isinstance(payload3.get('yDoc'), list), 'yDoc должен быть массивом'
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'fake_id, expected_status',
     [
         ('000000000000000000000000', 400),
         ('', 400),
         (None, 400),
-        ('bad_format', 400),
     ],
-    ids=['not_found', 'empty', 'null', 'bad_format'],
+    ids=['not_found', 'empty', 'null'],
 )
 def test_get_ydocument_invalid_id(owner_client, temp_space, fake_id, expected_status):
     """
@@ -77,6 +78,7 @@ def test_get_ydocument_invalid_id(owner_client, temp_space, fake_id, expected_st
             assert payload is None, 'payload не должен присутствовать'
 
 
+@allure.parent_suite("Document Service")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [

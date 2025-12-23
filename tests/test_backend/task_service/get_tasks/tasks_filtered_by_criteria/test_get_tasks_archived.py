@@ -5,8 +5,9 @@ from tests.test_backend.data.endpoints.Task.task_endpoints import get_tasks_endp
 
 pytestmark = [pytest.mark.backend]
 
-
-@allure.parent_suite("tasks_filtered_by_criteria")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks: фильтр по archived=false — возвращаются только неархивные задачи")
 def test_get_tasks_archived_false(owner_client, main_space, board_with_10000_tasks):
     """
@@ -35,7 +36,9 @@ def test_get_tasks_archived_false(owner_client, main_space, board_with_10000_tas
             assert t.get("archiver") is None, f"Задача {t.get('_id')} помечена как архивная при withArchived=false"
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks: фильтр по archived=true — возвращаются only архивные задачи")
 def test_get_tasks_archived_true(owner_client, main_space, board_with_10000_tasks):
     """
@@ -89,7 +92,9 @@ def test_get_tasks_archived_true(owner_client, main_space, board_with_10000_task
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
 @allure.title("Фильтрация задач: Archived некорректного типа — ошибка валидации (400)")
 def test_get_tasks_archived_invalid_type(owner_client, main_space, board_with_10000_tasks):
     """

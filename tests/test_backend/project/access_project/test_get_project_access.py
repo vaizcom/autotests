@@ -5,7 +5,8 @@ from test_backend.data.endpoints.Project.project_endpoints import get_project_en
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Project Service")
+@allure.suite("Access project")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -17,7 +18,7 @@ pytestmark = [pytest.mark.backend]
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_get_project_access_by_roles(request, client_fixture, expected_status, main_project, main_space):
-    allure.dynamic.title(f'Тест получения project: клиент={client_fixture}, ожидаемый статус={expected_status}')
+    allure.dynamic.title(f'Get project: клиент={client_fixture}, ожидаемый статус={expected_status}')
 
     with allure.step(f'Получение клиента: {client_fixture}'):
         client = request.getfixturevalue(client_fixture)
@@ -33,6 +34,8 @@ def test_get_project_access_by_roles(request, client_fixture, expected_status, m
         assert response.status_code == expected_status, response.text
 
 
+@allure.parent_suite("Project Service")
+@allure.suite("Access project")
 @pytest.mark.parametrize(
     'client_fixture, expected_status, expected_error_code',
     [
@@ -49,7 +52,7 @@ def test_negative_access_to_project(
 
     """
     allure.dynamic.title(
-        f'Негативный тест на доступ к борде: клиент={client_fixture}, ожидаемый статус={expected_status}'
+        f'Get project: Негативный тест доступ к борде клиент={client_fixture}, ожидаемый статус={expected_status}'
     )
 
     with allure.step(f'Получение клиента: {client_fixture}'):

@@ -7,8 +7,10 @@ from test_backend.task_service.utils import wait_group_empty, safe_delete_all_ta
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("create_task")
-@allure.title("Проверка что index соответствует ожидаемой позиции задачи в колонке")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
+@allure.title("Create Task: Проверка что index соответствует ожидаемой позиции задачи в колонке")
 @pytest.mark.parametrize(
     "initial_tasks, create_index, expected_position, title",
     [

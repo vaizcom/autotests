@@ -10,6 +10,8 @@ from tests.test_backend.data.endpoints.Board.board_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 
+@allure.parent_suite("Board Service")
+@allure.suite("Access board")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [

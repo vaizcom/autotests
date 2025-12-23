@@ -8,7 +8,9 @@ from tests.test_backend.data.endpoints.Task.task_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("multiple_edit_tasks")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Multiple Edit Tasks")
 @allure.title("Multiple edit Tasks: назначение assignees задачам в которой уже был установлен assignee и задаче без assignee")
 def test_multiple_edit_tasks_set_assignees(owner_client, main_space, main_project, main_board, main_personal, make_task_in_main):
     """
@@ -59,7 +61,8 @@ def test_multiple_edit_tasks_set_assignees(owner_client, main_space, main_projec
         assert assignees_2 == [target_assignee], f"Ожидался единственный ассайни {target_assignee}, получено {assignees_2}"
 
 
-@allure.parent_suite("multiple_edit_tasks")
+@allure.parent_suite("Task Service")
+@allure.suite("Multiple Edit Tasks")
 @allure.title("Multiple edit Tasks: неверный taskId должен попасть в failed при статусе 200")
 def test_multiple_edit_tasks_invalid_id_failed(owner_client, main_space, main_board, make_task_in_main):
     """
@@ -93,7 +96,8 @@ def test_multiple_edit_tasks_invalid_id_failed(owner_client, main_space, main_bo
         assert failed == [invalid_id], f"Ожидали failed=[{invalid_id}], получили: {failed}"
 
 
-@allure.parent_suite("multiple_edit_tasks")
+@allure.parent_suite("Task Service")
+@allure.suite("Multiple Edit Tasks")
 @allure.title("Multiple edit Tasks: установка списка ассайни (мультиселект) для нескольких задач")
 def test_multiple_edit_tasks_multiple_assignees(owner_client, main_space, main_board, main_personal, make_task_in_main):
     """
@@ -132,7 +136,8 @@ def test_multiple_edit_tasks_multiple_assignees(owner_client, main_space, main_b
         assert a2_final == assignees_list, f"Task2: ожидали {assignees_list}, получили {a2_final}"
 
 
-@allure.parent_suite("multiple_edit_tasks")
+@allure.parent_suite("Task Service")
+@allure.suite("Multiple Edit Tasks")
 @allure.title("Multiple edit Tasks: некорректный assigneeId статус 400 !!! тест должен упасть после исправления бага CCSS-31512 !!! ")
 def test_multiple_edit_tasks_invalid_assignee_id(owner_client, main_space, main_board, main_personal, make_task_in_main):
     """
@@ -163,7 +168,8 @@ def test_multiple_edit_tasks_invalid_assignee_id(owner_client, main_space, main_
         assert resp.status_code == 200, resp.text # CCSS-31512 400
 
 
-@allure.parent_suite("multiple_edit_tasks")
+@allure.parent_suite("Task Service")
+@allure.suite("Multiple Edit Tasks")
 @allure.title("Multiple edit Tasks: снятие ассайни (передача пустого массива) !! Не реализовано на фронте !!")
 def test_multiple_edit_tasks_clear_assignees(owner_client, main_space, main_board, main_personal, make_task_in_main):
     """

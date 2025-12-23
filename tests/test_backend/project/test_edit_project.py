@@ -8,7 +8,8 @@ from tests.test_backend.data.endpoints.Project.project_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Project Service")
+@allure.suite("Edit project")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -20,7 +21,7 @@ pytestmark = [pytest.mark.backend]
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_edit_project_name_access_by_roles(request, client_fixture, expected_status, main_project_2, main_space):
-    allure.dynamic.title(f'Тест редактирования project: клиент={client_fixture}, ожидаемый статус={expected_status}')
+    allure.dynamic.title(f'Edit project name access: клиент={client_fixture}, ожидаемый статус={expected_status}')
     client = request.getfixturevalue(client_fixture)
     new_name = generate_project_name()+"_new"
     with allure.step(f"Отправка запроса на редактирование project с новым именем: {new_name}"):
@@ -33,6 +34,8 @@ def test_edit_project_name_access_by_roles(request, client_fixture, expected_sta
             assert edit_response.json()['payload']['project']['name'] == new_name
 
 
+@allure.parent_suite("Project Service")
+@allure.suite("Edit project")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -44,7 +47,7 @@ def test_edit_project_name_access_by_roles(request, client_fixture, expected_sta
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_edit_project_slug_access_by_roles(request, client_fixture, expected_status, main_project_2, main_space):
-    allure.dynamic.title(f'Тест редактирования project: клиент={client_fixture}, ожидаемый статус={expected_status}')
+    allure.dynamic.title(f'Edit project slug access: клиент={client_fixture}, ожидаемый статус={expected_status}')
     client = request.getfixturevalue(client_fixture)
     new_slug = generate_slug()
     with allure.step(f"Отправка запроса на редактирование project с новым именем: {new_slug}"):
@@ -57,6 +60,8 @@ def test_edit_project_slug_access_by_roles(request, client_fixture, expected_sta
             assert edit_response.json()['payload']['project']['slug'] == new_slug.upper()
 
 
+@allure.parent_suite("Project Service")
+@allure.suite("Edit project")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -68,7 +73,7 @@ def test_edit_project_slug_access_by_roles(request, client_fixture, expected_sta
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_edit_project_description_access_by_roles(request, client_fixture, expected_status, main_project_2, main_space):
-    allure.dynamic.title(f'Тест редактирования project: клиент={client_fixture}, ожидаемый статус={expected_status}')
+    allure.dynamic.title(f'Edit project description access: клиент={client_fixture}, ожидаемый статус={expected_status}')
     client = request.getfixturevalue(client_fixture)
     new_description = generate_project_description()
     with allure.step(f"Отправка запроса на редактирование project с новым именем: {new_description}"):
