@@ -8,7 +8,6 @@ from test_backend.task_service.utils import get_assignee, get_current_timestamp,
 
 pytestmark = [pytest.mark.backend]
 
-@allure.title("Edit Task: Проверка минимального редактирования задачи без опциональных полей")
 @pytest.mark.parametrize(
     "client_fixture_name, expected_status_code",
     [
@@ -22,6 +21,7 @@ def test_edit_task_minimal_payload(
     request, main_space, main_board, owner_client, main_project, make_task_in_main,
     client_fixture_name, expected_status_code
 ):
+    allure.dynamic.title(f"Edit Task: Проверка минимального редактирования задачи без опциональных полей для роли {client_fixture_name}")
     """
     Проверяет минимальный вызов эндпоинта редактирования задачи,
     убеждаясь, что редактирование без опциональных полей проходит успешно
@@ -55,7 +55,6 @@ def test_edit_task_minimal_payload(
             assert error_message.get("error", {}).get("code") == "AccessDenied"
 
 
-@allure.title("Edit Task: проверка редактирования всех опциональных полей задачи")
 @pytest.mark.parametrize(
     "client_fixture_name, expected_status_code",
     [
@@ -69,6 +68,8 @@ def test_edit_task_endpoint_all_fields(
     request, owner_client, main_space, make_task_in_main, main_board, main_project,
     client_fixture_name, expected_status_code
 ):
+    allure.dynamic.title(f"Edit Task: проверка редактирования всех опциональных полей задачи для роли {client_fixture_name}")
+
     """
     Проверяет успешное редактирование задачи, передав все возможные опциональные поля.
     """
@@ -160,7 +161,6 @@ def test_edit_task_endpoint_all_fields(
             assert task.get("coverAR") is not None
             assert task.get("coverColor") is not None
             assert task.get("coverUrl") is not None
-            # assert_task_payload(task, main_board, main_project) # Добавлена проверка общей структуры после обновления
     else:
         with allure.step("Проверяем сообщение об ошибке для запрещенного доступа"):
             error_message = resp.json()
