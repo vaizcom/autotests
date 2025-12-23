@@ -21,6 +21,8 @@ def test_get_tasks_minimal(owner_client, board_with_10000_tasks, main_space):
         assert "tasks" in data and isinstance(data["tasks"], list)
 
 
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
 @allure.title("GetTasks: пустой payload")
 def test_get_tasks_with_empty_payload(owner_client,main_space):
     """
