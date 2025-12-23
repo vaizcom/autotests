@@ -1,0 +1,3 @@
+Не удалось удалить задачу 694ac5bbe7445ed0f960d53c после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"},"level":"error"}}
+Не удалось удалить задачу 694ac5bce7445ed0f960d61e после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"},"level":"error"}}
+Не удалось удалить задачу 694ac5bde7445ed0f960d6ff после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"},"level":"error"}}
