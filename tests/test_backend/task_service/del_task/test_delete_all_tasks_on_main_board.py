@@ -8,8 +8,9 @@ from test_backend.task_service.utils import get_client
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("create_task")
-@allure.title("Проверка удаление всех задач на доске")
+@allure.parent_suite("Task Service")
+@allure.suite("Delete Task")
+@allure.title("Delete Task: Проверка удаление всех задач на доске")
 def test_delete_all_tasks_on_main_board(request, owner_client, main_space, main_board, create_task_in_main):
     """
     Удаляет все задачи на основной доске (main_board).

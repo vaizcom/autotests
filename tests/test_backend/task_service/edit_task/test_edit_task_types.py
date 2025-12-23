@@ -8,7 +8,10 @@ from test_backend.task_service.utils import get_random_type_id
 pytestmark = [pytest.mark.backend]
 
 
-@allure.title("Edit Task: Проверка редактирования поля 'types'")
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Types edit Task")
+@allure.title("Edit Task Types: Проверка редактирования поля 'types'")
 def test_edit_task_types(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет успешное редактирование поля 'types' задачи.
@@ -38,7 +41,10 @@ def test_edit_task_types(owner_client, main_space, make_task_in_main, main_board
         assert_task_payload(task, main_board, main_project)
 
 
-@allure.title("Edit Task: Проверка очистки поля 'types' пустым списком")
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Types edit Task")
+@allure.title("Edit Task Types: Проверка очистки поля 'types' пустым списком")
 def test_edit_task_clear_types_with_empty_list(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет успешную очистку поля 'types' задачи путем передачи пустого списка.
@@ -60,8 +66,11 @@ def test_edit_task_clear_types_with_empty_list(owner_client, main_space, make_ta
         assert_task_payload(task, main_board, main_project)
 
 
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Types edit Task")
 @pytest.mark.skip(reason="APP-4046")
-@allure.title("Edit Task: Проверка ошибки при передаче повторяющихся типов (APP-4046)")
+@allure.title("Edit Task Types: Проверка ошибки при передаче повторяющихся типов (APP-4046)")
 def test_edit_task_duplicate_types_error(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет, что при попытке редактирования задачи с повторяющимися типами

@@ -35,7 +35,8 @@ def clear_milestone_tasks(client, space_id, milestone_id):
     assert total_after_cleanup == 0, f"После удаления всех задач total должен быть 0, а получил {total_after_cleanup}"
 
 
-@allure.parent_suite("create_task")
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
 @allure.title("Проверка увеличения счетчика задач в milestone после создания задач и соответствия completed")
 def test_milestone_total_and_completed_after_task_creation(owner_client, main_space, create_task_in_main, main_board):
     """
@@ -88,7 +89,8 @@ def test_milestone_total_and_completed_after_task_creation(owner_client, main_sp
                 delete_task_with_retry(client, task_id, main_space)
 
 
-@allure.parent_suite("create_task")
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
 @allure.title("Проверка уменьшения счетчика задач в milestone после удаления задач")
 def test_milestone_total_task_count_decrease_after_task_deletion(owner_client, main_space, create_task_in_main, main_board):
     """

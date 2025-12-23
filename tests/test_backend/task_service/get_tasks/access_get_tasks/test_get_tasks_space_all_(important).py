@@ -5,6 +5,10 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Access get Tasks")
 @allure.title("GetTasks: Проверка доступа к задачам спейса для всех ролей (без фильтраций)")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
@@ -52,6 +56,9 @@ def test_get_tasks_by_role_in_second_space(request, client_fixture, expected_sta
                 )
 
 
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Access get Tasks")
 @allure.title("Проверка что пользователь без доступа к спейсу не имеет доступ к задачам")
 def test_get_tasks_no_access(request, main_space):
     client = request.getfixturevalue('foreign_client')

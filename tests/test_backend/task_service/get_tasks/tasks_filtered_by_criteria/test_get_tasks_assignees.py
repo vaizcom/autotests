@@ -6,7 +6,9 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks assignees: пустой массив — без фильтра по исполнителям")
 def test_get_tasks_assignees_empty(owner_client, main_space, board_with_10000_tasks):
     """
@@ -28,7 +30,9 @@ def test_get_tasks_assignees_empty(owner_client, main_space, board_with_10000_ta
         assert len(tasks) == 0 #  пустой массив возвращает пустой список задач
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks assignees: один валидный исполнитель")
 def test_get_tasks_assignees_single_member(owner_client, main_space, board_with_10000_tasks, main_personal, random_main_personal_id):
     member_id = random_main_personal_id
@@ -50,7 +54,9 @@ def test_get_tasks_assignees_single_member(owner_client, main_space, board_with_
             assert member_id in assignees
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks assignees: несколько валидных исполнителей (OR-фильтр)")
 def test_get_tasks_assignees_multiple_members(owner_client, main_space, board_with_10000_tasks, main_personal):
     member_1 = main_personal["member"][0]
@@ -73,7 +79,9 @@ def test_get_tasks_assignees_multiple_members(owner_client, main_space, board_wi
             assert member_1 in assignees or member_2 in assignees
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks assignees: если указать пользователя невалидного(из другой борды) — ожидаем пустой список задач")
 def test_get_tasks_assignees_user_without_access(owner_client, main_space, board_with_10000_tasks, temp_member):
     user_without_access = temp_member
@@ -91,7 +99,9 @@ def test_get_tasks_assignees_user_without_access(owner_client, main_space, board
         assert tasks == []
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks assignees: если указать невалидный формат — ожидаем пустой список задач")
 def test_get_tasks_assignees_invalid_format(owner_client, main_space, board_with_10000_tasks):
     with allure.step("Выполнить GetTasks передав строку вместо массива в assignees=''"):

@@ -5,8 +5,11 @@ from tests.test_backend.data.endpoints.Task.task_endpoints import get_tasks_endp
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("Фильтрация задач: withArchived=false — возвращаются только неархивные задачи")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks withArchived: Фильтрация задач withArchived=false — возвращаются только неархивные задачи")
 def test_get_tasks_with_archived_false(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при withArchived=false API возвращает только неархивные задачи.
@@ -31,8 +34,10 @@ def test_get_tasks_with_archived_false(owner_client, main_space, board_with_1000
             assert t.get("archiver") is None, f"Задача {t.get('_id')} помечена как архивная при withArchived=false"
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("Фильтрация задач: withArchived=true — возвращаются и архивные, и неархивные задачи")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks withArchived: Фильтрация задач withArchived=true — возвращаются и архивные, и неархивные задачи")
 def test_get_tasks_with_archived_true(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при withArchived=true API возвращает архивные и неархивные задачи, и валидирует поля у архивных.
@@ -88,8 +93,10 @@ def test_get_tasks_with_archived_true(owner_client, main_space, board_with_10000
         assert len(ids) == len(set(ids)), f"Найдены дубликаты задач: {ids}"
 
 
-@allure.parent_suite("tasks_filtered_by_criteria")
-@allure.title("Фильтрация задач: withArchived некорректного типа — ошибка валидации (400)")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.title("GetTasks withArchived: Фильтрация задач withArchived некорректного типа — ошибка валидации (400)")
 def test_get_tasks_with_archived_invalid_type(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при передаче некорректного значения параметра withArchived (не boolean)

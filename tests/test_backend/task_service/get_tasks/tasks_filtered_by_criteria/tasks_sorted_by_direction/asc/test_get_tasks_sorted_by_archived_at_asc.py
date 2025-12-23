@@ -5,8 +5,11 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("asc")
-@allure.title("GetTasks: проверка сортировки по archivedAt при archived=true (возрастание)")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.sub_suite("Sort by Direction ASC")
+@allure.title("GetTasks archived_at_asc: проверка сортировки по archivedAt при archived=true (возрастание)")
 def test_get_tasks_sorted_by_archived_at_asc(owner_client, main_space, board_with_10000_tasks):
     """
     Проверяет, что при archived=true и сортировке по archivedAt в возрастающем порядке,

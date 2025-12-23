@@ -8,7 +8,9 @@ pytestmark = [pytest.mark.backend]
 
 # Базовые smoke-тесты
 
-@allure.title("GetTasks: базовый смоук — успешный ответ и массив tasks")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.title("GetTasks smoke: базовый смоук — успешный ответ и массив tasks")
 @allure.description("Проверка, что эндпоинт возвращает статус 200 и тело с полем tasks (массив).")
 def test_get_tasks_minimal(owner_client, board_with_10000_tasks, main_space):
     with allure.step("Выполнить POST /GetTasks без доп. параметров"):

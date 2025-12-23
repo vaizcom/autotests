@@ -5,7 +5,9 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Access get Tasks")
 @allure.title("GetTasks: Проверка доступа к задачам для всех ролей (с фильтрацией по проекту)")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
@@ -54,6 +56,9 @@ def test_get_tasks_filtered_by_project_by_role(request, client_fixture, expected
                 assert task.get("project") == main_project
 
 
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Access get Tasks")
 @allure.title("GetTasks: Проверка что список задач пустой для пользователей которые не имеют доступ к project")
 @pytest.mark.parametrize(
     'client_fixture',
@@ -81,6 +86,10 @@ def test_get_tasks_limited_access_filtered_by_project(request, client_fixture, m
         assert "tasks" in payload and isinstance(payload["tasks"], list)
         assert len(payload["tasks"]) == 0, f"Ожидался пустой список задач для {client_fixture}"
 
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Access get Tasks")
 @allure.title("Проверка что пользователь без доступа к спейсу не имеет доступ к задачам project")
 def test_get_tasks_no_access_filtered_by_project(request, main_project, main_space):
     client = request.getfixturevalue('foreign_client')

@@ -6,8 +6,12 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("asc")
-@allure.title("Проверка сортировки задач по дате создания (по возрастанию)")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.sub_suite("Sort by Direction ASC")
+@allure.title("GetTasks createdAt_asc: Проверка сортировки задач по дате создания (по возрастанию)")
 def test_get_tasks_sorting_by_created_at_asc(owner_client, main_space, board_with_10000_tasks):
     """Проверяет сортировку задач по дате создания в порядке возрастания (старые сверху)"""
 
@@ -49,8 +53,12 @@ def test_get_tasks_sorting_by_created_at_asc(owner_client, main_space, board_wit
             attachment_type=allure.attachment_type.TEXT
         )
 
-@allure.parent_suite("asc")
-@allure.title("Проверка сортировки по умолчанию (должна быть по возрастанию)")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.sub_suite("Sort by Direction ASC")
+@allure.title("GetTasks createdAt_asc: Проверка сортировки по умолчанию (должна быть по возрастанию)")
 def test_get_tasks_default_sorting(owner_client, main_space, board_with_10000_tasks):
     """Проверяет что без указания sortDirection сортировка происходит по возрастанию"""
 

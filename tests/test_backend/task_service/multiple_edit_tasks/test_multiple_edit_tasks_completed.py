@@ -5,7 +5,9 @@ from tests.test_backend.data.endpoints.Task.task_endpoints import multiple_edit_
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("multiple_edit_tasks")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Multiple Edit Tasks")
 @pytest.mark.parametrize(
     "count, expect_status",
     [
@@ -62,7 +64,8 @@ def test_multiple_edit_tasks_completed(owner_client, main_space, create_30_tasks
             assert t.get("completed") is False, f"После completed=False задача {tid} имеет completed={t.get('completed')!r}"
 
 
-@allure.parent_suite("multiple_edit_tasks")
+@allure.parent_suite("Task Service")
+@allure.suite("Multiple Edit Tasks")
 def test_multiple_edit_tasks_sets_completed_only_uncompleted(owner_client, main_space, main_board):
     allure.dynamic.title("Multiple edit Tasks: completed=True меняет только незавершённую таску, завершённая остаётся без изменений")
 

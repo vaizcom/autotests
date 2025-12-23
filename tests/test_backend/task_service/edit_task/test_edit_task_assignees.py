@@ -8,7 +8,10 @@ from test_backend.task_service.utils import get_assignee
 pytestmark = [pytest.mark.backend]
 
 
-@allure.title("Edit Task: Проверка редактирования только поля 'assignees'")
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Assignees edit Task")
+@allure.title("Edit Task Assignees: Проверка редактирования только поля 'assignees'")
 def test_edit_task_only_assignees(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет успешное редактирование только поля 'assignees' задачи.
@@ -34,7 +37,10 @@ def test_edit_task_only_assignees(owner_client, main_space, make_task_in_main, m
         assert task.get("types") == initial_types, "Другие поля не должны были измениться"
         assert_task_payload(task, main_board, main_project)
 
-@allure.title("Edit Task: Проверка удаления всех исполнителей в задаче передав пустой массив")
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Assignees edit Task")
+@allure.title("Edit Task Assignees: Проверка удаления всех исполнителей в задаче передав пустой массив")
 def test_edit_task_remove_all_assignees(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет успешное удаление всех исполнителей из задачи передав пустой массив "assignees": [].
@@ -59,8 +65,10 @@ def test_edit_task_remove_all_assignees(owner_client, main_space, make_task_in_m
         assert task.get("types") == initial_types, "Другие поля не должны были измениться"
         assert_task_payload(task, main_board, main_project)
 
-
-@allure.title("Edit Task: Проверка изменения списка исполнителей задачи")
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Assignees edit Task")
+@allure.title("Edit Task Assignees: Проверка изменения списка исполнителей задачи")
 def test_edit_task_update_assignees(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет успешное изменение списка исполнителей задачи с одного набора на другой.
@@ -93,7 +101,10 @@ def test_edit_task_update_assignees(owner_client, main_space, make_task_in_main,
         assert_task_payload(task, main_board, main_project)
 
 
-@allure.title("Edit Task: Проверка на уникалность ID исполнителей")
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Assignees edit Task")
+@allure.title("Edit Task Assignees: Проверка на уникалность ID исполнителей")
 def test_edit_task_with_duplicate_assignees(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет, что при попытке добавить повторяющиеся ID исполнителей выводится ошибка.

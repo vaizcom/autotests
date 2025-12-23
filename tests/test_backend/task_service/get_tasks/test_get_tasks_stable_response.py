@@ -5,7 +5,10 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.title("Проверка стабильности ответа при множественных запросах")
+
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.title("GetTasks stable response: Проверка стабильности ответа при множественных запросах")
 def test_get_tasks_stable_response(request, board_with_10000_tasks, main_space):
     """Проверяет что множественные запросы возвращают одинаковый результат"""
     client = request.getfixturevalue('owner_client')

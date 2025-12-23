@@ -6,8 +6,10 @@ from test_backend.data.endpoints.Task.task_endpoints import edit_task_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-
-@allure.title("Edit Task: Проверка редактирования поля 'completed' с False на True")
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Completed edit Task")
+@allure.title("Edit Task Completed: Проверка редактирования поля 'completed' с False на True")
 def test_edit_task_completed(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет успешное редактирование только поля 'completed' задачи с False на True.
@@ -34,7 +36,10 @@ def test_edit_task_completed(owner_client, main_space, make_task_in_main, main_b
         assert task.get("completedAt") is not None, "Дата завершения должна быть установлена"
         assert_task_payload(task, main_board, main_project)
 
-@allure.title("Edit Task: Проверка редактирования поля 'completed' с True на False")
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Completed edit Task")
+@allure.title("Edit Task Completed: Проверка редактирования поля 'completed' с True на False")
 def test_edit_task_uncompleted(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет успешное редактирование только поля 'completed' задачи с True на False.

@@ -10,7 +10,8 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Space Service")
+@allure.suite("Remove space")
 @allure.title('remove space success')
 def remove_space_success(owner_client):  # userId закрыт под Feature Toggle
     name = generate_space_name()
@@ -36,6 +37,9 @@ def remove_space_success(owner_client):  # userId закрыт под Feature To
         assert get_response.status_code != 200, 'GetSpace по удалённому space вернул 200'
 
 
+@allure.parent_suite("Space Service")
+@allure.suite("Remove space")
+@allure.title('remove all spaces')
 def del_all_spaces(owner_client):
     response = owner_client.post(**get_spaces_endpoint())
     spaces = response.json()['payload']['spaces']

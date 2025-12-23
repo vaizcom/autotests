@@ -5,7 +5,9 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.title("Проверка производительности запроса")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.title("Get Tasks performance: Проверка производительности запроса")
 def test_get_tasks_response_time(request, board_with_10000_tasks, main_space):
     """Проверяет что запрос выполняется за разумное время"""
     import time

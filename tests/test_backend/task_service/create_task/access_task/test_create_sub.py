@@ -8,7 +8,9 @@ from tests.test_backend.data.endpoints.Task.task_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("access_task")
+@allure.parent_suite("Task Service")
+@allure.suite("Create Task")
+@allure.sub_suite("Access create Task")
 @allure.title("Тестирование создания подзадачи разными пользовательскими ролями и проверка ожидаемого поведения")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',

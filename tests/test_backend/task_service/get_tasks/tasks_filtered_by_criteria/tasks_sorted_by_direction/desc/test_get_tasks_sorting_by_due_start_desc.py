@@ -6,8 +6,11 @@ from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
-@allure.parent_suite("desc")
-@allure.title("Проверка сортировки задач по dueStart: ненулевые по убыванию, затем null (в пределах лимита)")
+@allure.parent_suite("Task Service")
+@allure.suite("Get Tasks")
+@allure.sub_suite("Filtered by criteria")
+@allure.sub_suite("Sort by Direction DESC")
+@allure.title("GetTasks dueStart: Проверка сортировки задач по dueStart - ненулевые по убыванию, затем null (в пределах лимита)")
 def test_get_tasks_sorting_by_due_start_desc(owner_client, main_space, board_with_10000_tasks, main_board):
     limit = 20
 

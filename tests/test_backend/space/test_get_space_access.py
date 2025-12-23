@@ -6,6 +6,8 @@ from test_backend.task_service.utils import get_client
 
 pytestmark = [pytest.mark.backend]
 
+@allure.parent_suite("Space Service")
+@allure.suite("Get space access")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [

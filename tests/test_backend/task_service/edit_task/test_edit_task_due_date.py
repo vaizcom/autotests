@@ -9,7 +9,9 @@ from test_backend.task_service.utils import get_current_timestamp, get_due_end
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Due date edit Task")
 @allure.title("Edit Task: Проверка редактирования поля 'dueStart'")
 def test_edit_task_due_start(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
@@ -36,7 +38,9 @@ def test_edit_task_due_start(owner_client, main_space, make_task_in_main, main_b
         assert task.get("dueEnd") == initial_due_end, "Другие поля не должны были измениться"
         assert_task_payload(task, main_board, main_project)
 
-
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Due date edit Task")
 @allure.title("Edit Task: Проверка редактирования поля 'dueEnd'")
 def test_edit_task_due_end(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
@@ -65,8 +69,10 @@ def test_edit_task_due_end(owner_client, main_space, make_task_in_main, main_boa
         assert task.get("dueStart") == initial_due_start, "Другие поля не должны были измениться"
         assert_task_payload(task, main_board, main_project)
 
-
-@allure.title("Edit Task: Проверка ошибки, когда дата начала позже даты окончания")
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Due date edit Task")
+@allure.title("Edit Task Due date: Проверка ошибки, когда дата начала позже даты окончания")
 def test_edit_task_due_start_after_due_end_error(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет, что при попытке установить dueStart позже, чем dueEnd,
