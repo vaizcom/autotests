@@ -16,6 +16,7 @@ from tests.test_backend.data.endpoints.Board.custom_field_types import CustomFie
 pytestmark = [pytest.mark.backend]
 
 
+@allure.parent_suite("Board Service")
 @allure.title('Создание борды в существующем проекте и корректность возвращаемого имени')
 def test_create_board(owner_client, temp_project, temp_space):
     # Генерация имени борды
@@ -37,6 +38,7 @@ def test_create_board(owner_client, temp_project, temp_space):
         ), f"Ожидалось имя борды '{name}', а получено '{response_data['payload']['board']['name']}'"
 
 
+@allure.parent_suite("Board Service")
 @allure.title('Создание нескольких борд с одинаковым именем в одном проекте')
 def test_create_board_with_duplicate_name_allowed(owner_client, temp_project, temp_space):
     name = generate_board_name()
@@ -52,6 +54,7 @@ def test_create_board_with_duplicate_name_allowed(owner_client, temp_project, te
         assert response2.status_code == 200
 
 
+@allure.parent_suite("Board Service")
 @allure.title('Ошибка при создании борды с None вместо списков в полях groups/typesList/customFields')
 def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
     name = generate_board_name()
@@ -63,6 +66,7 @@ def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
         assert response.status_code == 400
 
 
+@allure.parent_suite("Board Service")
 @allure.title('Редактирование борды: изменение имени через /EditBoard')
 def test_edit_board_name(owner_client, temp_board, temp_space):
     new_name = generate_board_name()
@@ -78,6 +82,7 @@ def test_edit_board_name(owner_client, temp_board, temp_space):
         assert board['name'] == new_name, f"Ожидалось имя '{new_name}', получено '{board['name']}'"
 
 
+@allure.parent_suite("Board Service")
 @allure.title(
     'Добавление новой группы в борду через /CreateBoardGroup: проверка имени, описания и изменения количества групп'
 )
@@ -127,6 +132,7 @@ def test_create_board_group(owner_client, temp_board, temp_space):
         )
 
 
+@allure.parent_suite("Board Service")
 @allure.title('Редактирование группы через /EditBoardGroup: проверка обновления имени, описания, лимита и скрытия')
 def test_edit_board_group_updates_fields(owner_client, temp_board, temp_space):
     original_name = 'Группа для редактирования'
@@ -190,6 +196,8 @@ def test_edit_board_group_updates_fields(owner_client, temp_board, temp_space):
         assert updated_group.get('hidden') is True, "Поле 'hidden' не обновлено на True"
 
 
+
+@allure.parent_suite("Board Service")
 @pytest.mark.parametrize('field_type', CustomFieldType.list())
 @allure.title('Создание кастомного поля типа: {field_type}')
 def test_create_custom_field_of_each_type(owner_client, temp_board, field_type, temp_space):
@@ -206,6 +214,7 @@ def test_create_custom_field_of_each_type(owner_client, temp_board, field_type, 
         assert response.json()['payload']['customField']['type'] == field_type
 
 
+@allure.parent_suite("Board Service")
 @pytest.mark.parametrize('field_type', [t.value for t in CustomFieldType if t.value != 'Select'])
 @allure.title('Редактирование кастомного поля типа: {field_type}')
 def test_edit_custom_field_common_fields(owner_client, temp_board, temp_space, field_type):
@@ -244,6 +253,7 @@ def test_edit_custom_field_common_fields(owner_client, temp_board, temp_space, f
         assert updated_field['hidden'] is True
 
 
+@allure.parent_suite("Board Service")
 @allure.title('Редактирование поля Select: добавление новых опций с валидным _id')
 def test_edit_select_custom_field(owner_client, temp_board, temp_space):
     title = generate_custom_field_title()

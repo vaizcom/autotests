@@ -10,7 +10,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 pytestmark = [pytest.mark.backend]
 
 
-
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'kind, fixture_name',
     [

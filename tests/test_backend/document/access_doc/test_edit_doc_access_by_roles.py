@@ -12,7 +12,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'creator_fixture, editor_fixture, expected_status',
     [
@@ -137,6 +138,8 @@ def test_edit_project_and_space_docs_different_roles(
                 creator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'creator_fixture, editor_fixture, expected_status',
     [
@@ -225,6 +228,8 @@ def test_edit_personal_doc_different_roles(
                 creator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [

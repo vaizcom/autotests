@@ -18,6 +18,7 @@ from tests.test_backend.data.endpoints.Board.constants import (
 pytestmark = [pytest.mark.backend]
 
 
+@allure.parent_suite("Board Service")
 @pytest.mark.parametrize(
     'name, expected_status',
     [
@@ -55,6 +56,7 @@ def test_board_name_validation(owner_client, temp_project, temp_space, name, exp
         assert response.status_code == expected_status
 
 
+@allure.parent_suite("Board Service")
 @pytest.mark.parametrize(
     'name, expected_status',
     [('', 400), (None, 400), ('A' * 51, 400), ('A' * 50, 200)],
@@ -71,6 +73,7 @@ def test_board_group_name_validation(owner_client, temp_board, temp_space, name,
         assert response.status_code == expected_status
 
 
+@allure.parent_suite("Board Service")
 @pytest.mark.parametrize(
     'description, expected_status',
     [('D' * 1025, 400), ('D' * BOARD_GROUP_MAX_DESCRIPTION_LENGTH, 200), ('Обычное описание', 200), (None, 200)],
@@ -89,6 +92,7 @@ def test_board_group_description_validation(
         assert response.status_code == expected_status
 
 
+@allure.parent_suite("Board Service")
 @pytest.mark.parametrize(
     'limit, expected_status',
     [
@@ -121,6 +125,7 @@ def test_board_group_limit_validation(owner_client, temp_board, temp_space, limi
         assert response.status_code == expected_status
 
 
+@allure.parent_suite("Board Service")
 @pytest.mark.xfail(reason='Известный баг: длинный заголовок custom field без пробелов не влезает в тултип (APP-2763)')
 @allure.label('bug', 'APP-2763')
 @pytest.mark.parametrize('field_type', CustomFieldType.list())

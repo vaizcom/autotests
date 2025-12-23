@@ -6,6 +6,7 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import get_space_en
 
 pytestmark = [pytest.mark.backend]
 
+@allure.parent_suite("Auth Service")
 @allure.title("Авторизация: валидный токен и в Authorization и в Cookie - статус 200")
 def test_token_valid(owner_client):
     # Используем достоверный эндпоинт
@@ -18,6 +19,7 @@ def test_token_valid(owner_client):
         assert r.status_code == 200
 
 
+@allure.parent_suite("Auth Service")
 @allure.title("Авторизация: отсутствие токена (в Authorization и Cookie,) приводит к Unauthorized 401)")
 def test_token_missing():
     """
@@ -41,6 +43,7 @@ def make_invalid_token(owner_client) -> str:
     assert token, "owner_client.token пуст"
     return token[:-1] + ("0" if token[-1] == "1" else "1")
 
+@allure.parent_suite("Auth Service")
 @allure.title("Авторизация: невалидный токен приводит к отказу в доступе Bad Request 400")
 def test_token_invalid(owner_client):
     """
@@ -73,6 +76,7 @@ def test_token_invalid(owner_client):
     with allure.step('В ответе видим meta.description == "invalid signature"'):
         assert meta.get("description") == "invalid signature", f"Неожиданное описание: {meta.get('description')}"
 
+@allure.parent_suite("Auth Service")
 @allure.title("Авторизация: пустой токен '_t=' приводит к Unauthorized 401 ")
 def test_token_empty():
     url = f'{API_URL.rstrip("/")}/GetSpaceMembers'
@@ -96,7 +100,7 @@ def test_token_empty():
         assert err.get("code") == "Unauthorized", f'error.code должен быть "Unauthorized", получено: {err.get("code")}'
         assert err.get("originalType") == "GetSpaceMembers", "error.originalType должен совпадать с типом"
 
-
+@allure.parent_suite("Auth Service")
 @allure.title("Авторизация: токен пользователя без доступа к спейсу (foreign_client) => 400")
 def test_token_foreign_client(foreign_client: str):
     url = f'{API_URL.rstrip("/")}/GetSpace'

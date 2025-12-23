@@ -8,7 +8,7 @@ from tests.test_backend.data.endpoints.Board.board_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Board Service")
 @allure.title('Получение списка борд: проверка, что все созданные борды присутствуют в ответе(board_names)')
 def test_get_boards_returns_multiple_created_boards(owner_client, temp_project, temp_space):
     board_names = [generate_board_name() for _ in range(3)]
@@ -29,7 +29,7 @@ def test_get_boards_returns_multiple_created_boards(owner_client, temp_project, 
         for name in board_names:
             assert name in board_names_in_response, f"Борда '{name}' не найдена в списке"
 
-
+@allure.parent_suite("Board Service")
 @allure.title('Получение списка борд: проверка созданных борд и их обязательных полей(name, projectId, createdAt)')
 def test_get_boards_required_fields(owner_client, temp_project, temp_space):
     board_names = [generate_board_name() for _ in range(3)]

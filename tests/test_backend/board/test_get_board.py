@@ -8,7 +8,7 @@ from tests.test_backend.data.endpoints.Board.board_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Board Service")
 @allure.title('Получение борды по boardId через /GetBoard')
 def test_get_board_by_id(owner_client, temp_project, temp_space):
     name = generate_board_name()
@@ -27,7 +27,7 @@ def test_get_board_by_id(owner_client, temp_project, temp_space):
         assert board['_id'] == board_id
         assert board['project'] == temp_project
 
-
+@allure.parent_suite("Board Service")
 @allure.title('Ошибка при попытке получить борду по несуществующему boardId')
 def test_get_board_with_invalid_id(owner_client, temp_space):
     fake_board_id = 'non_existing_board_id_12345'

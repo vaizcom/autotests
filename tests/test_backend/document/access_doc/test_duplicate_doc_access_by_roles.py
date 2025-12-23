@@ -11,7 +11,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import (
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'creator_fixture, duplicator_fixture, expected_status',
     [
@@ -134,6 +135,9 @@ def test_duplicate_project_and_space_docs_different_roles(
                 duplicator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_copy_id))
 
 
+
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'creator_fixture, duplicator_fixture, expected_status',
     [
@@ -254,6 +258,8 @@ def test_duplicate_personal_doc_different_roles(
                 duplicator_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_copy_id))
 
 
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'kind, kind_id_fixture',
     [

@@ -6,7 +6,8 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import create
 
 pytestmark = [pytest.mark.backend]
 
-
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -49,7 +50,8 @@ def test_create_and_archive_space_doc_access_by_roles(request, main_space, clien
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
 
-
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -84,7 +86,8 @@ def test_create_and_archive_project_doc_access_by_roles(
                 archive_resp = api_client.post(**archive_document_endpoint(space_id=main_space, document_id=doc_id))
                 assert archive_resp.status_code == 200
 
-
+@allure.parent_suite("Document Service")
+@allure.suite("Access document")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
