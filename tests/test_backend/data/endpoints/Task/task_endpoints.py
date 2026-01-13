@@ -73,14 +73,6 @@ def get_task_endpoint(slug_id: str, space_id: str):
         "headers": {"Content-Type": "application/json", "Current-Space-Id": space_id}
     }
 
-def multiple_edit_tasks_endpoint1(space_id: str, tasks: list):
-    return {
-        "path": "/MultipleEditTasks",
-        "json": {"tasks": tasks},
-        "headers": {"Content-Type": "application/json", "Current-Space-Id": space_id}
-    }
-
-
 def multiple_edit_tasks_endpoint(
     space_id: str,
     tasks: List[Dict[str, Any]],
@@ -155,7 +147,7 @@ def edit_task_endpoint(
     Эндпоинт для редактирования одной задачи.
     """
     payload: Dict[str, Any] = {
-        "taskId": task_id,
+        "taskId": task_id,                     # обязательное поле
     }
 
     if assignees is not None:
