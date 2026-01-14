@@ -11,7 +11,7 @@ def generate_immutable_field_params():
     Использует TASK_FULL_SCHEMA как источник.
     Исключает поля из EDITABLE_FIELDS (те, что разрешено менять).
     Для остальных подбирает 'фейковые' значения правильного типа (чтобы пройти валидацию типов)
-    и проверяет бизнес-логику (игнорирование изменений для неразрешенных полей в ответе).
+    и проверяет бизнес-логику (игнорирование изменений для неизменяемых полей в ответе).
     """
     # Белый список: поля, которые РАЗРЕШЕНО менять через EditTask
     EDITABLE_FIELDS = {
@@ -66,7 +66,7 @@ immutable_params = generate_immutable_field_params()
 @allure.suite("Edit Task")
 @allure.sub_suite("Negative cases edit Task")
 @allure.title("Edit Task: НЕГАТИВНЫЙ ТЕСТ - Поле '{field_name}' не должно меняться")
-def test_edit_task_immutable_field_cannot_be_changed1(owner_client, main_space, make_task_in_main, main_board,
+def test_edit_task_immutable_field_cannot_be_changed(owner_client, main_space, make_task_in_main, main_board,
                                                       field_name, invalid_value_to_set):
     """
     Проверяет, что при попытке изменить указанное поле через эндпоинт EditTask,
@@ -80,6 +80,7 @@ def test_edit_task_immutable_field_cannot_be_changed1(owner_client, main_space, 
         "name": f"Task to test {field_name} immutability"
     })
     task_id = initial_task_data.get("_id")
+    task_name = initial_task_data.get("name")
     initial_field_value = initial_task_data.get(field_name)
 
     value_to_send = invalid_value_to_set
@@ -107,6 +108,7 @@ def test_edit_task_immutable_field_cannot_be_changed1(owner_client, main_space, 
         updated_task = body.get("payload", {}).get("task")
         assert updated_task is not None, "Payload или Task отсутствуют в ответе"
         assert updated_task.get("_id") == task_id
+        assert updated_task.get("name") == task_name
 
     with allure.step(f"Проверяем, что поле '{field_name}' НЕ БЫЛО изменено"):
         final_field_value = updated_task.get(field_name)
