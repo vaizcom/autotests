@@ -125,3 +125,4 @@ def test_edit_task_with_duplicate_assignees(owner_client, main_space, make_task_
 
         error_payload = resp.json().get("error")
         assert error_payload is not None, "В ответе об ошибке отсутствует 'error' секция."
+        assert error_payload.get("fields")[0].get("codes") == ["Assignees array must not contain duplicate assignees"]
