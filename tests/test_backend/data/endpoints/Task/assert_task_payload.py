@@ -1,5 +1,45 @@
 import allure
 
+TASK_FULL_SCHEMA = {
+    "_id": str,
+    # Disposition
+    "project": str,
+    "hrid": str,
+    "group": str,
+    "board": str,
+    # NOTE: deprecated field
+    "milestone": (str, type(None)),
+    "milestones": list,
+    "parentTask": (str, type(None)),
+    # Params
+    "name": str,
+    "completed": bool,
+    "assignees": list,
+    "subtasks": list,
+    "types": list,
+    "dueStart": (str, type(None)),
+    "dueEnd": (str, type(None)),
+    "priority": int,
+    "document": str,
+    "completedAt": (str, type(None)),
+    "rightConnectors": list,
+    "leftConnectors": list,
+    # "coverUrl": (str, type(None)),
+    # "coverAR": (int, float, type(None)),
+    # "coverColor": (str, type(None)),
+    "customFields": list,
+
+    # Системные поля
+    "creator": str,
+    "createdAt": str,
+    "updatedAt": str,
+    "followers": dict,
+    "archiver": (str, type(None)),
+    "archivedAt": (str, type(None)),
+    "deleter": (str, type(None)),
+    "deletedAt": (str, type(None)),
+}
+
 def assert_task_payload(task: dict, board_id: str, project_id: str):
     """
     Валидирует структуру и типы данных задачи, а также проверяет бизнес-правила.
@@ -10,45 +50,8 @@ def assert_task_payload(task: dict, board_id: str, project_id: str):
         project_id (str): Ожидаемый идентификатор проекта для бизнес-проверки.
     """
     with allure.step("Проверка полного совпадения набора полей задачи"):
-        expected_schema = {
-            # строки
-            "_id": str,
-            "name": str,
-            "group": str,
-            "board": str,
-            "project": str,
-            "hrid": str,
-            "creator": str,
-            "createdAt": str,
-            "updatedAt": str,
-            "document": str,
-            # "editor": str, # Убрано из обязательной схемы, т.к. проверяется отдельно
+        expected_schema = TASK_FULL_SCHEMA
 
-            # допускают None или строку
-            "parentTask": (str, type(None)),
-            "archiver": (str, type(None)),
-            "dueStart": (str, type(None)),
-            "dueEnd": (str, type(None)),
-            "archivedAt": (str, type(None)),
-            "completedAt": (str, type(None)),
-            "deleter": (str, type(None)),
-            "deletedAt": (str, type(None)),
-            "milestone": (str, type(None)),  #  Will be deprecated in next versions
-            # булево
-            "completed": bool,
-            # числа
-            "priority": int,
-            # массивы
-            "types": list,
-            "assignees": list,
-            "subtasks": list,
-            "milestones": list,
-            "rightConnectors": list,
-            "leftConnectors": list,
-            "customFields": list,
-            # словари
-            "followers": dict,
-        }
         actual_keys = set(task.keys())
         expected_keys = set(expected_schema.keys())
         missing = expected_keys - actual_keys

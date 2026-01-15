@@ -21,7 +21,8 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['archiver: owner' , 'archiver: manager', 'archiver: member', 'archiver: guest'],
 )
-def test_get_tasks_filter_by_archiver(request, manager_client, client_fixture, main_space, expected_status, make_task_in_main, expected_name_prefix, main_board):
+def test_get_tasks_filter_by_archiver(request, manager_client, client_fixture, main_space, expected_status,
+                                      make_task_in_main, expected_name_prefix, main_board):
     """
     Тест проверяет функциональность фильтрации задач по ID архиватора для различных ролей.
         Шаги:

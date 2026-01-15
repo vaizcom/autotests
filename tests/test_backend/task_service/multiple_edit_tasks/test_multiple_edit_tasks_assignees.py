@@ -12,7 +12,8 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Task Service")
 @allure.suite("Multiple Edit Tasks")
 @allure.title("Multiple edit Tasks: назначение assignees задачам в которой уже был установлен assignee и задаче без assignee")
-def test_multiple_edit_tasks_set_assignees(owner_client, main_space, main_project, main_board, main_personal, make_task_in_main):
+def test_multiple_edit_tasks_set_assignees(owner_client, main_space, main_project, main_board, main_personal,
+                                           make_task_in_main):
     """
     Создаём 2 задачи в одной борде: у первой уже стоит ассайни, у второй нет.
     Затем применяем multiple_edit_tasks_endpoint и проверяем,
@@ -99,7 +100,8 @@ def test_multiple_edit_tasks_invalid_id_failed(owner_client, main_space, main_bo
 @allure.parent_suite("Task Service")
 @allure.suite("Multiple Edit Tasks")
 @allure.title("Multiple edit Tasks: установка списка ассайни (мультиселект) для нескольких задач")
-def test_multiple_edit_tasks_multiple_assignees(owner_client, main_space, main_board, main_personal, make_task_in_main):
+def test_multiple_edit_tasks_multiple_assignees(owner_client, main_space, main_board, main_personal,
+                                                make_task_in_main):
     """
     Передаём список ассайни (мультиселект) и проверяем, что у обеих задач он установлен.
     """
@@ -139,7 +141,8 @@ def test_multiple_edit_tasks_multiple_assignees(owner_client, main_space, main_b
 @allure.parent_suite("Task Service")
 @allure.suite("Multiple Edit Tasks")
 @allure.title("Multiple edit Tasks: некорректный assigneeId статус 400 !!! тест должен упасть после исправления бага CCSS-31512 !!! ")
-def test_multiple_edit_tasks_invalid_assignee_id(owner_client, main_space, main_board, main_personal, make_task_in_main):
+def test_multiple_edit_tasks_invalid_assignee_id(owner_client, main_space, main_board, main_personal,
+                                                 make_task_in_main):
     """
     Передаём валидный и заведомо некорректный идентификаторы ассайни (у второго последняя цифра заменена на 0).
     Ожидаем HTTP 400 и корректное сообщение об ошибке.
@@ -171,7 +174,8 @@ def test_multiple_edit_tasks_invalid_assignee_id(owner_client, main_space, main_
 @allure.parent_suite("Task Service")
 @allure.suite("Multiple Edit Tasks")
 @allure.title("Multiple edit Tasks: снятие ассайни (передача пустого массива) !! Не реализовано на фронте !!")
-def test_multiple_edit_tasks_clear_assignees(owner_client, main_space, main_board, main_personal, make_task_in_main):
+def test_multiple_edit_tasks_clear_assignees(owner_client, main_space, main_board, main_personal,
+                                             make_task_in_main):
     """
     Снимаем ассайни у задач, передав пустой список assignees.
     Ожидаем HTTP 200 и пустые списки ассайни в задачах.

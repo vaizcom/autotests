@@ -21,7 +21,7 @@ pytestmark = [pytest.mark.backend]
         ("guest_client", 403),
     ],
 )
-def test_edit_task_minimal_payload(
+def test_edit_task_smoke(
     request, main_space, main_board, owner_client, main_project, make_task_in_main,
     client_fixture_name, expected_status_code
 ):
