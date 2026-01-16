@@ -1,0 +1,175 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","581","Редактирование кастомного поля типа: Date","Board Service","Fri Jan 16 13:56:30 UTC 2026","passed","Fri Jan 16 13:56:30 UTC 2026","","test_create_board","",""
+"
+    Тест для проверки создания и архивирования Space-документа с разными клиентскими ролями.
+    Тест выполняет следующие шаги для каждой роли:
+    1. Создает Space-документ с использованием предоставленной клиентской роли.
+    2. Проверяет, что статус ответа соответствует ожидаемому результату.
+    3. Если создание документа успешно (статус 200):
+       - Проверяет, что заголовок созданного документа соответствует ожидаемому.
+       - Архивирует созданный Space-документ и проверяет статус запроса на архивирование.
+    ","897","Создание Space-документа для роли manager","Document Service","Fri Jan 16 13:56:51 UTC 2026","passed","Fri Jan 16 13:56:51 UTC 2026","","Access document","",""
+"","283","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Date","Board Service","Fri Jan 16 13:56:20 UTC 2026","passed","Fri Jan 16 13:56:21 UTC 2026","","board_validation_test","",""
+"
+    Проверка универсальна для всех эндпоинтов. Выполнена на GetSpaces.
+    ","452","Авторизация: невалидный токен приводит к отказу в доступе Bad Request 400","Auth Service","Fri Jan 16 13:56:00 UTC 2026","passed","Fri Jan 16 13:56:01 UTC 2026","","test_token","",""
+"","259","APP-2763: Ошибка при создании борды с длинным заголовком custom field: TaskRelations","Board Service","Fri Jan 16 13:56:21 UTC 2026","passed","Fri Jan 16 13:56:21 UTC 2026","","board_validation_test","",""
+"","278","Валидация поля group description: regular description → ожидали 200","Board Service","Fri Jan 16 13:56:16 UTC 2026","passed","Fri Jan 16 13:56:17 UTC 2026","","board_validation_test","",""
+"","722","Тест создания доски: клиент=member_client, ожидаемый статус=403","Board Service","Fri Jan 16 13:56:05 UTC 2026","passed","Fri Jan 16 13:56:05 UTC 2026","","Access board","",""
+"","304","Создание кастомного поля типа: Boolean","Board Service","Fri Jan 16 13:56:25 UTC 2026","passed","Fri Jan 16 13:56:26 UTC 2026","","test_create_board","",""
+"","821","Добавление новой группы в борду через /CreateBoardGroup: проверка имени, описания и изменения количества групп","Board Service","Fri Jan 16 13:56:23 UTC 2026","passed","Fri Jan 16 13:56:24 UTC 2026","","test_create_board","",""
+"","1061","Archive document: Архивирование Personal-документа для роли guest, документ создан в роли Member","Document Service","Fri Jan 16 13:56:49 UTC 2026","passed","Fri Jan 16 13:56:50 UTC 2026","","Access document","",""
+"","244","Тест получения доски: клиент=guest_client, ожидаемый статус=200","Board Service","Fri Jan 16 13:56:07 UTC 2026","passed","Fri Jan 16 13:56:08 UTC 2026","","Access board","",""
+"","281","Тест получения доски: клиент=manager_client, ожидаемый статус=200","Board Service","Fri Jan 16 13:56:07 UTC 2026","passed","Fri Jan 16 13:56:07 UTC 2026","","Access board","",""
+"","247","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Boolean","Board Service","Fri Jan 16 13:56:20 UTC 2026","passed","Fri Jan 16 13:56:20 UTC 2026","","board_validation_test","",""
+"","277","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Text","Board Service","Fri Jan 16 13:56:20 UTC 2026","passed","Fri Jan 16 13:56:20 UTC 2026","","board_validation_test","",""
+"","535","Тест получения доски: клиент=owner_client, ожидаемый статус=200","Board Service","Fri Jan 16 13:56:06 UTC 2026","passed","Fri Jan 16 13:56:07 UTC 2026","","Access board","",""
+"","930","Archive document: Архивирование Personal-документа для роли member, документ создан в роли Member","Document Service","Fri Jan 16 13:56:48 UTC 2026","passed","Fri Jan 16 13:56:49 UTC 2026","","Access document","",""
+"","781","Редактирование группы через /EditBoardGroup: проверка обновления имени, описания, лимита и скрытия","Board Service","Fri Jan 16 13:56:24 UTC 2026","passed","Fri Jan 16 13:56:25 UTC 2026","","test_create_board","",""
+"","265","Создание кастомного поля типа: Member","Board Service","Fri Jan 16 13:56:26 UTC 2026","passed","Fri Jan 16 13:56:26 UTC 2026","","test_create_board","",""
+"","610","Получение борды по boardId через /GetBoard","Board Service","Fri Jan 16 13:56:32 UTC 2026","passed","Fri Jan 16 13:56:33 UTC 2026","","test_get_board","",""
+"","293","Валидация поля limit для board group: 1000","Board Service","Fri Jan 16 13:56:19 UTC 2026","passed","Fri Jan 16 13:56:19 UTC 2026","","board_validation_test","",""
+"","1063","Archive document: Архивирование Personal-документа для роли owner, документ создан в роли Member","Document Service","Fri Jan 16 13:56:44 UTC 2026","passed","Fri Jan 16 13:56:46 UTC 2026","","Access document","",""
+"
+    Проверяет функциональность архивации Space-документа с разными ролями и уровнями доступа.
+
+    Тест создает Space-документ, используя случайного клиента с повышенными правами (владелец, менеджер или участник),
+    и оценивает возможность архивации документа на основе предоставленной роли client_fixture.
+    Проверяется, что возвращаются корректные коды состояния в зависимости от прав пользователя.
+    Дополнительно, в случаях, когда доступ запрещен и ожидаемый статус 403, документ архивируется после теста
+    с использованием случайного клиента с повышенными правами.
+    ","839","Archive document: Архивирование Space-документа для роли member","Document Service","Fri Jan 16 13:56:38 UTC 2026","passed","Fri Jan 16 13:56:39 UTC 2026","","Access document","",""
+"","246","Валидация поля group name: too long (51 chars) → ожидали 400","Board Service","Fri Jan 16 13:56:15 UTC 2026","passed","Fri Jan 16 13:56:15 UTC 2026","","board_validation_test","",""
+"
+    Тест для проверки создания и архивирования Space-документа с разными клиентскими ролями.
+    Тест выполняет следующие шаги для каждой роли:
+    1. Создает Space-документ с использованием предоставленной клиентской роли.
+    2. Проверяет, что статус ответа соответствует ожидаемому результату.
+    3. Если создание документа успешно (статус 200):
+       - Проверяет, что заголовок созданного документа соответствует ожидаемому.
+       - Архивирует созданный Space-документ и проверяет статус запроса на архивирование.
+    ","812","Создание Space-документа для роли owner","Document Service","Fri Jan 16 13:56:50 UTC 2026","passed","Fri Jan 16 13:56:51 UTC 2026","","Access document","",""
+"","256","Валидация поля group description: too long (1025 chars) → ожидали 400","Board Service","Fri Jan 16 13:56:16 UTC 2026","passed","Fri Jan 16 13:56:16 UTC 2026","","board_validation_test","",""
+"","259","Создание кастомного поля типа: Number","Board Service","Fri Jan 16 13:56:25 UTC 2026","passed","Fri Jan 16 13:56:25 UTC 2026","","test_create_board","",""
+"","619","Редактирование кастомного поля типа: TaskRelations","Board Service","Fri Jan 16 13:56:31 UTC 2026","passed","Fri Jan 16 13:56:31 UTC 2026","","test_create_board","",""
+"","633","Создание Project-документа для роли owner","Document Service","Fri Jan 16 13:56:52 UTC 2026","passed","Fri Jan 16 13:56:53 UTC 2026","","Access document","",""
+"","225","Тест получения доски: клиент=member_client, ожидаемый статус=200","Board Service","Fri Jan 16 13:56:07 UTC 2026","passed","Fri Jan 16 13:56:07 UTC 2026","","Access board","",""
+"
+    Test to verify negative access scenarios for a board.
+
+    ","1858","Негативный тест на доступ к борде: клиент=client_with_access_only_in_space, ожидаемый статус=403","Board Service","Fri Jan 16 13:56:08 UTC 2026","passed","Fri Jan 16 13:56:10 UTC 2026","","Access board","",""
+"","261","Создание кастомного поля типа: Date","Board Service","Fri Jan 16 13:56:26 UTC 2026","passed","Fri Jan 16 13:56:26 UTC 2026","","test_create_board","",""
+"","1018","Archive document: Архивирование Project-документа для роли owner","Document Service","Fri Jan 16 13:56:40 UTC 2026","passed","Fri Jan 16 13:56:42 UTC 2026","","Access document","",""
+"","298","Валидация имени борды: valid name → ожидали 200","Board Service","Fri Jan 16 13:56:13 UTC 2026","passed","Fri Jan 16 13:56:13 UTC 2026","","board_validation_test","",""
+"
+    Тест проверяет дублирование документов разными ролями и типами документов. Тест проверяет, что документы могут быть
+    созданы одной ролью и продублированы другой в соответствии с ожидаемыми условиями, указанными в параметризации.
+    ","1593","Дублирование Project-документа: создание owner, дублирование owner","Document Service","Fri Jan 16 13:56:59 UTC 2026","passed","Fri Jan 16 13:57:00 UTC 2026","","Access document","",""
+"","560","Создание нескольких борд с одинаковым именем в одном проекте","Board Service","Fri Jan 16 13:56:22 UTC 2026","passed","Fri Jan 16 13:56:22 UTC 2026","","test_create_board","",""
+"","285","Валидация поля limit для board group: None","Board Service","Fri Jan 16 13:56:19 UTC 2026","passed","Fri Jan 16 13:56:19 UTC 2026","","board_validation_test","",""
+"","670","Создание Project-документа для роли manager","Document Service","Fri Jan 16 13:56:53 UTC 2026","passed","Fri Jan 16 13:56:54 UTC 2026","","Access document","",""
+"","2403","Создание Personal-документа для роли owner","Document Service","Fri Jan 16 13:56:55 UTC 2026","passed","Fri Jan 16 13:56:57 UTC 2026","","Access document","",""
+"","340","Валидация поля group description: None (optional) → ожидали 200","Board Service","Fri Jan 16 13:56:17 UTC 2026","passed","Fri Jan 16 13:56:17 UTC 2026","","board_validation_test","",""
+"","282","Создание кастомного поля типа: Text","Board Service","Fri Jan 16 13:56:25 UTC 2026","passed","Fri Jan 16 13:56:25 UTC 2026","","test_create_board","",""
+"","571","Создание Personal-документа для роли member","Document Service","Fri Jan 16 13:56:58 UTC 2026","passed","Fri Jan 16 13:56:58 UTC 2026","","Access document","",""
+"
+    Тест для проверки создания и архивирования Space-документа с разными клиентскими ролями.
+    Тест выполняет следующие шаги для каждой роли:
+    1. Создает Space-документ с использованием предоставленной клиентской роли.
+    2. Проверяет, что статус ответа соответствует ожидаемому результату.
+    3. Если создание документа успешно (статус 200):
+       - Проверяет, что заголовок созданного документа соответствует ожидаемому.
+       - Архивирует созданный Space-документ и проверяет статус запроса на архивирование.
+    ","230","Создание Space-документа для роли guest","Document Service","Fri Jan 16 13:56:52 UTC 2026","passed","Fri Jan 16 13:56:52 UTC 2026","","Access document","",""
+"","278","Создание борды в существующем проекте и корректность возвращаемого имени","Board Service","Fri Jan 16 13:56:22 UTC 2026","passed","Fri Jan 16 13:56:22 UTC 2026","","test_create_board","",""
+"
+    Проверяет функциональность архивации Space-документа с разными ролями и уровнями доступа.
+
+    Тест создает Space-документ, используя случайного клиента с повышенными правами (владелец, менеджер или участник),
+    и оценивает возможность архивации документа на основе предоставленной роли client_fixture.
+    Проверяется, что возвращаются корректные коды состояния в зависимости от прав пользователя.
+    Дополнительно, в случаях, когда доступ запрещен и ожидаемый статус 403, документ архивируется после теста
+    с использованием случайного клиента с повышенными правами.
+    ","1226","Archive document: Архивирование Space-документа для роли owner","Document Service","Fri Jan 16 13:56:35 UTC 2026","passed","Fri Jan 16 13:56:37 UTC 2026","","Access document","",""
+"","271","Валидация имени борды: @#$%^&*()! → ожидали 200","Board Service","Fri Jan 16 13:56:14 UTC 2026","passed","Fri Jan 16 13:56:14 UTC 2026","","board_validation_test","",""
+"","281","Валидация имени борды: exactly 50 chars → ожидали 200","Board Service","Fri Jan 16 13:56:13 UTC 2026","passed","Fri Jan 16 13:56:13 UTC 2026","","board_validation_test","",""
+"
+    Тест для проверки создания и архивирования Space-документа с разными клиентскими ролями.
+    Тест выполняет следующие шаги для каждой роли:
+    1. Создает Space-документ с использованием предоставленной клиентской роли.
+    2. Проверяет, что статус ответа соответствует ожидаемому результату.
+    3. Если создание документа успешно (статус 200):
+       - Проверяет, что заголовок созданного документа соответствует ожидаемому.
+       - Архивирует созданный Space-документ и проверяет статус запроса на архивирование.
+    ","728","Создание Space-документа для роли member","Document Service","Fri Jan 16 13:56:51 UTC 2026","passed","Fri Jan 16 13:56:52 UTC 2026","","Access document","",""
+"","574","Редактирование кастомного поля типа: Number","Board Service","Fri Jan 16 13:56:28 UTC 2026","passed","Fri Jan 16 13:56:29 UTC 2026","","test_create_board","",""
+"","274","Валидация поля group description: max valid (1024 chars) → ожидали 200","Board Service","Fri Jan 16 13:56:16 UTC 2026","passed","Fri Jan 16 13:56:16 UTC 2026","","board_validation_test","",""
+"
+    Проверяет функциональность архивации Space-документа с разными ролями и уровнями доступа.
+
+    Тест создает Space-документ, используя случайного клиента с повышенными правами (владелец, менеджер или участник),
+    и оценивает возможность архивации документа на основе предоставленной роли client_fixture.
+    Проверяется, что возвращаются корректные коды состояния в зависимости от прав пользователя.
+    Дополнительно, в случаях, когда доступ запрещен и ожидаемый статус 403, документ архивируется после теста
+    с использованием случайного клиента с повышенными правами.
+    ","1428","Archive document: Архивирование Space-документа для роли guest","Document Service","Fri Jan 16 13:56:39 UTC 2026","passed","Fri Jan 16 13:56:40 UTC 2026","","Access document","",""
+"","876","Archive document: Архивирование Project-документа для роли manager","Document Service","Fri Jan 16 13:56:42 UTC 2026","passed","Fri Jan 16 13:56:42 UTC 2026","","Access document","",""
+"","695","Редактирование кастомного поля типа: Text","Board Service","Fri Jan 16 13:56:28 UTC 2026","passed","Fri Jan 16 13:56:28 UTC 2026","","test_create_board","",""
+"","337","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Member","Board Service","Fri Jan 16 13:56:21 UTC 2026","passed","Fri Jan 16 13:56:21 UTC 2026","","board_validation_test","",""
+"","315","Валидация имени борды: valid name with spaces → ожидали 200","Board Service","Fri Jan 16 13:56:14 UTC 2026","passed","Fri Jan 16 13:56:14 UTC 2026","","board_validation_test","",""
+"","600","Тест создания доски: клиент=guest_client, ожидаемый статус=403","Board Service","Fri Jan 16 13:56:05 UTC 2026","passed","Fri Jan 16 13:56:06 UTC 2026","","Access board","",""
+"","1230","Создание кастомного поля типа: Select","Board Service","Fri Jan 16 13:56:27 UTC 2026","passed","Fri Jan 16 13:56:28 UTC 2026","","test_create_board","",""
+"","273","Валидация имени борды: length > 50 → ожидали 400","Board Service","Fri Jan 16 13:56:13 UTC 2026","passed","Fri Jan 16 13:56:13 UTC 2026","","board_validation_test","",""
+"","264","Валидация поля limit для board group: -1","Board Service","Fri Jan 16 13:56:17 UTC 2026","passed","Fri Jan 16 13:56:17 UTC 2026","","board_validation_test","",""
+"","894","Archive document: Архивирование Project-документа для роли guest","Document Service","Fri Jan 16 13:56:43 UTC 2026","passed","Fri Jan 16 13:56:44 UTC 2026","","Access document","",""
+"
+    Проверяет функциональность архивации Space-документа с разными ролями и уровнями доступа.
+
+    Тест создает Space-документ, используя случайного клиента с повышенными правами (владелец, менеджер или участник),
+    и оценивает возможность архивации документа на основе предоставленной роли client_fixture.
+    Проверяется, что возвращаются корректные коды состояния в зависимости от прав пользователя.
+    Дополнительно, в случаях, когда доступ запрещен и ожидаемый статус 403, документ архивируется после теста
+    с использованием случайного клиента с повышенными правами.
+    ","1676","Archive document: Архивирование Space-документа для роли manager","Document Service","Fri Jan 16 13:56:37 UTC 2026","passed","Fri Jan 16 13:56:38 UTC 2026","","Access document","",""
+"","1068","Тест создания доски: клиент=manager_client, ожидаемый статус=200","Board Service","Fri Jan 16 13:56:04 UTC 2026","passed","Fri Jan 16 13:56:05 UTC 2026","","Access board","",""
+"","352","Валидация поля limit для board group: 0","Board Service","Fri Jan 16 13:56:17 UTC 2026","passed","Fri Jan 16 13:56:18 UTC 2026","","board_validation_test","",""
+"","243","Валидация поля group name: empty string → ожидали 400","Board Service","Fri Jan 16 13:56:15 UTC 2026","passed","Fri Jan 16 13:56:15 UTC 2026","","board_validation_test","",""
+"
+    Test to verify negative access scenarios for a board.
+
+    ","224","Негативный тест на доступ к борде: клиент=foreign_client, ожидаемый статус=403","Board Service","Fri Jan 16 13:56:08 UTC 2026","passed","Fri Jan 16 13:56:08 UTC 2026","","Access board","",""
+"","267","Ошибка при создании борды с None вместо списков в полях groups/typesList/customFields","Board Service","Fri Jan 16 13:56:22 UTC 2026","passed","Fri Jan 16 13:56:23 UTC 2026","","test_create_board","",""
+"","466","Авторизация: пустой токен '_t=' приводит к Unauthorized 401 ","Auth Service","Fri Jan 16 13:56:01 UTC 2026","passed","Fri Jan 16 13:56:01 UTC 2026","","test_token","",""
+"","236","Ошибка при попытке получить борду по несуществующему boardId","Board Service","Fri Jan 16 13:56:33 UTC 2026","passed","Fri Jan 16 13:56:33 UTC 2026","","test_get_board","",""
+"","611","Создание Project-документа для роли member","Document Service","Fri Jan 16 13:56:54 UTC 2026","passed","Fri Jan 16 13:56:54 UTC 2026","","Access document","",""
+"","674","Редактирование кастомного поля типа: Member","Board Service","Fri Jan 16 13:56:30 UTC 2026","passed","Fri Jan 16 13:56:31 UTC 2026","","test_create_board","",""
+"
+    Test to verify negative access scenarios for a board.
+
+    ","582","Негативный тест на доступ к борде: клиент=client_with_access_only_in_project, ожидаемый статус=403","Board Service","Fri Jan 16 13:56:10 UTC 2026","passed","Fri Jan 16 13:56:11 UTC 2026","","Access board","",""
+"","246","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Number","Board Service","Fri Jan 16 13:56:20 UTC 2026","passed","Fri Jan 16 13:56:20 UTC 2026","","board_validation_test","",""
+"","1227","Получение списка борд: проверка созданных борд и их обязательных полей(name, projectId, createdAt)","Board Service","Fri Jan 16 13:56:34 UTC 2026","passed","Fri Jan 16 13:56:35 UTC 2026","","test_get_boards","",""
+"
+    Проверка универсальна для всех эндпоинтов. Выполнена на GetSpaces.
+    ","209","Авторизация: отсутствие токена (в Authorization и Cookie,) приводит к Unauthorized 401)","Auth Service","Fri Jan 16 13:56:00 UTC 2026","passed","Fri Jan 16 13:56:00 UTC 2026","","test_token","",""
+"","1215","Валидация поля limit для board group: 999","Board Service","Fri Jan 16 13:56:18 UTC 2026","passed","Fri Jan 16 13:56:19 UTC 2026","","board_validation_test","",""
+"","353","Авторизация: токен пользователя без доступа к спейсу (foreign_client) => 400","Auth Service","Fri Jan 16 13:56:02 UTC 2026","passed","Fri Jan 16 13:56:02 UTC 2026","","test_token","",""
+"","562","Редактирование борды: изменение имени через /EditBoard","Board Service","Fri Jan 16 13:56:23 UTC 2026","passed","Fri Jan 16 13:56:23 UTC 2026","","test_create_board","",""
+"","261","Валидация имени борды: chinese → ожидали 200","Board Service","Fri Jan 16 13:56:14 UTC 2026","passed","Fri Jan 16 13:56:14 UTC 2026","","board_validation_test","",""
+"","305","Валидация поля limit для board group: 123","Board Service","Fri Jan 16 13:56:19 UTC 2026","passed","Fri Jan 16 13:56:20 UTC 2026","","board_validation_test","",""
+"","244","Валидация имени борды:   → ожидали 400","Board Service","Fri Jan 16 13:56:13 UTC 2026","passed","Fri Jan 16 13:56:14 UTC 2026","","board_validation_test","",""
+"","259","Валидация поля group name: valid name → ожидали 200","Board Service","Fri Jan 16 13:56:15 UTC 2026","passed","Fri Jan 16 13:56:16 UTC 2026","","board_validation_test","",""
+"","1091","Получение списка борд: проверка, что все созданные борды присутствуют в ответе(board_names)","Board Service","Fri Jan 16 13:56:33 UTC 2026","passed","Fri Jan 16 13:56:34 UTC 2026","","test_get_boards","",""
+"","258","Валидация поля group name: None value → ожидали 400","Board Service","Fri Jan 16 13:56:15 UTC 2026","passed","Fri Jan 16 13:56:15 UTC 2026","","board_validation_test","",""
+"","265","Создание кастомного поля типа: TaskRelations","Board Service","Fri Jan 16 13:56:26 UTC 2026","passed","Fri Jan 16 13:56:26 UTC 2026","","test_create_board","",""
+"","695","Создание Personal-документа для роли manager","Document Service","Fri Jan 16 13:56:57 UTC 2026","passed","Fri Jan 16 13:56:58 UTC 2026","","Access document","",""
+"","602","Авторизация: валидный токен и в Authorization и в Cookie - статус 200","Auth Service","Fri Jan 16 13:55:59 UTC 2026","passed","Fri Jan 16 13:56:00 UTC 2026","","test_token","",""
+"","285","APP-2763: Ошибка при создании борды с длинным заголовком custom field: Select","Board Service","Fri Jan 16 13:56:21 UTC 2026","passed","Fri Jan 16 13:56:22 UTC 2026","","board_validation_test","",""
+"","893","Archive document: Архивирование Project-документа для роли member","Document Service","Fri Jan 16 13:56:42 UTC 2026","passed","Fri Jan 16 13:56:43 UTC 2026","","Access document","",""
+"","701","Редактирование поля Select: добавление новых опций с валидным _id","Board Service","Fri Jan 16 13:56:31 UTC 2026","passed","Fri Jan 16 13:56:32 UTC 2026","","test_create_board","",""
+"","890","Тест создания доски: клиент=owner_client, ожидаемый статус=200","Board Service","Fri Jan 16 13:56:03 UTC 2026","passed","Fri Jan 16 13:56:04 UTC 2026","","Access board","",""
+"","273","Создание Project-документа для роли guest","Document Service","Fri Jan 16 13:56:54 UTC 2026","passed","Fri Jan 16 13:56:55 UTC 2026","","Access document","",""
+"","540","Валидация имени борды: empty string → ожидали 400","Board Service","Fri Jan 16 13:56:12 UTC 2026","passed","Fri Jan 16 13:56:13 UTC 2026","","board_validation_test","",""
+"","2170","Archive document: Архивирование Personal-документа для роли manager, документ создан в роли Member","Document Service","Fri Jan 16 13:56:46 UTC 2026","passed","Fri Jan 16 13:56:48 UTC 2026","","Access document","",""
+"","544","Создание Personal-документа для роли guest","Document Service","Fri Jan 16 13:56:58 UTC 2026","passed","Fri Jan 16 13:56:59 UTC 2026","","Access document","",""
+"","562","Редактирование кастомного поля типа: Boolean","Board Service","Fri Jan 16 13:56:29 UTC 2026","passed","Fri Jan 16 13:56:30 UTC 2026","","test_create_board","",""
