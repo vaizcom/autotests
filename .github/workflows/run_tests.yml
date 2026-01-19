@@ -14,7 +14,7 @@ on:
         options: [ backend, frontend, all ]
       test_stand:
         description: 'Which test stand to run?'
-        default: 'kuber_dev'
+        default: 'dev'
         type: choice
         options: [ dev, kuber_dev, kuber_uat ]
 

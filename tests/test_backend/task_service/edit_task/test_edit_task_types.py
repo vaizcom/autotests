@@ -69,7 +69,6 @@ def test_edit_task_clear_types_with_empty_list(owner_client, main_space, make_ta
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task")
 @allure.sub_suite("Types edit Task")
-@pytest.mark.skip(reason="APP-4046")
 @allure.title("Edit Task Types: Проверка ошибки при передаче повторяющихся типов (APP-4046)")
 def test_edit_task_duplicate_types_error(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
@@ -98,6 +97,7 @@ def test_edit_task_duplicate_types_error(owner_client, main_space, make_task_in_
 
         # Получаем первый объект ошибки поля
         error_field = error_data["fields"][0]
+        assert error_field.get("codes") == ['Types array must not contain duplicate types']
         assert error_field.get("name") == "types", \
             f"Ожидалась ошибка для поля 'types', получено для '{error_field.get('name')}'"
         assert "Types array must not contain duplicate types" in error_field.get("codes", []), \

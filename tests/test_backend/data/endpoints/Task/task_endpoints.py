@@ -174,3 +174,23 @@ def edit_task_endpoint(
             "Content-Type": "application/json","Current-Space-Id": space_id,
         },
     }
+
+
+def edit_task_custom_field_endpoint(space_id, task_id, field_id, value):
+    """
+    Формирует запрос для EditTaskCustomField.
+    DTO: EditTaskCustomFieldInputDto { taskId, customFieldId, value }
+    """
+    payload = {
+        "taskId": task_id,
+        "customFieldId": field_id,
+        "value": value
+    }
+    return {
+        "path": "/EditTaskCustomField",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
