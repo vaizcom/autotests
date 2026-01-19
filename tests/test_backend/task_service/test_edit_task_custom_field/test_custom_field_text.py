@@ -38,7 +38,7 @@ def test_edit_task_text_custom_field(owner_client, main_space, board_with_tasks,
             assert cf_before.get("value") != new_value, \
                 "Текущее значение в базе уже совпадает с новым! Тест неэффективен."
 
-    with allure.step(f"Action: Отправка запроса на изменение поля Text"):
+    with allure.step("Action: Отправка запроса на изменение поля Text"):
         resp_edit = owner_client.post(**edit_task_custom_field_endpoint(
             space_id=main_space,
             task_id=target_task_id,
@@ -74,3 +74,48 @@ def test_edit_task_text_custom_field(owner_client, main_space, board_with_tasks,
         assert updated_field is not None, "Кастомное поле не найдено в задаче после обновления"
         assert updated_field.get("value") == new_value, \
             f"Значение в БД не сохранилось! Ожидалось '{new_value}', получено '{updated_field.get('value')}'"
+
+
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task Custom Field")
+@allure.sub_suite("Text Custom Fields")
+@allure.title("Edit Text Custom Field. Negative Flows")
+@allure.title("Edit Text Custom Field. Negative: Numeric value instead of string")
+def test_edit_task_text_custom_field_with_number(owner_client, main_space):
+    """
+    Text Custom Fields. Проверка валидации: передача числа вместо строки вызывает ошибку InvalidForm.
+    """
+    target_task_id = "696a1a04c7fd1dbba471efc2"
+    target_custom_field_id = "696a1a0ac7fd1dbba471f014"
+    invalid_value = 12
+
+    with allure.step(f"Action: Отправка запроса c Number (числом) вместо String (строки)"):
+        resp_edit = owner_client.post(**edit_task_custom_field_endpoint(
+            space_id=main_space,
+            task_id=target_task_id,
+            field_id=target_custom_field_id,
+            value=invalid_value
+        ))
+
+    with allure.step("Verification: Проверка ошибки валидации (InvalidForm)"):
+        response_json = resp_edit.json()
+
+        assert response_json["payload"] is None, "Payload должен быть null при ошибке валидации"
+        assert response_json["type"] == "EditTaskCustomField"
+
+        error_data = response_json.get("error", {})
+        assert error_data.get(
+            "code") == "InvalidForm", f"Ожидался код ошибки InvalidForm, получен {error_data.get('code')}"
+        assert error_data.get("originalType") == "EditTaskCustomField"
+
+        # Проверка деталей конкретного поля в ошибке
+        fields_errors = error_data.get("fields", [])
+        assert len(fields_errors) > 0, "Список ошибок полей пуст"
+
+        field_error = fields_errors[0]
+        assert field_error["name"] == "Text"
+        assert "IllegalField" in field_error["codes"]
+
+        meta = field_error.get("meta", {})
+        assert meta.get("message") == "Expected string value"
+        assert meta.get("received") == invalid_value
