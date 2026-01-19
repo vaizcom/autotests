@@ -73,11 +73,17 @@ def assert_task_payload(task: dict, board_id: str, project_id: str):
         # Массивы строк
         list_of_strings_fields = [
             "assignees", "subtasks", "milestones",
-            "rightConnectors", "leftConnectors", "types", "customFields"
+            "rightConnectors", "leftConnectors", "types"
         ]
         for f in list_of_strings_fields:
             assert isinstance(task[f], list), f"Поле '{f}' должно быть массивом"
             assert all(isinstance(x, str) for x in task[f]), f"Элементы поля '{f}' должны быть строками"
+
+        # customFields: массив словарей
+        assert isinstance(task["customFields"], list), "Поле 'customFields' должно быть массивом"
+        for cf in task["customFields"]:
+            assert isinstance(cf, dict), "Элементы поля 'customFields' должны быть словарями"
+
         # followers: ключи и значения строки
         assert all(isinstance(k, str) for k in task["followers"].keys()), "Ключи 'followers' должны быть строками"
         assert all(isinstance(v, str) for v in task["followers"].values()), "Значения 'followers' должны быть строками"
