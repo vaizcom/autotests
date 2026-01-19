@@ -9,7 +9,6 @@ from test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_fie
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
 @allure.sub_suite("Text Custom Fields")
-@allure.title("Edit Text Custom Field. RBAC")
 @pytest.mark.parametrize(
     "client_fixture_name, expected_status_code",
     [
@@ -17,6 +16,7 @@ from test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_fie
         ("manager_client", 200),
         ("member_client", 200),
         ("guest_client", 403),
+        ("foreign_client", 400)
     ],
 )
 def test_edit_task_text_custom_field_roles(
@@ -25,6 +25,8 @@ def test_edit_task_text_custom_field_roles(
         client_fixture_name,
         expected_status_code
 ):
+    allure.dynamic.title(f"{client_fixture_name} : Text Custom Fields. Проверка доступа к редактированию текстового поля для роли {client_fixture_name}")
+
     """
     Text Custom Fields. Проверка доступа к редактированию текстового поля для разных ролей.
     """
@@ -53,3 +55,23 @@ def test_edit_task_text_custom_field_roles(
 
             assert updated_field is not None, "Кастомное поле не найдено в ответе"
             assert updated_field["value"] == new_value
+
+    elif expected_status_code == 403:
+        with allure.step("Verification: Проверка ошибки AccessDenied для guest"):
+            response_json = resp_edit.json()
+            assert response_json["payload"] is None
+            assert response_json["type"] == "EditTaskCustomField"
+
+            error = response_json.get("error", {})
+            assert error.get("code") == "AccessDenied", \
+                f"Ожидался код ошибки AccessDenied, получен {error.get('code')}"
+
+    elif expected_status_code == 400:
+        with allure.step("Verification: Проверка ошибки SpaceIdNotSpecified для foreign_client"):
+            response_json = resp_edit.json()
+            assert response_json["payload"] is None
+            assert response_json["type"] == "EditTaskCustomField"
+
+            error = response_json.get("error", {})
+            assert error.get("code") == "SpaceIdNotSpecified", \
+                f"Ожидался код ошибки SpaceIdNotSpecified, получен {error.get('code')}"

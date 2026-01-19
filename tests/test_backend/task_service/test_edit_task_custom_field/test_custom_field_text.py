@@ -89,7 +89,7 @@ def test_edit_task_text_custom_field_with_number(owner_client, main_space):
     target_custom_field_id = "696a1a0ac7fd1dbba471f014"
     invalid_value = 12
 
-    with allure.step(f"Action: Отправка запроса c Number (числом) вместо String (строки)"):
+    with allure.step("Action: Отправка запроса c Number (числом) вместо String (строки)"):
         resp_edit = owner_client.post(**edit_task_custom_field_endpoint(
             space_id=main_space,
             task_id=target_task_id,
