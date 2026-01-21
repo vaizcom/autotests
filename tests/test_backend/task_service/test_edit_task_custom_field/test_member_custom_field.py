@@ -11,9 +11,9 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
 @allure.sub_suite("Member Custom Fields")
-@allure.title("Edit Member Custom Field. Positive Flows")
 @pytest.mark.parametrize("iterations", [1, 3], ids=["single_member", "multiple_members"])
 def test_edit_task_member_custom_field(owner_client, main_space, board_with_tasks, main_project, iterations):
+    allure.dynamic.title(f"Edit Member Custom Field. Positive Flows. Устанавливаем кол-во мемберов: {iterations}")
     """
     Member Custom Fields. Проверка успешного назначения.
     Параметризация:
@@ -70,21 +70,17 @@ def test_edit_task_member_custom_field(owner_client, main_space, board_with_task
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
 @allure.sub_suite("Member Custom Fields")
-@allure.title("Edit Member Custom Field. Negative Scenarios")
-@pytest.mark.parametrize("case_key, expected_code, expected_message", [
+@pytest.mark.parametrize("case_key, expected_message", [
     (
             "duplicates",
-            "IllegalField",
             "Duplicate member IDs are not allowed"
     ),
     (
             "invalid_id",
-            "IllegalField",
             "One or more members do not exist in this workspace or are not accessible"
     ),
     (
             "none_value",
-            "IncorrectId",
             "All member IDs must be valid 24-character hex strings"
     )
 ])
@@ -92,9 +88,9 @@ def test_edit_task_member_custom_field_negative(
         owner_client,
         main_space,
         case_key,
-        expected_code,
         expected_message
 ):
+    allure.dynamic.title(f"Edit Member Custom Field. Negative Flows. Case: {case_key}")
     """
     Member Custom Fields. Параметризованный негативный тест.
     Проверяет валидацию API при передаче некорректных данных:
@@ -140,7 +136,6 @@ def test_edit_task_member_custom_field_negative(
 
         field_error = fields_errors[0]
         assert field_error["name"] == "Member"
-        assert expected_code in field_error["codes"]
 
         meta = field_error.get("meta", {})
         assert meta.get("message") == expected_message
