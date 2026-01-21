@@ -6,7 +6,6 @@ from test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_fie
 pytestmark = [pytest.mark.backend]
 
 
-
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
 @allure.sub_suite("Boolean Custom Fields")
