@@ -1,11 +1,11 @@
-import random
-
 import allure
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_field_endpoint
+from test_backend.task_service.utils import get_assignee
 
 pytestmark = [pytest.mark.backend]
+
 
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
@@ -19,25 +19,30 @@ pytestmark = [pytest.mark.backend]
         ("guest_client", 403),
     ],
 )
-def test_edit_task_number_custom_field_roles(
+def test_edit_task_member_custom_field_roles(
         request,
         main_space,
+        owner_client,
         client_fixture_name,
         expected_status_code
 ):
     """
-    Number Custom Fields. Проверка доступа к редактированию числового поля для разных ролей.
+    Member Custom Fields. Проверка доступа к редактированию поля Member для разных ролей.
     """
-    allure.dynamic.title(f"{client_fixture_name} : Number Custom Fields. Проверка доступа для роли {client_fixture_name}")
+    allure.dynamic.title(f"{client_fixture_name}: Edit Member Custom Field for Role: {client_fixture_name}")
 
+    # Получаем клиента для теста (под кем будем делать запрос)
     client = request.getfixturevalue(client_fixture_name)
+
+    # Статические данные для Member CF
     target_task_id = "696a1a04c7fd1dbba471efc2"
-    target_custom_field_id = "696a1a10c7fd1dbba471f031"
+    target_custom_field_id = "696e02e02452157dfd7e2577"
 
-    # Генерируем СТРОКУ с числом
-    new_value = str(random.randint(1, 500))
+    # Подготавливаем валидное значение (список id участников).
+    # Используем owner_client для получения данных, чтобы тест не падал на этапе подготовки данных у прав guest/foreign
+    new_value = get_assignee(owner_client, main_space)
 
-    with allure.step(f"Action: Попытка изменения поля Number ролью {client_fixture_name}"):
+    with allure.step(f"Action: Попытка установить Member = {new_value} ролью {client_fixture_name}"):
         resp_edit = client.post(**edit_task_custom_field_endpoint(
             space_id=main_space,
             task_id=target_task_id,
@@ -50,16 +55,16 @@ def test_edit_task_number_custom_field_roles(
             f"Неверный статус для {client_fixture_name}. Ожидался {expected_status_code}, получен {resp_edit.status_code}"
 
     if expected_status_code == 200:
-        with allure.step("Verification: Проверка обновления значения"):
+        with allure.step("Verification: Значение обновилось"):
             task = resp_edit.json().get("payload", {}).get("task", {})
             updated_field = next((cf for cf in task.get("customFields", []) if cf["id"] == target_custom_field_id),
                                  None)
             assert updated_field is not None
-            # Сравниваем как строки
-            assert str(updated_field["value"]) == new_value
+            # Сравниваем списки
+            assert sorted(updated_field["value"]) == sorted(new_value)
 
     elif expected_status_code == 403:
-        with allure.step("Verification: Проверка тела ошибки AccessDenied"):
+        with allure.step("Verification: Ошибка AccessDenied"):
             error = resp_edit.json().get("error", {})
             assert error.get("code") == "AccessDenied"
             assert error.get("meta", {}).get("kind") == "Board"

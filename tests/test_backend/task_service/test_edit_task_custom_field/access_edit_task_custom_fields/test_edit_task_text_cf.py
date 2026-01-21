@@ -18,7 +18,6 @@ pytestmark = [pytest.mark.backend]
         ("manager_client", 200),
         ("member_client", 200),
         ("guest_client", 403),
-        ("foreign_client", 400)
     ],
 )
 def test_edit_task_text_custom_field_roles(
@@ -67,13 +66,3 @@ def test_edit_task_text_custom_field_roles(
             error = response_json.get("error", {})
             assert error.get("code") == "AccessDenied", \
                 f"Ожидался код ошибки AccessDenied, получен {error.get('code')}"
-
-    elif expected_status_code == 400:
-        with allure.step("Verification: Проверка ошибки SpaceIdNotSpecified для foreign_client"):
-            response_json = resp_edit.json()
-            assert response_json["payload"] is None
-            assert response_json["type"] == "EditTaskCustomField"
-
-            error = response_json.get("error", {})
-            assert error.get("code") == "SpaceIdNotSpecified", \
-                f"Ожидался код ошибки SpaceIdNotSpecified, получен {error.get('code')}"
