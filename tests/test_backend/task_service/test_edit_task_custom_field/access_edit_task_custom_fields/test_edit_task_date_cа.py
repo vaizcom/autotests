@@ -17,7 +17,7 @@ def generate_future_date_iso(days_ahead=1):
 
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
-@allure.sub_suite("Date Custom Fields")
+@allure.sub_suite("Access Custom Fields")
 @pytest.mark.parametrize(
     "client_fixture_name, expected_status_code",
     [

@@ -5,10 +5,12 @@ import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_field_endpoint
 
+pytestmark = [pytest.mark.backend]
+
 
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
-@allure.sub_suite("Text Custom Fields")
+@allure.sub_suite("Access Custom Fields")
 @pytest.mark.parametrize(
     "client_fixture_name, expected_status_code",
     [
