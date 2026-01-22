@@ -204,7 +204,6 @@ def test_edit_task_relations_custom_field_negative(owner_client, main_space, cas
     Проверяет:
     1. Передачу дублей ID.
     2. Передачу несуществующего ID задачи.
-    3. Передачу строки вместо массива.
     """
     allure.dynamic.title(f"Edit Task Relations Custom Field. Negative: {case_name}")
 
