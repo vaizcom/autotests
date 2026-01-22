@@ -26,7 +26,7 @@ def test_edit_task_text_custom_field_roles(
         client_fixture_name,
         expected_status_code
 ):
-    allure.dynamic.title(f"{client_fixture_name} : Text Custom Fields. Проверка доступа к редактированию текстового поля для роли {client_fixture_name}")
+    allure.dynamic.title(f"TEXT {client_fixture_name} : Text Custom Fields. Проверка доступа к редактированию текстового поля для роли {client_fixture_name}")
 
     """
     Text Custom Fields. Проверка доступа к редактированию текстового поля для разных ролей.

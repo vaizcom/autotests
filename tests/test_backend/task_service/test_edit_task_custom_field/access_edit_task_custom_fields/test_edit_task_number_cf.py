@@ -28,7 +28,7 @@ def test_edit_task_number_custom_field_roles(
     """
     Number Custom Fields. Проверка доступа к редактированию числового поля для разных ролей.
     """
-    allure.dynamic.title(f"{client_fixture_name} : Number Custom Fields. Проверка доступа для роли {client_fixture_name}")
+    allure.dynamic.title(f"NUMBER {client_fixture_name} : Number Custom Fields. Проверка доступа для роли {client_fixture_name}")
 
     client = request.getfixturevalue(client_fixture_name)
     target_task_id = "696a1a04c7fd1dbba471efc2"

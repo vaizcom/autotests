@@ -29,7 +29,7 @@ def test_edit_task_member_custom_field_roles(
     """
     Member Custom Fields. Проверка доступа к редактированию поля Member для разных ролей.
     """
-    allure.dynamic.title(f"{client_fixture_name}: Edit Member Custom Field for Role: {client_fixture_name}")
+    allure.dynamic.title(f"MEMBER {client_fixture_name}: Edit Member Custom Field for Role: {client_fixture_name}")
 
     # Получаем клиента для теста (под кем будем делать запрос)
     client = request.getfixturevalue(client_fixture_name)

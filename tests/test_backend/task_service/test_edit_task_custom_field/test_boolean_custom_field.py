@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
 @allure.sub_suite("Boolean Custom Fields")
-@allure.title("Edit Boolean Custom Field. Positive Flows")
+@allure.title("Edit Boolean Custom Field. Проверка успешного переключения значения (True <-> False)")
 def test_edit_task_boolean_custom_field(owner_client, main_space, board_with_tasks, main_project):
     """
     Boolean Custom Fields. Проверка успешного переключения значения (True <-> False).

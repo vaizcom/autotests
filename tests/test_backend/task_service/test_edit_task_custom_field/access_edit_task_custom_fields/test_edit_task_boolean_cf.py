@@ -27,7 +27,7 @@ def test_edit_task_boolean_custom_field_roles(
     """
     Boolean Custom Fields. Проверка доступа к редактированию чекбокса для разных ролей.
     """
-    allure.dynamic.title(f"{client_fixture_name}: Edit Boolean Custom Field for Role: {client_fixture_name}")
+    allure.dynamic.title(f"BOOLEAN {client_fixture_name}: Edit Boolean Custom Field for Role: {client_fixture_name}")
 
     client = request.getfixturevalue(client_fixture_name)
     target_task_id = "696a1a04c7fd1dbba471efc2"
