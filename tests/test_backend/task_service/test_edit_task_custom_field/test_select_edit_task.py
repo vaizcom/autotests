@@ -22,7 +22,7 @@ def _update_custom_field(client, space_id, task_id, field_id, value):
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
 @allure.sub_suite("Select Custom Fields")
-@allure.title("Edit Select Custom Field. Positive Flows")
+@allure.title("Edit Select Custom Field. Проверка успешного выбора опций и очистки поля.")
 def test_edit_task_select_custom_field(owner_client, main_space, board_with_tasks, main_project):
     """
     Select Custom Fields. Проверка успешного выбора опций (установка массива ID опций) и очистки поля.
