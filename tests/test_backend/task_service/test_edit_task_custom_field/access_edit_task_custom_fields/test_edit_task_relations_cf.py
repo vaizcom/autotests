@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_field_endpoint
+from test_backend.task_service.conftest import _update_custom_field
 
 pytestmark = [pytest.mark.backend]
 
@@ -33,13 +33,8 @@ def test_edit_task_relations_custom_field_roles(
     target_custom_field_id = "696e02e42452157dfd7e25cd"
     new_value = ["6971d6992452157dfd8076d4"]
 
-    with allure.step(f"Action: Попытка изменения поля TaskRelations под ролью {client_fixture_name}"):
-        resp_edit = client.post(**edit_task_custom_field_endpoint(
-            space_id=main_space,
-            task_id=target_task_id,
-            field_id=target_custom_field_id,
-            value=new_value
-        ))
+    with (allure.step(f"Action: Попытка изменения поля TaskRelations под ролью {client_fixture_name}")):
+        resp_edit = _update_custom_field(client, main_space, target_task_id, target_custom_field_id, new_value)
 
     with allure.step(f"Verification: Проверка статус-кода {expected_status_code}"):
         assert resp_edit.status_code == expected_status_code, \

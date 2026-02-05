@@ -4,7 +4,8 @@ from typing import List
 
 import pytest
 
-from tests.test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
+from tests.test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint, \
+    edit_task_custom_field_endpoint
 from test_backend.task_service.utils import get_client, create_task, get_random_type_id, get_random_group_id, \
     get_current_timestamp, get_due_end, get_priority, get_assignee
 
@@ -140,3 +141,14 @@ def make_task_in_main(owner_client, main_space, main_board):
                     pass
             except Exception:
                 pass
+
+def _update_custom_field(client, space_id, task_id, field_id, value):
+    """
+    Вспомогательная функция для обновления значения кастомного поля.
+    """
+    return client.post(**edit_task_custom_field_endpoint(
+        space_id=space_id,
+        task_id=task_id,
+        field_id=field_id,
+        value=value
+    ))

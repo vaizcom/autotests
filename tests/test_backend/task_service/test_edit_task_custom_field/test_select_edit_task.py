@@ -2,21 +2,11 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.Task.assert_task_payload import assert_task_payload
-from test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_field_endpoint, get_task_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
+from test_backend.task_service.conftest import _update_custom_field
 
 pytestmark = [pytest.mark.backend]
 
-
-def _update_custom_field(client, space_id, task_id, field_id, value):
-    """
-    Вспомогательная функция для обновления значения кастомного поля.
-    """
-    return client.post(**edit_task_custom_field_endpoint(
-        space_id=space_id,
-        task_id=task_id,
-        field_id=field_id,
-        value=value
-    ))
 
 
 @allure.parent_suite("Task Service")
