@@ -61,6 +61,15 @@ def test_edit_task_select_custom_field(owner_client, main_space, board_with_task
 
             assert_task_payload(task, board_with_tasks, main_project)
 
+        with allure.step("Post-condition: Проверка сохранения данных в БД (через GET Task)"):
+            resp_after_set = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=target_task_id))
+            assert resp_after_set.status_code == 200
+            task_db = resp_after_set.json().get("payload", {}).get("task")
+            field_db = next((cf for cf in task_db.get("customFields", []) if cf.get("id") == select_field_id), None)
+            assert field_db is not None
+            assert sorted(field_db.get("value")) == sorted(
+                value_to_set), "Значение в БД не сохранилось после установки"
+
     # 2. Очистка значения
     with allure.step("Action: Очистка поля Select (передача пустого массива)"):
         resp_clear = _update_custom_field(owner_client, main_space, target_task_id, select_field_id, value_to_clear)
