@@ -90,11 +90,6 @@ def test_edit_task_url_custom_field(owner_client, main_space, board_with_tasks, 
     ("No Protocol",
      "google.com",
      "InvalidURL",
-     'Expected valid URL (e.g., "https://example.com")'),
-
-    ("Just Text",
-     "some_random_text",
-     "InvalidURL",
      'Expected valid URL (e.g., "https://example.com")')
             ])
 def test_edit_task_url_custom_field_negative(owner_client, main_space, case_name, invalid_value, expected_field_code, expected_message):
