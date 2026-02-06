@@ -90,7 +90,18 @@ def test_edit_task_due_start_after_due_end_error(owner_client, main_space, make_
         assert resp.status_code == 400, f"Ожидался статус 400 (Bad Request), получен {resp.status_code}"
         error_payload = resp.json()
         assert error_payload.get("error", {}).get("code") == "InvalidForm"
-        assert any(
-            field.get("name") == "dueStart" and "Start date cannot be after end date" in field.get("codes", [])
-            for field in error_payload.get("error", {}).get("fields", [])
-        ), "Ожидалось сообщение об ошибке 'Start date cannot be after end date' для поля 'dueStart'"
+
+        # Получаем список ошибок полей
+        fields_errors = error_payload.get("error", {}).get("fields", [])
+
+        # Ищем ошибку конкретно для поля dueStart
+        field_error = next((f for f in fields_errors if f.get("name") == "dueStart"), None)
+
+        assert field_error is not None, f"Не найдена ошибка для поля dueStart. Список ошибок: {fields_errors}"
+
+        # Проверяем сообщение внутри meta
+        actual_message = field_error.get("meta", {}).get("message", "")
+        expected_message_part = "Start date cannot be after end date"
+
+        assert expected_message_part in actual_message, \
+            f"Ожидалось сообщение '{expected_message_part}', получено '{actual_message}'"
