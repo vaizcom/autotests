@@ -62,7 +62,7 @@ def test_archive_all_documents(request, owner_client, kind, container_fixture, m
     ],
     ids=['owner', 'manager', 'member', 'guest'],
 )
-def test_archive_all_personal_documents_member_kind(request, main_space, main_personal, client_fixture, member_key):
+def test_archive_all_personal_documents(request, main_space, main_personal, client_fixture, member_key):
     """
     Проверяет архивирование ВСЕХ персональных документов для конкретной роли, используя kind='Member'.
     """
