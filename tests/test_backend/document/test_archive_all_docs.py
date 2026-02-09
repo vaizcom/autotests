@@ -1,5 +1,7 @@
 import allure
 import pytest
+
+from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint
 from tests.test_backend.data.endpoints.Document.document_endpoints import (
     archive_document_endpoint,
     get_documents_endpoint,
@@ -17,7 +19,6 @@ def excluded_documents(main_space_doc, main_project_doc):
 
 
 @allure.parent_suite("Document Service")
-@allure.title('Document Service: Проверяем архивирование всех документов в спейсе и проекте')
 @pytest.mark.parametrize(
     'kind, container_fixture',
     [
@@ -30,6 +31,8 @@ def test_archive_all_documents(request, owner_client, kind, container_fixture, m
     """
     Проверяем архивирование всех документов в пространстве и проекте.
     """
+    allure.dynamic.title(f"Document Service: Проверяем архивирование всех документов в {kind}")
+
     with allure.step(f'Подготовка к удалению документов в {kind}'):
         container_id = request.getfixturevalue(container_fixture)
 
@@ -50,7 +53,6 @@ def test_archive_all_documents(request, owner_client, kind, container_fixture, m
 
 
 @allure.parent_suite("Document Service")
-@allure.suite("Archive Personal Documents")
 @pytest.mark.parametrize(
     'client_fixture, member_key',
     [
@@ -65,14 +67,17 @@ def test_archive_all_personal_documents(request, main_space, main_personal, clie
     """
     Проверяет архивирование ВСЕХ персональных документов для конкретной роли, используя kind='Member'.
     """
+    allure.dynamic.title(f'Document Service: archive personal {member_key} Documents')
+
     api_client = request.getfixturevalue(client_fixture)
 
     # Получаем ID для kind='Member' из фикстуры main_personal
-    # Предполагается структура main_personal = {'owner': [id], 'member': [id], ...}
     # Берем первый элемент списка, так как test_archive_personal_doc использовал main_personal['member'][0]
     kind_id = main_personal[member_key][0]
 
-    allure.dynamic.title(f'Archive ALL Personal documents: Очистка документов для {member_key} (kind=Member)')
+    with allure.step(f"Создание персонального документа пользователем {member_key}"):
+        re = api_client.post(**create_document_endpoint(kind="Member", kind_id=kind_id, space_id=main_space, title=f'Test Personal doc for archiving {member_key}'))
+        assert re.status_code == 200
 
     with allure.step(f'Получение списка документов для {member_key} (kind=Member, id={kind_id})'):
         docs_resp = api_client.post(**get_documents_endpoint(
