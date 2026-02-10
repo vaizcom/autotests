@@ -1,22 +1,31 @@
 import time
 import allure
+import pytest
 import requests
 
 from config.settings import API_URL
 from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 
-
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration")
-def test_register_user_success(base_url=API_URL):
+@pytest.mark.parametrize("email_case_func, title_suffix", [
+    (lambda s: s.lower(), "обычный email"),
+    (lambda s: s.upper(), "email в верхнем регистре")
+], ids=["lowercase", "uppercase"])
+def test_register_user_success(email_case_func, title_suffix):
     """
-    Тест регистрации нового пользователя с валидными данными.
+    Параметризованный тест регистрации пользователя (разные регистры email).
     """
-    allure.dynamic.title("Register: Успешная регистрация пользователя")
+    allure.dynamic.title(f"Register: Успешная регистрация ({title_suffix})")
+
+    base_url = API_URL
 
     # Генерируем уникальный email используя timestamp
     timestamp = int(time.time())
-    user_email = f"autotest_{timestamp}@gmail.com"
+    # Формируем базовый email и применяем функцию изменения регистра
+    raw_email = f"autotest_{timestamp}@gmail.com"
+    user_email = email_case_func(raw_email)
+
     user_password = "123456"
     user_name = f"autotest_{timestamp}"
 
