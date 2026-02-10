@@ -60,3 +60,24 @@ def test_register_user_success(email_case_func, title_suffix):
 
     with allure.step("Проверка безопасности (отсутствие пароля в ответе)"):
         assert 'password' not in user_data, "Критично: Пароль вернулся в ответе сервера!"
+
+    with allure.step("Проверка успешного входа (Login) с зарегистрированными данными"):
+        login_payload = {
+            "email": user_email,
+            "password": user_password
+        }
+        login_url = f"{base_url.rstrip('/')}/login"
+
+        resp_login = requests.post(
+            login_url,
+            json=login_payload,
+            headers={"Content-Type": "application/json"}
+        )
+
+        assert resp_login.status_code == 202, \
+            f"Не удалось войти в систему. Статус: {resp_login.status_code}. Ответ: {resp_login.text}"
+
+        # Дополнительно проверяем, что токен действительно пришел
+        login_resp_json = resp_login.json()
+        token = login_resp_json.get('payload', {}).get('token')
+        assert token is not None, "В ответе логина не найден токен авторизации!"
