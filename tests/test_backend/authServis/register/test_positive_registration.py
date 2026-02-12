@@ -6,6 +6,8 @@ import requests
 from config.settings import API_URL
 from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 
+pytestmark = [pytest.mark.backend]
+
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration")
 @pytest.mark.parametrize("email_case_func, title_suffix", [
