@@ -10,12 +10,63 @@ pytestmark = [pytest.mark.backend]
 
 MAX_FULL_NAME_LENGTH = 30
 
+
+@allure.parent_suite("Auth Service")
+@allure.suite("Registration Validation")
+@pytest.mark.parametrize("valid_fullname, description", [
+    ("A" * MAX_FULL_NAME_LENGTH, "Максимальная длина"),
+    ("O'Connor-Björn 陈 Иван", "Смешанные символы (Unicode)"), # Проверяет сразу: Кириллицу, Китайский, Дефис, Апостроф, Умляуты
+    ("  User Name", "Пробелы в начале и конце") # Пробелы по краям (Проверка Trim) Трим только вначале
+], ids=["max_len", "complex_unicode", "trim_spaces"])
+def test_register_valid_fullname(valid_fullname, description, base_url=API_URL):
+    """
+    Позитивный тест регистрации с различными вариантами полного имени.
+    """
+    allure.dynamic.title(f"Register: Успешная регистрация с именем '{valid_fullname}'")
+
+    timestamp = int(time.time())
+    # Используем hash, чтобы email был уникальным даже для одинаковых имен
+    user_email = f"name_{timestamp}_{abs(hash(valid_fullname))}@gmail.com"
+    user_password = "validPass123"
+
+    with allure.step(f"Подготовка данных: {valid_fullname}"):
+        endpoint_data = register_endpoint(
+            email=user_email,
+            password=user_password,
+            full_name=valid_fullname,
+            terms_accepted=True
+        )
+
+    with allure.step("Отправка запроса"):
+        url = f"{base_url.rstrip('/')}{endpoint_data['path']}"
+        resp = requests.post(url, json=endpoint_data['json'], headers=endpoint_data['headers'])
+
+    with allure.step("Проверка успеха (200 OK)"):
+        assert resp.status_code == 200, \
+            f"Ошибка регистрации. Статус: {resp.status_code}. Ответ: {resp.text}"
+
+    with allure.step("Валидация сохранения имени"):
+        user_data = resp.json().get('payload').get('space')
+        saved_name = user_data.get('name')
+
+        # Логика проверки Trim: ожидаем либо оригинал, либо обрезанную версию
+        expected = valid_fullname.strip() if valid_fullname.strip() != valid_fullname else valid_fullname
+
+        # Если API делает trim, saved_name будет равен stripped версии.
+        # Если нет - полной. Проверка ниже допускает оба варианта, если saved_name совпадает с trimmed.
+        if saved_name == valid_fullname.strip() + "'s Space":
+            pass  # OK, API делает trim
+        else:
+            assert saved_name == valid_fullname + "'s Space", \
+                f"Имя искажено. Отправлено: '{valid_fullname}', Сохранено: '{saved_name}'"
+
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration Validation")
 @pytest.mark.parametrize("fullname_value, description", [
     ("a" * (MAX_FULL_NAME_LENGTH + 1), f"Имя длиннее максимума ({MAX_FULL_NAME_LENGTH + 1} симв.)"),
-    ("", "Пустое имя")
-], ids=["fullname_too_long", "fullname_empty"])
+    ("", "Пустое имя"),
+    (" ", "Пробел вместо имени")
+], ids=["fullname_too_long", "fullname_empty", "fullname_space"])
 def test_register_invalid_fullname_length(fullname_value, description, base_url=API_URL):
     """
     Тест валидации граничных значений длины полного имени.
