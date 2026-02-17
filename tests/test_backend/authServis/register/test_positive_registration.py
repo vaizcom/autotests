@@ -4,6 +4,7 @@ import pytest
 import requests
 
 from config.settings import API_URL
+from test_backend.data.endpoints.User.assert_register_payload import assert_register_payload
 from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 
 pytestmark = [pytest.mark.backend]
@@ -48,12 +49,13 @@ def test_register_user_success(email_case_func, title_suffix):
         assert resp.status_code == 200, \
             f"Ожидался статус 200, но получен {resp.status_code}. Ответ: {resp.text}"
 
-    with allure.step("Валидация тела ответа"):
+    with allure.step("Валидация тела ответа (Полная проверка структуры и типов данных ответа)"):
         resp_json = resp.json()
 
-        user_data = resp_json.get('payload')
+        # Полная проверка структуры и типов данных ответа
+        assert_register_payload(resp_json)
 
-        assert user_data is not None, "В ответе отсутствует payload с данными пользователя"
+        user_data = resp_json.get('payload')
 
         # Проверка соответствия отправленных данных
         space_data = user_data.get('space')

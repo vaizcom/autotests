@@ -4,6 +4,7 @@ import requests
 import pytest
 
 from config.settings import API_URL
+from test_backend.data.endpoints.User.assert_register_payload import assert_register_payload
 from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 
 pytestmark = [pytest.mark.backend]
@@ -11,17 +12,13 @@ pytestmark = [pytest.mark.backend]
 MIN_PASSWORD_LENGTH = 6
 MAX_PASSWORD_LENGTH = 64
 
-
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration Validation")
 @allure.sub_suite("Password Validation")
 @pytest.mark.parametrize("valid_password", [
     ("      1"),  # Только пробелы Заведен Баг APP-4479
-    ("  123456  "),  # Пробелы по краям
-    ("!@#$%^&*()"),  # Спецсимволы
-    ("пароль123"),  # Кириллица
-    ("Pass🔑word"),  # Emoji (проверка поддержки Unicode/UTF-8)
-], ids=["only_spaces", "spaces_trim", "special_chars", "cyrillic", "emoji"])
+    ("  Pass🔑word!@#пароль123  "),  # сложный пароль (Unicode + пробелы)
+], ids=["only_spaces", "mixed_symbols"])
 def test_register_valid_complex_passwords(valid_password, base_url=API_URL):
     """
     Тест регистрации и входа с нестандартными паролями (спецсимволы, юникод, пробелы).
@@ -52,6 +49,12 @@ def test_register_valid_complex_passwords(valid_password, base_url=API_URL):
 
         assert resp_reg.status_code == 200, \
             f"Регистрация не удалась. Статус: {resp_reg.status_code}. Ответ: {resp_reg.text}"
+
+    with allure.step("Валидация тела ответа (Полная проверка структуры и типов данных ответа)"):
+        resp_json = resp_reg.json()
+
+        # Полная проверка структуры и типов данных ответа
+        assert_register_payload(resp_json)
 
     # --- Шаг 2: Вход в систему (Login) ---
     with allure.step("Попытка входа (Login) с тем же паролем"):

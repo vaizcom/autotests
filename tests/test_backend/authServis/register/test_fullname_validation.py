@@ -4,6 +4,7 @@ import requests
 import pytest
 
 from config.settings import API_URL
+from test_backend.data.endpoints.User.assert_register_payload import assert_register_payload
 from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 
 pytestmark = [pytest.mark.backend]
@@ -50,16 +51,18 @@ def test_register_valid_fullname(valid_fullname, description, base_url=API_URL):
         user_data = resp.json().get('payload').get('space')
         saved_name = user_data.get('name')
 
-        # Логика проверки Trim: ожидаем либо оригинал, либо обрезанную версию
-        expected = valid_fullname.strip() if valid_fullname.strip() != valid_fullname else valid_fullname
+    with allure.step("Валидация тела ответа (Полная проверка структуры и типов данных ответа)"):
+        resp_json = resp.json()
 
-        # Если API делает trim, saved_name будет равен stripped версии.
-        # Если нет - полной. Проверка ниже допускает оба варианта, если saved_name совпадает с trimmed.
+        # Полная проверка структуры и типов данных ответа
+        assert_register_payload(resp_json)
+
         if saved_name == valid_fullname.strip() + "'s Space":
             pass  # OK, API делает trim
         else:
             assert saved_name == valid_fullname + "'s Space", \
                 f"Имя искажено. Отправлено: '{valid_fullname}', Сохранено: '{saved_name}'"
+
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration Validation")
