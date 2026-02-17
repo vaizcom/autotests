@@ -13,6 +13,7 @@ MAX_FULL_NAME_LENGTH = 30
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration Validation")
+@allure.sub_suite("Fullname Validation")
 @pytest.mark.parametrize("valid_fullname, description", [
     ("A" * MAX_FULL_NAME_LENGTH, "Максимальная длина"),
     ("O'Connor-Björn 陈 Иван", "Смешанные символы (Unicode)"), # Проверяет сразу: Кириллицу, Китайский, Дефис, Апостроф, Умляуты
@@ -62,6 +63,7 @@ def test_register_valid_fullname(valid_fullname, description, base_url=API_URL):
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration Validation")
+@allure.sub_suite("Fullname Validation")
 @pytest.mark.parametrize("fullname_value, description", [
     ("a" * (MAX_FULL_NAME_LENGTH + 1), f"Имя длиннее максимума ({MAX_FULL_NAME_LENGTH + 1} симв.)"),
     ("", "Пустое имя"),

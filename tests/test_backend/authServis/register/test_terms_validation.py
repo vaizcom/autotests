@@ -11,6 +11,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration Validation")
+@allure.sub_suite("Terms Validation")
 @pytest.mark.parametrize("terms_value, expected_status, description", [
     (True, 200, "Позитивный: Условия приняты"),
     (False, 400, "Негативный: Условия отклонены")

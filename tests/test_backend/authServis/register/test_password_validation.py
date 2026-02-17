@@ -14,6 +14,7 @@ MAX_PASSWORD_LENGTH = 64
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration Validation")
+@allure.sub_suite("Password Validation")
 @pytest.mark.parametrize("valid_password", [
     ("      1"),  # Только пробелы Заведен Баг APP-4479
     ("  123456  "),  # Пробелы по краям
@@ -77,6 +78,7 @@ def test_register_valid_complex_passwords(valid_password, base_url=API_URL):
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration Validation")
+@allure.sub_suite("Password Validation")
 @pytest.mark.parametrize("password_value, description", [
     ("", "Пустой пароль"),
     ("a" * (MIN_PASSWORD_LENGTH - 1), f"Пароль короче минимума ({MIN_PASSWORD_LENGTH - 1} симв.)"),
