@@ -40,12 +40,13 @@ def test_multiple_edit_tasks_set_assignees(owner_client, main_space, main_projec
 
     with allure.step("Применяем multiple_edit_tasks с установленным ассайни у обеих задач"):
         payload = [
-            {"taskId": task1_id, "assignees": target_assignee},
-            {"taskId": task2_id, "assignees": target_assignee},
+            {"taskId": task1_id, "assignees": [target_assignee]},
+            {"taskId": task2_id, "assignees": [target_assignee]},
         ]
         resp_edit = owner_client.post(**multiple_edit_tasks_endpoint(
             space_id=main_space,
             tasks=payload,
+
         ))
         assert resp_edit.status_code == 200, resp_edit.text
 
