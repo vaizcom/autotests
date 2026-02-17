@@ -9,7 +9,8 @@ from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("Auth Service")
-@allure.suite("Registration Validation")
+@allure.suite("Registration")
+@allure.sub_suite("Missing field")
 @pytest.mark.parametrize("field_to_remove", [
     "email",
     "password",

@@ -9,7 +9,7 @@ from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("Auth Service")
-@allure.suite("Registration")
+@allure.suite("Registration Validation")
 @allure.sub_suite("Email Validation")
 @pytest.mark.parametrize("invalid_email, description", [
     ("invalid-email-format", "Неверный формат (без @)"),

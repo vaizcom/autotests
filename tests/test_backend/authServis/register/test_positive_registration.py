@@ -11,6 +11,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration")
+@allure.sub_suite("Positive registration")
 @pytest.mark.parametrize("email_case_func, title_suffix", [
     (lambda s: s.lower(), "обычный email"),
     (lambda s: s.upper(), "email в верхнем регистре")

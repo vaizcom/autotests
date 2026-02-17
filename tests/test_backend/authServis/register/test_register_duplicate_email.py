@@ -10,6 +10,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Registration")
+@allure.sub_suite("Duplicate email")
 def test_register_duplicate_email(base_url=API_URL):
     """
     Тест на невозможность регистрации двух пользователей с одинаковым email.
