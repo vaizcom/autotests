@@ -20,10 +20,11 @@ def test_edit_task_url_custom_field(owner_client, main_space, board_with_tasks, 
     url_field_id = "696e02e92452157dfd7e2631"
 
     # Значения для теста
+    initial_value = "https://vaiz.com"
     value_to_set = "https://www.google.com"
     value_to_clear = ""
 
-    with allure.step("Pre-condition: Проверка и очистка поля перед тестом"):
+    with allure.step(f"Pre-condition: Установка начального значения {initial_value}"):
         resp_pre = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=target_task_id))
         assert resp_pre.status_code == 200
 
@@ -31,7 +32,7 @@ def test_edit_task_url_custom_field(owner_client, main_space, board_with_tasks, 
         field_pre = next((cf for cf in task_pre.get("customFields", []) if cf.get("id") == url_field_id), None)
 
         if field_pre and field_pre.get("value"):
-            _update_custom_field(owner_client, main_space, target_task_id, url_field_id, value_to_clear)
+            _update_custom_field(owner_client, main_space, target_task_id, url_field_id, initial_value)
 
     # 1. Установка значения
     with allure.step(f"Action: Установка значения URL: {value_to_set}"):

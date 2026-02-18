@@ -127,7 +127,8 @@ def multiple_edit_tasks_endpoint(
         },
         "json": {
             "tasks": tasks,
-        },
+            "actionType": "editTask"
+        }
     }
 
 

@@ -1,7 +1,9 @@
-import random
-
+import os
 import pytest
+import requests
+import urllib3
 import allure
+import random
 
 from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST, MAIN_PROJECT_2_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
@@ -25,12 +27,38 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
     get_space_endpoint,
 )
 from datetime import datetime
-import os
 
 
 def pytest_configure(config):
     print(f'\n🧪 Running on stand: {settings.TEST_STAND_NAME}')
     print(f'🔗 API URL: {settings.API_URL}\n')
+
+
+@pytest.fixture(scope="session", autouse=True)
+def global_ssl_settings():
+    """
+    Глобальная настройка SSL для всех тестов.
+    Если стенд 'local', отключает верификацию сертификатов для всех запросов requests.
+    """
+    # Получаем название стенда из переменных окружения (из .env)
+    stand_name = os.getenv("TEST_STAND_NAME", "local")  # По умолчанию local, если не задано
+
+    if stand_name == "local":
+        # 1. Отключаем предупреждения InsecureRequestWarning, чтобы не засорять логи
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+        # 2. Сохраняем оригинальный метод request
+        original_request = requests.Session.request
+
+        # 3. Создаем обертку (патч), которая принудительно ставит verify=False
+        def patched_request(self, method, url, *args, **kwargs):
+            # Если verify не передан явно в тесте, ставим False
+            if 'verify' not in kwargs:
+                kwargs['verify'] = False
+            return original_request(self, method, url, *args, **kwargs)
+
+        # 4. Применяем патч глобально для всех сессий requests
+        requests.Session.request = patched_request
 
 
 @pytest.fixture(scope='session')

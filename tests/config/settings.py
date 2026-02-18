@@ -38,7 +38,7 @@ TEST_STAND_NAME = os.getenv('TEST_STAND_NAME', 'kuber_dev')
 
 API_URL = {
     'dev': 'https://api.vaiz.dev/v4',
-    'uat': 'https://uat--api.vaiz.dev/v4',
+    'local': 'https://api.vaiz.local:10000/v4',
     'kuber_dev': 'https://vaiz-api-ms.vaiz.dev/v4',
     'kuber_uat': 'https://vaiz-api-uat.vaiz.dev/v4',
 }[TEST_STAND_NAME]
