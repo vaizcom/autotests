@@ -10,12 +10,12 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Project Service")
 @allure.suite("Validation project")
 @allure.title('Validation project: Проверка предельной длины описания проекта')
-def test_project_description_too_long(owner_client, temp_space):
+def test_project_description_too_long(main_client, temp_space):
     description = 'D' * (MAX_PROJECT_DESCRIPTION_LENGTH + 1)
     name = generate_project_name()
     slug = generate_slug()
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'space_id': temp_space}
-    response = owner_client.post(
+    response = main_client.post(
         **create_project_endpoint(name=name, slug=slug, description=description, **common_kwargs)
     )
     assert response.status_code == 400
@@ -24,13 +24,13 @@ def test_project_description_too_long(owner_client, temp_space):
 @allure.parent_suite("Project Service")
 @allure.suite("Validation project")
 @allure.title('Validation project: Создание проекта с пустым описанием')
-def test_project_description_empty(owner_client, temp_space):
+def test_project_description_empty(main_client, temp_space):
     description = ''
     name = generate_project_name()
     slug = generate_slug()
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'space_id': temp_space}
     with allure.step('Отправка запроса с пустым описанием проекта'):
-        response = owner_client.post(
+        response = main_client.post(
             **create_project_endpoint(name=name, slug=slug, description=description, **common_kwargs)
         )
     with allure.step('Проверка, что API вернул 200 – описание не является обязательным к заполнению'):

@@ -83,10 +83,10 @@ def test_get_tasks_assignees_multiple_members(owner_client, main_space, board_wi
 @allure.suite("Get Tasks")
 @allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks assignees: если указать пользователя невалидного(из другой борды) — ожидаем пустой список задач")
-def test_get_tasks_assignees_user_without_access(owner_client, main_space, board_with_10000_tasks, temp_member):
+def test_get_tasks_assignees_user_without_access(main_client, main_space, board_with_10000_tasks, temp_member):
     user_without_access = temp_member
     with allure.step("Выполнить POST /GetTasks от пользователя без доступа к борде"):
-        response = owner_client.post(**get_tasks_endpoint(
+        response = main_client.post(**get_tasks_endpoint(
             space_id=main_space,
             board=board_with_10000_tasks,
             assignees=user_without_access
@@ -103,9 +103,9 @@ def test_get_tasks_assignees_user_without_access(owner_client, main_space, board
 @allure.suite("Get Tasks")
 @allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks assignees: если указать невалидный формат — ожидаем пустой список задач")
-def test_get_tasks_assignees_invalid_format(owner_client, main_space, board_with_10000_tasks):
+def test_get_tasks_assignees_invalid_format(manager_client, main_space, board_with_10000_tasks):
     with allure.step("Выполнить GetTasks передав строку вместо массива в assignees=''"):
-        response = owner_client.post(**get_tasks_endpoint(
+        response = manager_client.post(**get_tasks_endpoint(
             space_id=main_space,
             board=board_with_10000_tasks,
             assignees="Marina"

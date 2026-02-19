@@ -14,8 +14,8 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Space Service")
 @allure.suite("Edit space")
 @allure.title('Edit space: Test edit space name')
-def test_edit_space_name(owner_client, temp_space):
-    client = owner_client
+def test_edit_space_name(main_client, temp_space):
+    client = main_client
     space_id = temp_space
     new_name = generate_space_name() + '_edit'
     with allure.step('Edit space name'):
@@ -31,8 +31,8 @@ def test_edit_space_name(owner_client, temp_space):
 @allure.parent_suite("Space Service")
 @allure.suite("Edit space")
 @allure.title('Edit space: Test space name cannot be empty')
-def test_space_name_cannot_be_empty(owner_client):
-    client = owner_client
+def test_space_name_cannot_be_empty(main_client):
+    client = main_client
     with allure.step('Try to create space with empty name'):
         response = client.post(**create_space_endpoint(name=''))
         assert response.status_code == 400, 'Should fail if space name is empty'
@@ -41,8 +41,8 @@ def test_space_name_cannot_be_empty(owner_client):
 @allure.parent_suite("Space Service")
 @allure.suite("Edit space")
 @allure.title('Edit space: Test space name length limit')
-def test_space_name_length_limit(owner_client):
-    client = owner_client
+def test_space_name_length_limit(main_client):
+    client = main_client
     name = 'a' * (MAX_SPACE_NAME_LENGTH + 1)
     with allure.step('Try to create space with too long name'):
         response = client.post(**create_space_endpoint(name=name))

@@ -16,19 +16,19 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_document_success(owner_client, request, temp_space, kind, fixture_name):
+def test_get_document_success(main_client, request, temp_space, kind, fixture_name):
     kind_id = request.getfixturevalue(fixture_name)
     allure.dynamic.title(f'Get document: Успешное получение документа по documentId (kind={kind})')
 
     with allure.step(f'Создание документа (kind={kind})'):
-        resp = owner_client.post(
+        resp = main_client.post(
             **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title='test doc')
         )
         assert resp.status_code == 200
         document_id = resp.json()['payload']['document']['_id']
 
     with allure.step('Запрос документа по его documentId'):
-        resp = owner_client.post(**get_document_endpoint(document_id=document_id, space_id=temp_space))
+        resp = main_client.post(**get_document_endpoint(document_id=document_id, space_id=temp_space))
         assert resp.status_code == 200
         data = resp.json().get('payload', {}).get('document')
         assert data is not None, 'Документ не найден в ответе'
@@ -49,12 +49,12 @@ def test_get_document_success(owner_client, request, temp_space, kind, fixture_n
     ],
     ids=['invalid-id', 'missing-id', 'empty-string'],
 )
-def test_get_document_invalid_input(owner_client, temp_space, document_id, expected_status, expected_error_code):
+def test_get_document_invalid_input(main_client, temp_space, document_id, expected_status, expected_error_code):
     allure.dynamic.title(f'Get document validation: Негативный кейс documentId={document_id}')
 
     with allure.step('Отправка запроса с некорректным или отсутствующим documentId'):
         payload = {'documentId': document_id} if document_id is not None else {}
-        resp = owner_client.post(
+        resp = main_client.post(
             path='/GetDocument',
             json=payload,
             headers={'Content-Type': 'application/json', 'Current-Space-Id': temp_space},
@@ -73,24 +73,24 @@ def test_get_document_invalid_input(owner_client, temp_space, document_id, expec
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_document_multiple_requests(owner_client, request, temp_space, kind, fixture_name):
+def test_get_document_multiple_requests(main_client, request, temp_space, kind, fixture_name):
     kind_id = request.getfixturevalue(fixture_name)
     allure.dynamic.title(f'Get document: Повторный запрос одного и того же документа (kind={kind})')
 
     with allure.step('Создание документа'):
-        resp = owner_client.post(
+        resp = main_client.post(
             **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title='Repeat test doc')
         )
         assert resp.status_code == 200
         document_id = resp.json()['payload']['document']['_id']
 
     with allure.step('Первый запрос документа'):
-        first = owner_client.post(**get_document_endpoint(document_id=document_id, space_id=temp_space))
+        first = main_client.post(**get_document_endpoint(document_id=document_id, space_id=temp_space))
         assert first.status_code == 200
         first_doc = first.json()['payload']['document']
 
     with allure.step('Повторный запрос документа'):
-        second = owner_client.post(**get_document_endpoint(document_id=document_id, space_id=temp_space))
+        second = main_client.post(**get_document_endpoint(document_id=document_id, space_id=temp_space))
         assert second.status_code == 200
         second_doc = second.json()['payload']['document']
 
