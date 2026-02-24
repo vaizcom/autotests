@@ -38,3 +38,15 @@ def invite_to_space_endpoint(
             "Current-Space-Id": space_id,
         },
     }
+
+def remove_invite_endpoint(space_id: str, member_id: str) -> dict:
+    return {
+        "path": "/RemoveInvite",
+        "json": {
+            "memberId": member_id,
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }

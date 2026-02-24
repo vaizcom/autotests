@@ -35,12 +35,12 @@ def test_edit_project_name_access_by_roles(request, client_fixture, expected_sta
 
 
 @allure.parent_suite("Project Service")
-@allure.suite("Edit project")
+@allure.suite("Edit Slug project APP-4608 ")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
-        ('owner_client', 200),
-        ('manager_client', 200),
+        ('owner_client', 200),  # APP-4608 запретить изменять slug для всех
+        ('manager_client', 200), # APP-4608 запретить изменять slug для всех
         ('member_client', 403),
         ('guest_client', 403),
     ],

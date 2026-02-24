@@ -151,13 +151,13 @@ def test_edit_document_overwrite(main_client, kind, kind_id_fixture, temp_space,
     ids=['max_allowed', 'exceed_max'],
 )
 def test_edit_document_title_length(
-    main_client, request, kind, kind_id_fixture, space_id_function, length, expected_status
+    owner_client, request, kind, kind_id_fixture, space_id_function, length, expected_status
 ):
     allure.dynamic.title(f'Edit document title: Проверка граничной валидации длины title: LENGTH = {length} for {kind}')
     kind_id = request.getfixturevalue(kind_id_fixture)
 
     # Создаём документ
-    resp = main_client.post(
+    resp = owner_client.post(
         **create_document_endpoint(
             kind=kind,
             kind_id=kind_id,
@@ -171,7 +171,7 @@ def test_edit_document_title_length(
     # Формируем title заданной длины
     boundary_title = 'A' * length
     with allure.step(f'Attempt edit with title length {length}'):
-        resp2 = main_client.post(
+        resp2 = owner_client.post(
             **edit_document_endpoint(
                 document_id=doc_id,
                 title=boundary_title,

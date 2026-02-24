@@ -37,6 +37,15 @@ def generate_slug(min_len: int = 4, max_len: int = 8) -> str:
     return ''.join(random.choices(string.ascii_letters, k=length))
 
 
+def generate_email() -> str:
+    """
+    Генерирует имя для Space, включающее текущую дату и время до секунд в человеко-читаемом формате.
+    Пример: space_2025-12-10_10-30-45
+    """
+    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    return f"invite_{current_datetime}@autotest.com"
+
+
 def generate_project_description() -> str:
     """
     Генерирует уникальное description для Project.
