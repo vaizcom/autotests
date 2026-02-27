@@ -9,6 +9,12 @@ from tests.test_backend.data.endpoints.Board.constants import (
     BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH,
 )
 
+def generate_date() -> str:
+    """
+    Генерирует date
+    """
+    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    return f'{current_datetime}'
 
 def generate_space_name() -> str:
     """

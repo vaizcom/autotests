@@ -1,4 +1,6 @@
 import os
+import uuid
+
 import pytest
 import requests
 import urllib3
@@ -7,6 +9,7 @@ import random
 
 from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST, MAIN_PROJECT_2_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
+from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
@@ -263,6 +266,27 @@ def temp_board(main_client, temp_project, temp_space):
     assert response.status_code == 200
 
     yield response.json()['payload']['board']['_id']
+
+
+@pytest.fixture(scope='session')
+def temp_access_group(main_client, temp_space):
+    """
+    Создает временную группу доступа в temp_space.
+    """
+    group_name = f"Test Group {uuid.uuid4().hex[:4]}"
+    group_desc = "Temporary access group for testing"
+
+    response = main_client.post(**create_access_group_endpoint(
+        space_id=temp_space,
+        name=group_name,
+        description=group_desc
+    ))
+    assert response.status_code == 200, f"Ошибка создания группы: {response.text}"
+
+    group_id = response.json().get("payload", {}).get("accessGroup", {}).get("_id")
+    assert group_id, "В ответе не вернулся _id созданной группы доступа"
+
+    yield group_id
 
 
 @pytest.fixture(scope='session')

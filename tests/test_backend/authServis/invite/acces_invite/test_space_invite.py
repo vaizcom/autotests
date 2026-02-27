@@ -3,7 +3,7 @@ import pytest
 
 from config.generators import generate_email
 from core.waiters import wait_until
-from test_backend.data.endpoints.access_group.get_aaccess_group import get_access_groups_endpoint
+from test_backend.data.endpoints.access_group.aaccess_group_endpoints import get_access_groups_endpoint
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, remove_invite_endpoint
 
 pytestmark = [pytest.mark.backend]

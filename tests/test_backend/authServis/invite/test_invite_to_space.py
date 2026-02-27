@@ -2,7 +2,8 @@ import pytest
 import allure
 
 from core.waiters import wait_until
-from test_backend.data.endpoints.access_group.get_aaccess_group import get_access_groups_endpoint
+from test_backend.data.endpoints.access_group.aaccess_group_endpoints import get_access_groups_endpoint
+from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint
 
 pytestmark = [pytest.mark.backend]
@@ -37,6 +38,13 @@ def test_invite_to_space(main_client, temp_space, role):
         _id = payload.get("_id")
 
         assert _id, "В ответе инвайта не вернулся _id"
+
+    with allure.step("Валидация тела ответа InviteToSpace"):
+        assert_invite_payload(
+            invite=payload,
+            space_id=temp_space,
+            email=email
+        )
 
     # 3. Прямой запрос прав доступа по полученному ID с универсальным поллингом
     with allure.step(f"Ожидание появления пользователя в списке групп доступа"):
