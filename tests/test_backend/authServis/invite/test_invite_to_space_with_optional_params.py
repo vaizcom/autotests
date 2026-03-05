@@ -13,7 +13,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Invite")
-@allure.sub_suite("Space Invitations")
+@allure.sub_suite("Space Invitations - Optional Params (Positive)")
 @allure.title("Приглашение пользователя с необязательными параметрами (projectAccesses, boardAccesses, fullName)")
 def test_invite_to_space_with_optional_params(main_client, temp_space, temp_project, temp_board):
     """
@@ -85,7 +85,7 @@ def test_invite_to_space_with_optional_params(main_client, temp_space, temp_proj
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Invite")
-@allure.sub_suite("Space Invitations")
+@allure.sub_suite("Space Invitations - Optional Params (Positive)")
 @allure.title("Приглашение пользователя с добавлением в указанную группу доступа (accessGroupId)")
 def test_invite_to_space_with_access_group(main_client, temp_space, temp_access_group):
     """
@@ -150,3 +150,89 @@ def test_invite_to_space_with_access_group(main_client, temp_space, temp_access_
     with allure.step("Удаление инвайта"):
         remove_resp = main_client.post(**remove_invite_endpoint(space_id=temp_space, member_id=member_id))
         assert remove_resp.status_code == 200, f"Ошибка при удалении инвайта: {remove_resp.text}"
+
+
+
+@allure.parent_suite("Auth Service")
+@allure.suite("Invite")
+@allure.sub_suite("Space Invitations - Optional Params (Negative)")
+@allure.title("Инвайт с невалидными доп. параметрами: {scenario}")
+@pytest.mark.parametrize(
+    "scenario, overrides, expected_status",
+    [
+        # --- Проверки прав на проекты (projectAccesses) ---
+        (
+                "Несуществующая роль в проекте",
+                {"project_accesses": [{"id": "VALID_PROJECT", "access": "SuperAdminFakeRole"}]},
+                400
+        ),
+        (
+                "Невалидный формат ID проекта (не MongoDB ID)",
+                {"project_accesses": [{"id": "12345-invalid-id", "access": "Manager"}]},
+                400
+        ),
+        # (
+        #         "Несуществующий (но валидный по формату) accessGroupId",
+        #         {"access_group_id": "5f8d0a6b7b2b3c0017a4b8e9"},  # Рандомный MongoDB ID
+        #         400  # Или 404, зависит от того, как бэкенд обрабатывает Not Found при валидации
+        # ),
+        # (
+        #         "Слишком длинное fullName (> 255 символов)",
+        #         {"full_name": "A" * 1025},
+        #         400  # Сервер должен валидировать длину имени
+        # )
+    ],
+    ids=[
+        "project_role_not_exist",
+        "project_id_invalid_format",
+        # "access_group_id_not_exist",
+        # "full_name_too_long"
+    ]
+)
+def test_invite_optional_params_negative(
+        main_client, temp_space, temp_project, temp_board, scenario, overrides, expected_status
+):
+    """
+    Негативные сценарии для эндпоинта инвайта с дополнительными параметрами
+    (projectAccesses, boardAccesses, accessGroupId, fullName).
+    Ожидаем, что бэкенд отклонит запрос из-за ошибок валидации.
+    """
+
+    with allure.step("Подготовка тестовых данных и замена плейсхолдеров"):
+        # Так как внутри @pytest.mark.parametrize нельзя напрямую вызывать фикстуры,
+        # мы передаем плейсхолдер "VALID_PROJECT" и заменяем его на реальный ID в самом тесте.
+        if "project_accesses" in overrides:
+            for p in overrides["project_accesses"]:
+                if p["id"] == "VALID_PROJECT":
+                    p["id"] = temp_project
+
+        if "board_accesses" in overrides:
+            for b in overrides["board_accesses"]:
+                if b["id"] == "VALID_BOARD":
+                    b["id"] = temp_board
+
+        email = generate_email()
+
+        # Базовые параметры, которые всегда валидны
+        invite_kwargs = {
+            "space_id": temp_space,
+            "email": email,
+            "space_access": "Member"
+        }
+        # Накатываем невалидные параметры поверх базовых
+        invite_kwargs.update(overrides)
+
+    with allure.step(f"Отправка инвайта: {scenario}"):
+        invite_req = invite_to_space_endpoint(**invite_kwargs)
+
+        response = main_client.post(
+            invite_req["path"],
+            json=invite_req.get("json", {}),
+            headers=invite_req.get("headers", {})
+        )
+
+    with allure.step(f"Проверка, что сервер вернул ошибку {expected_status}"):
+        assert response.status_code == expected_status, (
+            f"Уязвимость / Баг валидации! Ожидался статус {expected_status}, "
+            f"но получен {response.status_code}. Ответ сервера: {response.text}"
+        )
