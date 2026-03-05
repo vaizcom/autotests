@@ -3,6 +3,7 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.file.upload_avatar_endpoint import get_uploaded_avatar_url, upload_avatar_endpoint
+from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint
 from tests.test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 
@@ -79,6 +80,20 @@ def test_invite_user_with_avatar_positive(main_client, temp_space, file_ext, mim
             print(f"\n[ОШИБКА ИНВАЙТА] Ответ сервера: {response.text}\n")
 
         assert response.status_code == 200, f"Ошибка приглашения. Ожидался статус 200, получен {response.status_code}. Ответ: {response.text}"
+
+        payload = response.json().get("payload", {}).get("invite", {})
+
+
+        _id = payload.get("_id")
+
+        assert _id, "В ответе инвайта не вернулся _id"
+
+    with allure.step("Валидация тела ответа InviteToSpace"):
+        assert_invite_payload(
+            invite=payload,
+            space_id=temp_space,
+            email=invite_email
+        )
 
 
 @allure.parent_suite("Auth Service")
