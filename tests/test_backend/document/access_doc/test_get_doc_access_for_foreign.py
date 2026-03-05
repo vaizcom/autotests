@@ -52,20 +52,20 @@ def test_documents_access_denied_for_foreign_user(foreign_client, request, space
     ids=['project', 'space', 'member'],
 )
 def test_document_foreign_access_denied_for_foreign_space(
-    owner_client, request, temp_space, kind, fixture_name, space_id_module
+    main_client, request, temp_space, kind, fixture_name, space_id_module
 ):
     kind_id = request.getfixturevalue(fixture_name)
     allure.dynamic.title(f'Попытка получить документ из чужого space (kind={kind}) — должен вернуться AccessDenied')
 
     with allure.step('Создание документа в своём пространстве'):
-        resp = owner_client.post(
+        resp = main_client.post(
             **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title='My doc')
         )
         assert resp.status_code == 200
         document_id = resp.json()['payload']['document']['_id']
 
     with allure.step('Попытка получить этот документ через другой spaceId'):
-        resp = owner_client.post(
+        resp = main_client.post(
             **get_document_endpoint(document_id=document_id, space_id=space_id_module)  # temp_space заменён на kind_id
         )
         assert resp.status_code == 403

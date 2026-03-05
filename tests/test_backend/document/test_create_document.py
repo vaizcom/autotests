@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("Document Service")
 @pytest.mark.parametrize('kind', ['Space', 'Project', 'Member'])
-def test_create_document(owner_client, temp_space, temp_project, temp_member, kind):
+def test_create_document(main_client, temp_space, temp_project, temp_member, kind):
     kind_id_map = {
         'Space': temp_space,
         'Project': temp_project,
@@ -21,7 +21,7 @@ def test_create_document(owner_client, temp_space, temp_project, temp_member, ki
     allure.dynamic.title(f'Create document: Создание документа: {kind}')
 
     with allure.step(f'POST /CreateDocument для {kind}, Проверка status_code и title'):
-        response = owner_client.post(
+        response = main_client.post(
             **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title=title)
         )
 
@@ -58,12 +58,12 @@ MAX_DOC_NAME_LENGTH = 2048
     ],
 )
 def test_document_title_validation(
-    owner_client, temp_space, temp_project, title, expected_status, expected_actual_title, request
+    main_client, temp_space, temp_project, title, expected_status, expected_actual_title, request
 ):
     allure.dynamic.title(f'Create document кейс: [{request.node.callspec.id}] (ожидается {expected_status})')
 
     with allure.step(f'Отправка запроса [{request.node.callspec.id}] (ожидается {expected_status})'):
-        response = owner_client.post(
+        response = main_client.post(
             **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title=title)
         )
 
@@ -108,10 +108,10 @@ def test_document_title_validation(
 
 @allure.parent_suite("Document Service")
 @allure.title('Create document: Создание дочерних документов, Проверка status_code и title')
-def test_create_child_document(owner_client, temp_space, temp_project):
+def test_create_child_document(main_client, temp_space, temp_project):
     with allure.step('1. Создание родительского документа'):
         parent_title = 'Parent Doc'
-        parent_resp = owner_client.post(
+        parent_resp = main_client.post(
             **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title=parent_title)
         )
         assert parent_resp.status_code == 200
@@ -120,7 +120,7 @@ def test_create_child_document(owner_client, temp_space, temp_project):
 
     with allure.step('2. Создание первого дочернего документа (index=0)'):
         first_title = 'Child 1'
-        first_resp = owner_client.post(
+        first_resp = main_client.post(
             **create_document_endpoint(
                 kind='Project',
                 kind_id=temp_project,
@@ -136,7 +136,7 @@ def test_create_child_document(owner_client, temp_space, temp_project):
 
     with allure.step('3. Создание второго дочернего документа (index=1)'):
         second_title = 'Child 2'
-        second_resp = owner_client.post(
+        second_resp = main_client.post(
             **create_document_endpoint(
                 kind='Project',
                 kind_id=temp_project,
@@ -163,7 +163,7 @@ def test_create_child_document(owner_client, temp_space, temp_project):
     ],
     ids=['project', 'space', 'member', 'wrong kind', 'wrong id'],
 )
-def test_document_kind_and_id(owner_client, temp_space, request, kind, get_fixture, expected_status):
+def test_document_kind_and_id(main_client, temp_space, request, kind, get_fixture, expected_status):
     allure.dynamic.title(
         f'Create document: в роли owner - с передачей kind={kind} и kindId (ожидается {expected_status})'
     )
@@ -173,7 +173,7 @@ def test_document_kind_and_id(owner_client, temp_space, request, kind, get_fixtu
     with allure.step(
         f'Создание документа Оунером с передачей kind={kind} и kindId={kind_id}  (ожидается {expected_status})'
     ):
-        response = owner_client.post(
+        response = main_client.post(
             **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title='Kind Test')
         )
 
@@ -183,17 +183,17 @@ def test_document_kind_and_id(owner_client, temp_space, request, kind, get_fixtu
 
 @allure.parent_suite("Document Service")
 @allure.title('Create document: Создание документа с дублирующимся title')
-def test_document_title_duplicates(owner_client, temp_space, temp_project):
+def test_document_title_duplicates(main_client, temp_space, temp_project):
     title = 'Duplicate Title'
 
     with allure.step('Создание первого документа с одинаковым title'):
-        resp1 = owner_client.post(
+        resp1 = main_client.post(
             **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title=title)
         )
         assert resp1.status_code == 200
 
     with allure.step('Создание второго документа с тем же title'):
-        resp2 = owner_client.post(
+        resp2 = main_client.post(
             **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title=title)
         )
         assert resp2.status_code == 200, 'Поведение зависит от бизнес-логики: разрешены ли дубликаты'
@@ -201,9 +201,9 @@ def test_document_title_duplicates(owner_client, temp_space, temp_project):
 
 @allure.parent_suite("Document Service")
 @allure.title('Create document: Проверка структуры ответа при создании документа')
-def test_document_response_structure(owner_client, temp_space, temp_project):
+def test_document_response_structure(main_client, temp_space, temp_project):
     with allure.step('Создание документа'):
-        response = owner_client.post(
+        response = main_client.post(
             **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space)
         )
         assert response.status_code == 200
@@ -228,9 +228,9 @@ def test_create_document_without_auth(foreign_client, temp_space, temp_project):
 
 @allure.parent_suite("Document Service")
 @allure.title('Create document: Создание документа в чужом space')
-def test_create_document_in_foreign_space(owner_client, foreign_space, temp_project):
+def test_create_document_in_foreign_space(main_client, foreign_space, temp_project):
     with allure.step('Попытка создать документ в чужом space'):
-        response = owner_client.post(
+        response = main_client.post(
             **create_document_endpoint(
                 kind='Project', kind_id=temp_project, space_id=foreign_space, title='Wrong space'
             )

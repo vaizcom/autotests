@@ -42,11 +42,11 @@ pytestmark = [pytest.mark.backend]
         'chinese',
     ],
 )
-def test_board_name_validation(owner_client, temp_project, temp_space, name, expected_status, request):
+def test_board_name_validation(main_client, temp_project, temp_space, name, expected_status, request):
     allure.dynamic.title(f'Валидация имени борды: {request.node.callspec.id} → ожидали {expected_status}')
     if not isinstance(name, str):
         raise ValueError('Name must be of type str.')
-    response = owner_client.post(
+    response = main_client.post(
         **create_board_endpoint(
             name=name, project=temp_project, space_id=temp_space, groups=[], typesList=[], customFields=[]
         )
@@ -62,9 +62,9 @@ def test_board_name_validation(owner_client, temp_project, temp_space, name, exp
     [('', 400), (None, 400), ('A' * 51, 400), ('A' * 50, 200)],
     ids=['empty string', 'None value', 'too long (51 chars)', 'valid name'],
 )
-def test_board_group_name_validation(owner_client, temp_board, temp_space, name, expected_status, request):
+def test_board_group_name_validation(main_client, temp_board, temp_space, name, expected_status, request):
     allure.dynamic.title(f'Валидация поля group name: {request.node.callspec.id} → ожидали {expected_status}')
-    response = owner_client.post(
+    response = main_client.post(
         **create_board_group_endpoint(
             board_id=temp_board, space_id=temp_space, name=name, description='Описание группы'
         )
@@ -80,10 +80,10 @@ def test_board_group_name_validation(owner_client, temp_board, temp_space, name,
     ids=['too long (1025 chars)', 'max valid (1024 chars)', 'regular description', 'None (optional)'],
 )
 def test_board_group_description_validation(
-    owner_client, temp_board, temp_space, description, expected_status, request
+    main_client, temp_board, temp_space, description, expected_status, request
 ):
     allure.dynamic.title(f'Валидация поля group description: {request.node.callspec.id} → ожидали {expected_status}')
-    response = owner_client.post(
+    response = main_client.post(
         **create_board_group_endpoint(
             board_id=temp_board, space_id=temp_space, name='Группа с описанием', description=description
         )
@@ -115,8 +115,8 @@ def test_board_group_description_validation(
     ],
 )
 @allure.title('Валидация поля limit для board group: {limit}')
-def test_board_group_limit_validation(owner_client, temp_board, temp_space, limit, expected_status):
-    response = owner_client.post(
+def test_board_group_limit_validation(main_client, temp_board, temp_space, limit, expected_status):
+    response = main_client.post(
         **create_board_group_endpoint(
             board_id=temp_board, space_id=temp_space, name='Группа с лимитом', description='Описание', limit=limit
         )
@@ -129,14 +129,14 @@ def test_board_group_limit_validation(owner_client, temp_board, temp_space, limi
 @pytest.mark.xfail(reason='Известный баг: длинный заголовок custom field без пробелов не влезает в тултип (APP-2763)')
 @allure.label('bug', 'APP-2763')
 @pytest.mark.parametrize('field_type', CustomFieldType.list())
-def test_board_with_long_custom_field_title(owner_client, temp_board, field_type, temp_project, temp_space):
+def test_board_with_long_custom_field_title(main_client, temp_board, field_type, temp_project, temp_space):
     custom_field = 'T' * (BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH + 1)
 
     # Явно указываем тип поля в заголовке
     allure.dynamic.title(f'APP-2763: Ошибка при создании борды с длинным заголовком custom field: {field_type}')
 
     with allure.step(f'Отправка запроса с custom field title длиннее {BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH} символов'):
-        response = owner_client.post(
+        response = main_client.post(
             **create_board_custom_field_endpoint(
                 board_id=temp_board, name=custom_field, type=field_type, space_id=temp_space
             )

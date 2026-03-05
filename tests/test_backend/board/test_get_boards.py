@@ -10,16 +10,16 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("Board Service")
 @allure.title('Получение списка борд: проверка, что все созданные борды присутствуют в ответе(board_names)')
-def test_get_boards_returns_multiple_created_boards(owner_client, temp_project, temp_space):
+def test_get_boards_returns_multiple_created_boards(main_client, temp_project, temp_space):
     board_names = [generate_board_name() for _ in range(3)]
 
     with allure.step('Создание трёх борд'):
         for name in board_names:
-            response = owner_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
+            response = main_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
             assert response.status_code == 200, f"Не удалось создать борду '{name}'"
 
     with allure.step('Запрос всех борд в текущем спейсе'):
-        get_response = owner_client.post(**get_boards_endpoint(temp_space))
+        get_response = main_client.post(**get_boards_endpoint(temp_space))
         assert get_response.status_code == 200
 
     boards = get_response.json()['payload']['boards']
@@ -31,16 +31,16 @@ def test_get_boards_returns_multiple_created_boards(owner_client, temp_project, 
 
 @allure.parent_suite("Board Service")
 @allure.title('Получение списка борд: проверка созданных борд и их обязательных полей(name, projectId, createdAt)')
-def test_get_boards_required_fields(owner_client, temp_project, temp_space):
+def test_get_boards_required_fields(main_client, temp_project, temp_space):
     board_names = [generate_board_name() for _ in range(3)]
 
     with allure.step('Создание трёх борд'):
         for name in board_names:
-            response = owner_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
+            response = main_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
             assert response.status_code == 200, f"Не удалось создать борду '{name}'"
 
     with allure.step('Запрос всех борд в текущем спейсе'):
-        get_response = owner_client.post(**get_boards_endpoint(temp_space))
+        get_response = main_client.post(**get_boards_endpoint(temp_space))
         assert get_response.status_code == 200
 
     boards = get_response.json()['payload']['boards']

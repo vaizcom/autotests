@@ -14,8 +14,8 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Project Service")
 @allure.suite("Validation project")
 @allure.title('Validation project Slug: Проверка slug - уникальность до создания, неуникальность после создания, и ошибка при дубликате')
-def test_project_slug_unique(owner_client, temp_space):
-    client = owner_client
+def test_project_slug_unique(main_client, temp_space):
+    client = main_client
     slug = generate_slug()
     name = generate_project_name()
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'test slug validation', 'space_id': temp_space}
@@ -40,36 +40,36 @@ def test_project_slug_unique(owner_client, temp_space):
 @allure.parent_suite("Project Service")
 @allure.suite("Validation project")
 @allure.title('Validation project: Проверка предельной длины slug')
-def test_project_slug_too_long(owner_client, temp_space):
+def test_project_slug_too_long(main_client, temp_space):
     slug = generate_slug(MAX_PROJECT_SLUG_LENGTH + 1, MAX_PROJECT_SLUG_LENGTH + 1)
     name = generate_project_name()
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'too long slug', 'space_id': temp_space}
-    response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+    response = main_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
     assert response.status_code == 400
 
 
 @allure.parent_suite("Project Service")
 @allure.suite("Validation project")
 @allure.title('Validation project: Создание проекта с пустым slug')
-def test_project_slug_empty(owner_client, temp_space):
+def test_project_slug_empty(main_client, temp_space):
     slug = ''
     name = generate_project_name()
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'empty slug', 'space_id': temp_space}
     with allure.step('Отправка запроса с пустым slug проекта'):
-        response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+        response = main_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
     with allure.step('Проверка, что API вернул 404 – ошибка валидации'):
         assert response.status_code == 400
 
 @allure.parent_suite("Project Service")
 @allure.suite("Validation project")
 @allure.title('Validation project: Создание проекта с невалидным slug (не латиница)')
-def test_project_slug_only_latin_letter(owner_client, temp_space):
+def test_project_slug_only_latin_letter(main_client, temp_space):
     slug = 'некорректный'
     name = generate_project_name()
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'нелатинский slug', 'space_id': temp_space}
 
     with allure.step('Отправка запроса с кириллическим slug'):
-        response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+        response = main_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
 
     with allure.step('Проверка, что API вернул 400 – slug должен быть на латинице'):
         assert response.status_code == 400

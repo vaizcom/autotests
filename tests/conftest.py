@@ -1,4 +1,6 @@
 import os
+import uuid
+
 import pytest
 import requests
 import urllib3
@@ -7,6 +9,8 @@ import random
 
 from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST, MAIN_PROJECT_2_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
+from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
+from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
@@ -211,8 +215,8 @@ def random_main_personal_id(main_personal: dict) -> str:
 
 # Фикстура: создает временный спейс и возвращает member_id после прохождения тестов удаляет этот временный спейс
 @pytest.fixture(scope='session')
-def temp_member(owner_client, temp_space):
-    response = owner_client.post(**get_space_members_endpoint(space_id=temp_space))
+def temp_member(main_client, temp_space):
+    response = main_client.post(**get_space_members_endpoint(space_id=temp_space))
     response.raise_for_status()
 
     data = response.json()['payload']
@@ -220,33 +224,40 @@ def temp_member(owner_client, temp_space):
 
     yield member_id
 
+@pytest.fixture(scope='session')
+def temp_member_profile(main_client, temp_space):
+    """Получение id пользователя который создает задачу"""
+    resp = main_client.post(**get_profile_endpoint(space_id=temp_space))
+    resp.raise_for_status()
+    return resp.json()["payload"]["profile"]["memberId"]
+
 
 # Фикстура: создает временный спейс и после прохождения тестов удаляет этот временный спейс
 @pytest.fixture(scope='session')
-def temp_space(owner_client):
+def temp_space(main_client):
     name = generate_space_name()
-    response = owner_client.post(**create_space_endpoint(name=name))
+    response = main_client.post(**create_space_endpoint(name=name))
     assert response.status_code == 200
     space_id = response.json()['payload']['space']['_id']
 
     yield space_id
 
-    owner_client.post(**remove_space_endpoint(space_id=space_id))
+    main_client.post(**remove_space_endpoint(space_id=space_id))
 
 
 @pytest.fixture(scope='session')
-def temp_project(owner_client, temp_space):
+def temp_project(main_client, temp_space):
     """Создаёт проект, который используется во всех тестах модуля."""
     name = generate_project_name()
     slug = generate_slug()
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': temp_space}
-    response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+    response = main_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
     assert response.status_code == 200
     yield response.json()['payload']['project']['_id']
 
 
 @pytest.fixture(scope='session')
-def temp_board(owner_client, temp_project, temp_space):
+def temp_board(main_client, temp_project, temp_space):
     """
     Создаёт временную борду в указанном проекте и спейсе.
     """
@@ -259,10 +270,31 @@ def temp_board(owner_client, temp_project, temp_space):
         typesList=[],
         customFields=[],
     )
-    response = owner_client.post(**payload)
+    response = main_client.post(**payload)
     assert response.status_code == 200
 
     yield response.json()['payload']['board']['_id']
+
+
+@pytest.fixture(scope='session')
+def temp_access_group(main_client, temp_space):
+    """
+    Создает временную группу доступа в temp_space.
+    """
+    group_name = f"Test Group {uuid.uuid4().hex[:4]}"
+    group_desc = "Temporary access group for testing"
+
+    response = main_client.post(**create_access_group_endpoint(
+        space_id=temp_space,
+        name=group_name,
+        description=group_desc
+    ))
+    assert response.status_code == 200, f"Ошибка создания группы: {response.text}"
+
+    group_id = response.json().get("payload", {}).get("accessGroup", {}).get("_id")
+    assert group_id, "В ответе не вернулся _id созданной группы доступа"
+
+    yield group_id
 
 
 @pytest.fixture(scope='session')
@@ -351,11 +383,11 @@ def member_id_function(owner_client, space_id_function):
 
 
 @pytest.fixture
-def temp_document(owner_client, request, kind, kind_id_fixture):
+def temp_document(main_client, request, kind, kind_id_fixture):
     kind_id = request.getfixturevalue(kind_id_fixture)
     space_id = request.getfixturevalue('temp_space')
 
-    response = owner_client.post(
+    response = main_client.post(
         **create_document_endpoint(
             kind=kind,
             kind_id=kind_id,
@@ -369,7 +401,7 @@ def temp_document(owner_client, request, kind, kind_id_fixture):
 
     yield doc_id
 
-    owner_client.post(**archive_document_endpoint(space_id=space_id, document_id=doc_id))
+    main_client.post(**archive_document_endpoint(space_id=space_id, document_id=doc_id))
 
 
 @pytest.fixture

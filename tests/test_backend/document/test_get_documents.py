@@ -22,7 +22,7 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
+def test_get_documents(main_client, temp_space, request, kind, fixture_name):
     allure.dynamic.title(f'Get documents: Получение документов — кейс: kind={kind}')
 
     kind_id = request.getfixturevalue(fixture_name)
@@ -31,13 +31,13 @@ def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
 
     with allure.step(f'Создание {count} (Random[1,5]) документов с kind={kind}'):
         for title in titles:
-            response = owner_client.post(
+            response = main_client.post(
                 **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title=title)
             )
             assert response.status_code == 200
 
     with allure.step(f'Получение списка документов по kind={kind}'):
-        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
+        response = main_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
         assert response.status_code == 200
         docs = response.json()['payload']['documents']
 
@@ -65,7 +65,7 @@ def test_get_documents(owner_client, temp_space, request, kind, fixture_name):
     ids=['invalid kindId', 'invalid kind', 'missing kind', 'missing kindId'],
 )
 def test_get_documents_invalid_inputs(
-    owner_client, temp_space, temp_project, kind, kind_id, space_id, expected_status, case_id
+    main_client, temp_space, temp_project, kind, kind_id, space_id, expected_status, case_id
 ):
     allure.dynamic.title(f'Get documents validation: Негативный кейс: {case_id}')
 
@@ -73,7 +73,7 @@ def test_get_documents_invalid_inputs(
         kind_id = temp_project
 
     with allure.step(f'Отправка запроса и проверка статуса {expected_status}, проверка ошибки "InvalidForm"'):
-        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
+        response = main_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
         assert (
             response.status_code == expected_status
         ), f'Ожидался статус {expected_status}, но получен {response.status_code}'
@@ -107,8 +107,8 @@ def test_get_documents_empty_list(owner_client, space_id_module, request, kind, 
 
 @allure.parent_suite("Document Service")
 @allure.title('Get documents: изолированность документов по kindId проектов')
-def test_get_documents_isolation_by_kind_id(owner_client, temp_space, temp_project):
-    other_project = owner_client.post(
+def test_get_documents_isolation_by_kind_id(main_client, temp_space, temp_project):
+    other_project = main_client.post(
         **create_project_endpoint(
             name='Other project',
             slug=generate_slug(),
@@ -120,21 +120,21 @@ def test_get_documents_isolation_by_kind_id(owner_client, temp_space, temp_proje
     ).json()['payload']['project']['_id']
 
     with allure.step('Создание документа для первого проекта'):
-        response1 = owner_client.post(
+        response1 = main_client.post(
             **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title='Doc 1')
         )
         assert response1.status_code == 200
         doc1_id = response1.json()['payload']['document']['_id']
 
     with allure.step('Создание документа для второго проекта'):
-        response2 = owner_client.post(
+        response2 = main_client.post(
             **create_document_endpoint(kind='Project', kind_id=other_project, space_id=temp_space, title='Doc 2')
         )
         assert response2.status_code == 200
         doc2_id = response2.json()['payload']['document']['_id']
 
     with allure.step('Получение документов только для первого проекта'):
-        response = owner_client.post(
+        response = main_client.post(
             **get_documents_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space)
         )
         assert response.status_code == 200
@@ -147,16 +147,16 @@ def test_get_documents_isolation_by_kind_id(owner_client, temp_space, temp_proje
 
 
 @allure.parent_suite("Document Service")
-def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_member):
+def test_cross_kind_isolation(main_client, temp_space, temp_project, temp_member):
     allure.dynamic.title('Get documents: Документы разных kind не попадают в результаты других kind')
     with allure.step('Создание документа с kind=Member'):
-        response = owner_client.post(
+        response = main_client.post(
             **create_document_endpoint(kind='Member', kind_id=temp_member, space_id=temp_space, title='Member doc')
         )
         assert response.status_code == 200
 
     with allure.step('Запрос документов по kind=Project, Документ Member doc не попал в результат'):
-        response = owner_client.post(
+        response = main_client.post(
             **get_documents_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space)
         )
         assert response.status_code == 200
@@ -164,7 +164,7 @@ def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_membe
         assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
 
     with allure.step('Запрос документов по kind=Space, Документ Member doc не попал в результат'):
-        response = owner_client.post(**get_documents_endpoint(kind='Space', kind_id=temp_space, space_id=temp_space))
+        response = main_client.post(**get_documents_endpoint(kind='Space', kind_id=temp_space, space_id=temp_space))
         assert response.status_code == 200
         titles = [doc['title'] for doc in response.json()['payload']['documents']]
         assert 'Member doc' not in titles, 'Документ от другого kind попал в результат'
@@ -180,12 +180,12 @@ def test_cross_kind_isolation(owner_client, temp_space, temp_project, temp_membe
     ],
     ids=['project-wrong-id', 'member-wrong-id', 'space-wrong-id'],
 )
-def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, request, kind, wrong_fixture, case_title):
+def test_get_documents_mismatched_kind_and_id(main_client, temp_space, request, kind, wrong_fixture, case_title):
     kind_id = request.getfixturevalue(wrong_fixture)
     allure.dynamic.title(f'Get documents: Несоответствие kind и kindId — {case_title}')
 
     with allure.step(f'Отправка запроса с kind={kind} и kindId от {wrong_fixture}'):
-        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
+        response = main_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
 
     with allure.step('Ожидаем ошибку 403'):
         assert response.status_code == 403
@@ -203,21 +203,21 @@ def test_get_documents_mismatched_kind_and_id(owner_client, temp_space, request,
     ],
     ids=['project', 'space', 'member'],
 )
-def test_documents_sorted_by_created_at(owner_client, request, temp_space, kind, fixture_name):
+def test_documents_sorted_by_created_at(main_client, request, temp_space, kind, fixture_name):
     kind_id = request.getfixturevalue(fixture_name)
     allure.dynamic.title(f'Get documents: Сортировка документов по createdAt (kind={kind})')
 
     with allure.step('Создание документов с небольшими задержками'):
         titles = ['Doc A', 'Doc B', 'Doc C']
         for title in titles:
-            response = owner_client.post(
+            response = main_client.post(
                 **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space, title=title)
             )
             assert response.status_code == 200
             time.sleep(1)
 
     with allure.step('Получение документов'):
-        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
+        response = main_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=temp_space))
         assert response.status_code == 200
         documents = response.json()['payload']['documents']
         created_ats = [doc['createdAt'] for doc in documents]

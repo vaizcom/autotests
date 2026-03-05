@@ -12,11 +12,11 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Project Service")
 @allure.suite("Create project")
 @allure.title('Create project: Создание проекта, проверка что payload ответа соответствует ожидаемой структуре')
-def test_create_project_output_payload(owner_client, temp_space):
+def test_create_project_output_payload(main_client, temp_space):
     name = generate_project_name()
     slug = generate_slug()
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': temp_space}
-    response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+    response = main_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
 
     with allure.step("Проверка статуса ответа"):
         assert response.status_code == 200, f"Ожидался статус 200, получен {response.status_code}"

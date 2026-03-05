@@ -18,12 +18,12 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("Board Service")
 @allure.title('Создание борды в существующем проекте и корректность возвращаемого имени')
-def test_create_board(owner_client, temp_project, temp_space):
+def test_create_board(main_client, temp_project, temp_space):
     # Генерация имени борды
     name = generate_board_name()
     # Отправка запроса и проверка результата
     with allure.step('Отправка запроса на создание борды с валидными данными'):
-        response = owner_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
+        response = main_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
 
     # Проверяем статус и возвращаемое имя борды
     with allure.step('Проверка успешного ответа от API'):
@@ -40,15 +40,15 @@ def test_create_board(owner_client, temp_project, temp_space):
 
 @allure.parent_suite("Board Service")
 @allure.title('Создание нескольких борд с одинаковым именем в одном проекте')
-def test_create_board_with_duplicate_name_allowed(owner_client, temp_project, temp_space):
+def test_create_board_with_duplicate_name_allowed(main_client, temp_project, temp_space):
     name = generate_board_name()
 
     with allure.step('Создание первой борды с именем'):
-        response1 = owner_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
+        response1 = main_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
         assert response1.status_code == 200
 
     with allure.step('Повторная попытка создать борду с тем же именем'):
-        response2 = owner_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
+        response2 = main_client.post(**create_board_endpoint(name, temp_project, temp_space, [], [], []))
 
     with allure.step('Проверка, что API вернул 200'):
         assert response2.status_code == 200
@@ -56,11 +56,11 @@ def test_create_board_with_duplicate_name_allowed(owner_client, temp_project, te
 
 @allure.parent_suite("Board Service")
 @allure.title('Ошибка при создании борды с None вместо списков в полях groups/typesList/customFields')
-def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
+def test_create_board_with_none_fields(main_client, temp_project, temp_space):
     name = generate_board_name()
 
     with allure.step('Отправка запроса, где списочные поля переданы как None'):
-        response = owner_client.post(**create_board_endpoint(name, temp_project, temp_space, None, None, None))
+        response = main_client.post(**create_board_endpoint(name, temp_project, temp_space, None, None, None))
 
     with allure.step('Проверка, что API вернул 400 – ошибка валидации типов'):
         assert response.status_code == 400
@@ -68,15 +68,15 @@ def test_create_board_with_none_fields(owner_client, temp_project, temp_space):
 
 @allure.parent_suite("Board Service")
 @allure.title('Редактирование борды: изменение имени через /EditBoard')
-def test_edit_board_name(owner_client, temp_board, temp_space):
+def test_edit_board_name(main_client, temp_board, temp_space):
     new_name = generate_board_name()
 
     with allure.step('Редактирование борды с новым именем'):
-        response = owner_client.post(**edit_board_endpoint(board_id=temp_board, name=new_name, space_id=temp_space))
+        response = main_client.post(**edit_board_endpoint(board_id=temp_board, name=new_name, space_id=temp_space))
         assert response.status_code == 200
 
     with allure.step('Получение борды по ID и проверка обновлённого имени'):
-        get_response = owner_client.post(**get_board_endpoint(board_id=temp_board, space_id=temp_space))
+        get_response = main_client.post(**get_board_endpoint(board_id=temp_board, space_id=temp_space))
         assert get_response.status_code == 200
         board = get_response.json()['payload']['board']
         assert board['name'] == new_name, f"Ожидалось имя '{new_name}', получено '{board['name']}'"
@@ -86,19 +86,19 @@ def test_edit_board_name(owner_client, temp_board, temp_space):
 @allure.title(
     'Добавление новой группы в борду через /CreateBoardGroup: проверка имени, описания и изменения количества групп'
 )
-def test_create_board_group(owner_client, temp_board, temp_space):
+def test_create_board_group(main_client, temp_board, temp_space):
     new_group_name = 'Созданная группа'
     new_group_description = 'Описание новой группы'
 
     with allure.step('Шаг 1: Получаем список групп до создания новой'):
-        get_before = owner_client.post(**get_board_endpoint(temp_board, temp_space))
+        get_before = main_client.post(**get_board_endpoint(temp_board, temp_space))
         assert get_before.status_code == 200
         board_before = get_before.json()['payload']['board']
         groups_before = board_before.get('groups', [])
         count_before = len(groups_before)
 
     with allure.step('Шаг 2: Отправляем запрос на создание новой группы'):
-        create_response = owner_client.post(
+        create_response = main_client.post(
             **create_board_group_endpoint(
                 board_id=temp_board, space_id=temp_space, name=new_group_name, description=new_group_description
             )
@@ -106,7 +106,7 @@ def test_create_board_group(owner_client, temp_board, temp_space):
         assert create_response.status_code == 200
 
     with allure.step('Шаг 3: Получаем список групп после создания'):
-        get_after = owner_client.post(**get_board_endpoint(temp_board, temp_space))
+        get_after = main_client.post(**get_board_endpoint(temp_board, temp_space))
         assert get_after.status_code == 200
         board_after = get_after.json()['payload']['board']
         groups_after = board_after.get('groups', [])
@@ -134,12 +134,12 @@ def test_create_board_group(owner_client, temp_board, temp_space):
 
 @allure.parent_suite("Board Service")
 @allure.title('Редактирование группы через /EditBoardGroup: проверка обновления имени, описания, лимита и скрытия')
-def test_edit_board_group_updates_fields(owner_client, temp_board, temp_space):
+def test_edit_board_group_updates_fields(main_client, temp_board, temp_space):
     original_name = 'Группа для редактирования'
     original_description = 'Исходное описание'
 
     with allure.step('Шаг 1: Создание новой группы, которую затем будем редактировать'):
-        create_response = owner_client.post(
+        create_response = main_client.post(
             **create_board_group_endpoint(
                 board_id=temp_board, space_id=temp_space, name=original_name, description=original_description
             )
@@ -162,7 +162,7 @@ def test_edit_board_group_updates_fields(owner_client, temp_board, temp_space):
     updated_hidden = True
 
     with allure.step('Шаг 2: Редактирование группы через /EditBoardGroup'):
-        edit_response = owner_client.post(
+        edit_response = main_client.post(
             **edit_board_group_endpoint(
                 board_id=temp_board,
                 board_group_id=group_id,
@@ -176,7 +176,7 @@ def test_edit_board_group_updates_fields(owner_client, temp_board, temp_space):
         assert edit_response.status_code == 200, 'Редактирование завершилось с ошибкой'
 
     with allure.step('Шаг 3: Получение борды и проверка обновлённых данных группы'):
-        get_response = owner_client.post(**get_board_endpoint(temp_board, temp_space))
+        get_response = main_client.post(**get_board_endpoint(temp_board, temp_space))
         assert get_response.status_code == 200, 'Ошибка при получении борды'
 
         updated_groups = get_response.json()['payload']['board']['groups']
@@ -200,11 +200,11 @@ def test_edit_board_group_updates_fields(owner_client, temp_board, temp_space):
 @allure.parent_suite("Board Service")
 @pytest.mark.parametrize('field_type', CustomFieldType.list())
 @allure.title('Создание кастомного поля типа: {field_type}')
-def test_create_custom_field_of_each_type(owner_client, temp_board, field_type, temp_space):
+def test_create_custom_field_of_each_type(main_client, temp_board, field_type, temp_space):
     title = generate_custom_field_title()
 
     with allure.step(f"Создание поля типа '{field_type}' с валидным заголовком"):
-        response = owner_client.post(
+        response = main_client.post(
             **create_board_custom_field_endpoint(board_id=temp_board, name=title, type=field_type, space_id=temp_space)
         )
 
@@ -217,11 +217,11 @@ def test_create_custom_field_of_each_type(owner_client, temp_board, field_type, 
 @allure.parent_suite("Board Service")
 @pytest.mark.parametrize('field_type', [t.value for t in CustomFieldType if t.value != 'Select'])
 @allure.title('Редактирование кастомного поля типа: {field_type}')
-def test_edit_custom_field_common_fields(owner_client, temp_board, temp_space, field_type):
+def test_edit_custom_field_common_fields(main_client, temp_board, temp_space, field_type):
     original_title = generate_custom_field_title()
 
     with allure.step(f"Создание поля типа '{field_type}'"):
-        create_response = owner_client.post(
+        create_response = main_client.post(
             **create_board_custom_field_endpoint(
                 board_id=temp_board, name=original_title, type=field_type, space_id=temp_space
             )
@@ -234,7 +234,7 @@ def test_edit_custom_field_common_fields(owner_client, temp_board, temp_space, f
     hidden = True
 
     with allure.step('Редактирование поля: обновление name, description и hidden'):
-        edit_response = owner_client.post(
+        edit_response = main_client.post(
             **edit_board_custom_field_endpoint(
                 board_id=temp_board,
                 field_id=field_id,
@@ -255,11 +255,11 @@ def test_edit_custom_field_common_fields(owner_client, temp_board, temp_space, f
 
 @allure.parent_suite("Board Service")
 @allure.title('Редактирование поля Select: добавление новых опций с валидным _id')
-def test_edit_select_custom_field(owner_client, temp_board, temp_space):
+def test_edit_select_custom_field(main_client, temp_board, temp_space):
     title = generate_custom_field_title()
 
     with allure.step("Создание поля типа 'Select' без опций"):
-        create_response = owner_client.post(
+        create_response = main_client.post(
             **create_board_custom_field_endpoint(
                 board_id=temp_board, space_id=temp_space, name=title, type=CustomFieldType.SELECT.value
             )
@@ -274,7 +274,7 @@ def test_edit_select_custom_field(owner_client, temp_board, temp_space):
     ]
 
     with allure.step('Редактирование поля: добавление опций'):
-        edit_response = owner_client.post(
+        edit_response = main_client.post(
             **edit_board_custom_field_endpoint(
                 board_id=temp_board,
                 space_id=temp_space,

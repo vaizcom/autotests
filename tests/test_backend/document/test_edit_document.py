@@ -20,14 +20,14 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['project', 'space', 'member'],
 )
-def test_edit_document_success(owner_client, kind, kind_id_fixture, temp_space, temp_document):
+def test_edit_document_success(main_client, kind, kind_id_fixture, temp_space, temp_document):
     allure.dynamic.title(f'Edit document: Успешное редактирование полей title и icon. {kind}')
 
     # Редактируем title и icon
     new_title = 'EditedTitle'
     new_icon = 'EditedIcon'
     with allure.step('Edit document'):
-        edit_resp = owner_client.post(
+        edit_resp = main_client.post(
             **edit_document_endpoint(
                 document_id=temp_document['_id'],
                 title=new_title,
@@ -55,10 +55,10 @@ def test_edit_document_success(owner_client, kind, kind_id_fixture, temp_space, 
     ],
     ids=['not_found', 'empty', 'null', 'bad_format'],
 )
-def test_edit_document_invalid_id(owner_client, temp_space, fake_id, expected_status):
+def test_edit_document_invalid_id(main_client, temp_space, fake_id, expected_status):
     allure.dynamic.title(f'Edit document Validation: Негативные сценарии: некорректный documentId. id={fake_id}')
     with allure.step('Attempt edit with invalid id'):
-        resp = owner_client.post(
+        resp = main_client.post(
             **edit_document_endpoint(
                 document_id=fake_id,
                 title='X',
@@ -84,7 +84,7 @@ def test_edit_document_invalid_id(owner_client, temp_space, fake_id, expected_st
     ],
     ids=['project', 'space', 'member'],
 )
-def test_edit_document_overwrite(owner_client, kind, kind_id_fixture, temp_space, temp_document):
+def test_edit_document_overwrite(main_client, kind, kind_id_fixture, temp_space, temp_document):
     allure.dynamic.title(
         f'Edit document: Два последовательных запроса на редактирование одного документа- проверяем что последнее изменение сохранилось.{kind}'
     )
@@ -93,7 +93,7 @@ def test_edit_document_overwrite(owner_client, kind, kind_id_fixture, temp_space
     first_title = 'FirstUpdate'
     first_icon = 'IconA'
     with allure.step('Первое редактирование'):
-        r1 = owner_client.post(
+        r1 = main_client.post(
             **edit_document_endpoint(
                 document_id=temp_document['_id'],
                 title=first_title,
@@ -110,7 +110,7 @@ def test_edit_document_overwrite(owner_client, kind, kind_id_fixture, temp_space
     second_title = 'SecondUpdate'
     second_icon = 'IconB'
     with allure.step('Второе редактирование (перезапись)'):
-        r2 = owner_client.post(
+        r2 = main_client.post(
             **edit_document_endpoint(
                 document_id=temp_document['_id'],
                 title=second_title,
@@ -126,7 +126,7 @@ def test_edit_document_overwrite(owner_client, kind, kind_id_fixture, temp_space
     # 4) Финальная проверка: выгружаем документ и убеждаемся в последних значениях
     with allure.step('Проверка итогового состояния документа'):
         # Предполагаем, что есть endpoint GET /documents/{id}
-        get_resp = owner_client.post(**get_document_endpoint(document_id=temp_document['_id'], space_id=temp_space))
+        get_resp = main_client.post(**get_document_endpoint(document_id=temp_document['_id'], space_id=temp_space))
         assert get_resp.status_code == 200
         final = get_resp.json()['payload']['document']
         assert final['title'] == second_title

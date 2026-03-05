@@ -9,6 +9,12 @@ from tests.test_backend.data.endpoints.Board.constants import (
     BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH,
 )
 
+def generate_date() -> str:
+    """
+    Генерирует date
+    """
+    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    return f'{current_datetime}'
 
 def generate_space_name() -> str:
     """
@@ -35,6 +41,15 @@ def generate_slug(min_len: int = 4, max_len: int = 8) -> str:
     """
     length = random.randint(min_len, max_len)
     return ''.join(random.choices(string.ascii_letters, k=length))
+
+
+def generate_email() -> str:
+    """
+    Генерирует имя для Space, включающее текущую дату и время до секунд в человеко-читаемом формате.
+    Пример: space_2025-12-10_10-30-45
+    """
+    current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    return f"invite_{current_datetime}@autotest.com"
 
 
 def generate_project_description() -> str:

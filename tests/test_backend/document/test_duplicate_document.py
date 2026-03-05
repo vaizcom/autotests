@@ -17,11 +17,11 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['project', 'space', 'member'],
 )
-def test_create_and_duplicate_document(owner_client, request, kind, kind_id_fixture, temp_document):
+def test_create_and_duplicate_document(main_client, request, kind, kind_id_fixture, temp_document):
     space_id = request.getfixturevalue('temp_space')
 
     # Дублируем
-    response = owner_client.post(**duplicate_document_endpoint(document_id=temp_document['_id'], space_id=space_id))
+    response = main_client.post(**duplicate_document_endpoint(document_id=temp_document['_id'], space_id=space_id))
 
     allure.dynamic.title(f'Duplicate document: Создание и дублирование документа ({kind})')
 
@@ -37,7 +37,7 @@ def test_create_and_duplicate_document(owner_client, request, kind, kind_id_fixt
         assert duplicated.get('map') == temp_document.get('map')
 
     # Архивируем
-    archive = owner_client.post(**archive_document_endpoint(document_id=duplicated['_id'], space_id=space_id))
+    archive = main_client.post(**archive_document_endpoint(document_id=duplicated['_id'], space_id=space_id))
     assert archive.status_code == 200
 
 
@@ -52,10 +52,10 @@ def test_create_and_duplicate_document(owner_client, request, kind, kind_id_fixt
     ],
     ids=['not_found', 'empty', 'null', 'bad_format'],
 )
-def test_duplicate_document_invalid_id(owner_client, space_id_function, fake_id, expected_status):
+def test_duplicate_document_invalid_id(main_client, space_id_function, fake_id, expected_status):
     allure.dynamic.title(f'Duplicate document Validation: Негативный сценарий- дублирование с некорректным documentId, invalid id={fake_id}')
     with allure.step('Попытка дублирования с invalid id'):
-        resp = owner_client.post(
+        resp = main_client.post(
             **duplicate_document_endpoint(
                 document_id=fake_id,
                 space_id=space_id_function,
