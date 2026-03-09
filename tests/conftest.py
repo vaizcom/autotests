@@ -11,6 +11,7 @@ from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
 from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
+from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
@@ -28,7 +29,7 @@ from tests.test_backend.data.endpoints.Project.project_endpoints import (
 from tests.test_backend.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
     remove_space_endpoint,
-    get_space_endpoint,
+    get_space_endpoint, get_spaces_endpoint,
 )
 from datetime import datetime
 
@@ -295,6 +296,90 @@ def temp_access_group(main_client, temp_space):
     assert group_id, "В ответе не вернулся _id созданной группы доступа"
 
     yield group_id
+
+
+
+@pytest.fixture(scope="session")
+def space_with_members(
+        request,
+        main_client,
+        owner_client,
+        manager_client,
+        member_client,
+        guest_client):
+    """
+    Создает временное пространство от имени main_client, приглашает туда
+    owner, manager, member, guest с соответствующими ролями.
+    Возвращает space_id.
+    После прохождения тестов пространство удаляется, и проверяется, что оно больше
+    недоступно ни одному из клиентов.
+    """
+    clients_to_invite = {
+        "Owner": owner_client,
+        "Manager": manager_client,
+        "Member": member_client,
+        "Guest": guest_client,
+    }
+
+    # 1. main_client создает временное пространство
+    with allure.step("Создание временного пространства (temp_space_with_members)"):
+        name = generate_space_name()
+        create_resp = main_client.post(**create_space_endpoint(name=name))
+        assert create_resp.status_code == 200, f"Ошибка при создании пространства: {create_resp.text}"
+        space_id = create_resp.json()['payload']['space']['_id']
+
+    # 2. main_client приглашает всех пользователей и они подтверждают инвайт
+    with allure.step("Приглашение пользователей и подтверждение инвайтов"):
+        for role, client in clients_to_invite.items():
+            client_email = settings.USERS[role.lower()]['email']
+            client_password = settings.USERS[role.lower()]['password']
+
+            # Отправка инвайта
+            invite_resp = main_client.post(**invite_to_space_endpoint(
+                space_id=space_id,
+                email=client_email,
+                space_access=role
+            ))
+            assert invite_resp.status_code == 200, f"Не удалось пригласить {role}: {invite_resp.text}"
+
+            # Получение списка спейсов клиента для поиска inviteCode
+            spaces_resp = client.post(**get_spaces_endpoint())
+            assert spaces_resp.status_code == 200, f"Не удалось получить список спейсов для {role}: {spaces_resp.text}"
+
+            spaces = spaces_resp.json().get('payload', {}).get('spaces', [])
+            target_space = next((s for s in spaces if s.get('_id') == space_id), None)
+
+            assert target_space, f"Пространство {space_id} не найдено у {role}"
+            invite_code = target_space.get('inviteCode')
+            assert invite_code, f"У пространства {space_id} нет inviteCode для пользователя {role}"
+
+            # Подтверждение инвайта
+            confirm_resp = client.post(**confirm_space_invite_endpoint(
+                code=invite_code,
+                full_name=f"Test {role}",
+                password=client_password
+            ))
+            assert confirm_resp.status_code == 200, f"Ошибка подтверждения инвайта для {role}: {confirm_resp.text}"
+
+    # Передаем управление тестам
+    yield space_id
+
+    # 3. Teardown: удаляем пространство
+    with allure.step("Удаление временного пространства"):
+        remove_resp = main_client.post(**remove_space_endpoint(space_id=space_id))
+        assert remove_resp.status_code == 200, f"Ошибка при удалении пространства: {remove_resp.text}"
+
+    # 4. Проверяем, что спейс пропал у всех приглашенных клиентов и у создателя
+    all_clients = [main_client] + list(clients_to_invite.values())
+    with allure.step("Проверка, что удаленное пространство недоступно у всех клиентов"):
+        for client in all_clients:
+            check_resp = client.post(**get_space_endpoint(space_id=space_id))
+            # Ожидаем, что пространство не будет найдено (статус код не 200, скорее всего 404 или 403)
+            assert check_resp.status_code != 200, (
+                f"Уязвимость! Пространство {space_id} всё ещё доступно для одного из клиентов "
+                f"после удаления. Ответ: {check_resp.text}"
+            )
+
 
 
 @pytest.fixture(scope='session')
