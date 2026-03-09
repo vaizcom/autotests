@@ -25,7 +25,7 @@ pytestmark = [pytest.mark.backend]
 def test_space_invite_access_by_role(request, space_with_members, client_fixture, expected_status):
     """
     Проверка, что инвайт в спейс разрешен только пользователям с ролью выше менеджера (Owner, Manager).
-    Для ролей Member и Guest ожидается ошибка доступа (обычно 403 Forbidden).
+    Для ролей Member и Guest ожидается ошибка доступа (403 Forbidden).
     """
     # 1. Получаем клиента с нужной ролью через request.getfixturevalue
     client = request.getfixturevalue(client_fixture)

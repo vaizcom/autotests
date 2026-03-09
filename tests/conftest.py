@@ -374,7 +374,7 @@ def space_with_members(
     with allure.step("Проверка, что удаленное пространство недоступно у всех клиентов"):
         for client in all_clients:
             check_resp = client.post(**get_space_endpoint(space_id=space_id))
-            # Ожидаем, что пространство не будет найдено (статус код не 200, скорее всего 404 или 403)
+            # Ожидаем, что пространство не будет найдено (статус код не 200, статус код == 400)
             assert check_resp.status_code != 200, (
                 f"Уязвимость! Пространство {space_id} всё ещё доступно для одного из клиентов "
                 f"после удаления. Ответ: {check_resp.text}"
