@@ -2,6 +2,7 @@ import allure
 import pytest
 
 from config.generators import generate_email
+from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, resend_invite_endpoint, \
     remove_invite_endpoint
 
@@ -47,6 +48,11 @@ def test_space_resend_and_remove_invite_access_by_role(request, space_with_membe
         assert response.status_code == expected_status, (
             f"Права доступа нарушены! Ожидался статус {expected_status}, получен {response.status_code}. Ответ: {response.text}"
         )
+        if expected_status == 200:
+            response = response.json()
+            assert response.get("type", {}) == 'ResendInvite'
+            assert response.get("payload").get("email") == email
+            assert response.get("payload").get("sent") == True
 
     # 5. Очистка: удаляем созданный инвайт
     with allure.step(f"Попытка удаления инвайта клиентом {client_fixture}. Ожидаемый статус: {expected_status}"):
@@ -56,3 +62,11 @@ def test_space_resend_and_remove_invite_access_by_role(request, space_with_membe
         assert response.status_code == expected_status, (
             f"Права доступа нарушены! Ожидался статус {expected_status}, получен {response.status_code}. Ответ: {response.text}"
         )
+        if expected_status == 200:
+            payload = response.json().get("payload", {}).get("invite", {})
+            with allure.step("Валидация тела ответа"):
+                assert_invite_payload(
+                    invite=payload,
+                    space_id=space_with_members,
+                    email=email
+                )
