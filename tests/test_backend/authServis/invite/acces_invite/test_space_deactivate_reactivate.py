@@ -81,6 +81,13 @@ def test_space_deactivate_reactivate_access_by_role(request, space_with_members,
         assert deact_resp.status_code == expected_status, (
             f"Ошибка доступа при деактивации! Ожидался {expected_status}, получен {deact_resp.status_code}"
         )
+        if expected_status == 200:
+            with allure.step("Проверка того что пользователю больше не доступен спейс"):
+                spaces_resp = foreign_client.post(**get_spaces_endpoint())
+                assert spaces_resp.status_code == 200
+                spaces = spaces_resp.json().get('payload', {}).get('spaces', [])
+                target_space = next((s for s in spaces if s.get('_id') == space_with_members), None)
+                assert target_space not in spaces, "Пространство не найдено в списке спейсов"
 
     # 4. Проверка реактивации
     with allure.step(f"Попытка реактивации мембера клиентом {client_fixture}. Ожидаемый статус: {expected_status}"):
@@ -96,3 +103,10 @@ def test_space_deactivate_reactivate_access_by_role(request, space_with_members,
         assert react_resp.status_code == expected_status, (
             f"Ошибка доступа при реактивации! Ожидался {expected_status}, получен {react_resp.status_code}"
         )
+        if expected_status == 200:
+            with allure.step("Проверка того что пользователю доступен спейс"):
+                spaces_resp = foreign_client.post(**get_spaces_endpoint())
+                assert spaces_resp.status_code == 200
+                spaces = spaces_resp.json().get('payload', {}).get('spaces', [])
+                target_space = next((s for s in spaces if s.get('_id') == space_with_members), None)
+                assert target_space in spaces, "Пространство не найдено в списке спейсов"

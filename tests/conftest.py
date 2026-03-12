@@ -306,7 +306,8 @@ def space_with_members(
         owner_client,
         manager_client,
         member_client,
-        guest_client):
+        guest_client
+):
     """
     Создает временное пространство от имени main_client, приглашает туда
     owner, manager, member, guest с соответствующими ролями.
@@ -318,7 +319,7 @@ def space_with_members(
         "Owner": owner_client,
         "Manager": manager_client,
         "Member": member_client,
-        "Guest": guest_client,
+        "Guest": guest_client
     }
 
     # 1. main_client создает временное пространство
