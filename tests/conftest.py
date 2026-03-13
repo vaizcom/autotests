@@ -1,5 +1,6 @@
 import os
 import uuid
+from pymongo import MongoClient
 
 import pytest
 import requests
@@ -37,6 +38,27 @@ from datetime import datetime
 def pytest_configure(config):
     print(f'\n🧪 Running on stand: {settings.TEST_STAND_NAME}')
     print(f'🔗 API URL: {settings.API_URL}\n')
+
+@pytest.fixture(scope="session")
+def mongo_client():
+    """Создает подключение к MongoDB на время всего прогона тестов."""
+    # Получаем URI из переменных окружения (которые грузятся из .env)
+    mongo_uri = os.getenv("MONGO_URI")
+
+    # Подключаемся
+    client = MongoClient(mongo_uri)
+
+    yield client
+
+    # Закрываем соединение после завершения всех тестов
+    client.close()
+
+
+@pytest.fixture(scope="session")
+def db(mongo_client):
+    """Возвращает конкретную базу данных для работы."""
+    db_name = os.getenv("MONGO_DB_NAME")
+    return mongo_client[db_name]
 
 
 @pytest.fixture(scope="session", autouse=True)
