@@ -298,6 +298,38 @@ def temp_access_group(main_client, temp_space):
     yield group_id
 
 
+@pytest.fixture(scope="session")
+def get_invite_code(main_client):
+    """
+    Фабрика для получения кода приглашения.
+    Принимает клиента, которого нужно пригласить, его email и ID пространства.
+    """
+
+    def _get_invite_code(client_to_invite, email_to_invite, space_id):
+        # 1. Отправляем инвайт от лица owner'a (main_client)
+        invite_resp = main_client.post(**invite_to_space_endpoint(
+            space_id=space_id,
+            email=email_to_invite,
+            space_access="Member"
+        ))
+
+        # Игнорируем ошибку, если пользователь уже приглашен/состоит в пространстве
+        if invite_resp.status_code != 200:
+            error_code = invite_resp.json().get("error", {}).get("code")
+            assert error_code in ["UserAlreadySpaceMember", "UserAlreadyInvited"], f"Ошибка инвайта: {invite_resp.text}"
+
+        # 2. Запрашиваем спейсы от лица приглашенного клиента
+        spaces_resp = client_to_invite.post(**get_spaces_endpoint())
+        assert spaces_resp.status_code == 200
+
+        spaces = spaces_resp.json().get('payload', {}).get('spaces', [])
+        target_space = next((s for s in spaces if s.get('_id') == space_id), None)
+        assert target_space is not None, f"Пространство {space_id} не найдено в списке инвайтов"
+
+        return target_space.get('inviteCode')
+
+    return _get_invite_code
+
 
 @pytest.fixture(scope="session")
 def space_with_members(
@@ -358,7 +390,8 @@ def space_with_members(
             confirm_resp = client.post(**confirm_space_invite_endpoint(
                 code=invite_code,
                 full_name=f"Test {role}",
-                password=client_password
+                password=client_password,
+                termsAccepted=True
             ))
             assert confirm_resp.status_code == 200, f"Ошибка подтверждения инвайта для {role}: {confirm_resp.text}"
 

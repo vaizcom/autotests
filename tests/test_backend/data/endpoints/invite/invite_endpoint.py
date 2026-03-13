@@ -89,7 +89,7 @@ def reactivate_member_endpoint(space_id: str, member_id: str) -> dict:
     }
 
 
-def confirm_space_invite_endpoint(code: str, full_name: str, password: str = "123456") -> dict:
+def confirm_space_invite_endpoint(code: str, full_name: str, password: str, termsAccepted: bool) -> dict:
     """
     Эндпоинт для подтверждения инвайта в пространство.
     """
@@ -100,7 +100,7 @@ def confirm_space_invite_endpoint(code: str, full_name: str, password: str = "12
             "profileFields": {
                 "password": password,
                 "fullName": full_name,
-                "termsAccepted": True,
+                "termsAccepted": termsAccepted,
                 "emailSubscriptions": {}
             }
         },

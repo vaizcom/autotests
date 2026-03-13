@@ -65,7 +65,8 @@ def test_space_deactivate_reactivate_access_by_role(request, space_with_members,
             confirm_resp = foreign_client.post(**confirm_space_invite_endpoint(
                 code=invite_code,
                 full_name="Foreign User",
-                password=foreign_password
+                password=foreign_password,
+                termsAccepted=True
             ))
             assert confirm_resp.status_code == 200, f"Ошибка подтверждения: {confirm_resp.text}"
 
