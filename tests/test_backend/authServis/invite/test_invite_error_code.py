@@ -14,9 +14,9 @@ pytestmark = [pytest.mark.backend]
 @allure.suite("Invite")
 @allure.sub_suite("Invite Error Code")
 @allure.title("Ошибка при пустом коде приглашения")
-def test_confirm_space_invite_empty_code(foreign_client):
+def test_confirm_space_invite_empty_code(owner_client):
     with allure.step("Попытка подтверждения с пустым кодом (ожидается JwtEmpty)"):
-        confirm_resp = foreign_client.post(**confirm_space_invite_endpoint(
+        confirm_resp = owner_client.post(**confirm_space_invite_endpoint(
             code="",
             full_name="Valid Name",
             password="ValidPassword123!",
@@ -38,7 +38,7 @@ def test_confirm_space_invite_empty_code(foreign_client):
 ids=["empty_full_name", "empty_password", "terms_not_accepted"]
 )
 def test_confirm_space_invite_invalid_profile(
-        foreign_client,
+        owner_client,
         temp_space,
         get_invite_code,
         full_name,
@@ -50,18 +50,18 @@ def test_confirm_space_invite_invalid_profile(
     allure.dynamic.title(f"{case_name}. Ошибка подтверждения инвайта при невалидных полях")
 
     from config import settings
-    foreign_email = settings.USERS['foreign_client']['email']
+    foreign_email = settings.USERS['owner']['email']
 
     with allure.step("Подготовка: получение валидного кода инвайта"):
         # Передаем клиента, email и ID пространства
         valid_invite_code = get_invite_code(
-            client_to_invite=foreign_client,
+            client_to_invite=owner_client,
             email_to_invite=foreign_email,
             space_id=temp_space
         )
 
     with allure.step(f"Попытка подтверждения с некорректными данными (ожидается {expected_error_code})"):
-        confirm_resp = foreign_client.post(**confirm_space_invite_endpoint(
+        confirm_resp = owner_client.post(**confirm_space_invite_endpoint(
             code=valid_invite_code,
             full_name=full_name,
             password=password,

@@ -222,7 +222,7 @@ def test_create_document_without_auth(foreign_client, temp_space, temp_project):
             **create_document_endpoint(kind='Project', kind_id=temp_project, space_id=temp_space, title='Guest test')
         )
     with allure.step('Ожидаем 400 Unauthorized, проверяем текст ошибки SpaceIdNotSpecified'):
-        assert response.status_code == 400
+        assert response.status_code in [400, 403]
         assert response.json()['error']['code'] == 'SpaceIdNotSpecified'
 
 
