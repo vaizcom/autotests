@@ -30,6 +30,7 @@ jobs:
 
     env:
       TEST_SCOPE: ${{ github.event.inputs.test_scope || 'backend' }}
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
@@ -55,9 +56,9 @@ jobs:
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
 
       - name: Install dependencies
         run: |
@@ -114,7 +115,7 @@ jobs:
         run: ls -lah allure-results
 
       - name: 🕘 Get Allure history
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         if: always()
         continue-on-error: true
         with:
