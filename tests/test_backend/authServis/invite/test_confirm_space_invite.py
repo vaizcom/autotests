@@ -15,19 +15,19 @@ pytestmark = [pytest.mark.backend]
 @allure.suite("Invite")
 @allure.sub_suite("Confirm Space Invite")
 @allure.title("Успешное подтверждение инвайта новым пользователем")
-def test_confirm_space_invite_success(main_client, temp_space, foreign_client):
+def test_confirm_space_invite_success(main_client, temp_space, member_client):
     """
     Проверка успешного подтверждения приглашения в пространство.
     """
 
-    foreign_email = settings.USERS['foreign_client']['email']
-    foreign_password = settings.USERS['foreign_client']['password']
+    member_email = settings.USERS['member']['email']
+    member_password = settings.USERS['member']['password']
     full_name = "Confirmed User"
 
-    with allure.step("Owner приглашает foreign_client в пространство"):
+    with allure.step("Owner приглашает member_client в пространство"):
         invite_resp = main_client.post(**invite_to_space_endpoint(
             space_id=temp_space,
-            email=foreign_email,
+            email=member_email,
             space_access="Member"
         ))
         assert invite_resp.status_code == 200, f"Ошибка приглашения: {invite_resp.text}"
@@ -40,28 +40,28 @@ def test_confirm_space_invite_success(main_client, temp_space, foreign_client):
             ))
             assert response.status_code == 200
             resp = response.json().get('payload').get('members')
-            target_status = next((s for s in resp if s.get('email') == foreign_email), None)
+            target_status = next((s for s in resp if s.get('email') == member_email), None)
             assert target_status is not None, "Приглашенный пользователь не найден в списке участников"
             assert target_status.get('status') == "Invited"
 
 
     with allure.step("Получение кода приглашения (inviteCode)"):
-        spaces_resp = foreign_client.post(**get_spaces_endpoint())
+        spaces_resp = member_client.post(**get_spaces_endpoint())
         assert spaces_resp.status_code == 200, f"Ошибка получения спейсов: {spaces_resp.text}"
 
         spaces = spaces_resp.json().get('payload', {}).get('spaces', [])
         target_space = next((s for s in spaces if s.get('_id') == temp_space), None)
-        assert target_space, "Пространство не найдено в списке спейсов foreign_client"
+        assert target_space, "Пространство не найдено в списке спейсов member_client"
 
         invite_code = target_space.get('inviteCode')
         assert invite_code, "inviteCode отсутствует в ответе"
         assert target_space.get("isForeign") is True, "Флаг isForeign должен быть True"
 
     with allure.step("Подтверждение инвайта через ConfirmSpaceInvite"):
-        confirm_resp = foreign_client.post(**confirm_space_invite_endpoint(
+        confirm_resp = member_client.post(**confirm_space_invite_endpoint(
             code=invite_code,
             full_name=full_name,
-            password=foreign_password,
+            password=member_password,
             termsAccepted=True
         ))
         assert confirm_resp.status_code == 200, f"Ошибка подтверждения: {confirm_resp.text}"
@@ -79,6 +79,6 @@ def test_confirm_space_invite_success(main_client, temp_space, foreign_client):
             ))
             assert response.status_code == 200
             resp = response.json().get('payload').get('members')
-            target_status = next((s for s in resp if s.get('email') == foreign_email), None)
+            target_status = next((s for s in resp if s.get('email') == member_email), None)
             assert target_status is not None, "Приглашенный пользователь не найден в списке участников"
             assert target_status.get('status') == "Active"
