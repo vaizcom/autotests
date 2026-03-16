@@ -43,7 +43,7 @@ jobs:
           if [[ "$BRANCH" == "main" || "$BRANCH" == "uat" ]]; then
             echo "TEST_STAND_NAME=kuber_uat" >> $GITHUB_ENV
           else
-            echo "TEST_STAND_NAME=kuber_dev" >> $GITHUB_ENV
+            echo "TEST_STAND_NAME=dev" >> $GITHUB_ENV
           fi
 
       # 🧠 Получаем стенд из input (если ручной запуск)
