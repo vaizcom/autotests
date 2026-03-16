@@ -29,7 +29,7 @@ DUMMY_WEBP = b'RIFF\x1a\x00\x00\x00WEBPVP8L\r\x00\x00\x00/\x00\x00\x00\x10\x07\x
     ],
     ids=["png", "jpg", "gif", "webp"]
 )
-def test_invite_user_with_avatar_positive(main_client, temp_space, file_ext, mime_type, file_content):
+def test_invite_user_with_avatar_positive(owner_client, space_id_module, file_ext, mime_type, file_content):
     """
     Проверка позитивного сценария:
     1. Получение контекста пространства (заголовки).
@@ -39,13 +39,13 @@ def test_invite_user_with_avatar_positive(main_client, temp_space, file_ext, mim
     allure.dynamic.title(f"(формат: {file_ext}) Приглашение пользователя с необязательными параметрами (Avatar)")
 
     with allure.step("Получение заголовков с ID пространства для обхода проверок безопасности"):
-        space_req = get_space_members_endpoint(space_id=temp_space)
+        space_req = get_space_members_endpoint(space_id=space_id_module)
         space_headers = space_req.get("headers", {})
 
     with allure.step(f"Загрузка картинки аватара ({file_ext}) через multipart/form-data"):
         avatar_url = get_uploaded_avatar_url(
-            client=main_client,
-            kind_id=temp_space,
+            client=owner_client,
+            kind_id=space_id_module,
             kind="Space",
             file_content=file_content,
             headers=space_headers,
@@ -60,7 +60,7 @@ def test_invite_user_with_avatar_positive(main_client, temp_space, file_ext, mim
         invite_email = f"new_user_{uuid.uuid4().hex[:8]}@example.com"
 
         invite_req = invite_to_space_endpoint(
-            space_id=temp_space,
+            space_id=space_id_module,
             email=invite_email,
             space_access="Member",
             avatar_url=avatar_url
@@ -69,7 +69,7 @@ def test_invite_user_with_avatar_positive(main_client, temp_space, file_ext, mim
         invite_headers = invite_req.get("headers", {})
         invite_headers.update(space_headers)
 
-        response = main_client.post(
+        response = owner_client.post(
             invite_req["path"],
             json=invite_req.get("json", {}),
             headers=invite_headers
@@ -91,7 +91,7 @@ def test_invite_user_with_avatar_positive(main_client, temp_space, file_ext, mim
     with allure.step("Валидация тела ответа InviteToSpace"):
         assert_invite_payload(
             invite=payload,
-            space_id=temp_space,
+            space_id=space_id_module,
             email=invite_email
         )
 
