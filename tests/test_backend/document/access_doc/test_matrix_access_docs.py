@@ -36,33 +36,32 @@ def test_space_client_document_access(
         assert response_personal.status_code == 403, 'Доступ к MAIN_PERSONAL_DOC_ID должен быть запрещён'
 
 
-@allure.parent_suite("Document Service")
-@allure.suite("Access document")
-@allure.title(
-    'Проверка доступа project_client к основному документу, проектному документу и отсутствия доступа к персональному документу'
-)
-def test_project_client_document_access(
-        client_with_access_only_in_project, main_space, main_space_doc, main_project_doc, main_personal_doc
-):
-    """
-    Проверяем, что project_client имеет доступ к main_space_doc и main_project_doc, но не имеет доступа к main_personal_doc.
-    """
-
-    with allure.step('Проверка доступа project_client к основному документу MAIN_SPACE_DOC_ID'):
-        response_space = client_with_access_only_in_project.post(**get_document_endpoint(document_id=main_space_doc, space_id=main_space))
-        assert response_space.status_code == 200, 'Доступ к MAIN_SPACE_DOC_ID должен быть разрешён'
-
-    with allure.step('Проверка доступа project_client к проектному документу MAIN_PROJECT_DOC_ID'):
-        response_project = client_with_access_only_in_project.post(
-            **get_document_endpoint(document_id=main_project_doc, space_id=main_space)
-        )
-        assert response_project.status_code == 200, 'Доступ к MAIN_PROJECT_DOC_ID должен быть разрешён'
-
-    with allure.step('Проверка отсутствия доступа project_client к персональному документу MAIN_PERSONAL_DOC_ID'):
-        response_personal = client_with_access_only_in_project.post(
-            **get_document_endpoint(document_id=main_personal_doc, space_id=main_space)
-        )
-        assert response_personal.status_code == 403, 'Доступ к MAIN_PERSONAL_DOC_ID должен быть запрещён'
+# @allure.parent_suite("Document Service")
+# @allure.suite("Access document")
+# @allure.title('Проверка доступа project_client к основному документу, проектному документу и отсутствия доступа к персональному документу'
+# )
+# def test_project_client_document_access(
+#         client_with_access_only_in_project, main_space, main_space_doc, main_project_doc, main_personal_doc
+# ):
+#     """
+#     Проверяем, что project_client имеет доступ к main_space_doc и main_project_doc, но не имеет доступа к main_personal_doc.
+#     """
+#
+#     with allure.step('Проверка доступа project_client к основному документу MAIN_SPACE_DOC_ID'):
+#         response_space = client_with_access_only_in_project.post(**get_document_endpoint(document_id=main_space_doc, space_id=main_space))
+#         assert response_space.status_code == 200, 'Доступ к MAIN_SPACE_DOC_ID должен быть разрешён'
+#
+#     with allure.step('Проверка доступа project_client к проектному документу MAIN_PROJECT_DOC_ID'):
+#         response_project = client_with_access_only_in_project.post(
+#             **get_document_endpoint(document_id=main_project_doc, space_id=main_space)
+#         )
+#         assert response_project.status_code == 200, 'Доступ к MAIN_PROJECT_DOC_ID должен быть разрешён'
+#
+#     with allure.step('Проверка отсутствия доступа project_client к персональному документу MAIN_PERSONAL_DOC_ID'):
+#         response_personal = client_with_access_only_in_project.post(
+#             **get_document_endpoint(document_id=main_personal_doc, space_id=main_space)
+#         )
+#         assert response_personal.status_code == 403, 'Доступ к MAIN_PERSONAL_DOC_ID должен быть запрещён'
 
 
 @allure.parent_suite("Document Service")

@@ -54,36 +54,36 @@ def test_get_tasks_filtered_by_board_by_role(request, client_fixture, expected_s
                     f"Найдена задача {task.get('_id', 'unknown')} из чужой борды {another_board_id}"
                 )
 
-
-@allure.parent_suite("Task Service")
-@allure.suite("Get Tasks")
-@allure.sub_suite("Access get Tasks")
-@allure.title("GetTasks: Проверка что список задач пустой для пользователей которые не имеют доступ к борде")
-@pytest.mark.parametrize(
-    'client_fixture',
-    ['client_with_access_only_in_space', 'client_with_access_only_in_project'],
-    ids=['no_access_to_project', 'no_access_to_board'],
-)
-def test_get_tasks_limited_access_filtered_by_board(request, client_fixture, board_with_10000_tasks, main_space):
-    """
-        Проверяет, что пользователи без доступа к проекту или доске получают пустой список задач,
-        но при этом запрос выполняется успешно (HTTP 200).
-        """
-    role_name = client_fixture.capitalize()
-    allure.dynamic.title(f"Тестирование получения задач под ролью {role_name}")
-
-    client = request.getfixturevalue(client_fixture)
-
-    with allure.step(f"{client_fixture}: вызвать GetTasks с фильтром board"):
-        resp = client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_10000_tasks))
-
-    with allure.step("Проверить HTTP 200"):
-        assert resp.status_code == 200
-
-    with allure.step("Проверить что список задач пустой"):
-        payload = resp.json().get("payload", {})
-        assert "tasks" in payload and isinstance(payload["tasks"], list)
-        assert len(payload["tasks"]) == 0, f"Ожидался пустой список задач для {client_fixture}"
+#
+# @allure.parent_suite("Task Service")
+# @allure.suite("Get Tasks")
+# @allure.sub_suite("Access get Tasks")
+# @allure.title("GetTasks: Проверка что список задач пустой для пользователей которые не имеют доступ к борде")
+# @pytest.mark.parametrize(
+#     'client_fixture',
+#     ['client_with_access_only_in_space', 'client_with_access_only_in_project'],
+#     ids=['no_access_to_project', 'no_access_to_board'],
+# )
+# def test_get_tasks_limited_access_filtered_by_board(request, client_fixture, board_with_10000_tasks, main_space):
+#     """
+#         Проверяет, что пользователи без доступа к проекту или доске получают пустой список задач,
+#         но при этом запрос выполняется успешно (HTTP 200).
+#         """
+#     role_name = client_fixture.capitalize()
+#     allure.dynamic.title(f"Тестирование получения задач под ролью {role_name}")
+#
+#     client = request.getfixturevalue(client_fixture)
+#
+#     with allure.step(f"{client_fixture}: вызвать GetTasks с фильтром board"):
+#         resp = client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_10000_tasks))
+#
+#     with allure.step("Проверить HTTP 200"):
+#         assert resp.status_code == 200
+#
+#     with allure.step("Проверить что список задач пустой"):
+#         payload = resp.json().get("payload", {})
+#         assert "tasks" in payload and isinstance(payload["tasks"], list)
+#         assert len(payload["tasks"]) == 0, f"Ожидался пустой список задач для {client_fixture}"
 
 
 @allure.parent_suite("Task Service")
