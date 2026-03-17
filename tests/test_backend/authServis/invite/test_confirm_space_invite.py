@@ -89,10 +89,11 @@ def test_confirm_space_invite_success(main_client, temp_space, member_client):
 @allure.suite("Invite")
 @allure.sub_suite("Confirm Space Invite")
 @allure.title("Успешное подтверждение инвайта пользователя, которого нет в базе")
-def test_confirm_space_invite_new_user(owner_client, space_id_module, db):
+def test_confirm_space_invite_new_user(main_client, space_id_module, db):
     """
     Проверка успешного приглашения и подтверждения для пользователя,
     которого еще нет в базе данных.
+    Покрытие кейса когда пользователь получает по email ссылку-приглашение и переходит в спейс.
     """
 
     new_user_email = "invite_new_user@autotest.com"
@@ -100,7 +101,7 @@ def test_confirm_space_invite_new_user(owner_client, space_id_module, db):
     full_name = "Brand New User"
 
     with allure.step("Owner приглашает нового пользователя в пространство (space_id_module)"):
-        invite_resp = owner_client.post(**invite_to_space_endpoint(
+        invite_resp = main_client.post(**invite_to_space_endpoint(
             space_id=space_id_module,
             email=new_user_email,
             space_access="Member"
@@ -126,7 +127,7 @@ def test_confirm_space_invite_new_user(owner_client, space_id_module, db):
             termsAccepted=True
         )
 
-        confirm_resp = owner_client.post(**confirm_endpoint)
+        confirm_resp = main_client.post(**confirm_endpoint)
         assert confirm_resp.status_code == 200, f"Ошибка подтверждения: {confirm_resp.text}"
 
         payload = confirm_resp.json().get("payload", {})
@@ -134,7 +135,7 @@ def test_confirm_space_invite_new_user(owner_client, space_id_module, db):
         assert payload.get("spaceId") == space_id_module, "Неверный spaceId в ответе"
 
     with allure.step("Проверка статуса пользователя в списке участников (должен быть Active)"):
-        response = owner_client.post(**get_space_members_endpoint(
+        response = main_client.post(**get_space_members_endpoint(
             space_id=space_id_module
         ))
         assert response.status_code == 200

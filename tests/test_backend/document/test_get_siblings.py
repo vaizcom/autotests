@@ -19,20 +19,20 @@ pytestmark = [pytest.mark.backend]
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_document_parent_siblings(owner_client, request, space_id_module, kind, kind_id_fixture):
+def test_get_document_parent_siblings(main_client, request, space_id_module, kind, kind_id_fixture):
     """Тест проверки siblins и родителей для родительского документа"""
     kind_id = request.getfixturevalue(kind_id_fixture)
     space_id = space_id_module
     allure.dynamic.title(f'Проверка отсутствия siblins и родителей для одного корневого документа (kind={kind})')
 
     # Создаем родительский документ
-    resp = owner_client.post(**create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id, title='Parent'))
+    resp = main_client.post(**create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id, title='Parent'))
     assert resp.status_code == 200, f'Ожидался статус 200, но получен {resp.status_code}'
     parent_id = resp.json()['payload']['document']['_id']
 
     # Запрос siblins для родительского документа
     with allure.step('Запрос siblins для родительского документа'):
-        parent_resp = owner_client.post(**get_document_siblings_endpoint(document_id=parent_id, space_id=space_id))
+        parent_resp = main_client.post(**get_document_siblings_endpoint(document_id=parent_id, space_id=space_id))
         assert parent_resp.status_code == 200, f'Ожидался статус 200, но получен {parent_resp.status_code}'
         data = parent_resp.json()
         assert (

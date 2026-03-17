@@ -29,7 +29,7 @@ DUMMY_WEBP = b'RIFF\x1a\x00\x00\x00WEBPVP8L\r\x00\x00\x00/\x00\x00\x00\x10\x07\x
     ],
     ids=["png", "jpg", "gif", "webp"]
 )
-def test_invite_user_with_avatar_positive(owner_client, space_id_module, file_ext, mime_type, file_content):
+def test_invite_user_with_avatar_positive(main_client, space_id_module, file_ext, mime_type, file_content):
     """
     Проверка позитивного сценария:
     1. Получение контекста пространства (заголовки).
@@ -44,7 +44,7 @@ def test_invite_user_with_avatar_positive(owner_client, space_id_module, file_ex
 
     with allure.step(f"Загрузка картинки аватара ({file_ext}) через multipart/form-data"):
         avatar_url = get_uploaded_avatar_url(
-            client=owner_client,
+            client=main_client,
             kind_id=space_id_module,
             kind="Space",
             file_content=file_content,
@@ -69,7 +69,7 @@ def test_invite_user_with_avatar_positive(owner_client, space_id_module, file_ex
         invite_headers = invite_req.get("headers", {})
         invite_headers.update(space_headers)
 
-        response = owner_client.post(
+        response = main_client.post(
             invite_req["path"],
             json=invite_req.get("json", {}),
             headers=invite_headers
