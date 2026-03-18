@@ -30,7 +30,6 @@ jobs:
 
     env:
       TEST_SCOPE: ${{ github.event.inputs.test_scope || 'backend' }}
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +42,7 @@ jobs:
           if [[ "$BRANCH" == "main" || "$BRANCH" == "uat" ]]; then
             echo "TEST_STAND_NAME=kuber_uat" >> $GITHUB_ENV
           else
-            echo "TEST_STAND_NAME=dev" >> $GITHUB_ENV
+            echo "TEST_STAND_NAME=kuber_dev" >> $GITHUB_ENV
           fi
 
       # 🧠 Получаем стенд из input (если ручной запуск)
@@ -56,9 +55,9 @@ jobs:
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.13'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
@@ -101,8 +100,8 @@ jobs:
           echo "TEST_SCOPE=$TEST_SCOPE" >> allure-results/environment.properties
           echo "TEST_STAND=$TEST_STAND_NAME" >> allure-results/environment.properties
           echo "API_URL=$API_URL" >> allure-results/environment.properties
-          
-      - name: ✅ Check if the API is available from the agent 
+
+      - name: ✅ Check if the API is available from the agent
         continue-on-error: false
         run: curl -m 10 $API_URL/healthCheck
 
@@ -115,7 +114,7 @@ jobs:
         run: ls -lah allure-results
 
       - name: 🕘 Get Allure history
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
         if: always()
         continue-on-error: true
         with:
