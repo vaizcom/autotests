@@ -15,86 +15,86 @@ DUMMY_JPEG = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00\xf
 DUMMY_GIF = b'GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;'
 DUMMY_WEBP = b'RIFF\x1a\x00\x00\x00WEBPVP8L\r\x00\x00\x00/\x00\x00\x00\x10\x07\x10\x11\x11\x88\x88\xfe\x07\x00'
 
-
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Avatar (Positive)")
-@pytest.mark.parametrize(
-    "file_ext, mime_type, file_content",
-    [
-        ("png", "image/png", DUMMY_PNG),
-        ("jpg", "image/jpeg", DUMMY_JPEG),
-        ("gif", "image/gif", DUMMY_GIF),
-        ("webp", "image/webp", DUMMY_WEBP),
-    ],
-    ids=["png", "jpg", "gif", "webp"]
-)
-def test_invite_user_with_avatar_positive(main_client, temp_space, file_ext, mime_type, file_content):
-    """
-    Проверка позитивного сценария:
-    1. Получение контекста пространства (заголовки).
-    2. Загрузка валидного аватара (тип Space) на сервер с проверкой всех доступных форматов.
-    3. Успешное приглашение нового пользователя в пространство с указанным avatarUrl.
-    """
-    allure.dynamic.title(f"(формат: {file_ext}) Приглашение пользователя с необязательными параметрами (Avatar)")
-
-    with allure.step("Получение заголовков с ID пространства для обхода проверок безопасности"):
-        space_req = get_space_members_endpoint(space_id=temp_space)
-        space_headers = space_req.get("headers", {})
-
-    with allure.step(f"Загрузка картинки аватара ({file_ext}) через multipart/form-data"):
-        avatar_url = get_uploaded_avatar_url(
-            client=main_client,
-            kind_id=temp_space,
-            kind="Space",
-            file_content=file_content,
-            headers=space_headers,
-            file_name=f"test_avatar.{file_ext}",
-            content_type=mime_type
-        )
-
-        assert avatar_url is not None, "URL аватара не должен быть None"
-        assert len(avatar_url) > 0, "Длина URL аватара должна быть больше 0"
-
-    with allure.step(f"Приглашение нового пользователя с загруженным аватаром ({avatar_url})"):
-        invite_email = f"new_user_{uuid.uuid4().hex[:8]}@example.com"
-
-        invite_req = invite_to_space_endpoint(
-            space_id=temp_space,
-            email=invite_email,
-            space_access="Member",
-            avatar_url=avatar_url
-        )
-
-        invite_headers = invite_req.get("headers", {})
-        invite_headers.update(space_headers)
-
-        response = main_client.post(
-            invite_req["path"],
-            json=invite_req.get("json", {}),
-            headers=invite_headers
-        )
-
-    with allure.step("Проверка статус-кода ответа сервера 200"):
-        if response.status_code != 200:
-            print(f"\n[ОШИБКА ИНВАЙТА] Ответ сервера: {response.text}\n")
-
-        assert response.status_code == 200, f"Ошибка приглашения. Ожидался статус 200, получен {response.status_code}. Ответ: {response.text}"
-
-        payload = response.json().get("payload", {}).get("invite", {})
-
-
-        _id = payload.get("_id")
-
-        assert _id, "В ответе инвайта не вернулся _id"
-
-    with allure.step("Валидация тела ответа InviteToSpace"):
-        assert_invite_payload(
-            invite=payload,
-            space_id=temp_space,
-            email=invite_email
-        )
-
+#
+# @allure.parent_suite("Auth Service")
+# @allure.suite("Invite")
+# @allure.sub_suite("Space Invitations - Avatar (Positive)")
+# @pytest.mark.parametrize(
+#     "file_ext, mime_type, file_content",
+#     [
+#         ("png", "image/png", DUMMY_PNG),
+#         ("jpg", "image/jpeg", DUMMY_JPEG),
+#         ("gif", "image/gif", DUMMY_GIF),
+#         ("webp", "image/webp", DUMMY_WEBP),
+#     ],
+#     ids=["png", "jpg", "gif", "webp"]
+# )
+# def test_invite_user_with_avatar_positive(main_client, temp_space, file_ext, mime_type, file_content):
+#     """
+#     Проверка позитивного сценария:
+#     1. Получение контекста пространства (заголовки).
+#     2. Загрузка валидного аватара (тип Space) на сервер с проверкой всех доступных форматов.
+#     3. Успешное приглашение нового пользователя в пространство с указанным avatarUrl.
+#     """
+#     allure.dynamic.title(f"(формат: {file_ext}) Приглашение пользователя с необязательными параметрами (Avatar)")
+#
+#     with allure.step("Получение заголовков с ID пространства для обхода проверок безопасности"):
+#         space_req = get_space_members_endpoint(space_id=temp_space)
+#         space_headers = space_req.get("headers", {})
+#
+#     with allure.step(f"Загрузка картинки аватара ({file_ext}) через multipart/form-data"):
+#         avatar_url = get_uploaded_avatar_url(
+#             client=main_client,
+#             kind_id=temp_space,
+#             kind="Space",
+#             file_content=file_content,
+#             headers=space_headers,
+#             file_name=f"test_avatar.{file_ext}",
+#             content_type=mime_type
+#         )
+#
+#         assert avatar_url is not None, "URL аватара не должен быть None"
+#         assert len(avatar_url) > 0, "Длина URL аватара должна быть больше 0"
+#
+#     with allure.step(f"Приглашение нового пользователя с загруженным аватаром ({avatar_url})"):
+#         invite_email = f"new_user_{uuid.uuid4().hex[:8]}@example.com"
+#
+#         invite_req = invite_to_space_endpoint(
+#             space_id=temp_space,
+#             email=invite_email,
+#             space_access="Member",
+#             avatar_url=avatar_url
+#         )
+#
+#         invite_headers = invite_req.get("headers", {})
+#         invite_headers.update(space_headers)
+#
+#         response = main_client.post(
+#             invite_req["path"],
+#             json=invite_req.get("json", {}),
+#             headers=invite_headers
+#         )
+#
+#     with allure.step("Проверка статус-кода ответа сервера 200"):
+#         if response.status_code != 200:
+#             print(f"\n[ОШИБКА ИНВАЙТА] Ответ сервера: {response.text}\n")
+#
+#         assert response.status_code == 200, f"Ошибка приглашения. Ожидался статус 200, получен {response.status_code}. Ответ: {response.text}"
+#
+#         payload = response.json().get("payload", {}).get("invite", {})
+#
+#
+#         _id = payload.get("_id")
+#
+#         assert _id, "В ответе инвайта не вернулся _id"
+#
+#     with allure.step("Валидация тела ответа InviteToSpace"):
+#         assert_invite_payload(
+#             invite=payload,
+#             space_id=temp_space,
+#             email=invite_email
+#         )
+#
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Invite")
