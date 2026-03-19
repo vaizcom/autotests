@@ -226,13 +226,13 @@ def test_single_child_siblings(owner_client, request, kind, kind_id_fixture, spa
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_document_siblings(owner_client, request, space_id_module, kind, kind_id_fixture):
+def test_get_document_siblings(main_client, request, space_id_module, kind, kind_id_fixture):
     kind_id = request.getfixturevalue(kind_id_fixture)
     space_id = space_id_module
     allure.dynamic.title(f'Проверяем siblins для нескольктих Child (kind={kind})')
 
     with allure.step('Создание родительского документа'):
-        resp = owner_client.post(
+        resp = main_client.post(
             **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id, title='Parent')
         )
         assert resp.status_code == 200
@@ -243,7 +243,7 @@ def test_get_document_siblings(owner_client, request, space_id_module, kind, kin
         child_ids = []
 
         for title in titles:
-            resp = owner_client.post(
+            resp = main_client.post(
                 **create_document_endpoint(
                     kind=kind,
                     kind_id=kind_id,
@@ -257,7 +257,7 @@ def test_get_document_siblings(owner_client, request, space_id_module, kind, kin
 
     with allure.step('Запрос сиблингов для среднего дочернего документа'):
         target_id = child_ids[1]
-        resp = owner_client.post(**get_document_siblings_endpoint(document_id=target_id, space_id=space_id))
+        resp = main_client.post(**get_document_siblings_endpoint(document_id=target_id, space_id=space_id))
         with allure.step('Проверка кода ответа при запросе сиблингов'):
             assert resp.status_code == 200, f'Ожидался статус 200, но получен {resp.status_code}'
         with allure.step('Проверка поля type в ответе'):
@@ -275,7 +275,7 @@ def test_get_document_siblings(owner_client, request, space_id_module, kind, kin
     # Проверка сиблингов первого документа
     target_first = child_ids[0]
     with allure.step('Проверка nextSibling для первого документа и отсутствие prevSibling'):
-        first_resp = owner_client.post(**get_document_siblings_endpoint(document_id=target_first, space_id=space_id))
+        first_resp = main_client.post(**get_document_siblings_endpoint(document_id=target_first, space_id=space_id))
         assert first_resp.status_code == 200
         first_data = first_resp.json()['payload']
         assert (
@@ -286,7 +286,7 @@ def test_get_document_siblings(owner_client, request, space_id_module, kind, kin
     # Проверка сиблингов для последнего документа
     target_last = child_ids[-1]
     with allure.step('Проверка prevSibling для последнего документа и отсутствие nextSibling'):
-        last_resp = owner_client.post(**get_document_siblings_endpoint(document_id=target_last, space_id=space_id))
+        last_resp = main_client.post(**get_document_siblings_endpoint(document_id=target_last, space_id=space_id))
         assert last_resp.status_code == 200
         last_data = last_resp.json()['payload']
         assert last_data['prevSibling']['_id'] == child_ids[-2], 'prevSibling должен указывать на предыдущий элемент'
