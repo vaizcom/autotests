@@ -18,12 +18,11 @@ pytestmark = [pytest.mark.backend]
         ('manager_client', 200),
         ('member_client', 200),
         ('guest_client', 200),
-        # ('client_with_access_only_in_space', 400),
-        # ('client_with_access_only_in_project', 400),
-        # ('foreign_client', 403)
+        ('client_with_access_only_in_space', 400),
+        ('client_with_access_only_in_project', 400),
+        ('foreign_client', 403)
     ],
-    ids=['owner', 'manager', 'member', 'guest']
-    # ids=['owner', 'manager', 'member', 'guest','no_access_to_project', 'no_access_to_board', 'no_access_to_space'],
+    ids=['owner', 'manager', 'member', 'guest','no_access_to_project', 'no_access_to_board', 'no_access_to_space'],
 )
 def test_get_task(request, main_space, board_with_10000_tasks, client_fixture, expected_status, main_project):
     """

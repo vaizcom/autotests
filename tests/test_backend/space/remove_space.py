@@ -50,5 +50,5 @@ def del_all_spaces(client):
         if space['_id'] not in ids_to_keep:
             client.post(**remove_space_endpoint(space_id=space['_id']))
 
-# def test_remove_space_success(guest_client):
-#     del_all_spaces(guest_client)
+# def test_remove_space_success(main_client):
+#     del_all_spaces(main_client)
