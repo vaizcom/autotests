@@ -1,5 +1,6 @@
 import os
 import uuid
+from pymongo import MongoClient
 
 import pytest
 import requests
@@ -11,6 +12,7 @@ from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
 from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
+from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
@@ -28,7 +30,7 @@ from tests.test_backend.data.endpoints.Project.project_endpoints import (
 from tests.test_backend.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
     remove_space_endpoint,
-    get_space_endpoint,
+    get_space_endpoint, get_spaces_endpoint,
 )
 from datetime import datetime
 
@@ -36,6 +38,27 @@ from datetime import datetime
 def pytest_configure(config):
     print(f'\n🧪 Running on stand: {settings.TEST_STAND_NAME}')
     print(f'🔗 API URL: {settings.API_URL}\n')
+
+@pytest.fixture(scope="session")
+def mongo_client():
+    """Создает подключение к MongoDB на время всего прогона тестов."""
+    # Получаем URI из переменных окружения (которые грузятся из .env)
+    mongo_uri = os.getenv("MONGO_URI")
+
+    # Подключаемся
+    client = MongoClient(mongo_uri)
+
+    yield client
+
+    # Закрываем соединение после завершения всех тестов
+    client.close()
+
+
+@pytest.fixture(scope="session")
+def db(mongo_client):
+    """Возвращает конкретную базу данных для работы."""
+    db_name = os.getenv("MONGO_DB_NAME")
+    return mongo_client[db_name]
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -297,6 +320,124 @@ def temp_access_group(main_client, temp_space):
     yield group_id
 
 
+@pytest.fixture(scope="session")
+def get_invite_code(main_client):
+    """
+    Фабрика для получения кода приглашения.
+    Принимает клиента, которого нужно пригласить, его email и ID пространства.
+    """
+
+    def _get_invite_code(client_to_invite, email_to_invite, space_id):
+        # 1. Отправляем инвайт от лица owner'a (main_client)
+        invite_resp = main_client.post(**invite_to_space_endpoint(
+            space_id=space_id,
+            email=email_to_invite,
+            space_access="Member"
+        ))
+
+        # Игнорируем ошибку, если пользователь уже приглашен/состоит в пространстве
+        if invite_resp.status_code != 200:
+            error_code = invite_resp.json().get("error", {}).get("code")
+            assert error_code in ["UserAlreadySpaceMember", "UserAlreadyInvited"], f"Ошибка инвайта: {invite_resp.text}"
+
+        # 2. Запрашиваем спейсы от лица приглашенного клиента
+        spaces_resp = client_to_invite.post(**get_spaces_endpoint())
+        assert spaces_resp.status_code == 200
+
+        spaces = spaces_resp.json().get('payload', {}).get('spaces', [])
+        target_space = next((s for s in spaces if s.get('_id') == space_id), None)
+        assert target_space is not None, f"Пространство {space_id} не найдено в списке инвайтов"
+
+        return target_space.get('inviteCode')
+
+    return _get_invite_code
+
+
+@pytest.fixture(scope="session")
+def space_with_members(
+        request,
+        main_client,
+        owner_client,
+        manager_client,
+        member_client,
+        guest_client
+):
+    """
+    Создает временное пространство от имени main_client, приглашает туда
+    owner, manager, member, guest с соответствующими ролями.
+    Возвращает space_id.
+    После прохождения тестов пространство удаляется, и проверяется, что оно больше
+    недоступно ни одному из клиентов.
+    """
+    clients_to_invite = {
+        "Owner": owner_client,
+        "Manager": manager_client,
+        "Member": member_client,
+        "Guest": guest_client
+    }
+
+    # 1. main_client создает временное пространство
+    with allure.step("Создание временного пространства (temp_space_with_members)"):
+        name = generate_space_name()
+        create_resp = main_client.post(**create_space_endpoint(name=name))
+        assert create_resp.status_code == 200, f"Ошибка при создании пространства: {create_resp.text}"
+        space_id = create_resp.json()['payload']['space']['_id']
+
+    # 2. main_client приглашает всех пользователей и они подтверждают инвайт
+    with allure.step("Приглашение пользователей и подтверждение инвайтов"):
+        for role, client in clients_to_invite.items():
+            client_email = settings.USERS[role.lower()]['email']
+            client_password = settings.USERS[role.lower()]['password']
+
+            # Отправка инвайта
+            invite_resp = main_client.post(**invite_to_space_endpoint(
+                space_id=space_id,
+                email=client_email,
+                space_access=role
+            ))
+            assert invite_resp.status_code == 200, f"Не удалось пригласить {role}: {invite_resp.text}"
+
+            # Получение списка спейсов клиента для поиска inviteCode
+            spaces_resp = client.post(**get_spaces_endpoint())
+            assert spaces_resp.status_code == 200, f"Не удалось получить список спейсов для {role}: {spaces_resp.text}"
+
+            spaces = spaces_resp.json().get('payload', {}).get('spaces', [])
+            target_space = next((s for s in spaces if s.get('_id') == space_id), None)
+
+            assert target_space, f"Пространство {space_id} не найдено у {role}"
+            invite_code = target_space.get('inviteCode')
+            assert invite_code, f"У пространства {space_id} нет inviteCode для пользователя {role}"
+
+            # Подтверждение инвайта
+            confirm_resp = client.post(**confirm_space_invite_endpoint(
+                code=invite_code,
+                full_name=f"Test {role}",
+                password=client_password,
+                termsAccepted=True
+            ))
+            assert confirm_resp.status_code == 200, f"Ошибка подтверждения инвайта для {role}: {confirm_resp.text}"
+
+    # Передаем управление тестам
+    yield space_id
+
+    # 3. Teardown: удаляем пространство
+    with allure.step("Удаление временного пространства"):
+        remove_resp = main_client.post(**remove_space_endpoint(space_id=space_id))
+        assert remove_resp.status_code == 200, f"Ошибка при удалении пространства: {remove_resp.text}"
+
+    # 4. Проверяем, что спейс пропал у всех приглашенных клиентов и у создателя
+    all_clients = [main_client] + list(clients_to_invite.values())
+    with allure.step("Проверка, что удаленное пространство недоступно у всех клиентов"):
+        for client in all_clients:
+            check_resp = client.post(**get_space_endpoint(space_id=space_id))
+            # Ожидаем, что пространство не будет найдено (статус код не 200, статус код == 400)
+            assert check_resp.status_code != 200, (
+                f"Уязвимость! Пространство {space_id} всё ещё доступно для одного из клиентов "
+                f"после удаления. Ответ: {check_resp.text}"
+            )
+
+
+
 @pytest.fixture(scope='session')
 def foreign_space(guest_client):
     """Создаёт space от имени другого пользователя"""
@@ -311,8 +452,8 @@ def foreign_space(guest_client):
 
 
 @pytest.fixture(scope='module')
-def space_id_module(owner_client):
-    client = owner_client
+def space_id_module(main_client):
+    client = main_client
     name = generate_space_name()
     response = client.post(**create_space_endpoint(name=name))
     assert response.status_code == 200
@@ -324,11 +465,11 @@ def space_id_module(owner_client):
 
 
 @pytest.fixture(scope='module')
-def project_id_module(owner_client, space_id_module):
+def project_id_module(main_client, space_id_module):
     name = generate_project_name()
     slug = generate_slug()
     common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': space_id_module}
-    response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+    response = main_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
     assert response.status_code == 200
     project_id = response.json()['payload']['project']['_id']
 
@@ -336,8 +477,8 @@ def project_id_module(owner_client, space_id_module):
 
 
 @pytest.fixture(scope='module')
-def member_id_module(owner_client, space_id_module):
-    response = owner_client.post(**get_space_members_endpoint(space_id=space_id_module))
+def member_id_module(main_client, space_id_module):
+    response = main_client.post(**get_space_members_endpoint(space_id=space_id_module))
     response.raise_for_status()
 
     data = response.json()['payload']

@@ -125,6 +125,27 @@ def get_assignee(client, space_id):
     return member_id[random_member]
 
 
+def get_user_id(client, space_id, member_name):
+    """
+    Возвращает _id участника с указанным именем (member_name) из списка участников пространства.
+    """
+    # Делаем запрос к endpoint для получения списка участников
+    response = client.post(**get_space_members_endpoint(space_id))
+    response.raise_for_status()
+
+    # Извлекаем список участников
+    members = response.json().get("payload", {}).get("members", [])
+    assert members, "Ошибка: список участников пуст или недоступен"
+
+    # Ищем пользователя по имени
+    for member in members:
+        if member.get("fullName") == member_name:
+            return member["_id"]
+
+    raise AssertionError(f"Ошибка: участник '{member_name}' не найден в пространстве")
+
+
+
 def get_milestone(client, space_id, board_id):
     """
     Получает список майлстоунов из указанной борды и возвращает случайный milestone_id.

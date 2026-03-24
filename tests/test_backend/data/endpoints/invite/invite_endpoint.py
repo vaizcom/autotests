@@ -50,3 +50,61 @@ def remove_invite_endpoint(space_id: str, member_id: str) -> dict:
             "Current-Space-Id": space_id,
         },
     }
+
+
+def resend_invite_endpoint(space_id: str, member_id: str) -> dict:
+    return {
+        "path": "/ResendInvite",
+        "json": {
+            "memberId": member_id,
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+def deactivate_member_endpoint(space_id: str, member_id: str) -> dict:
+    return {
+        "path": "/DeactivateMember",
+        "json": {
+            "memberId": member_id,
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+def reactivate_member_endpoint(space_id: str, member_id: str) -> dict:
+    return {
+        "path": "/ReactivateMember",
+        "json": {
+            "memberId": member_id,
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
+def confirm_space_invite_endpoint(code: str, full_name: str, password: str, termsAccepted: bool) -> dict:
+    """
+    Эндпоинт для подтверждения инвайта в пространство.
+    """
+    return {
+        "path": "/ConfirmSpaceInvite",
+        "json": {
+            "code": code,
+            "profileFields": {
+                "password": password,
+                "fullName": full_name,
+                "termsAccepted": termsAccepted,
+                "emailSubscriptions": {}
+            }
+        },
+        "headers": {
+            "Content-Type": "application/json",
+        },
+    }

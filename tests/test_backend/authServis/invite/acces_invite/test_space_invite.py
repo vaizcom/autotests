@@ -22,10 +22,10 @@ pytestmark = [pytest.mark.backend]
         ("guest_client", 403),
     ]
 )
-def test_space_invite_access_by_role(request, second_space, client_fixture, expected_status):
+def test_space_invite_access_by_role(request, space_with_members, client_fixture, expected_status):
     """
     Проверка, что инвайт в спейс разрешен только пользователям с ролью выше менеджера (Owner, Manager).
-    Для ролей Member и Guest ожидается ошибка доступа (обычно 403 Forbidden).
+    Для ролей Member и Guest ожидается ошибка доступа (403 Forbidden).
     """
     # 1. Получаем клиента с нужной ролью через request.getfixturevalue
     client = request.getfixturevalue(client_fixture)
@@ -36,7 +36,7 @@ def test_space_invite_access_by_role(request, second_space, client_fixture, expe
     # 3. Отправляем запрос от имени этого клиента
     with allure.step(f"Попытка отправки инвайта клиентом {client_fixture}. Ожидаемый статус: {expected_status}"):
         response = client.post(**invite_to_space_endpoint(
-            space_id=second_space,
+            space_id=space_with_members,
             email=email,
             space_access="Member"  # Роль, которую пытаемся выдать, не важна
         ))
@@ -51,14 +51,14 @@ def test_space_invite_access_by_role(request, second_space, client_fixture, expe
         if expected_status == 200:
             invite_id = response.json().get("payload", {}).get("invite", {}).get("_id")
             if invite_id:
-                client.post(**remove_invite_endpoint(space_id=second_space, member_id=invite_id))
+                client.post(**remove_invite_endpoint(space_id=space_with_members, member_id=invite_id))
 
 
 @allure.parent_suite("Auth Service")
 @allure.suite("Invite")
 @allure.sub_suite("Space Invitations - Access Control APP-4623")
 @allure.title("Менеджер не может выдать роль Owner при инвайте (роль сбрасывается до Guest , д.б. 400 APP-4623)")
-def test_manager_cannot_invite_owner(manager_client, second_space):
+def test_manager_cannot_invite_owner(manager_client, space_with_members):
     """
     Проверка, что менеджер при попытке пригласить пользователя с ролью Owner,
     успешно отправляет инвайт (200 OK), но пользователю фактически назначается роль Guest.
@@ -68,7 +68,7 @@ def test_manager_cannot_invite_owner(manager_client, second_space):
     # 1. Отправляем инвайт с завышенной ролью
     with allure.step("Менеджер отправляет инвайт с ролью Owner"):
         response = manager_client.post(**invite_to_space_endpoint(
-            space_id=second_space,
+            space_id=space_with_members,
             email=email,
             space_access="Owner"
         ))
@@ -81,7 +81,7 @@ def test_manager_cannot_invite_owner(manager_client, second_space):
     # 2. Ждем появления группы доступа
     with allure.step("Ожидание появления пользователя в списке групп доступа"):
         def _check_group():
-            group_resp = manager_client.post(**get_access_groups_endpoint(space_id=second_space))
+            group_resp = manager_client.post(**get_access_groups_endpoint(space_id=space_with_members))
             assert group_resp.status_code == 200, f"Ошибка GetAccessGroup: {group_resp.text}"
             groups = group_resp.json().get("payload", {}).get("accessGroups", [])
             return next((g for g in groups if g.get("members") == [_id]), None)
@@ -98,7 +98,7 @@ def test_manager_cannot_invite_owner(manager_client, second_space):
     # 3. Проверяем, что роль сбросилась
     with allure.step("Проверка, что роль в spaceAccesses сброшена до Guest"):
         space_accesses = target_group.get("spaceAccesses", {})
-        actual_role = space_accesses.get(second_space)
+        actual_role = space_accesses.get(space_with_members)
         assert actual_role == "Guest", (
             f"Защита от эскалации не сработала!\n"
             f"Ожидалась роль: Guest\n"
@@ -108,5 +108,5 @@ def test_manager_cannot_invite_owner(manager_client, second_space):
 
     # 4. Удаляем инвайт
     with allure.step("Удаление инвайта"):
-        remove_resp = manager_client.post(**remove_invite_endpoint(space_id=second_space, member_id=_id))
+        remove_resp = manager_client.post(**remove_invite_endpoint(space_id=space_with_members, member_id=_id))
         assert remove_resp.status_code == 200, f"Ошибка при удалении инвайта: {remove_resp.text}"

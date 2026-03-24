@@ -10,6 +10,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("Project Service")
 @allure.suite("Edit project")
+@allure.sub_suite("Edit Name project access")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -35,7 +36,8 @@ def test_edit_project_name_access_by_roles(request, client_fixture, expected_sta
 
 
 @allure.parent_suite("Project Service")
-@allure.suite("Edit Slug project APP-4608 ")
+@allure.suite("Edit project")
+@allure.sub_suite("Edit Slug project access")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -47,21 +49,26 @@ def test_edit_project_name_access_by_roles(request, client_fixture, expected_sta
     ids=['owner', 'manager', 'member', 'guest'],
 )
 def test_edit_project_slug_access_by_roles(request, client_fixture, expected_status, main_project_2, main_space):
-    allure.dynamic.title(f'Edit project slug access: клиент={client_fixture}, ожидаемый статус={expected_status}')
+    """
+    В рамках задачи APP-4608 запретили изменять slug для всех ролей (но статус код разный для ролей, не критично для внутреннего апи)
+    """
+    allure.dynamic.title(f"Edit Slug project access: редактирование Slug запрещено для клиент={client_fixture}, ожидаемый статус={expected_status}" )
     client = request.getfixturevalue(client_fixture)
     new_slug = generate_slug()
-    with allure.step(f"Отправка запроса на редактирование project с новым именем: {new_slug}"):
+    expected_slug = "TLIVFJS"
+    with allure.step(f"Отправка запроса на редактирование project с новым slug: {new_slug}"):
         edit_response = client.post(**edit_project_endpoint(project_id=main_project_2, slug=new_slug, space_id=main_space))
     with allure.step(f'Проверка статус-кода: ожидаемый {expected_status}'):
         assert edit_response.status_code == expected_status, edit_response.text
-        r =edit_response.json()['payload']
     if expected_status == 200:
-        with allure.step('Проверка, что имя проекта было обновлено'):
-            assert edit_response.json()['payload']['project']['slug'] == new_slug.upper()
+        actual_slug = edit_response.json()['payload']['project']['slug']
+        with allure.step('Проверка, что slug проекта остался неизменным'):
+            assert actual_slug == expected_slug
 
 
 @allure.parent_suite("Project Service")
 @allure.suite("Edit project")
+@allure.sub_suite("Edit Description project access")
 @pytest.mark.parametrize(
     'client_fixture, expected_status',
     [
@@ -80,7 +87,6 @@ def test_edit_project_description_access_by_roles(request, client_fixture, expec
         edit_response = client.post(**edit_project_endpoint(project_id=main_project_2, description=new_description, space_id=main_space))
     with allure.step(f'Проверка статус-кода: ожидаемый {expected_status}'):
         assert edit_response.status_code == expected_status, edit_response.text
-        r =edit_response.json()['payload']
     if expected_status == 200:
         with allure.step('Проверка, что имя проекта было обновлено'):
             assert edit_response.json()['payload']['project']['description'] == new_description

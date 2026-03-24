@@ -90,12 +90,12 @@ def test_get_documents_invalid_inputs(
     ],
     ids=['project', 'space', 'member'],
 )
-def test_get_documents_empty_list(owner_client, space_id_module, request, kind, fixture_name):
+def test_get_documents_empty_list(main_client, space_id_module, request, kind, fixture_name):
     kind_id = request.getfixturevalue(fixture_name)
     allure.dynamic.title(f'Get documents: Пустой результат при отсутствии документов (kind={kind})')
 
     with allure.step(f'Get documents: Запрос документов без предварительного создания (kind={kind}, kindId={kind_id})'):
-        response = owner_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=space_id_module))
+        response = main_client.post(**get_documents_endpoint(kind=kind, kind_id=kind_id, space_id=space_id_module))
 
     with allure.step('Проверка успешного ответа и пустого списка'):
         assert response.status_code == 200

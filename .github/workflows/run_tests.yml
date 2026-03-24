@@ -100,8 +100,8 @@ jobs:
           echo "TEST_SCOPE=$TEST_SCOPE" >> allure-results/environment.properties
           echo "TEST_STAND=$TEST_STAND_NAME" >> allure-results/environment.properties
           echo "API_URL=$API_URL" >> allure-results/environment.properties
-          
-      - name: ✅ Check if the API is available from the agent 
+
+      - name: ✅ Check if the API is available from the agent
         continue-on-error: false
         run: curl -m 10 $API_URL/healthCheck
 
