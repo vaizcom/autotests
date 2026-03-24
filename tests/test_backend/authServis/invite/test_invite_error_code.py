@@ -10,10 +10,11 @@ from test_backend.task_service.utils import get_user_id
 
 pytestmark = [pytest.mark.backend]
 
-#To do: 'IncompleteProfile', 'AcceptOnlyForActiveMember'
-# 'CantDepriveAccessCreator',
-# 'CantDepriveAccessYourself',
-# 'UserAlreadySpaceMember','SelfInvitation'
+#To do: 'IncompleteProfile', для стрых пользователей, не воспроизвести в автотестах
+# 'AcceptOnlyForActiveMember' не исполльзуется нигде в коде, неактуальная ошибка, можно завести задачу на удаление
+# 'CantDepriveAccessCreator', готово
+# 'CantDepriveAccessYourself', готово
+# 'UserAlreadySpaceMember','SelfInvitation', готово
 
 
 @allure.parent_suite("Auth Service")

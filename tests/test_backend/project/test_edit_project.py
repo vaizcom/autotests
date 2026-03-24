@@ -62,7 +62,7 @@ def test_edit_project_slug_access_by_roles(request, client_fixture, expected_sta
         assert edit_response.status_code == expected_status, edit_response.text
     if expected_status == 200:
         actual_slug = edit_response.json()['payload']['project']['slug']
-        with allure.step('Проверка, что имя проекта осталось неизменным'):
+        with allure.step('Проверка, что slug проекта остался неизменным'):
             assert actual_slug == expected_slug
 
 
