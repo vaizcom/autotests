@@ -32,6 +32,7 @@ USERS = {
     'manager': {'email': os.getenv('MANAGER_EMAIL'), 'password': os.getenv('PASSWORD')},
     'owner': {'email': os.getenv('OWNER_EMAIL'), 'password': os.getenv('PASSWORD')},
     'main': {'email': os.getenv('MAIN_CLIENT'), 'password': os.getenv('PASSWORD')},
+    'second_main': {'email': os.getenv('SECOND_MAIN_CLIENT'), 'password': os.getenv('PASSWORD')},
 }
 
 TEST_STAND_NAME = os.getenv('TEST_STAND_NAME', 'kuber_dev')

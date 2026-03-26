@@ -15,18 +15,18 @@ pytestmark = [pytest.mark.backend]
 @allure.sub_suite("Space Invitations (set role)")
 @pytest.mark.parametrize("role", ["Guest", "Member", "Manager", "Owner"])
 @allure.title("Приглашение пользователя в Space с ролью {role}")
-def test_invite_to_space(main_client, temp_space, role):
+def test_invite_to_space(second_main_client, space_id_, role):
     """
     Тест проверяет приглашение пользователя в спейс с указанной ролью
     и последующую проверку его прав в списке участников.
     """
     # 1. Генерация уникального email для теста
-    email = f"invite_{role.lower()}_{temp_space}@autotest.com"
+    email = f"invite_{role.lower()}_{space_id_}@autotest.com"
 
     # 2. Отправка приглашения
     with allure.step(f"Приглашение пользователя с ролью {role}"):
-        response = main_client.post(**invite_to_space_endpoint(
-            space_id=temp_space,
+        response = second_main_client.post(**invite_to_space_endpoint(
+            space_id=space_id_,
             email=email,
             space_access=role
         ))
@@ -42,7 +42,7 @@ def test_invite_to_space(main_client, temp_space, role):
     with allure.step("Валидация тела ответа InviteToSpace"):
         assert_invite_payload(
             invite=payload,
-            space_id=temp_space,
+            space_id=space_id_,
             email=email
         )
 
@@ -51,7 +51,7 @@ def test_invite_to_space(main_client, temp_space, role):
 
         def _check_group():
             """Локальная функция-условие для поллинга"""
-            group_resp = main_client.post(**get_access_groups_endpoint(space_id=temp_space))
+            group_resp = second_main_client.post(**get_access_groups_endpoint(space_id=space_id_))
             assert group_resp.status_code == 200, f"Ошибка GetAccessGroup: {group_resp.text}"
 
             groups = group_resp.json().get("payload", {}).get("accessGroups", [])
@@ -69,7 +69,7 @@ def test_invite_to_space(main_client, temp_space, role):
 
         # Базовые проверки структуры группы
     with allure.step("Базовые проверки структуры созданной группы"):
-        assert target_id.get("space") == temp_space, "ID спейса в группе не совпадает"
+        assert target_id.get("space") == space_id_, "ID спейса в группе не совпадает"
         assert isinstance(target_id.get("members"), list), "Поле members должно быть списком"
         assert "createdAt" in target_id, "Отсутствует поле createdAt"
         assert "updatedAt" in target_id, "Отсутствует поле updatedAt"
@@ -88,7 +88,7 @@ def test_invite_to_space(main_client, temp_space, role):
         # Проверяем права в spaceAccesses
     with allure.step(f"Проверка соответствия роли {role} в spaceAccesses"):
         space_accesses = target_id.get("spaceAccesses", {})
-        actual_role = space_accesses.get(temp_space)
+        actual_role = space_accesses.get(space_id_)
 
         assert actual_role == role, (
             f"Роль не совпадает!\n"

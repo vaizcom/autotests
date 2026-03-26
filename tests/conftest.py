@@ -92,6 +92,10 @@ def global_ssl_settings():
 def main_client():
     return APIClient(base_url=API_URL, token=get_token('main'))
 
+@pytest.fixture(scope='session')
+def second_main_client():
+    return APIClient(base_url=API_URL, token=get_token('second_main'))
+
 
 # Фикстура: возвращает авторизованного API клиента с токеном владельца
 @pytest.fixture(scope='session')
@@ -465,6 +469,23 @@ def space_id_module(main_client):
 
 
 @pytest.fixture(scope='module')
+def space_id_(second_main_client):
+    """
+    спейс созданный для тестирования инвайтов,
+    т.к. есть ограничение и на количество инвайтов от пользователя (10/час),
+    и на количество участников в одном спейсе (не больше 10 для бесплатного тарифа)
+    """
+    client = second_main_client
+    name = generate_space_name()
+    response = client.post(**create_space_endpoint(name=name))
+    assert response.status_code == 200
+    space_id = response.json()['payload']['space']['_id']
+
+    yield space_id
+
+    client.post(**remove_space_endpoint(space_id=space_id))
+
+@pytest.fixture(scope='module')
 def project_id_module(main_client, space_id_module):
     name = generate_project_name()
     slug = generate_slug()
@@ -475,6 +496,42 @@ def project_id_module(main_client, space_id_module):
 
     yield project_id
 
+@pytest.fixture(scope='module')
+def board_id_module(main_client, project_id_module, space_id_module):
+    board_name = generate_board_name()
+    payload = create_board_endpoint(
+        name=board_name,
+        temp_project=project_id_module,
+        space_id=space_id_module,
+        groups=DEFAULT_BOARD_GROUPS,
+        typesList=[],
+        customFields=[],
+    )
+    response = main_client.post(**payload)
+    assert response.status_code == 200
+
+    yield response.json()['payload']['board']['_id']
+
+
+@pytest.fixture(scope='module')
+def group_in_module(main_client, space_id_module):
+    """
+    Создает временную группу доступа в space_id_module.
+    """
+    group_name = f"Test Group {uuid.uuid4().hex[:4]}"
+    group_desc = "Temporary access group for testing"
+
+    response = main_client.post(**create_access_group_endpoint(
+        space_id=space_id_module,
+        name=group_name,
+        description=group_desc
+    ))
+    assert response.status_code == 200, f"Ошибка создания группы: {response.text}"
+
+    group_id = response.json().get("payload", {}).get("accessGroup", {}).get("_id")
+    assert group_id, "В ответе не вернулся _id созданной группы доступа"
+
+    yield group_id
 
 @pytest.fixture(scope='module')
 def member_id_module(main_client, space_id_module):

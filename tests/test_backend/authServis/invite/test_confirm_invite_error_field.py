@@ -37,7 +37,7 @@ ids=["empty_full_name", "empty_password", "terms_not_accepted"]
 )
 def test_confirm_space_invite_invalid_profile(
         owner_client,
-        temp_space,
+        space_id_module,
         get_invite_code,
         full_name,
         password,
@@ -55,7 +55,7 @@ def test_confirm_space_invite_invalid_profile(
         valid_invite_code = get_invite_code(
             client_to_invite=owner_client,
             email_to_invite=foreign_email,
-            space_id=temp_space
+            space_id=space_id_module
         )
 
     with allure.step(f"Попытка подтверждения с некорректными данными (ожидается {expected_error_code})"):
