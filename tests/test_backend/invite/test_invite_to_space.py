@@ -10,9 +10,8 @@ pytestmark = [pytest.mark.backend]
 
 
 # Параметризация для проверки разных ролей
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations (set role)")
+@allure.parent_suite("Invite")
+@allure.suite("Space Invitations (set role)")
 @pytest.mark.parametrize("role", ["Guest", "Member", "Manager", "Owner"])
 @allure.title("Приглашение пользователя в Space с ролью {role}")
 def test_invite_to_space(second_main_client, space_id_, role):

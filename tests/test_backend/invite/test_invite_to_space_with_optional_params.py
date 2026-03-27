@@ -2,7 +2,6 @@ import allure
 import pytest
 
 from config.generators import generate_email
-from conftest import temp_access_group
 from core.waiters import wait_until
 from test_backend.data.endpoints.access_group.aaccess_group_endpoints import get_access_groups_endpoint
 from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
@@ -11,9 +10,8 @@ from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_e
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Optional Params (Positive)")
+@allure.parent_suite("Invite")
+@allure.suite("Space Invitations - Optional Params (Positive)")
 @allure.title("Приглашение пользователя с необязательными параметрами (projectAccesses, boardAccesses, fullName)")
 def test_invite_to_space_with_optional_params(main_client, space_id_module, project_id_module, board_id_module):
     """
@@ -83,9 +81,8 @@ def test_invite_to_space_with_optional_params(main_client, space_id_module, proj
         assert remove_resp.status_code == 200, f"Ошибка при удалении инвайта: {remove_resp.text}"
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Optional Params (Positive)")
+@allure.parent_suite("Invite")
+@allure.suite("Space Invitations - Optional Params (Positive)")
 @allure.title("Приглашение пользователя с добавлением в указанную группу доступа (accessGroupId)")
 def test_invite_to_space_with_access_group(main_client, space_id_module, group_in_module):
     """
@@ -153,9 +150,8 @@ def test_invite_to_space_with_access_group(main_client, space_id_module, group_i
 
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Optional Params (Negative)")
+@allure.parent_suite("Invite")
+@allure.suite("Space Invitations - Optional Params (Negative)")
 @allure.title("Инвайт с невалидными доп. параметрами: {scenario}")
 @pytest.mark.parametrize(
     "scenario, overrides, expected_status",

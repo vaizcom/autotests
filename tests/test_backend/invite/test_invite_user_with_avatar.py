@@ -16,9 +16,8 @@ DUMMY_GIF = b'GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x0
 DUMMY_WEBP = b'RIFF\x1a\x00\x00\x00WEBPVP8L\r\x00\x00\x00/\x00\x00\x00\x10\x07\x10\x11\x11\x88\x88\xfe\x07\x00'
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Avatar (Positive)")
+@allure.parent_suite("Invite")
+@allure.suite("Space Invitations - Avatar (Positive)")
 @pytest.mark.parametrize(
     "file_ext, mime_type, file_content",
     [
@@ -96,9 +95,8 @@ def test_invite_user_with_avatar_positive(second_main_client, space_id_, file_ex
         )
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Avatar (Negative)")
+@allure.parent_suite("Invite")
+@allure.suite("Space Invitations - Avatar (Negative)")
 @allure.title("Загрузка аватара с невалидным параметром: {scenario}")
 @pytest.mark.parametrize(
     "scenario, kind, file_tuple, expected_status",
@@ -149,9 +147,8 @@ def test_upload_avatar_negative(second_main_client, space_id_, scenario, kind, f
         )
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Avatar (Negative)")
+@allure.parent_suite("Invite")
+@allure.suite("Space Invitations - Avatar (Negative)")
 @allure.title("Загрузка аватара, превышающего лимит размера (> 100 МБ)")
 def test_upload_avatar_too_large(second_main_client, space_id_):
     """

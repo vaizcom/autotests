@@ -8,9 +8,8 @@ from test_backend.data.endpoints.invite.invite_endpoint import (
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Confirm Invite Error Field")
+@allure.parent_suite("Invite")
+@allure.suite("Confirm Invite Error Field")
 @allure.title("Ошибка при пустом коде приглашения")
 def test_confirm_space_invite_empty_code(owner_client):
     with allure.step("Попытка подтверждения с пустым кодом (ожидается JwtEmpty)"):
@@ -25,9 +24,8 @@ def test_confirm_space_invite_empty_code(owner_client):
         assert confirm_resp.json().get("error", {}).get("code") == "JwtEmpty"
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Confirm Invite Error Field")
+@allure.parent_suite("Invite")
+@allure.suite("Confirm Invite Error Field")
 @pytest.mark.parametrize("full_name, password, terms_accepted, expected_error_code, case_name", [
     (" ", "123456", True, "FieldCantBeBlanc", "empty_full_name"),
     ("full_name", "", True, "PasswordTooShort", "empty_password"),
