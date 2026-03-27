@@ -24,7 +24,7 @@ def test_confirm_space_invite_empty_code(owner_client):
         assert confirm_resp.json().get("error", {}).get("code") == "JwtEmpty"
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Confirm Invite Error Field")
 @pytest.mark.parametrize("full_name, password, terms_accepted, expected_error_code, case_name", [
     (" ", "123456", True, "FieldCantBeBlanc", "empty_full_name"),

@@ -39,8 +39,8 @@ jobs:
         if: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
           BRANCH="${GITHUB_REF##*/}"
-          if [[ "$BRANCH" == "main" || "$BRANCH" == "uat" ]]; then
-            echo "TEST_STAND_NAME=kuber_uat" >> $GITHUB_ENV
+          if [[ "$BRANCH" == "main" || "$BRANCH" == "dev" ]]; then
+            echo "TEST_STAND_NAME=dev" >> $GITHUB_ENV
           else
             echo "TEST_STAND_NAME=kuber_dev" >> $GITHUB_ENV
           fi
