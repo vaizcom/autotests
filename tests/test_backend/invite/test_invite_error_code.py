@@ -17,7 +17,7 @@ pytestmark = [pytest.mark.backend]
 # 'UserAlreadySpaceMember','SelfInvitation', готово
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Invite Error Code")
 @allure.title("Ошибка CantDepriveAccessYourself при попытке удалить самого себя")
 def test_cant_deprive_access_yourself_error(owner_client, space_with_members):
@@ -42,7 +42,7 @@ def test_cant_deprive_access_yourself_error(owner_client, space_with_members):
         assert actual_error_code == expected_error_code, f"Ожидался код ошибки {expected_error_code}, получен {actual_error_code}"
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Invite Error Code")
 @allure.title("Ошибка CantDepriveAccessCreator при попытке удалить создателя space")
 def test_cant_deprive_access_creator_error(main_client, owner_client, space_with_members):
@@ -65,7 +65,7 @@ def test_cant_deprive_access_creator_error(main_client, owner_client, space_with
         assert actual_error_code == expected_error_code, f"Ожидался код ошибки {expected_error_code}, получен {actual_error_code}"
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Invite Error Code")
 @allure.title("Ошибка UserAlreadySpaceMember при попытке пригласить дважды одного пользователя (самого себя)")
 def test_already_space_member_error(main_client, space_with_members):

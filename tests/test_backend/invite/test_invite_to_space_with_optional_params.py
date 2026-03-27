@@ -10,7 +10,7 @@ from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_e
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Space Invitations - Optional Params (Positive)")
 @allure.title("Приглашение пользователя с необязательными параметрами (projectAccesses, boardAccesses, fullName)")
 def test_invite_to_space_with_optional_params(main_client, space_id_module, project_id_module, board_id_module):
@@ -81,7 +81,7 @@ def test_invite_to_space_with_optional_params(main_client, space_id_module, proj
         assert remove_resp.status_code == 200, f"Ошибка при удалении инвайта: {remove_resp.text}"
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Space Invitations - Optional Params (Positive)")
 @allure.title("Приглашение пользователя с добавлением в указанную группу доступа (accessGroupId)")
 def test_invite_to_space_with_access_group(main_client, space_id_module, group_in_module):
@@ -150,7 +150,7 @@ def test_invite_to_space_with_access_group(main_client, space_id_module, group_i
 
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Space Invitations - Optional Params (Negative)")
 @allure.title("Инвайт с невалидными доп. параметрами: {scenario}")
 @pytest.mark.parametrize(

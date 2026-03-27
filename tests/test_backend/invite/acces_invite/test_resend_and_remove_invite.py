@@ -9,7 +9,7 @@ from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_e
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Access Resend/Remove Invitations")
 @allure.title("Проверка прав на Resend/Remove инвайта в Space клиентом: {client_fixture}")
 @pytest.mark.parametrize(

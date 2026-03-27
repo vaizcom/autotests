@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.backend]
 _FOREIGN_MEMBER_CACHE = {}
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Access Deactivate/Reactivate Space Invitations")
 @allure.title("Проверка прав на деактивацию и реактивацию мембера клиентом: {client_fixture}")
 @pytest.mark.parametrize(

@@ -8,7 +8,7 @@ from test_backend.data.endpoints.invite.invite_endpoint import (
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Confirm Invite Error Field")
 @allure.title("Ошибка при пустом коде приглашения")
 def test_confirm_space_invite_empty_code(owner_client):
