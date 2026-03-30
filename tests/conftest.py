@@ -7,10 +7,12 @@ import requests
 import urllib3
 import allure
 import random
+import time
 
 from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST, MAIN_PROJECT_2_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
+from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
 from tests.config import settings
@@ -32,7 +34,6 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
     remove_space_endpoint,
     get_space_endpoint, get_spaces_endpoint,
 )
-from datetime import datetime
 
 
 def pytest_configure(config):
@@ -122,6 +123,39 @@ def guest_client():
 @pytest.fixture(scope='session')
 def foreign_client():
     return APIClient(base_url=API_URL, token=get_token('foreign_client'))
+
+@pytest.fixture(scope="session")
+def temp_client():
+    """
+    Регистрирует нового пользователя, авторизует его и
+    возвращает готовый APIClient и ID спейса для тестов(на лимиты).
+    """
+    base_url = API_URL
+    timestamp = int(time.time())
+    email = f"space_{timestamp}@autotest.com"
+    password = "123456"
+    name = f"Rate Limit {timestamp}"
+
+    # 1. Регистрация пользователя
+    reg_data = register_endpoint(
+        email=email,
+        password=password,
+        full_name=name,
+        terms_accepted=True
+    )
+    reg_url = f"{base_url.rstrip('/')}{reg_data['path']}"
+    reg_resp = requests.post(reg_url, json=reg_data['json'], headers=reg_data['headers'])
+    assert reg_resp.status_code == 200, f"Ошибка регистрации: {reg_resp.text}"
+
+    login_json = reg_resp.json()
+    token = login_json.get("payload", {}).get("token")
+    space_id = reg_resp.json().get("payload", {}).get("space", {}).get("_id")
+
+    assert token and space_id, "Не удалось получить token или space_id"
+
+    # Возвращаем стандартный клиент вашего фреймворка и space_id
+    client = APIClient(base_url=base_url, token=token)
+    return client, space_id
 
 
 # Пользователь имеет доступ к spаce в роли member(и не имеет доступ к проекту и борде)
