@@ -1,5 +1,7 @@
+import datetime
 import os
 import uuid
+
 from pymongo import MongoClient
 
 import pytest
@@ -656,7 +658,7 @@ def create_main_documents(request, main_space):
                 creator_client = request.getfixturevalue(creator_fixture)
 
                 with allure.step(f'Создание документа пользователем {creator_role}'):
-                    title = f'{kind} doc by {creator_role} {datetime.now().strftime("%Y.%m.%d_%H:%M:%S")}'
+                    title = f'{kind} doc by {creator_role} {datetime.datetime.now().strftime("%Y.%m.%d_%H:%M:%S")}'
                     create_resp = creator_client.post(
                         **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=main_space, title=title)
                     )

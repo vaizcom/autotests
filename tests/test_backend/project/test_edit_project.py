@@ -55,7 +55,7 @@ def test_edit_project_slug_access_by_roles(request, client_fixture, expected_sta
     allure.dynamic.title(f"Edit Slug project access: редактирование Slug запрещено для клиент={client_fixture}, ожидаемый статус={expected_status}" )
     client = request.getfixturevalue(client_fixture)
     new_slug = generate_slug()
-    expected_slug = "TLIVFJS"
+    expected_slug = 'PNTY'
     with allure.step(f"Отправка запроса на редактирование project с новым slug: {new_slug}"):
         edit_response = client.post(**edit_project_endpoint(project_id=main_project_2, slug=new_slug, space_id=main_space))
     with allure.step(f'Проверка статус-кода: ожидаемый {expected_status}'):
