@@ -1,5 +1,7 @@
+import datetime
 import os
 import uuid
+
 from pymongo import MongoClient
 
 import pytest
@@ -7,10 +9,12 @@ import requests
 import urllib3
 import allure
 import random
+import time
 
 from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST, MAIN_PROJECT_2_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
+from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
 from tests.config import settings
@@ -32,7 +36,6 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
     remove_space_endpoint,
     get_space_endpoint, get_spaces_endpoint,
 )
-from datetime import datetime
 
 
 def pytest_configure(config):
@@ -92,6 +95,10 @@ def global_ssl_settings():
 def main_client():
     return APIClient(base_url=API_URL, token=get_token('main'))
 
+@pytest.fixture(scope='session')
+def second_main_client():
+    return APIClient(base_url=API_URL, token=get_token('second_main'))
+
 
 # Фикстура: возвращает авторизованного API клиента с токеном владельца
 @pytest.fixture(scope='session')
@@ -118,6 +125,39 @@ def guest_client():
 @pytest.fixture(scope='session')
 def foreign_client():
     return APIClient(base_url=API_URL, token=get_token('foreign_client'))
+
+@pytest.fixture(scope="session")
+def temp_client():
+    """
+    Регистрирует нового пользователя, авторизует его и
+    возвращает готовый APIClient и ID спейса для тестов(на лимиты).
+    """
+    base_url = API_URL
+    timestamp = int(time.time())
+    email = f"space_{timestamp}@autotest.com"
+    password = "123456"
+    name = f"Rate Limit {timestamp}"
+
+    # 1. Регистрация пользователя
+    reg_data = register_endpoint(
+        email=email,
+        password=password,
+        full_name=name,
+        terms_accepted=True
+    )
+    reg_url = f"{base_url.rstrip('/')}{reg_data['path']}"
+    reg_resp = requests.post(reg_url, json=reg_data['json'], headers=reg_data['headers'])
+    assert reg_resp.status_code == 200, f"Ошибка регистрации: {reg_resp.text}"
+
+    login_json = reg_resp.json()
+    token = login_json.get("payload", {}).get("token")
+    space_id = reg_resp.json().get("payload", {}).get("space", {}).get("_id")
+
+    assert token and space_id, "Не удалось получить token или space_id"
+
+    # Возвращаем стандартный клиент вашего фреймворка и space_id
+    client = APIClient(base_url=base_url, token=token)
+    return client, space_id
 
 
 # Пользователь имеет доступ к spаce в роли member(и не имеет доступ к проекту и борде)
@@ -465,6 +505,23 @@ def space_id_module(main_client):
 
 
 @pytest.fixture(scope='module')
+def space_id_(second_main_client):
+    """
+    спейс созданный для тестирования инвайтов,
+    т.к. есть ограничение и на количество инвайтов от пользователя (10/час),
+    и на количество участников в одном спейсе (не больше 10 для бесплатного тарифа)
+    """
+    client = second_main_client
+    name = generate_space_name()
+    response = client.post(**create_space_endpoint(name=name))
+    assert response.status_code == 200
+    space_id = response.json()['payload']['space']['_id']
+
+    yield space_id
+
+    client.post(**remove_space_endpoint(space_id=space_id))
+
+@pytest.fixture(scope='module')
 def project_id_module(main_client, space_id_module):
     name = generate_project_name()
     slug = generate_slug()
@@ -475,6 +532,42 @@ def project_id_module(main_client, space_id_module):
 
     yield project_id
 
+@pytest.fixture(scope='module')
+def board_id_module(main_client, project_id_module, space_id_module):
+    board_name = generate_board_name()
+    payload = create_board_endpoint(
+        name=board_name,
+        temp_project=project_id_module,
+        space_id=space_id_module,
+        groups=DEFAULT_BOARD_GROUPS,
+        typesList=[],
+        customFields=[],
+    )
+    response = main_client.post(**payload)
+    assert response.status_code == 200
+
+    yield response.json()['payload']['board']['_id']
+
+
+@pytest.fixture(scope='module')
+def group_in_module(main_client, space_id_module):
+    """
+    Создает временную группу доступа в space_id_module.
+    """
+    group_name = f"Test Group {uuid.uuid4().hex[:4]}"
+    group_desc = "Temporary access group for testing"
+
+    response = main_client.post(**create_access_group_endpoint(
+        space_id=space_id_module,
+        name=group_name,
+        description=group_desc
+    ))
+    assert response.status_code == 200, f"Ошибка создания группы: {response.text}"
+
+    group_id = response.json().get("payload", {}).get("accessGroup", {}).get("_id")
+    assert group_id, "В ответе не вернулся _id созданной группы доступа"
+
+    yield group_id
 
 @pytest.fixture(scope='module')
 def member_id_module(main_client, space_id_module):
@@ -565,7 +658,7 @@ def create_main_documents(request, main_space):
                 creator_client = request.getfixturevalue(creator_fixture)
 
                 with allure.step(f'Создание документа пользователем {creator_role}'):
-                    title = f'{kind} doc by {creator_role} {datetime.now().strftime("%Y.%m.%d_%H:%M:%S")}'
+                    title = f'{kind} doc by {creator_role} {datetime.datetime.now().strftime("%Y.%m.%d_%H:%M:%S")}'
                     create_resp = creator_client.post(
                         **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=main_space, title=title)
                     )

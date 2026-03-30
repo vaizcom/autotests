@@ -100,9 +100,10 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
                         expected_task_keys = {
                             "name", "group", "board", "project", "parentTask", "priority", "completed",
                             "types", "assignees", "milestones", "subtasks", "dueStart", "dueEnd",
-                            "_id", "createdAt", "updatedAt", "document", "milestone", "followers",
+                            "_id", "createdAt", "updatedAt", "document", "followers",
                             "hrid", "rightConnectors", "leftConnectors", "archiver", "archivedAt",
-                            "completedAt", "deleter", "deletedAt", "customFields", "creator"
+                            "completedAt", "deleter", "deletedAt", "customFields", "creator",
+                            # "milestone"
                         }
                         assert_task_keys(task, expected_task_keys)
     finally:
@@ -205,7 +206,7 @@ def test_create_task_with_specific_payload_and_response(
                     assert task["assignees"] == random_member_id, "Ошибка: неверное значение assignees"
                     assert task["milestones"] == [get_random_milestone], "Ошибка: неверное значение milestones"
                     assert task["subtasks"] == [], "Ошибка: поле с подзадачами должно быть пустым"
-                    assert task["milestone"] == get_random_milestone, "Ошибка: неверный milestone"
+                    # assert task["milestone"] == get_random_milestone, "Ошибка: неверный milestone"
                     assert task["dueStart"] == current_timestamp.replace("+00:00", "Z"), "Ошибка: неверное значение dueStart"
                     assert task["dueEnd"] == due_end.replace("+00:00", "Z"), "Ошибка: неверное значение dueEnd"
 
@@ -239,9 +240,10 @@ def test_create_task_with_specific_payload_and_response(
                         expected_task_keys = {
                             "name", "group", "board", "project", "parentTask", "priority", "completed",
                             "types", "assignees", "milestones", "subtasks", "dueStart", "dueEnd",
-                            "_id", "createdAt", "updatedAt", "document", "milestone", "followers",
+                            "_id", "createdAt", "updatedAt", "document", "followers",
                             "hrid", "rightConnectors", "leftConnectors", "archiver", "archivedAt",
-                            "completedAt", "deleter", "deletedAt", "customFields", "creator"
+                            "completedAt", "deleter", "deletedAt", "customFields", "creator",
+                            # "milestone"
                         }
                         assert_task_keys(task, expected_task_keys)
 
@@ -252,5 +254,3 @@ def test_create_task_with_specific_payload_and_response(
                 assert del_resp.status_code == 200, (
                     f"Не удалось удалить задачу {task_id}: {del_resp.status_code} {del_resp.text}"
                 )
-
-

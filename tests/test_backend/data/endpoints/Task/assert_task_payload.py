@@ -8,7 +8,7 @@ TASK_FULL_SCHEMA = {
     "group": str,
     "board": str,
     # NOTE: deprecated field
-    "milestone": (str, type(None)),
+    # "milestone": (str, type(None)),
     "milestones": list,
     "parentTask": (str, type(None)),
     # Params

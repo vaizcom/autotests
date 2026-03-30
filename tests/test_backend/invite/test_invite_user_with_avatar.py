@@ -16,9 +16,8 @@ DUMMY_GIF = b'GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x0
 DUMMY_WEBP = b'RIFF\x1a\x00\x00\x00WEBPVP8L\r\x00\x00\x00/\x00\x00\x00\x10\x07\x10\x11\x11\x88\x88\xfe\x07\x00'
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Avatar (Positive)")
+@allure.parent_suite("Invite Service")
+@allure.suite("Space Invitations - Avatar (Positive)")
 @pytest.mark.parametrize(
     "file_ext, mime_type, file_content",
     [
@@ -29,7 +28,7 @@ DUMMY_WEBP = b'RIFF\x1a\x00\x00\x00WEBPVP8L\r\x00\x00\x00/\x00\x00\x00\x10\x07\x
     ],
     ids=["png", "jpg", "gif", "webp"]
 )
-def test_invite_user_with_avatar_positive(main_client, space_id_module, file_ext, mime_type, file_content):
+def test_invite_user_with_avatar_positive(second_main_client, space_id_, file_ext, mime_type, file_content):
     """
     Проверка позитивного сценария:
     1. Получение контекста пространства (заголовки).
@@ -39,13 +38,13 @@ def test_invite_user_with_avatar_positive(main_client, space_id_module, file_ext
     allure.dynamic.title(f"(формат: {file_ext}) Приглашение пользователя с необязательными параметрами (Avatar)")
 
     with allure.step("Получение заголовков с ID пространства для обхода проверок безопасности"):
-        space_req = get_space_members_endpoint(space_id=space_id_module)
+        space_req = get_space_members_endpoint(space_id=space_id_)
         space_headers = space_req.get("headers", {})
 
     with allure.step(f"Загрузка картинки аватара ({file_ext}) через multipart/form-data"):
         avatar_url = get_uploaded_avatar_url(
-            client=main_client,
-            kind_id=space_id_module,
+            client=second_main_client,
+            kind_id=space_id_,
             kind="Space",
             file_content=file_content,
             headers=space_headers,
@@ -60,7 +59,7 @@ def test_invite_user_with_avatar_positive(main_client, space_id_module, file_ext
         invite_email = f"new_user_{uuid.uuid4().hex[:8]}@example.com"
 
         invite_req = invite_to_space_endpoint(
-            space_id=space_id_module,
+            space_id=space_id_,
             email=invite_email,
             space_access="Member",
             avatar_url=avatar_url
@@ -69,7 +68,7 @@ def test_invite_user_with_avatar_positive(main_client, space_id_module, file_ext
         invite_headers = invite_req.get("headers", {})
         invite_headers.update(space_headers)
 
-        response = main_client.post(
+        response = second_main_client.post(
             invite_req["path"],
             json=invite_req.get("json", {}),
             headers=invite_headers
@@ -91,14 +90,13 @@ def test_invite_user_with_avatar_positive(main_client, space_id_module, file_ext
     with allure.step("Валидация тела ответа InviteToSpace"):
         assert_invite_payload(
             invite=payload,
-            space_id=space_id_module,
+            space_id=space_id_,
             email=invite_email
         )
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Avatar (Negative)")
+@allure.parent_suite("Invite Service")
+@allure.suite("Space Invitations - Avatar (Negative)")
 @allure.title("Загрузка аватара с невалидным параметром: {scenario}")
 @pytest.mark.parametrize(
     "scenario, kind, file_tuple, expected_status",
@@ -119,23 +117,23 @@ def test_invite_user_with_avatar_positive(main_client, space_id_module, file_ext
     , ids=["invalid_kind","invalid_file_format"]
 )
 
-def test_upload_avatar_negative(main_client, temp_space, scenario, kind, file_tuple, expected_status):
+def test_upload_avatar_negative(second_main_client, space_id_, scenario, kind, file_tuple, expected_status):
     """
     Негативные сценарии эндпоинта UploadAvatar.
     Ожидаем, что сервер отклонит запрос со статусом 400 Bad Request.
     """
     with allure.step("Подготовка параметров запроса"):
-        space_req = get_space_members_endpoint(space_id=temp_space)
+        space_req = get_space_members_endpoint(space_id=space_id_)
         headers = space_req.get("headers", {})
 
         req = upload_avatar_endpoint(
             file_tuple=file_tuple,
             kind=kind,
-            kind_id=temp_space,
+            kind_id=space_id_,
         )
 
     with allure.step(f"Отправка запроса на загрузку аватара ({scenario})"):
-        response = main_client.post(
+        response = second_main_client.post(
             req["path"],
             data=req["data"],
             files=req["files"],
@@ -149,11 +147,10 @@ def test_upload_avatar_negative(main_client, temp_space, scenario, kind, file_tu
         )
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Avatar (Negative)")
+@allure.parent_suite("Invite Service")
+@allure.suite("Space Invitations - Avatar (Negative)")
 @allure.title("Загрузка аватара, превышающего лимит размера (> 100 МБ)")
-def test_upload_avatar_too_large(main_client, temp_space):
+def test_upload_avatar_too_large(second_main_client, space_id_):
     """
     Проверка лимита размера загружаемого файла (максимум 100 МБ).
     Генерируем "фейковый" файл размером 101 МБ в памяти и ожидаем ошибку EUploadErrorCode.FileSize.
@@ -167,18 +164,18 @@ def test_upload_avatar_too_large(main_client, temp_space):
         huge_file_content = b"0" * large_file_size
 
     with allure.step("Подготовка параметров запроса"):
-        space_req = get_space_members_endpoint(space_id=temp_space)
+        space_req = get_space_members_endpoint(space_id=space_id_)
         headers = space_req.get("headers", {})
         headers.pop("Content-Type", None)
 
         req = upload_avatar_endpoint(
             file_tuple=("huge_avatar.png", huge_file_content, "image/png"),
             kind="Space",
-            kind_id=temp_space,
+            kind_id=space_id_,
         )
 
     with allure.step("Отправка огромного файла на сервер (может занять несколько секунд)"):
-        response = main_client.post(
+        response = second_main_client.post(
             req["path"],
             data=req["data"],
             files=req["files"],

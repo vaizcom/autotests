@@ -9,9 +9,8 @@ from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_e
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Access Space Invitations")
+@allure.parent_suite("Invite Service")
+@allure.suite("Access Space Invitations")
 @allure.title("Проверка прав на отправку инвайта в Space клиентом: {client_fixture}")
 @pytest.mark.parametrize(
     "client_fixture, expected_status",
@@ -54,9 +53,8 @@ def test_space_invite_access_by_role(request, space_with_members, client_fixture
                 client.post(**remove_invite_endpoint(space_id=space_with_members, member_id=invite_id))
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Space Invitations - Access Control APP-4623")
+@allure.parent_suite("Invite Service")
+@allure.suite("Space Invitations - Access Control APP-4623")
 @allure.title("Менеджер не может выдать роль Owner при инвайте (роль сбрасывается до Guest , д.б. 400 APP-4623)")
 def test_manager_cannot_invite_owner(manager_client, space_with_members):
     """

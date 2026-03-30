@@ -10,9 +10,8 @@ from config import settings
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Confirm Space Invite")
+@allure.parent_suite("Invite Service")
+@allure.suite("Confirm Space Invite")
 @allure.title("Успешное подтверждение инвайта новым пользователем")
 def test_confirm_space_invite_success(main_client, temp_space, member_client):
     """
@@ -85,9 +84,8 @@ def test_confirm_space_invite_success(main_client, temp_space, member_client):
 # инвайт пользователя которого нет в базе. подтверждение через отправку кода = tokenHash, который нужно взять из монго бд: confirmtokens.({"payload.email": "test+1@test.com"})
 # также учесть инвайт в space_id_module, потому что в temp_space закончилось кол-во инвайтов на фри тарифе = 10
 
-@allure.parent_suite("Auth Service")
-@allure.suite("Invite")
-@allure.sub_suite("Confirm Space Invite")
+@allure.parent_suite("Invite Service")
+@allure.suite("Confirm Space Invite")
 @allure.title("Успешное подтверждение инвайта пользователя, которого нет в базе")
 def test_confirm_space_invite_new_user(main_client, space_id_module, db):
     """
