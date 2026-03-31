@@ -10,7 +10,7 @@ from test_backend.data.endpoints.invite.invite_endpoint import (
 pytestmark = [pytest.mark.backend]
 
 
-@allure.parent_suite("Invite")
+@allure.parent_suite("Invite Service")
 @allure.suite("Rate Limits & Seats Limits")
 @allure.title("Проверка лимитов: SeatsLimitReached и Too Many Requests")
 def test_invite_rate_and_seats_limits(temp_client):
