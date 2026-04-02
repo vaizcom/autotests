@@ -13,7 +13,7 @@ def assert_history_event_exists(
     Если событие не появилось сразу (т.к. история пишется асинхронно), функция будет
     повторять запросы до истечения timeout.
     """
-    with allure.step(f"Ожидание события '{expected_event_key}' в истории {kind} (таймаут: {timeout}с)"):
+    with allure.step(f"Ожидание события '{expected_event_key}' в истории {kind}"):
         start_time = time.time()
         event_keys = []
         histories = []

@@ -12,7 +12,8 @@ import random
 import time
 
 from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST, MAIN_PROJECT_2_ID
-from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, create_task_endpoint, \
+    delete_task_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
 from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
@@ -337,6 +338,34 @@ def temp_board(main_client, temp_project, temp_space):
     assert response.status_code == 200
 
     yield response.json()['payload']['board']['_id']
+
+@pytest.fixture
+def temp_task(main_client, main_space, board_with_tasks):
+    """
+    Фикстура для создания временной задачи перед тестом и её удаления после теста.
+    Возвращает ID созданной задачи.
+    """
+    task_name = "Temp task for tests task events"
+    create_resp = main_client.post(
+        **create_task_endpoint(
+            space_id=main_space,
+            board=board_with_tasks,
+            name=task_name
+        ))
+    assert create_resp.status_code == 200, f"Ошибка создания задачи в фикстуре: {create_resp.text}"
+    task_id = create_resp.json()['payload']['task']['_id']
+
+    # Передаем ID задачи в сам тест
+    yield task_id
+
+    with allure.step("Teardown [Fixture]: Удаление временной задачи"):
+        delete_resp = main_client.post(
+            **delete_task_endpoint(
+                space_id=main_space,
+                task_id=task_id
+            )
+        )
+        assert delete_resp.status_code == 200
 
 
 @pytest.fixture(scope='session')
