@@ -195,3 +195,24 @@ def edit_task_custom_field_endpoint(space_id, task_id, field_id, value):
             "Current-Space-Id": space_id,
         },
     }
+
+def toggle_subtask_endpoint(space_id: str, task_id: str, parent_task_id: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Эндпоинт для привязки или отвязки подзадачи (ToggleSubtaskInputDto).
+    Если parent_task_id равен None, подзадача отвязывается.
+    """
+    payload: Dict[str, Any] = {
+        "taskId": task_id,
+    }
+
+    if parent_task_id is not None:
+        payload["parentTaskId"] = parent_task_id
+
+    return {
+        "path": "/ToggleSubtask",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }

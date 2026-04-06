@@ -12,7 +12,7 @@ def assert_history_event_exists(
     Вспомогательная функция: запрашивает историю с механизмом ожидания (поллингом).
     Если передан expected_data, функция будет искать событие, в котором data содержит указанные пары ключ-значение.
     """
-    with allure.step(f"Ожидание события '{expected_event_key}' в истории {kind} (таймаут: {timeout}с)"):
+    with allure.step(f"Ожидание события '{expected_event_key}' в истории {kind}"):
         start_time = time.time()
         found_event = None
 

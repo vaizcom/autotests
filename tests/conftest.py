@@ -346,6 +346,7 @@ def temp_task(main_client, main_space, board_with_tasks):
     Возвращает ID созданной задачи.
     """
     task_name = "Temp task for tests task events"
+
     create_resp = main_client.post(
         **create_task_endpoint(
             space_id=main_space,
