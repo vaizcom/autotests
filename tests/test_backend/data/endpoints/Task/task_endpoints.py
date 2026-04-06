@@ -237,3 +237,25 @@ def toggle_milestone_endpoint(space_id: str, task_id: str, milestone_ids: Option
             "Current-Space-Id": space_id,
         },
     }
+
+
+def duplicate_task_endpoint(space_id: str, task_id: str, board_id: str, group_id: Optional[str] = None):
+    """
+    Эндпоинт дублирования задачи (DuplicateTaskInputDto).
+    """
+    payload = {
+        "taskId": task_id,
+        "boardId": board_id,
+    }
+
+    if group_id is not None:
+        payload["groupId"] = group_id
+
+    return {
+        "path": "/DuplicateTask",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }

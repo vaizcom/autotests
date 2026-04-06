@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.backend]
 @allure.title("Task & Milestones Attach/Detach events")
 def test_task_milestones_history_events(owner_client, main_space, temp_task, temp_milestone):
     """
-    Проверяем генерацию событий при привязке и отвязке задачи к вехам (Milestones).
+    Проверяем генерацию событий при привязке и отвязке задачи к Milestones.
     События в истории Задачи (kind="Task"):
       - TASK_ATTACHED_TO_MILESTONE
       - TASK_DETACHED_TO_MILESTONE
@@ -48,7 +48,7 @@ def test_task_milestones_history_events(owner_client, main_space, temp_task, tem
             assert_history_event_exists(
                 client=owner_client,
                 space_id=main_space,
-                kind="Milestone",  # Запрашиваем историю именно Майлстоуна!
+                kind="Milestone",  # Запрашиваем историю Майлстоуна!
                 kind_id=milestone_id,
                 expected_event_key="TASK_ATTACHED_INTO_MILESTONE",
                 # В истории майлстоуна ожидаем увидеть ID привязанной задачи
@@ -79,7 +79,7 @@ def test_task_milestones_history_events(owner_client, main_space, temp_task, tem
             assert_history_event_exists(
                 client=owner_client,
                 space_id=main_space,
-                kind="Milestone",  # Запрашиваем историю именно Майлстоуна!
+                kind="Milestone",  # Запрашиваем историю Майлстоуна!
                 kind_id=milestone_id,
                 expected_event_key="TASK_DETACHED_INTO_MILESTONE",
                 expected_data={"_id": task_id}
