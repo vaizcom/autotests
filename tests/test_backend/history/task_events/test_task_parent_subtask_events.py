@@ -5,13 +5,13 @@ from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
     delete_task_endpoint
 from tests.test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
-pytestmark = [pytest.mark.backend, pytest.mark.history]
+pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Parent & Subtask events")
-def test_task_hierarchy_history_events(owner_client, main_space, main_board, temp_task):
+def test_task_parent_subtask_history_events(owner_client, main_space, main_board, temp_task):
     """
     Проверяем генерацию событий при связывании задач (Родитель - Подзадача):
     TASK_ATTACHED_AS_SUBTASK / TASK_ATTACHED_TO_PARENT

@@ -11,6 +11,7 @@ import allure
 import random
 import time
 
+from config.generators import generate_date
 from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST, MAIN_PROJECT_2_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, create_task_endpoint, \
     delete_task_endpoint
@@ -18,6 +19,7 @@ from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoi
 from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
+from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
@@ -388,6 +390,40 @@ def temp_access_group(main_client, temp_space):
     assert group_id, "В ответе не вернулся _id созданной группы доступа"
 
     yield group_id
+
+
+@pytest.fixture
+def temp_milestone(owner_client, main_space, board_with_tasks, main_project):
+    """
+    Фикстура для создания временного майлстоуна перед тестом и его Архивация после теста.
+    Возвращает ID созданного майлстоуна.
+    """
+    with allure.step("Setup [Fixture]: Создание временного майлстоуна"):
+        milestone_name = "Temp Milestone " + generate_date()
+        create_resp = owner_client.post(
+            **create_milestone_endpoint(
+                space_id=main_space,
+                board=board_with_tasks,
+                name=milestone_name,
+                project=main_project
+            )
+        )
+        assert create_resp.status_code == 200, f"Ошибка создания майлстоуна в фикстуре: {create_resp.text}"
+        milestone_id = create_resp.json()['payload']['milestone']['_id']
+
+    # Передаем ID майлстоуна в тест
+    yield milestone_id
+
+    with allure.step("Teardown [Fixture]: Архивация временного майлстоуна"):
+        from tests.test_backend.data.endpoints.milestone.milestones_endpoints import archive_milestone_endpoint
+
+        archive_resp = owner_client.post(
+            **archive_milestone_endpoint(
+                space_id=main_space,
+                milestone_id=milestone_id
+            )
+        )
+        assert archive_resp.status_code == 200, f"Ошибка при архивации майлстоуна в фикстуре: {archive_resp.text}"
 
 
 @pytest.fixture(scope="session")

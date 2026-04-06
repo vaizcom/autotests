@@ -216,3 +216,24 @@ def toggle_subtask_endpoint(space_id: str, task_id: str, parent_task_id: Optiona
             "Current-Space-Id": space_id,
         },
     }
+
+
+def toggle_milestone_endpoint(space_id: str, task_id: str, milestone_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    """
+    Эндпоинт для привязки задачи к майлстоунам (ToggleMilestoneInputDto).
+    """
+    payload: Dict[str, Any] = {
+        "taskId": task_id,
+    }
+
+    if milestone_ids is not None:
+        payload["milestoneIds"] = milestone_ids
+
+    return {
+        "path": "/ToggleMilestone",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
