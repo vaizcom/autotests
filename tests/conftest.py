@@ -12,7 +12,8 @@ import random
 import time
 
 from config.generators import generate_date
-from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST, MAIN_PROJECT_2_ID
+from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST, MAIN_PROJECT_2_ID, \
+    SECOND_BOARD_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, create_task_endpoint, \
     delete_task_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
@@ -225,6 +226,13 @@ def main_board(main_client, main_space):
     resp = main_client.post(**get_board_endpoint(board_id=MAIN_BOARD_ID, space_id=main_space))
     assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {resp.text}'
     return MAIN_BOARD_ID
+
+@pytest.fixture(scope='session')
+def second_board(main_client, second_space):
+    assert SECOND_BOARD_ID,'Не задана переменная окружения SECOND_BOARD_ID'
+    resp = main_client.post(**get_board_endpoint(board_id=SECOND_BOARD_ID, space_id=second_space))
+    assert resp.status_code == 200, f'Space {SECOND_BOARD_ID} not found: {resp.text}'
+    return SECOND_BOARD_ID
 
 # Доска с 10.000 тасок в main_space
 @pytest.fixture(scope='session')
