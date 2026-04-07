@@ -259,3 +259,22 @@ def duplicate_task_endpoint(space_id: str, task_id: str, board_id: str, group_id
             "Current-Space-Id": space_id,
         },
     }
+
+
+def toggle_task_connector_endpoint(space_id: str, task_id: str, direction: str, task_connector_id: str):
+    """
+    Эндпоинт для переключения связей (зависимостей) между задачами (ToggleTaskConnectorInputDto).
+    direction: 'blockers' или 'blocking'
+    """
+    return {
+        "path": "/ToggleTaskConnector",
+        "json": {
+            "taskId": task_id,
+            "direction": direction,
+            "taskConnectorId": task_connector_id
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
