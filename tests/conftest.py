@@ -376,7 +376,9 @@ def temp_task(main_client, main_space, board_with_tasks):
                 task_id=task_id
             )
         )
-        assert delete_resp.status_code == 200
+        # Вместо жесткого assert == 200, мы допускаем, что задача уже удалена или конвертирована
+        if delete_resp.status_code not in (200, 400, 404):
+            pytest.fail(f"Ошибка при удалении задачи в фикстуре: {delete_resp.text}")
 
 
 @pytest.fixture(scope='session')

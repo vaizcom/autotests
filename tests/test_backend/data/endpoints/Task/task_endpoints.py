@@ -278,3 +278,17 @@ def toggle_task_connector_endpoint(space_id: str, task_id: str, direction: str, 
             "Current-Space-Id": space_id,
         },
     }
+
+
+def convert_task_to_milestone_endpoint(space_id: str, task_id: str):
+    """
+    Эндпоинт для конвертации задачи в Milestone (ConvertTaskToMilestoneInputDto).
+    """
+    return {
+        "path": "/ConvertTaskToMilestone",
+        "json": {"taskId": task_id},
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
