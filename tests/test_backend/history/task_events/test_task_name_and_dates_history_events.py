@@ -11,12 +11,12 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Name & Due Dates events")
-def test_task_name_and_dates_history_events(member_client, main_space, temp_task):
+def test_task_name_and_dates_history_events(member_client, main_space, temp_task_on_board_with_tasks):
     """
     Проверяем генерацию событий при изменении базовых параметров задачи:
     TASK_RENAMED -> TASK_DUE_CHANGED
     """
-    task_id = temp_task
+    task_id = temp_task_on_board_with_tasks
 
     with allure.step("1. Переименовываем задачу -> ожидаем TASK_RENAMED"):
         new_name = "Updated Task Name for History Test"

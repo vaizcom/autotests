@@ -27,7 +27,7 @@ pytestmark = [pytest.mark.backend]
     ids=["blockers", "blocking"]
 )
 def test_task_connectors_history_events(
-    owner_client, main_space, board_with_tasks, temp_task,
+    owner_client, main_space, board_with_tasks, temp_task_on_board_with_tasks,
     direction, main_task_expected_added, main_task_expected_removed,
     connector_task_expected_added, connector_task_expected_removed
 ):
@@ -37,7 +37,7 @@ def test_task_connectors_history_events(
     """
     allure.dynamic.title(f"events: {direction} task connectors Blockers & Dependents (added/removed) ")
 
-    main_task_id = temp_task
+    main_task_id = temp_task_on_board_with_tasks
 
     with allure.step("Setup: Создана основная задача, создаем вторую задачу (connector_task)"):
         resp = owner_client.post(

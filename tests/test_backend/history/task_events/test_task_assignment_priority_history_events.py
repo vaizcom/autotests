@@ -10,12 +10,12 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Assignees & Priority events")
-def test_task_assignment_priority_history_events(member_client, main_space, temp_task, main_personal):
+def test_task_assignment_priority_history_events(member_client, main_space, temp_task_on_board_with_tasks, main_personal):
     """
     Проверяем генерацию событий:
     TASK_ASSIGNED -> TASK_UNASSIGNED -> TASK_PRIORITY_CHANGED
     """
-    task_id = temp_task
+    task_id = temp_task_on_board_with_tasks
     assignee_1 = main_personal['member']
     assignee_2 = main_personal['manager']
     assignees = assignee_1 + assignee_2

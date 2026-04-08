@@ -11,7 +11,7 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Parent & Subtask events")
-def test_task_parent_subtask_history_events(owner_client, main_space, main_board, temp_task):
+def test_task_parent_subtask_history_events(owner_client, main_space, main_board, temp_task_on_board_with_tasks):
     """
     Проверяем генерацию событий при связывании задач (Родитель - Подзадача):
     TASK_ATTACHED_AS_SUBTASK / TASK_ATTACHED_TO_PARENT
@@ -19,7 +19,7 @@ def test_task_parent_subtask_history_events(owner_client, main_space, main_board
     TASK_DETACHED_AS_SUBTASK / TASK_DETACHED_TO_PARENT
     (при отвязке через ToggleSubtask)
     """
-    parent_task_id = temp_task
+    parent_task_id = temp_task_on_board_with_tasks
 
     with allure.step("1. Создаем подзадачу, сразу указывая parent_task -> ожидаем ATTACHED"):
         resp = owner_client.post(

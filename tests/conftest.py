@@ -350,7 +350,40 @@ def temp_board(main_client, temp_project, temp_space):
     yield response.json()['payload']['board']['_id']
 
 @pytest.fixture
-def temp_task(main_client, main_space, board_with_tasks):
+def temp_task(main_client, temp_space, temp_board):
+    """
+    Фикстура для создания временной задачи перед тестом и её удаления после теста.
+    Возвращает ID созданной задачи.
+    """
+    task_name = "Temp task"
+
+    create_resp = main_client.post(
+        **create_task_endpoint(
+            space_id=temp_space,
+            board=temp_board,
+            name=task_name
+        ))
+    assert create_resp.status_code == 200, f"Ошибка создания задачи в фикстуре: {create_resp.text}"
+    task_id = create_resp.json()['payload']['task']['_id']
+
+    # Передаем ID задачи в сам тест
+    yield task_id
+
+    with allure.step("Teardown [Fixture]: Удаление временной задачи"):
+        delete_resp = main_client.post(
+            **delete_task_endpoint(
+                space_id=temp_space,
+                task_id=task_id
+            )
+        )
+        # Вместо жесткого assert == 200, мы допускаем, что задача уже удалена или конвертирована
+        if delete_resp.status_code not in (200, 400, 404):
+            pytest.fail(f"Ошибка при удалении задачи в фикстуре: {delete_resp.text}")
+
+
+
+@pytest.fixture
+def temp_task_on_board_with_tasks(main_client, main_space, board_with_tasks):
     """
     Фикстура для создания временной задачи перед тестом и её удаления после теста.
     Возвращает ID созданной задачи.
@@ -403,7 +436,7 @@ def temp_access_group(main_client, temp_space):
 
 
 @pytest.fixture
-def temp_milestone(owner_client, main_space, board_with_tasks, main_project):
+def temp_milestone_on_board_with_tasks(owner_client, main_space, board_with_tasks, main_project):
     """
     Фикстура для создания временного майлстоуна перед тестом и его Архивация после теста.
     Возвращает ID созданного майлстоуна.

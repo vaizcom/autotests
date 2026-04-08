@@ -11,12 +11,12 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Task Types events")
-def test_task_types_history_events(owner_client, main_space, temp_task, board_with_tasks):
+def test_task_types_history_events(owner_client, main_space, temp_task_on_board_with_tasks, board_with_tasks):
     """
     Проверяем генерацию событий при работе с массивом типов задачи (Types):
     TASK_TYPE_ADDED -> TASK_TYPE_ADDED (еще один) -> TASK_TYPE_REMOVED -> TASK_TYPE_CHANGED
     """
-    task_id = temp_task
+    task_id = temp_task_on_board_with_tasks
 
     # Получаем два разных типа для доски
     # type_1 = get_random_type_id(owner_client, board_with_tasks, main_space)
