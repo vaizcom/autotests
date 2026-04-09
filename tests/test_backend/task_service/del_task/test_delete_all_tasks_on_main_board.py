@@ -1,4 +1,5 @@
 import random
+import time
 
 import pytest
 import allure
@@ -44,3 +45,24 @@ def test_delete_all_tasks_on_main_board(request, owner_client, main_space, main_
             deleted_ids.append(task_id)
 
         allure.attach("\n".join(deleted_ids), "Удалённые ID задач", "text/plain")
+
+    with allure.step("Ожидаем полного удаления задач с доски"):
+        max_retries = 10
+        interval = 1
+        tasks = []
+
+        for i in range(max_retries):
+            response = client.post(**get_tasks_endpoint(board=main_board, space_id=main_space))
+            assert response.status_code == 200, f"Не удалось получить список задач: {response.text}"
+
+            tasks = response.json()["payload"].get("tasks", [])
+            if len(tasks) == 0:
+                # Все задачи успешно удалились из выдачи
+                break
+
+            time.sleep(interval)
+
+        assert len(tasks) == 0, (
+            f"Задачи не исчезли с доски за {max_retries * interval} секунд после удаления. "
+            f"Остались задачи: {tasks}"
+        )

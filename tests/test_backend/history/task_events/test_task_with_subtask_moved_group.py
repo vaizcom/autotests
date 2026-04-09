@@ -15,7 +15,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.title("Move Task with Subtask: Move to another group")
+@allure.title("Move to another group: Move Task with Subtask")
 def test_task_with_subtask_moved_group(owner_client, main_space, board_with_tasks, temp_task_on_board_with_tasks):
     """
     При перемещении родительской задачи в другую группу:
