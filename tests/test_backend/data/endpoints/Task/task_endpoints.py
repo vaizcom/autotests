@@ -292,3 +292,51 @@ def convert_task_to_milestone_endpoint(space_id: str, task_id: str):
             "Current-Space-Id": space_id,
         },
     }
+
+
+def move_task_to_board_endpoint(space_id: str, task_id: str, to_board_id: str, to_group_id: str) -> Dict[str, Any]:
+    """
+    Перемещение задачи на другую доску (MoveTaskToBoardInputDto).
+    """
+    return {
+        "path": "/MoveTaskToBoard",
+        "json": {
+            "taskId": task_id,
+            "toBoardId": to_board_id,
+            "toGroupId": to_group_id
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+def move_tasks_endpoint(space_id: str, moves: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Массовое или одиночное перемещение задач внутри текущей доски (MoveTasksInputDto).
+    moves - список словарей типа MoveTaskInputDtoStrict:
+    [{"taskId": "...", "toGroupId": "...", "toIndex": 0}]
+    """
+    return {
+        "path": "/MoveTasks",
+        "json": {
+            "moves": moves
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+def move_single_task_endpoint(space_id: str, task_id: str, to_group_id: str, to_index: int = 0) -> Dict[str, Any]:
+    """
+    Удобная обертка над MoveTasks для перемещения одной задачи (частый кейс в тестах).
+    """
+    return move_tasks_endpoint(
+        space_id=space_id,
+        moves=[{
+            "taskId": task_id,
+            "toGroupId": to_group_id,
+            "toIndex": to_index
+        }]
+    )
