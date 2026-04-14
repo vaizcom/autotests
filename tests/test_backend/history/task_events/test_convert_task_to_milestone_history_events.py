@@ -14,9 +14,16 @@ pytestmark = [pytest.mark.backend]
 @allure.title("Convert Task to Milestone events")
 def test_convert_task_to_milestone_history_events(owner_client, main_space, main_board, temp_task_on_board_with_tasks):
     """
-    Проверяем генерацию событий при конвертации задачи в Milestone:
-    MILESTONE_CREATED_FROM_TASK (в истории нового майлстоуна)
-    PARENT_TASK_CONVERTED_TO_MILESTONE (в истории подзадачи)
+    Проверяем генерацию событий при конвертации задачи + сабтаски в Milestone:
+
+    Ожидаемые события в истории нового Milestone:
+      - MILESTONE_CREATED_FROM_TASK (в истории нового майлстоуна)
+      - TASK_ATTACHED_INTO_MILESTONE (подзадача автоматически прикреплена к майлстоуну)
+
+    Ожидаемые события в истории Подзадачи:
+      - PARENT_TASK_CONVERTED_TO_MILESTONE (в истории подзадачи)
+      - TASK_DETACHED_TO_PARENT (отвязка от исчезнувшей родительской задачи)
+      - TASK_ATTACHED_TO_MILESTONE (привязка к новому майлстоуну)
     """
     parent_task_id = temp_task_on_board_with_tasks
     milestone_id = None

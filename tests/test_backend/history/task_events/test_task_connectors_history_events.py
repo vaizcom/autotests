@@ -34,8 +34,11 @@ def test_task_connectors_history_events(
     """
     Проверяем генерацию событий при установке зависимостей между задачами
     в обоих направлениях ('blockers' и 'blocking').
+
+    Связь является двусторонней, поэтому при изменении статуса блокировки (ToggleTaskConnector)
+    соответствующие события (Blocker/Dependent) должны одновременно генерироваться в истории обеих задач.
     """
-    allure.dynamic.title(f"events: {direction} task connectors Blockers & Dependents (added/removed) ")
+    allure.dynamic.title(f"{direction} task connectors: Добавление и удаление связей для '{direction}'")
 
     main_task_id = temp_task_on_board_with_tasks
 
