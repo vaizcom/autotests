@@ -5,6 +5,7 @@ import pytest
 from test_backend.task_service.utils import get_client, delete_task_with_retry
 from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
 from test_backend.task_service.utils import get_random_group_id
+from tests.test_backend.task_service.conftest import create_task_in_main
 
 pytestmark = [pytest.mark.backend]
 
