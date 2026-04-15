@@ -142,6 +142,7 @@ def make_task_in_main(owner_client, main_space, main_board):
             except Exception:
                 pass
 
+
 def _update_custom_field(client, space_id, task_id, field_id, value):
     """
     Вспомогательная функция для обновления значения кастомного поля.

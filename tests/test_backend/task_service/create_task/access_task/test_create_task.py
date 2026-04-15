@@ -103,7 +103,6 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
                             "_id", "createdAt", "updatedAt", "document", "followers",
                             "hrid", "rightConnectors", "leftConnectors", "archiver", "archivedAt",
                             "completedAt", "deleter", "deletedAt", "customFields", "creator",
-                            # "milestone"
                         }
                         assert_task_keys(task, expected_task_keys)
     finally:

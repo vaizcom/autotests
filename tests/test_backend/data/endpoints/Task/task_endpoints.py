@@ -195,3 +195,148 @@ def edit_task_custom_field_endpoint(space_id, task_id, field_id, value):
             "Current-Space-Id": space_id,
         },
     }
+
+def toggle_subtask_endpoint(space_id: str, task_id: str, parent_task_id: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Эндпоинт для привязки или отвязки подзадачи (ToggleSubtaskInputDto).
+    Если parent_task_id равен None, подзадача отвязывается.
+    """
+    payload: Dict[str, Any] = {
+        "taskId": task_id,
+    }
+
+    if parent_task_id is not None:
+        payload["parentTaskId"] = parent_task_id
+
+    return {
+        "path": "/ToggleSubtask",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
+def toggle_milestone_endpoint(space_id: str, task_id: str, milestone_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    """
+    Эндпоинт для привязки задачи к майлстоунам (ToggleMilestoneInputDto).
+    """
+    payload: Dict[str, Any] = {
+        "taskId": task_id,
+    }
+
+    if milestone_ids is not None:
+        payload["milestoneIds"] = milestone_ids
+
+    return {
+        "path": "/ToggleMilestone",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
+def duplicate_task_endpoint(space_id: str, task_id: str, board_id: str, group_id: Optional[str] = None):
+    """
+    Эндпоинт дублирования задачи (DuplicateTaskInputDto).
+    """
+    payload = {
+        "taskId": task_id,
+        "boardId": board_id,
+    }
+
+    if group_id is not None:
+        payload["groupId"] = group_id
+
+    return {
+        "path": "/DuplicateTask",
+        "json": payload,
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
+def toggle_task_connector_endpoint(space_id: str, task_id: str, direction: str, task_connector_id: str):
+    """
+    Эндпоинт для переключения связей (зависимостей) между задачами (ToggleTaskConnectorInputDto).
+    direction: 'blockers' или 'blocking'
+    """
+    return {
+        "path": "/ToggleTaskConnector",
+        "json": {
+            "taskId": task_id,
+            "direction": direction,
+            "taskConnectorId": task_connector_id
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
+def convert_task_to_milestone_endpoint(space_id: str, task_id: str):
+    """
+    Эндпоинт для конвертации задачи в Milestone (ConvertTaskToMilestoneInputDto).
+    """
+    return {
+        "path": "/ConvertTaskToMilestone",
+        "json": {"taskId": task_id},
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
+def move_task_to_board_endpoint(space_id: str, task_id: str, to_board_id: str, to_group_id: str) -> Dict[str, Any]:
+    """
+    Перемещение задачи на другую доску (MoveTaskToBoardInputDto).
+    """
+    return {
+        "path": "/MoveTaskToBoard",
+        "json": {
+            "taskId": task_id,
+            "toBoardId": to_board_id,
+            "toGroupId": to_group_id
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+def move_tasks_endpoint(space_id: str, moves: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Массовое или одиночное перемещение задач внутри текущей доски (MoveTasksInputDto).
+    moves - список словарей типа MoveTaskInputDtoStrict:
+    [{"taskId": "...", "toGroupId": "...", "toIndex": 0}]
+    """
+    return {
+        "path": "/MoveTasks",
+        "json": {
+            "moves": moves
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+def move_single_task_endpoint(space_id: str, task_id: str, to_group_id: str, to_index: int = 0) -> Dict[str, Any]:
+    """
+    Удобная обертка над MoveTasks для перемещения одной задачи (частый кейс в тестах).
+    """
+    return move_tasks_endpoint(
+        space_id=space_id,
+        moves=[{
+            "taskId": task_id,
+            "toGroupId": to_group_id,
+            "toIndex": to_index
+        }]
+    )
