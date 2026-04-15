@@ -1,6 +1,7 @@
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
+from tests.test_backend.task_service.conftest import make_task_in_main
 
 
 @pytest.fixture

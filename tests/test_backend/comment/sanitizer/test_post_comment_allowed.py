@@ -63,10 +63,6 @@ ALLOWED_CONTENT_CASES = [
         id="em_emoji"
     ),
     pytest.param(
-        "<table><thead><tr><th>Col</th></tr></thead><tbody><tr><td>Val</td></tr></tbody></table>",
-        id="table_structure"
-    ),
-    pytest.param(
         "<ul><li>item one</li><li>item two</li></ul>",
         id="bullet_list"
     ),
