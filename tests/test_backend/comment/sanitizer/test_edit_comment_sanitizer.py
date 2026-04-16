@@ -15,6 +15,7 @@ EDIT_SANITIZED_CASES = [
         "<p>1</p><p>2</p><p>3</p>",
         "<p>1</p><p>2</p><p>3</p>",
         200,
+        "Сброс форматирования — plain текст сохраняется",
         id="reset_style_plain_paragraphs"
     ),
     pytest.param(
@@ -22,6 +23,7 @@ EDIT_SANITIZED_CASES = [
         "<script>alert('xss')</script>",
         None,
         400,
+        "Тег script при редактировании → 400, пустой контент отклоняется",
         id="edit_script_tag_stripped_returns_400"
     ),
     pytest.param(
@@ -29,6 +31,7 @@ EDIT_SANITIZED_CASES = [
         "<p onclick=\"evil()\">edited</p>",
         "<p>edited</p>",
         200,
+        "Атрибут onclick при редактировании удаляется",
         id="edit_onclick_removed"
     ),
 ]
@@ -37,15 +40,15 @@ EDIT_SANITIZED_CASES = [
 @allure.parent_suite("Comment Service")
 @allure.suite("Sanitizer")
 @allure.sub_suite("Edit comment")
-@pytest.mark.parametrize("initial_content,edit_content,expected_content,expected_status", EDIT_SANITIZED_CASES)
+@pytest.mark.parametrize("initial_content,edit_content,expected_content,expected_status,title", EDIT_SANITIZED_CASES)
 def test_edit_comment_content_sanitized(
         owner_client, main_space, document_id,
-        initial_content, edit_content, expected_content, expected_status
+        initial_content, edit_content, expected_content, expected_status, title
 ):
     """
     Санитайзер применяется и при редактировании комментария через EditComment.
     """
-    allure.dynamic.title(f"Edit: {edit_content[:60]}")
+    allure.dynamic.title(title)
 
     with allure.step("Создаём исходный комментарий"):
         create_resp = owner_client.post(

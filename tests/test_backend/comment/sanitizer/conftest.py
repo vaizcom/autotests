@@ -1,17 +1,28 @@
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
-from tests.test_backend.task_service.conftest import make_task_in_main
+from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, get_task_endpoint, delete_task_endpoint
 
 
-@pytest.fixture
-def document_id(owner_client, main_space, make_task_in_main):
+@pytest.fixture(scope="module")
+def document_id(owner_client, main_space, main_board):
     """
-    Создаёт задачу и возвращает ID её документа для тестов комментариев.
+    Создаёт одну задачу на весь модуль и возвращает ID её документа.
+    После прохождения всех тестов модуля задача удаляется.
     """
-    task = make_task_in_main({"name": "Task for comment sanitizer test"})
-    task_id = task["_id"]
+    create_resp = owner_client.post(
+        **create_task_endpoint(
+            space_id=main_space,
+            board=main_board,
+            name="Task for comment sanitizer tests"
+        )
+    )
+    assert create_resp.status_code == 200, f"Ошибка создания задачи: {create_resp.text}"
+    task_id = create_resp.json()["payload"]["task"]["_id"]
 
-    resp = owner_client.post(**get_task_endpoint(slug_id=task_id, space_id=main_space))
-    assert resp.status_code == 200
-    return resp.json()["payload"]["task"]["document"]
+    task_resp = owner_client.post(**get_task_endpoint(slug_id=task_id, space_id=main_space))
+    assert task_resp.status_code == 200
+    doc_id = task_resp.json()["payload"]["task"]["document"]
+
+    yield doc_id
+
+    owner_client.post(**delete_task_endpoint(task_id=task_id, space_id=main_space))
