@@ -89,6 +89,21 @@ def reactivate_member_endpoint(space_id: str, member_id: str) -> dict:
     }
 
 
+def decline_space_invite_endpoint(space_id: str, code: str) -> dict:
+    """
+    Эндпоинт для отклонения инвайта в пространство (DeclineSpaceInvite).
+    Вызывается от имени приглашённого пользователя.
+    """
+    return {
+        "path": "/DeclineSpaceInvite",
+        "json": {"code": code},
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
 def confirm_space_invite_endpoint(code: str, full_name: str, password: str, termsAccepted: bool) -> dict:
     """
     Эндпоинт для подтверждения инвайта в пространство.

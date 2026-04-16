@@ -55,3 +55,94 @@ def create_access_group_endpoint(
             "Current-Space-Id": space_id
         }
     }
+
+
+def update_access_group_endpoint(space_id: str, group_id: str, name: str = None, description: str = None):
+    """
+    Обновление имени/описания группы доступа (UpdateAccessGroupInputDto).
+    """
+    json_payload = {"groupId": group_id}
+    if name is not None:
+        json_payload["name"] = name
+    if description is not None:
+        json_payload["description"] = description
+
+    return {
+        "path": "/UpdateAccessGroup",
+        "json": json_payload,
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
+def update_access_group_rights_endpoint(space_id: str, group_id: str, kind: str, kind_id: str, level: str):
+    """
+    Обновление прав группы доступа на сущность (UpdateAccessGroupRightsInputDto).
+    kind: 'Space' | 'Project' | 'Board'
+    level: EAccessLevel ('Member', 'Manager', 'Owner', 'Guest', ...)
+    """
+    return {
+        "path": "/UpdateAccessGroupRights",
+        "json": {
+            "groupId": group_id,
+            "kind": kind,
+            "kindId": kind_id,
+            "level": level,
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
+def remove_access_group_endpoint(space_id: str, group_id: str):
+    """
+    Удаление группы доступа (RemoveAccessGroupInputDto).
+    """
+    return {
+        "path": "/RemoveAccessGroup",
+        "json": {"groupId": group_id},
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
+def set_access_group_member_endpoint(space_id: str, member_id: str, access_group_id: str):
+    """
+    Добавление участника в группу доступа (SetAccessGroupsMemberInputDto).
+    Триггерит MEMBER_SET_ACCESS.
+    """
+    return {
+        "path": "/SetAccessGroupsMember",
+        "json": {
+            "memberId": member_id,
+            "accessGroupId": access_group_id,
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
+
+
+def remove_access_group_member_endpoint(space_id: str, member_id: str, access_group_id: str):
+    """
+    Удаление участника из группы доступа (RemoveAccessGroupMemberInputDto).
+    Триггерит MEMBER_REMOVE_ACCESS.
+    """
+    return {
+        "path": "/RemoveAccessGroupMember",
+        "json": {
+            "memberId": member_id,
+            "accessGroupId": access_group_id,
+        },
+        "headers": {
+            "Content-Type": "application/json",
+            "Current-Space-Id": space_id,
+        },
+    }
