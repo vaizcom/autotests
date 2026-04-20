@@ -20,7 +20,8 @@ from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoi
 from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
-from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint
+from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint, \
+    archive_milestone_endpoint
 from tests.config import settings
 from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
@@ -458,8 +459,6 @@ def temp_milestone_on_board_with_tasks(owner_client, main_space, board_with_task
     yield milestone_id
 
     with allure.step("Teardown [Fixture]: Архивация временного майлстоуна"):
-        from tests.test_backend.data.endpoints.milestone.milestones_endpoints import archive_milestone_endpoint
-
         archive_resp = owner_client.post(
             **archive_milestone_endpoint(
                 space_id=main_space,
