@@ -10,6 +10,14 @@ on:
     paths:
       - 'tests/test_frontend/**'
   workflow_dispatch:
+    inputs:
+      frontend_url:
+        description: 'Test stand'
+        default: 'https://app.vaiz.com'
+        type: choice
+        options:
+          - https://app.vaiz.com
+          - https://app.vaiz.dev
 
 permissions:
   contents: write
@@ -22,7 +30,7 @@ jobs:
     timeout-minutes: 30
 
     env:
-      FRONTEND_URL: https://app.vaiz.com
+      FRONTEND_URL: ${{ github.event.inputs.frontend_url || vars.FRONTEND_URL || 'https://app.vaiz.com' }}
       FRONTEND_EMAIL: ${{ secrets.FRONTEND_EMAIL }}
       FRONTEND_PASSWORD: ${{ secrets.FRONTEND_PASSWORD }}
 
@@ -42,6 +50,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install allure-pytest
+
+      - name: Setup VPN
+        uses: Boostport/setup-cloudflare-warp@v1.6.0
+        with:
+          organization: vaiz
+          auth_client_id: ${{ vars.CF_TOKEN_NAME }}
+          auth_client_secret: ${{ secrets.CF_TOKEN }}
 
       - name: Install Playwright browsers
         run: python -m playwright install chromium --with-deps
