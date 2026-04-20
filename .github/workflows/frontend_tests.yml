@@ -52,6 +52,7 @@ jobs:
           pip install allure-pytest
 
       - name: Setup VPN
+        if: ${{ env.FRONTEND_URL == 'https://app.vaiz.dev' }}
         uses: Boostport/setup-cloudflare-warp@v1.6.0
         with:
           organization: vaiz
