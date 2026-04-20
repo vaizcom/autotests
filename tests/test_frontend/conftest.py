@@ -3,6 +3,12 @@ import pytest
 from tests.test_frontend.core.settings import BASE_URL, FRONTEND_EMAIL, FRONTEND_PASSWORD
 
 
+def pytest_configure(config):
+    stand = "production" if "vaiz.com" in BASE_URL else "dev"
+    print(f"\n🧪 Running on stand: {stand}")
+    print(f"🌐 UI URL: {BASE_URL}\n")
+
+
 @pytest.fixture(scope="session")
 def auth_state(playwright):
     """Логинится один раз на сессию и сохраняет состояние браузера."""
