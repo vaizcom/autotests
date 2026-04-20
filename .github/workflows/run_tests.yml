@@ -16,7 +16,7 @@ on:
         description: 'Which test stand to run?'
         default: 'dev'
         type: choice
-        options: [ dev, kuber_dev, kuber_uat ]
+        options: [ dev, kuber_dev, kuber_uat, prod ]
 
 permissions:
   contents: write 
@@ -79,8 +79,12 @@ jobs:
         if: ${{ env.TEST_SCOPE == 'frontend' || env.TEST_SCOPE == 'all' }}
         run: python -m playwright install --with-deps
 
-      - name: ☁️ Setup VPN (only for frontend or all)
-        if: ${{ env.TEST_SCOPE == 'frontend' || env.TEST_SCOPE == 'all' }}
+      - name: Set FRONTEND_URL for prod stand
+        if: ${{ github.event.inputs.test_stand == 'prod' }}
+        run: echo "FRONTEND_URL=https://app.vaiz.com" >> $GITHUB_ENV
+
+      - name: ☁️ Setup VPN (only for frontend or all, not prod)
+        if: ${{ (env.TEST_SCOPE == 'frontend' || env.TEST_SCOPE == 'all') && github.event.inputs.test_stand != 'prod' }}
         uses: Boostport/setup-cloudflare-warp@v1.6.0
         with:
           organization: vaiz
