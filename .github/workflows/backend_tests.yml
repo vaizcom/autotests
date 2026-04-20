@@ -1,0 +1,176 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'tests/test_backend/**'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'tests/test_backend/**'
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: 'Which tests to run?'
+        default: 'backend'
+        type: choice
+        options: [ backend, frontend, all ]
+      test_stand:
+        description: 'Which test stand to run?'
+        default: 'dev'
+        type: choice
+        options: [ dev, kuber_dev, kuber_uat ]
+
+permissions:
+  contents: write 
+  issues: write
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest-m
+    timeout-minutes: 60
+
+    env:
+      TEST_SCOPE: ${{ github.event.inputs.test_scope || 'backend' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 🧠 Определяем стенд по ветке
+      - name: Determine test stand from branch
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: |
+          BRANCH="${GITHUB_REF##*/}"
+          if [[ "$BRANCH" == "main" || "$BRANCH" == "kuber_dev" ]]; then
+            echo "TEST_STAND_NAME=kuber_dev" >> $GITHUB_ENV
+          else
+            echo "TEST_STAND_NAME=dev" >> $GITHUB_ENV
+          fi
+
+      # 🧠 Получаем стенд из input (если ручной запуск)
+      - name: Set test stand from input
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: echo "TEST_STAND_NAME=${{ github.event.inputs.test_stand }}" >> $GITHUB_ENV
+
+      # ✅ Добавляем tests/ в PYTHONPATH (для from config import settings)
+      - name: Add tests to PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install allure-pytest
+
+      # ✅ Импортируем settings.py, чтобы API_URL записался в GITHUB_ENV
+      - name: Export API_URL from settings.py
+        run: python -c "from config import settings"
+
+      - name: Display selected options
+        run: |
+          echo "Test scope: $TEST_SCOPE"
+          echo "Test stand: $TEST_STAND_NAME"
+          echo "API URL: $API_URL"
+
+      - name: Install Playwright Browsers
+        if: ${{ env.TEST_SCOPE == 'frontend' || env.TEST_SCOPE == 'all' }}
+        run: python -m playwright install --with-deps
+
+      - name: ☁️ Setup VPN (only for frontend or all)
+        if: ${{ env.TEST_SCOPE == 'frontend' || env.TEST_SCOPE == 'all' }}
+        uses: Boostport/setup-cloudflare-warp@v1.6.0
+        with:
+          organization: vaiz
+          auth_client_id: ${{ vars.CF_TOKEN_NAME }}
+          auth_client_secret: ${{ secrets.CF_TOKEN }}
+
+      - name: Adding static DNS
+        run: echo "10.114.16.5 app.vaiz.dev" | sudo tee -a /etc/hosts
+
+      - name: ❌ Clean old Allure results
+        run: rm -rf allure-results
+
+      # ✅ Allure Environment: API_URL теперь доступен
+      - name: Set Allure environment metadata
+        run: |
+          mkdir -p allure-results
+          echo "TEST_SCOPE=$TEST_SCOPE" >> allure-results/environment.properties
+          echo "TEST_STAND=$TEST_STAND_NAME" >> allure-results/environment.properties
+          echo "API_URL=$API_URL" >> allure-results/environment.properties
+
+      - name: ✅ Check if the API is available from the agent
+        continue-on-error: false
+        run: curl -m 10 $API_URL/healthCheck
+
+
+      - name: ✅ Run tests with Allure
+        continue-on-error: true
+        run: pytest . --alluredir=allure-results -m "$TEST_SCOPE"
+
+      - name: Check allure-results content
+        run: ls -lah allure-results
+
+      - name: 🕘 Get Allure history
+        uses: actions/checkout@v2
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: 📊 Generate Allure Report and Deploy
+        uses: simple-elf/allure-report-action@v1.13
+        if: always()
+        with:
+          allure_results: allure-results
+          allure_report: allure-report
+          allure_history: allure-history
+          gh_pages: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚀 Publish Allure Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v2
+        if: always()
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history
+
+      - name: 📝 Comment Allure Report link on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const summaryPath = './allure-report/widgets/summary.json';
+
+            let status = "✅ Tests passed";
+            try {
+              const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+              const { failed, broken } = summary.statistic;
+              if (failed > 0 || broken > 0) {
+                status = "❌ Tests failed";
+              }
+            } catch (e) {
+              status = "⚠️ Could not read test results";
+            }
+
+            const sha = context.payload.pull_request.head.sha.substring(0, 7);
+            const time = new Date().toISOString();
+            const link = "https://vaizcom.github.io/autotests/";
+
+            await github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+              body: `${status}\n\n🧪 **Allure Report for Commit \`${sha}\`**\n\n📄 [Click to view Allure Report](${link})\n\n🕒 Generated at: \`${time}\``
+            });
