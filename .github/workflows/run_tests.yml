@@ -34,6 +34,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 🧠 Определяем scope по изменённым файлам (только для push/PR)
+      - name: Detect changed test scope
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            frontend:
+              - 'tests/test_frontend/**'
+            backend:
+              - 'tests/test_backend/**'
+
+      - name: Set TEST_SCOPE based on changed files
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: |
+          if [[ "${{ steps.changes.outputs.frontend }}" == "true" && "${{ steps.changes.outputs.backend }}" == "true" ]]; then
+            echo "TEST_SCOPE=all" >> $GITHUB_ENV
+          elif [[ "${{ steps.changes.outputs.frontend }}" == "true" ]]; then
+            echo "TEST_SCOPE=frontend" >> $GITHUB_ENV
+          else
+            echo "TEST_SCOPE=backend" >> $GITHUB_ENV
+          fi
+
       # 🧠 Определяем стенд по ветке
       - name: Determine test stand from branch
         if: ${{ github.event_name != 'workflow_dispatch' }}
