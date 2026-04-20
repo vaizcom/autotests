@@ -1,99 +1,36 @@
-import random
-import string
-from datetime import time
-import allure
 import pytest
-from requests import request
 
-from tests.test_frontend.core import settings
-from tests.test_frontend.core.settings import URL
+from tests.test_frontend.core.settings import BASE_URL, FRONTEND_EMAIL, FRONTEND_PASSWORD
 
 
-@pytest.fixture
-def generated_string():
-    length = 4
-    str_characters = '!#$%^&*' + string.ascii_lowercase + string.digits
-    generated_string = ''.join(random.choice(str_characters) for _ in range(length))
-    return generated_string
+def pytest_configure(config):
+    stand = "production" if "vaiz.com" in BASE_URL else "dev"
+    print(f"\n🧪 Running on stand: {stand}")
+    print(f"🌐 UI URL: {BASE_URL}\n")
 
 
-# ["session", "package", "module", "class", "function"]
-@pytest.fixture(scope='session')
-def browser_token():
-    payload = {'email': 'mastretsovaone@gmail.com', 'password': '123456'}
-    headers = {'Content-Type': 'application/json'}
-    response = request('POST', URL + '/Login', headers=headers, json=payload)
-    payload = response.json()['payload']
-    return payload['token']
+@pytest.fixture(scope="session")
+def auth_state(playwright):
+    """Логинится один раз на сессию и сохраняет состояние браузера."""
+    browser = playwright.chromium.launch()
+    context = browser.new_context(ignore_https_errors=True)
+    page = context.new_page()
+    page.goto(f"{BASE_URL}/auth/sign-in")
+    page.get_by_role("textbox", name="Email").fill(FRONTEND_EMAIL)
+    page.get_by_role("textbox", name="Password").fill(FRONTEND_PASSWORD)
+    page.get_by_role("button", name="Continue with Email").click()
+    page.wait_for_load_state("networkidle")
+    state = context.storage_state()
+    context.close()
+    browser.close()
+    return state
 
 
-@pytest.fixture(scope='session')
-def browser_context_args(browser_context_args, browser_token):
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args, auth_state):
+    """Все тесты стартуют уже залогиненными."""
     return {
         **browser_context_args,
-        'storage_state': {
-            'cookies': [
-                {
-                    'name': '_t',
-                    'value': browser_token,
-                    'url': URL,
-                },
-            ]
-        },
+        "ignore_https_errors": True,
+        "storage_state": auth_state,
     }
-
-
-@pytest.fixture(scope='function')
-def open_task_drawer(browser_context_args, page):
-    with allure.step('Launching the app'):
-        page.goto(settings.BASE_URL)
-    with allure.step('Open Board'):
-        page.get_by_role('navigation').get_by_text('Project 1').click()
-        page.get_by_role('link', name='autotest_dont_tuch').click()
-    with allure.step('Add task'):
-        page.get_by_role('button', name='Add task', exact=True).first.click()
-        task = 'autotest ' + str(time.asctime())
-        page.get_by_placeholder('Enter title...').fill(task)
-        page.get_by_role('button', name='Add task', exact=True).first.click()
-    with allure.step('Open task_drawer'):
-        task_drawer = page.get_by_role('button', name=task).click()
-    return task_drawer
-
-
-# @pytest.fixture()
-# def browser_context_args():
-#     return {
-#         'http_credentials': {
-#             'username': 'test.vaiz.by.email@gmail.com',
-#             'password': 'fJ529_/!o7T~wwn!*e|',
-#         }
-#     }
-
-
-# @pytest.fixture(scope="session")
-# def browser_context_args(browser_context_args):
-#     return {
-#         **browser_context_args,
-#         "storage_state": {
-#             "cookies": [
-#                 {
-#                     "name": "_t",
-#                     "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
-#                     eyJpZCI6IjY2NDM5YmU1YTU0ZTkzNjA5ZTk3NGEyNSIsIm
-#                     lhdCI6MTcxNTcwNjg1MywiZXhwIjozMzI1MTcwNjg1M30.
-#                     6MnZuzdiBGHnN0JksJUva3CiMjt2bCNf7HU0L0JsMa4",
-#                     "url": "https://app.vaiz.dev/",
-#                 },
-#             ]
-#         },
-#     }
-
-
-#
-# @pytest.fixture(scope="session")
-# def browser_context_args(browser_context_args, playwright):
-#     iphone_11 = playwright.devices['iPhone 11 Pro']
-#     return {
-#         **browser_context_args,
-#         **iphone_11,
-#     }

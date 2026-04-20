@@ -3,8 +3,12 @@ name: Tests + Allure Report
 on:
   push:
     branches: [ main, master ]
+    paths:
+      - 'tests/test_backend/**'
   pull_request:
     branches: [ main, master ]
+    paths:
+      - 'tests/test_backend/**'
   workflow_dispatch:
     inputs:
       test_scope:

@@ -1,0 +1,126 @@
+name: Frontend Tests
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tests/test_frontend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'tests/test_frontend/**'
+  workflow_dispatch:
+    inputs:
+      frontend_url:
+        description: 'Test stand'
+        default: 'https://app.vaiz.com'
+        type: choice
+        options:
+          - https://app.vaiz.com
+          - https://app.vaiz.dev
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  frontend-tests:
+    runs-on: ${{ github.event.inputs.frontend_url == 'https://app.vaiz.dev' && 'ubuntu-latest-m' || 'ubuntu-latest' }}
+    timeout-minutes: 30
+
+    env:
+      FRONTEND_URL: ${{ github.event.inputs.frontend_url || vars.FRONTEND_URL || 'https://app.vaiz.com' }}
+      FRONTEND_EMAIL: ${{ secrets.FRONTEND_EMAIL }}
+      FRONTEND_PASSWORD: ${{ secrets.FRONTEND_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Add tests to PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd)/tests" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install allure-pytest
+
+      - name: Install Playwright browsers
+        run: python -m playwright install chromium --with-deps
+
+      - name: Clean old Allure results
+        run: rm -rf allure-results
+
+      - name: Set Allure environment metadata
+        run: |
+          mkdir -p allure-results
+          echo "TEST_SCOPE=frontend" >> allure-results/environment.properties
+          echo "FRONTEND_URL=$FRONTEND_URL" >> allure-results/environment.properties
+
+      - name: Run frontend tests
+        continue-on-error: true
+        run: pytest -m frontend --alluredir=allure-results
+
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Generate Allure Report
+        uses: simple-elf/allure-report-action@v1.13
+        if: always()
+        with:
+          allure_results: allure-results
+          allure_report: allure-report
+          allure_history: allure-history
+          gh_pages: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Allure Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v2
+        if: always()
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history
+
+      - name: Comment Allure Report link on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const summaryPath = './allure-report/widgets/summary.json';
+
+            let status = "✅ Tests passed";
+            try {
+              const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+              const { failed, broken } = summary.statistic;
+              if (failed > 0 || broken > 0) {
+                status = "❌ Tests failed";
+              }
+            } catch (e) {
+              status = "⚠️ Could not read test results";
+            }
+
+            const sha = context.payload.pull_request.head.sha.substring(0, 7);
+            const time = new Date().toISOString();
+            const link = "https://vaizcom.github.io/autotests/";
+
+            await github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+              body: `${status}\n\n🧪 **Allure Report** для коммита \`${sha}\`\n\n📄 [Открыть отчёт](${link})\n\n🕒 ${time}`
+            });
