@@ -1,10 +1,8 @@
 from os import environ
-
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# BASE_URL = environ.get('BASE_URL', default=f'https://dev:jaichoof8iigeech4upegooraeChooz1hoo9eece@app.vaiz.dev')
-BASE_URL = environ.get('BASE_URL', default='https://vaiz-app-ms.vaiz.dev/')
-
-URL = environ.get('URL', default='https://vaiz-api-ms.vaiz.dev/v3')
+BASE_URL = environ.get("FRONTEND_URL", default="https://app.vaiz.com")
+FRONTEND_EMAIL = environ.get("FRONTEND_EMAIL")
+FRONTEND_PASSWORD = environ.get("FRONTEND_PASSWORD")
