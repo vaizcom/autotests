@@ -85,11 +85,7 @@ jobs:
 
       - name: ☁️ Setup VPN (only for frontend or all)
         if: ${{ env.TEST_SCOPE == 'frontend' || env.TEST_SCOPE == 'all' }}
-        uses: Boostport/setup-cloudflare-warp@v1.6.0
-        with:
-          organization: vaiz
-          auth_client_id: ${{ vars.CF_TOKEN_NAME }}
-          auth_client_secret: ${{ secrets.CF_TOKEN }}
+        uses: ./.github/actions/cloudflare
 
       - name: Adding static DNS
         run: echo "10.114.16.5 app.vaiz.dev" | sudo tee -a /etc/hosts

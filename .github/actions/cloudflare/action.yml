@@ -1,0 +1,23 @@
+name: Cloudflare
+description: Cloudflare connection
+inputs:
+  CLOUDFLARE_AUTH_CLIENT_ID:
+    description: Sets Cloudflare client id
+  CLOUDFLARE_AUTH_CLIENT_SECRET:
+    description: Sets Cloudflare auth secret
+runs:
+  using: composite
+  steps:
+
+    - name: Zero trust VPN connection
+      uses: Boostport/setup-cloudflare-warp@v1.6.0
+      with:
+        organization: vaiz
+        auth_client_id: ${{ inputs.CLOUDFLARE_AUTH_CLIENT_ID }}
+        auth_client_secret: ${{ inputs.CLOUDFLARE_AUTH_CLIENT_SECRET }}
+
+    - name: Let Zero trust do his things
+      shell: bash
+      run: |
+        sleep 5
+
