@@ -46,7 +46,7 @@ jobs:
       - name: CHECK AVAILABILITY
         shell: bash
         run: |
-          curl https://app.vaiz.dev/.well-known/apple-app-site-association
+          curl https://app.vaiz.dev/.well-known/apple-app-site-association -vvv
 
       - name: Set up Python
         uses: actions/setup-python@v4
