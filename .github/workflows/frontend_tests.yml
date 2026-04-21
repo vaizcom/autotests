@@ -39,7 +39,9 @@ jobs:
 
       - name: ☁️ Setup VPN 
         uses: ./.github/actions/cloudflare
-
+        with:
+          CLOUDFLARE_AUTH_CLIENT_ID: ${{ vars.CF_TOKEN_NAME }}
+          CLOUDFLARE_AUTH_CLIENT_SECRET: ${{ secrets.CF_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v4

@@ -86,6 +86,9 @@ jobs:
       - name: ☁️ Setup VPN (only for frontend or all)
         if: ${{ env.TEST_SCOPE == 'frontend' || env.TEST_SCOPE == 'all' }}
         uses: ./.github/actions/cloudflare
+        with:
+          CLOUDFLARE_AUTH_CLIENT_ID: ${{ vars.CF_TOKEN_NAME }}
+          CLOUDFLARE_AUTH_CLIENT_SECRET: ${{ secrets.CF_TOKEN }}
 
       - name: Adding static DNS
         run: echo "10.114.16.5 app.vaiz.dev" | sudo tee -a /etc/hosts
