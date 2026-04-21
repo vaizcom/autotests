@@ -3,6 +3,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_URL = environ.get("FRONTEND_URL", default="https://app.vaiz.com")
-FRONTEND_EMAIL = environ.get("FRONTEND_EMAIL")
-FRONTEND_PASSWORD = environ.get("FRONTEND_PASSWORD")
+FRONTEND_STAND = environ.get("FRONTEND_STAND", "production")
+
+BASE_URL = {
+    "prod": "https://app.vaiz.com",
+    "dev": "https://app.vaiz.dev",
+}[FRONTEND_STAND]
+
+FRONTEND_EMAIL = environ.get("OWNER_EMAIL")
+FRONTEND_PASSWORD = environ.get("PASSWORD")
