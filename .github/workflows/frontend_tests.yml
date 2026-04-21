@@ -13,11 +13,11 @@ on:
     inputs:
       frontend_url:
         description: 'Test stand'
-        default: 'https://app.vaiz.com'
+        default: 'https://app.vaiz.dev'
         type: choice
         options:
-          - https://app.vaiz.com
           - https://app.vaiz.dev
+          - https://app.vaiz.com
 
 permissions:
   contents: write
@@ -26,13 +26,14 @@ permissions:
 
 jobs:
   frontend-tests:
-    runs-on: ${{ github.event.inputs.frontend_url == 'https://app.vaiz.dev' && 'ubuntu-latest-m' || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.inputs.frontend_url == 'https://app.vaiz.com' && 'ubuntu-latest' || 'ubuntu-latest-m' }}
     timeout-minutes: 30
 
     env:
-      FRONTEND_URL: ${{ github.event.inputs.frontend_url || vars.FRONTEND_URL || 'https://app.vaiz.com' }}
-      FRONTEND_EMAIL: ${{ secrets.FRONTEND_EMAIL }}
-      FRONTEND_PASSWORD: ${{ secrets.FRONTEND_PASSWORD }}
+      FRONTEND_URL: ${{ github.event.inputs.frontend_url || 'https://app.vaiz.dev' }}
+      FRONTEND_STAND: ${{ github.event.inputs.frontend_url == 'https://app.vaiz.com' && 'prod' || 'dev' }}
+      OWNER_EMAIL: ${{ secrets.OWNER_EMAIL }}
+      PASSWORD: ${{ secrets.PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4
