@@ -13,6 +13,9 @@ def browser_context_args(browser_context_args):
     return {k: v for k, v in browser_context_args.items() if k != "storage_state"}
 
 
+@allure.parent_suite("Frontend")
+@allure.suite("Auth")
+@allure.title("Sign in with email")
 def test_sign_in_with_email(page: Page, assert_snapshot):
     with allure.step("Открытие страницы входа"):
         page.goto(f"{settings.BASE_URL}/auth/sign-in")
