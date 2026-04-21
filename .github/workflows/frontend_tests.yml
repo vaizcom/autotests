@@ -30,15 +30,12 @@ jobs:
     timeout-minutes: 30
 
     env:
-      FRONTEND_URL: ${{ github.event.inputs.frontend_url || 'https://app.vaiz.dev' }}
       FRONTEND_STAND: ${{ github.event.inputs.frontend_url == 'https://app.vaiz.com' && 'prod' || 'dev' }}
-      OWNER_EMAIL: ${{ secrets.OWNER_EMAIL }}
-      PASSWORD: ${{ secrets.PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: ☁️ Setup VPN 
+      - name: ☁️ Setup VPN
         uses: ./.github/actions/cloudflare
         with:
           CLOUDFLARE_AUTH_CLIENT_ID: ${{ vars.CF_TOKEN_NAME }}
