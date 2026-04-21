@@ -33,8 +33,6 @@ jobs:
       FRONTEND_URL: ${{ github.event.inputs.frontend_url || vars.FRONTEND_URL || 'https://app.vaiz.com' }}
       FRONTEND_EMAIL: ${{ secrets.FRONTEND_EMAIL }}
       FRONTEND_PASSWORD: ${{ secrets.FRONTEND_PASSWORD }}
-      CF_ACCESS_CLIENT_ID: ${{ vars.CF_TOKEN_NAME }}
-      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -46,13 +44,8 @@ jobs:
           CLOUDFLARE_AUTH_CLIENT_SECRET: ${{ secrets.CF_TOKEN }}
 
       - name: Adding static DNS
-        run: echo "10.114.16.5 app.vaiz.dev" | sudo tee -a /etc/hosts
+        run: echo "10.114.16.5 app.vaiz.dev api.vaiz.dev" | sudo tee -a /etc/hosts
 
-      - name: CHECK AVAILABILITY
-        shell: bash
-        run: |
-          curl https://app.vaiz.dev/.well-known/apple-app-site-association \
-            -vvv
 
       - name: Set up Python
         uses: actions/setup-python@v4
