@@ -171,3 +171,5 @@ allure-results/
 # VRT артефакты падений (не коммитить, только baseline)
 **/__snapshots__/*_actual.png
 **/__snapshots__/*_diff.png
+
+**/__snapshots__/*.zip
