@@ -18,6 +18,10 @@ on:
         options:
           - https://app.vaiz.dev
           - https://app.vaiz.com
+      update_snapshots:
+        description: 'Update baseline snapshots'
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -69,6 +73,16 @@ jobs:
           mkdir -p allure-results
           echo "TEST_SCOPE=frontend" >> allure-results/environment.properties
           echo "FRONTEND_URL=$FRONTEND_URL" >> allure-results/environment.properties
+
+      - name: Update baseline snapshots
+        if: github.event.inputs.update_snapshots == 'true'
+        run: |
+          pytest -m frontend --update-snapshots
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tests/test_frontend/tests/login/__snapshots__/
+          git diff --cached --quiet || git commit -m "chore: update VRT baselines on CI"
+          git push
 
       - name: Run frontend tests
         continue-on-error: true
