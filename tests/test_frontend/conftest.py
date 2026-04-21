@@ -130,3 +130,44 @@ def browser_context_args(browser_context_args, auth_state):
         "storage_state": auth_state,
         "viewport": {"width": 1280, "height": 720},
     }
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+    setattr(item, f"rep_{rep.when}", rep)
+
+
+@pytest.fixture(autouse=True)
+def attach_on_failure(request, page):
+    """Прикладывает скриншот, URL и трейс к Allure при падении теста."""
+    context = page.context
+    context.tracing.start(screenshots=True, snapshots=True)
+
+    yield
+
+    failed = getattr(getattr(request.node, "rep_call", None), "failed", False)
+    if failed:
+        try:
+            allure.attach(
+                page.screenshot(),
+                name="screenshot on failure",
+                attachment_type=allure.attachment_type.PNG,
+            )
+            allure.attach(
+                page.url,
+                name="page URL",
+                attachment_type=allure.attachment_type.TEXT,
+            )
+            trace_path = Path(request.node.fspath).parent / "__snapshots__" / f"{request.node.name}.zip"
+            context.tracing.stop(path=str(trace_path))
+            allure.attach(
+                trace_path.read_bytes(),
+                name="playwright trace",
+                attachment_type=allure.attachment_type.ZIP,
+            )
+        except Exception:
+            context.tracing.stop()
+    else:
+        context.tracing.stop()
