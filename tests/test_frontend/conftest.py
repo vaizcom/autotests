@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import allure
 import pytest
 
 from tests.test_frontend.core.settings import BASE_URL, FRONTEND_EMAIL, FRONTEND_PASSWORD
@@ -40,8 +41,8 @@ def assert_snapshot(request):
         actual = Image.open(io.BytesIO(screenshot)).convert("RGB")
 
         if baseline.size != actual.size:
-            actual_path = snapshot_dir / name.replace(".png", "_actual.png")
-            actual_path.write_bytes(screenshot)
+            allure.attach(snapshot_path.read_bytes(), name="baseline", attachment_type=allure.attachment_type.PNG)
+            allure.attach(screenshot, name="actual", attachment_type=allure.attachment_type.PNG)
             pytest.fail(
                 f"Размер изменился: baseline {baseline.size} → actual {actual.size}.\n"
                 f"Для обновления запусти: pytest --update-snapshots"
@@ -78,6 +79,10 @@ def assert_snapshot(request):
 
             diff_path = snapshot_dir / name.replace(".png", "_diff.png")
             diff_highlighted.save(diff_path)
+
+            allure.attach(snapshot_path.read_bytes(), name="baseline", attachment_type=allure.attachment_type.PNG)
+            allure.attach(screenshot, name="actual", attachment_type=allure.attachment_type.PNG)
+            allure.attach(diff_path.read_bytes(), name="diff", attachment_type=allure.attachment_type.PNG)
 
             pytest.fail(
                 f"Скриншот отличается от baseline на {diff_pct:.2f}% пикселей "
