@@ -46,7 +46,6 @@ jobs:
       - name: Adding static DNS
         run: echo "10.114.16.5 app.vaiz.dev api.vaiz.dev" | sudo tee -a /etc/hosts
 
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
