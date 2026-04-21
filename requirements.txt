@@ -14,7 +14,7 @@ pytest==8.3.4
 pytest-base-url==2.1.0
 pytest-playwright==0.4.4
 python-dateutil==2.9.0
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 python-slugify==8.0.4
 requests==2.32.3
 ruff==0.2.2
