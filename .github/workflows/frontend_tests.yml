@@ -43,6 +43,11 @@ jobs:
           CLOUDFLARE_AUTH_CLIENT_ID: ${{ vars.CF_TOKEN_NAME }}
           CLOUDFLARE_AUTH_CLIENT_SECRET: ${{ secrets.CF_TOKEN }}
 
+      - name: CHECK AVAILABILITY
+        shell: bash
+        run: |
+          curl https://app.vaiz.dev/.well-known/apple-app-site-association
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
