@@ -23,7 +23,7 @@ on:
         default: false
         type: boolean
       snapshot_test:
-        description: 'Only if "Update baseline snapshots" is checked: test name to update (e.g. test_sign_in_with_email), or leave empty to update all.'
+        description: 'Test name to update (e.g. test_sign_in_with_email). Leave empty to update all baselines.'
         default: ''
         type: string
 

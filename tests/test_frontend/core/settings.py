@@ -10,5 +10,5 @@ BASE_URL = {
     "dev": "https://app.vaiz.dev",
 }[FRONTEND_STAND]
 
-FRONTEND_EMAIL = environ.get("OWNER_EMAIL")
-FRONTEND_PASSWORD = environ.get("PASSWORD")
+FRONTEND_EMAIL = environ.get("FRONTEND_EMAIL") or environ.get("OWNER_EMAIL")
+FRONTEND_PASSWORD = environ.get("FRONTEND_PASSWORD") or environ.get("PASSWORD")
