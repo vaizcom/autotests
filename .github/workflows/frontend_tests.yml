@@ -22,6 +22,10 @@ on:
         description: 'Update baseline snapshots'
         default: false
         type: boolean
+      snapshot_test:
+        description: 'Test name to update snapshots for (e.g. test_sign_in_with_email). Leave empty to update all.'
+        default: ''
+        type: string
 
 permissions:
   contents: write
@@ -77,10 +81,15 @@ jobs:
       - name: Update baseline snapshots
         if: github.event.inputs.update_snapshots == 'true'
         run: |
-          pytest -m frontend --update-snapshots
+          TARGET="${{ github.event.inputs.snapshot_test }}"
+          if [ -z "$TARGET" ]; then
+            pytest -m frontend --update-snapshots
+          else
+            pytest -m frontend -k "$TARGET" --update-snapshots
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tests/test_frontend/tests/login/__snapshots__/
+          git add tests/test_frontend/
           git diff --cached --quiet || git commit -m "chore: update VRT baselines on CI"
           git push
 

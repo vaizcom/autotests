@@ -168,8 +168,6 @@ allure-results/
 
 **/allure-results/
 
-# VRT артефакты падений (не коммитить, только baseline)
-**/__snapshots__/*_actual.png
-**/__snapshots__/*_diff.png
-
+# VRT артефакты Playwright (не коммитить, только baseline)
+test-results/
 **/__snapshots__/*.zip

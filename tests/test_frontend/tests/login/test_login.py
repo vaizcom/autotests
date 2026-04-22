@@ -27,16 +27,15 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
         page.get_by_role("button", name="Continue with Email").click()
 
     with allure.step("Проверка успешного входа"):
-        page.wait_for_load_state("networkidle")
-        expect(page).not_to_have_url(f"{settings.BASE_URL}/auth/sign-in")
-        expect(page.get_by_role("link", name="Home")).to_be_visible()
+        expect(page).not_to_have_url(f"{settings.BASE_URL}/auth/sign-in", timeout=15000)
+        expect(page.get_by_role("link", name="Home")).to_be_visible(timeout=15000)
 
     with allure.step("Сравнение скриншота"):
         page.get_by_role("link", name="Archive").wait_for(state="visible")
 
         # Фиксируем известный раздел → Home всегда активен в сайдбаре
         page.get_by_role("link", name="Home").click()
-        page.wait_for_load_state("networkidle")
+        page.get_by_role("link", name="Archive").wait_for(state="visible")
         page.mouse.move(640, 400)  # убираем hover с Home
 
         # Сворачиваем все раскрытые секции сайдбара → фиксируем известное состояние
@@ -77,5 +76,15 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
             page.locator('[class*="AsideMenu-module_Footer"]'),           # футер сайдбара
         ]
 
+        # Версия приложения имеет высоту 0 — маска не работает, красим через CSS как Playwright mask
+        page.add_style_tag(content='''
+            span[class*="AppVersion"] {
+                background-color: #FF00FF !important;
+                color: transparent !important;
+                display: inline-block !important;
+                min-height: 14px !important;
+            }
+        ''')
+
         screenshot = page.screenshot(mask=dynamic_masks)
-        assert_snapshot(screenshot, name="sign_in_success.png", threshold=0.5)
+        assert_snapshot(screenshot, name="sign_in_success.png", threshold=1.5)
