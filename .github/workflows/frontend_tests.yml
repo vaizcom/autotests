@@ -42,6 +42,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: ☁️ Setup VPN
         uses: ./.github/actions/cloudflare
@@ -90,7 +92,6 @@ jobs:
           BRANCH="${{ github.head_ref || github.ref_name }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout "$BRANCH"
           git pull origin "$BRANCH"
           git add tests/test_frontend/
           git diff --cached --quiet || git commit -m "chore: update VRT baselines on CI"
@@ -105,7 +106,6 @@ jobs:
           BRANCH="${{ github.head_ref || github.ref_name }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout "$BRANCH"
           git pull origin "$BRANCH"
           git add tests/test_frontend/
           git diff --cached --quiet || (git commit -m "chore: auto-commit new VRT baselines" && git push origin "$BRANCH")
