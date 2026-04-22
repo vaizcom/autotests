@@ -13,11 +13,19 @@ on:
     inputs:
       frontend_url:
         description: 'Test stand'
-        default: 'https://app.vaiz.com'
+        default: 'https://app.vaiz.dev'
         type: choice
         options:
-          - https://app.vaiz.com
           - https://app.vaiz.dev
+          - https://app.vaiz.com
+      update_snapshots:
+        description: 'Update baseline snapshots'
+        default: false
+        type: boolean
+      snapshot_test:
+        description: 'Test name to update (e.g. test_sign_in_with_email). Leave empty to update all baselines.'
+        default: ''
+        type: string
 
 permissions:
   contents: write
@@ -26,18 +34,26 @@ permissions:
 
 jobs:
   frontend-tests:
-    runs-on: ${{ github.event.inputs.frontend_url == 'https://app.vaiz.dev' && 'ubuntu-latest-m' || 'ubuntu-latest' }}
+    runs-on: ${{ github.event.inputs.frontend_url == 'https://app.vaiz.com' && 'ubuntu-latest' || 'ubuntu-latest-m' }}
     timeout-minutes: 30
 
     env:
-      FRONTEND_URL: ${{ github.event.inputs.frontend_url || vars.FRONTEND_URL || 'https://app.vaiz.com' }}
-      FRONTEND_EMAIL: ${{ secrets.FRONTEND_EMAIL }}
-      FRONTEND_PASSWORD: ${{ secrets.FRONTEND_PASSWORD }}
+      FRONTEND_STAND: ${{ github.event.inputs.frontend_url == 'https://app.vaiz.com' && 'prod' || 'dev' }}
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: ☁️ Setup VPN 
+      - name: Print test environment
+        run: |
+          echo "## Frontend Tests" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Stand** | $FRONTEND_STAND |" >> $GITHUB_STEP_SUMMARY
+          echo "| **URL** | ${{ github.event.inputs.frontend_url || 'https://app.vaiz.dev' }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: ☁️ Setup VPN
         uses: ./.github/actions/cloudflare
         with:
           CLOUDFLARE_AUTH_CLIENT_ID: ${{ vars.CF_TOKEN_NAME }}
@@ -54,14 +70,33 @@ jobs:
       - name: Add tests to PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/tests" >> $GITHUB_ENV
 
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: pip-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install allure-pytest
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('requirements.txt') }}
+
       - name: Install Playwright browsers
-        run: python -m playwright install chromium --with-deps
+        run: |
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" ]; then
+            python -m playwright install-deps chromium
+          else
+            python -m playwright install chromium --with-deps
+          fi
 
       - name: Clean old Allure results
         run: rm -rf allure-results
@@ -70,11 +105,37 @@ jobs:
         run: |
           mkdir -p allure-results
           echo "TEST_SCOPE=frontend" >> allure-results/environment.properties
-          echo "FRONTEND_URL=$FRONTEND_URL" >> allure-results/environment.properties
+          echo "FRONTEND_URL=${{ github.event.inputs.frontend_url || 'https://app.vaiz.dev' }}" >> allure-results/environment.properties
+
+      - name: Update baseline snapshots
+        if: github.event.inputs.update_snapshots == 'true'
+        run: |
+          TARGET="${{ github.event.inputs.snapshot_test }}"
+          if [ -z "$TARGET" ]; then
+            pytest tests/test_frontend/ -m frontend --update-snapshots
+          else
+            pytest tests/test_frontend/ -m frontend -k "$TARGET" --update-snapshots
+          fi
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull origin "$BRANCH"
+          git add tests/test_frontend/
+          git diff --cached --quiet || git commit -m "chore: update VRT baselines on CI"
+          git push origin "$BRANCH"
 
       - name: Run frontend tests
         continue-on-error: true
         run: pytest -m frontend --alluredir=allure-results
+
+      - name: Commit new baselines if created
+        run: |
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull origin "$BRANCH"
+          git add tests/test_frontend/
+          git diff --cached --quiet || (git commit -m "chore: auto-commit new VRT baselines" && git push origin "$BRANCH")
 
       - name: Get Allure history
         uses: actions/checkout@v2

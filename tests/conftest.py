@@ -42,9 +42,11 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
 )
 
 
-def pytest_configure(config):
-    print(f'\n🧪 Running on stand: {settings.TEST_STAND_NAME}')
-    print(f'🔗 API URL: {settings.API_URL}\n')
+def pytest_collection_finish(session):
+    has_backend = any(item.get_closest_marker('backend') for item in session.items)
+    if has_backend:
+        print(f'\n🧪 Running on stand: {settings.TEST_STAND_NAME}')
+        print(f'🔗 API URL: {settings.API_URL}\n')
 
 @pytest.fixture(scope="session")
 def mongo_client():
