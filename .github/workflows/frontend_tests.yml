@@ -78,7 +78,7 @@ jobs:
         run: |
           mkdir -p allure-results
           echo "TEST_SCOPE=frontend" >> allure-results/environment.properties
-          echo "FRONTEND_URL=$FRONTEND_URL" >> allure-results/environment.properties
+          echo "FRONTEND_URL=${{ github.event.inputs.frontend_url || 'https://app.vaiz.dev' }}" >> allure-results/environment.properties
 
       - name: Update baseline snapshots
         if: github.event.inputs.update_snapshots == 'true'

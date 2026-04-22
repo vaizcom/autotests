@@ -164,9 +164,13 @@ def assert_snapshot(request):
         snapshot_path = snapshot_dir / name
         test_name = request.node.originalname
 
-        if not snapshot_path.exists() or request.config.getoption("--update-snapshots"):
+        if not snapshot_path.exists():
             snapshot_path.write_bytes(screenshot)
-            pytest.skip(f"Baseline сохранён: {snapshot_path.name}. Запусти тест снова.")
+            return
+
+        if request.config.getoption("--update-snapshots"):
+            snapshot_path.write_bytes(screenshot)
+            pytest.skip(f"Baseline обновлён: {snapshot_path.name}.")
 
         # Удаляем артефакты прошлого падения перед новым сравнением
         (snapshot_dir / name.replace(".png", "_actual.png")).unlink(missing_ok=True)
@@ -233,5 +237,7 @@ def assert_snapshot(request):
                 f"Для обновления запусти: pytest --update-snapshots\n"
                 f"В CI укажи в поле snapshot_test: {test_name}"
             )
+
+        allure.attach(screenshot, name="screenshot", attachment_type=allure.attachment_type.PNG)
 
     return _assert
