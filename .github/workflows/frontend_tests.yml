@@ -23,7 +23,7 @@ on:
         default: false
         type: boolean
       snapshot_test:
-        description: 'Test name to update snapshots for (e.g. test_sign_in_with_email). Leave empty to update all.'
+        description: 'Only if "Update baseline snapshots" is checked: test name to update (e.g. test_sign_in_with_email), or leave empty to update all.'
         default: ''
         type: string
 
@@ -96,6 +96,13 @@ jobs:
       - name: Run frontend tests
         continue-on-error: true
         run: pytest -m frontend --alluredir=allure-results
+
+      - name: Commit new baselines if created
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tests/test_frontend/
+          git diff --cached --quiet || (git commit -m "chore: auto-commit new VRT baselines" && git push)
 
       - name: Get Allure history
         uses: actions/checkout@v2
