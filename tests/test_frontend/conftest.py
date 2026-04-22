@@ -162,6 +162,7 @@ def assert_snapshot(request):
         snapshot_dir = Path(request.fspath).parent / "__snapshots__" / FRONTEND_STAND
         snapshot_dir.mkdir(parents=True, exist_ok=True)
         snapshot_path = snapshot_dir / name
+        test_name = request.node.originalname
 
         if not snapshot_path.exists() or request.config.getoption("--update-snapshots"):
             snapshot_path.write_bytes(screenshot)
@@ -179,7 +180,8 @@ def assert_snapshot(request):
             allure.attach(screenshot, name="actual", attachment_type=allure.attachment_type.PNG)
             pytest.fail(
                 f"Размер изменился: baseline {baseline.size} → actual {actual.size}.\n"
-                f"Для обновления запусти: pytest --update-snapshots"
+                f"Для обновления запусти: pytest --update-snapshots\n"
+                f"В CI укажи в поле snapshot_test: {test_name}"
             )
 
         # Пиксель считается отличающимся если хоть один RGB-канал отличается больше чем на 10 единиц.
@@ -228,7 +230,8 @@ def assert_snapshot(request):
                 f"Baseline:  {snapshot_path}\n"
                 f"Actual:    {actual_path}\n"
                 f"Diff:      {diff_path}\n"
-                f"Для обновления запусти: pytest --update-snapshots"
+                f"Для обновления запусти: pytest --update-snapshots\n"
+                f"В CI укажи в поле snapshot_test: {test_name}"
             )
 
     return _assert

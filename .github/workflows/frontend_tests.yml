@@ -85,9 +85,9 @@ jobs:
         run: |
           TARGET="${{ github.event.inputs.snapshot_test }}"
           if [ -z "$TARGET" ]; then
-            pytest -m frontend --update-snapshots
+            pytest tests/test_frontend/ -m frontend --update-snapshots
           else
-            pytest -m frontend -k "$TARGET" --update-snapshots
+            pytest tests/test_frontend/ -m frontend -k "$TARGET" --update-snapshots
           fi
           BRANCH="${{ github.head_ref || github.ref_name }}"
           git config user.name "github-actions[bot]"
