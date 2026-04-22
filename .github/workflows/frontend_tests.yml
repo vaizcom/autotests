@@ -45,6 +45,14 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref_name }}
 
+      - name: Print test environment
+        run: |
+          echo "## Frontend Tests" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Stand** | $FRONTEND_STAND |" >> $GITHUB_STEP_SUMMARY
+          echo "| **URL** | ${{ github.event.inputs.frontend_url || 'https://app.vaiz.dev' }} |" >> $GITHUB_STEP_SUMMARY
+
       - name: ☁️ Setup VPN
         uses: ./.github/actions/cloudflare
         with:
@@ -79,11 +87,6 @@ jobs:
           mkdir -p allure-results
           echo "TEST_SCOPE=frontend" >> allure-results/environment.properties
           echo "FRONTEND_URL=${{ github.event.inputs.frontend_url || 'https://app.vaiz.dev' }}" >> allure-results/environment.properties
-          echo "## 🧪 Frontend Tests" >> $GITHUB_STEP_SUMMARY
-          echo "| | |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Stand** | $FRONTEND_STAND |" >> $GITHUB_STEP_SUMMARY
-          echo "| **URL** | ${{ github.event.inputs.frontend_url || 'https://app.vaiz.dev' }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Update baseline snapshots
         if: github.event.inputs.update_snapshots == 'true'
