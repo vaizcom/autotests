@@ -34,10 +34,12 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
     with allure.step("Сравнение скриншота"):
         page.get_by_role("link", name="Archive").wait_for(state="visible")
 
+        # Фиксируем известный раздел → Home всегда активен в сайдбаре
         page.get_by_role("link", name="Home").click()
         page.get_by_role("link", name="Archive").wait_for(state="visible")
-        page.mouse.move(640, 400)
+        page.mouse.move(640, 400)  # убираем hover с Home
 
+        # Сворачиваем все раскрытые секции сайдбара → фиксируем известное состояние
         for arrow in page.locator('[class*="_ArrowBox_"]').all():
             is_expanded = arrow.evaluate("""el => {
                 const header = el.parentElement;
@@ -54,25 +56,28 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
                 arrow.click()
                 page.wait_for_timeout(1000)
 
-        page.mouse.move(640, 400)
+        page.mouse.move(640, 400)  # убираем hover после сворачивания
         page.wait_for_timeout(200)
 
+        # Маски для динамических элементов которые меняются между запусками.
+        # Если тест станет флакать — добавь сюда новые локаторы.
         dynamic_masks = [
-            page.locator('[class*="AsideNotificationsMenuItem-module_UnreadDot"]'),
-            page.locator('[class*="NotificationsToggleButton-module_UnreadDot"]'),
-            page.locator('[class*="MemberAvatar-module_Root"]'),
-            page.locator('[class*="HomeScreen-module_Avatar"]'),
-            page.locator('[class*="HomeScreen-module_Title"]'),
-            page.locator('[class*="HomeScreen-module_TimeBlock"]'),
-            page.locator('[class*="HeaderSpaceSelector-module_Inner"]'),
-            page.locator('[class*="HomeScreenCard-module_Root"]'),
-            page.locator('[class*="HomeScreenTipCard-module_Tips"]'),
-            page.locator('[class*="HomeScreenStuff-module_Root"]'),
-            page.locator('[class*="TourBanner-module_Root"]'),
-            page.locator('[class*="AffiliateBanner-module_Root"]'),
-            page.locator('[class*="AsideMenu-module_Footer"]'),
+            page.locator('[class*="AsideNotificationsMenuItem-module_UnreadDot"]'),  # точка уведомлений в сайдбаре
+            page.locator('[class*="NotificationsToggleButton-module_UnreadDot"]'),   # точка уведомлений в хедере
+            page.locator('[class*="MemberAvatar-module_Root"]'),          # аватар пользователя в хедере
+            page.locator('[class*="HomeScreen-module_Avatar"]'),          # аватар/обложка на главной
+            page.locator('[class*="HomeScreen-module_Title"]'),           # приветствие "Hello, auto!"
+            page.locator('[class*="HomeScreen-module_TimeBlock"]'),       # время и дата
+            page.locator('[class*="HeaderSpaceSelector-module_Inner"]'),  # селектор Space в хедере
+            page.locator('[class*="HomeScreenCard-module_Root"]'),        # карточки (задачи, документы, избранное)
+            page.locator('[class*="HomeScreenTipCard-module_Tips"]'),     # совет недели
+            page.locator('[class*="HomeScreenStuff-module_Root"]'),       # блок Spaces
+            page.locator('[class*="TourBanner-module_Root"]'),            # баннер онбординга
+            page.locator('[class*="AffiliateBanner-module_Root"]'),       # баннер "Invite people"
+            page.locator('[class*="AsideMenu-module_Footer"]'),           # футер сайдбара
         ]
 
+        # Версия приложения имеет высоту 0 — маска не работает, красим через CSS как Playwright mask
         page.add_style_tag(content='''
             span[class*="AppVersion"] {
                 background-color: #FF00FF !important;
