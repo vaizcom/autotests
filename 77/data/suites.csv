@@ -1,0 +1,4 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","10685","Sign in with email","Frontend","Thu Apr 23 11:07:09 UTC 2026","passed","Thu Apr 23 11:07:20 UTC 2026","","Auth","",""
+"","17918","Logout","Frontend","Thu Apr 23 11:06:51 UTC 2026","failed","Thu Apr 23 11:07:09 UTC 2026","","Auth","",""
+"","7903","Login after logout","Frontend","Thu Apr 23 11:06:43 UTC 2026","passed","Thu Apr 23 11:06:50 UTC 2026","","Auth","",""
