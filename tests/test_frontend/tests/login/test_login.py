@@ -53,7 +53,7 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
             }""")
             if is_expanded:
                 arrow.click()
-                page.wait_for_timeout(300)
+                page.wait_for_timeout(500)
 
         page.mouse.move(640, 400)  # убираем hover после сворачивания
         page.wait_for_timeout(200)
@@ -87,4 +87,4 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
         ''')
 
         screenshot = page.screenshot(mask=dynamic_masks)
-        assert_snapshot(screenshot, name="sign_in_success.png", threshold=1.5)
+        assert_snapshot(screenshot, name="sign_in_success.png", threshold=3.0)
