@@ -238,6 +238,7 @@ def assert_snapshot(request):
                 f"В CI укажи в поле snapshot_test: {test_name}"
             )
 
-        allure.attach(screenshot, name="screenshot", attachment_type=allure.attachment_type.PNG)
+        allure.attach(snapshot_path.read_bytes(), name="baseline", attachment_type=allure.attachment_type.PNG)
+        allure.attach(screenshot, name="actual", attachment_type=allure.attachment_type.PNG)
 
     return _assert
