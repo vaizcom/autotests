@@ -1,0 +1,1 @@
+{"7c389b06b830905c0c44df3200f7563a":{"statistic":{"failed":0,"broken":0,"skipped":0,"passed":1,"unknown":0,"total":1},"items":[{"uid":"34445cc9c4b3f0e8","reportUrl":"https://vaizcom.github.io/autotests/67/#testresult/34445cc9c4b3f0e8","status":"passed","time":{"start":1776933506836,"stop":1776933515325,"duration":8489}}]}}
