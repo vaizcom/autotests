@@ -53,22 +53,7 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
             }""")
             if is_expanded:
                 arrow.click()
-                # Ждём пока конкретная секция полностью свернётся (высота = 0)
-                arrow.evaluate("""el => new Promise(resolve => {
-                    const check = () => {
-                        const header = el.parentElement;
-                        let next = header?.nextElementSibling;
-                        while (next) {
-                            if (next.className?.includes('CollabsedBox')) {
-                                if (next.offsetHeight === 0) { resolve(); return; }
-                                break;
-                            }
-                            next = next.nextElementSibling;
-                        }
-                        setTimeout(check, 50);
-                    };
-                    check();
-                })""")
+                page.wait_for_timeout(1000)
 
         page.mouse.move(640, 400)  # убираем hover после сворачивания
         page.wait_for_timeout(200)
