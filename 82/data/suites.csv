@@ -1,0 +1,3 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","12403","Sign in with email","Frontend","Fri Apr 24 07:54:37 UTC 2026","passed","Fri Apr 24 07:54:49 UTC 2026","","Auth","",""
+"","9256","Logout","Frontend","Fri Apr 24 07:54:27 UTC 2026","passed","Fri Apr 24 07:54:37 UTC 2026","","Auth","",""
