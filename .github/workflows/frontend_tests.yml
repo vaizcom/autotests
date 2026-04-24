@@ -23,7 +23,7 @@ on:
         default: false
         type: boolean
       snapshot_test:
-        description: 'Test name to update (e.g. test_sign_in_with_email). Leave empty to update all baselines.'
+        description: 'One or more test names separated by comma (e.g. test_a, test_b). Leave empty to run all.'
         default: ''
         type: string
 
@@ -110,7 +110,8 @@ jobs:
       - name: Update baseline snapshots
         if: github.event.inputs.update_snapshots == 'true'
         run: |
-          TARGET="${{ github.event.inputs.snapshot_test }}"
+          RAW="${{ github.event.inputs.snapshot_test }}"
+          TARGET=$(echo "$RAW" | sed 's/[[:space:]]*,[[:space:]]*/  or /g')
           if [ -z "$TARGET" ]; then
             pytest tests/test_frontend/ -m frontend --update-snapshots
           else
@@ -126,7 +127,14 @@ jobs:
 
       - name: Run frontend tests
         continue-on-error: true
-        run: pytest -m frontend --alluredir=allure-results
+        run: |
+          RAW="${{ github.event.inputs.snapshot_test }}"
+          TARGET=$(echo "$RAW" | sed 's/[[:space:]]*,[[:space:]]*/  or /g')
+          if [ -z "$TARGET" ]; then
+            pytest -m frontend --alluredir=allure-results
+          else
+            pytest -m frontend -k "$TARGET" --alluredir=allure-results
+          fi
 
       - name: Commit new baselines if created
         run: |

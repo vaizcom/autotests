@@ -120,6 +120,8 @@ def attach_on_failure(request, page):
     - Прошёл: останавливает трейс без сохранения, удаляет старый zip
       от предыдущего падения если он остался.
     """
+    allure.dynamic.parameter("test_name", request.node.originalname)
+
     context = page.context
     context.tracing.start(screenshots=True, snapshots=True)
 
