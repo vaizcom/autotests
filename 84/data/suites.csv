@@ -1,0 +1,8 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"
+    Smoke-тест, проверяющий полный флоу создания сущностей: Space → Project → Board → Task.
+    По завершении скриншот доски сравнивается с baseline. Space удаляется через API в teardown.
+    Тест не запускается на проде, так как создание сущностей тестируется только на dev.
+    ","18949","Create space → project → board → task","Frontend","Fri Apr 24 08:25:00 UTC 2026","passed","Fri Apr 24 08:25:19 UTC 2026","","Smoke","",""
+"","10499","Sign in with email","Frontend","Fri Apr 24 08:24:48 UTC 2026","passed","Fri Apr 24 08:24:58 UTC 2026","","Auth","",""
+"","7205","Logout","Frontend","Fri Apr 24 08:24:40 UTC 2026","passed","Fri Apr 24 08:24:48 UTC 2026","","Auth","",""
