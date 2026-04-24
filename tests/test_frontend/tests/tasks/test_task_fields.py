@@ -46,7 +46,9 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
     with allure.step(f"Создание Board: {_BOARD_NAME}"):
         page.get_by_text("Add board").click()
         page.get_by_role("button", name="Start creating").click()
-        page.get_by_role("button", name="Continue").click()
+        continue_btn = page.get_by_role("button", name="Continue")
+        expect(continue_btn).to_be_visible(timeout=10000)
+        continue_btn.click()
         page.get_by_role("textbox", name="Board name").fill(_BOARD_NAME)
         page.get_by_role("button", name="Create board").click()
         # Регистрируем cleanup сразу после создания — teardown найдёт борду по имени
@@ -56,6 +58,7 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
         page.get_by_role("textbox", name="Begin typing to search").fill(settings.AUTOTEST_MEMBER_EMAIL)
         page.get_by_role("textbox", name="Begin typing to search").press("Enter")
         page.get_by_role("button", name="Add members").click()
+        expect(page.get_by_role("button", name="Continue")).to_be_visible(timeout=10000)
         page.get_by_role("button", name="Continue").click()
 
     with allure.step("Открытие Board"):
