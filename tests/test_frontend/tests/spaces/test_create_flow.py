@@ -127,4 +127,3 @@ def test_create_space_with_project_board_task(page: Page, cleanup_space, assert_
 
         screenshot = page.screenshot(mask=dynamic_masks)
         assert_snapshot(screenshot, name="board_with_task.png", threshold=1.5)
-
