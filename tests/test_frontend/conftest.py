@@ -3,9 +3,25 @@ from pathlib import Path
 
 import allure
 import pytest
+import requests
 from PIL import Image, ImageChops, ImageDraw
 
 from tests.test_frontend.core.settings import BASE_URL, FRONTEND_EMAIL, FRONTEND_PASSWORD, FRONTEND_STAND
+
+# API URL для teardown-операций (удаление Space, Project и т.д.)
+API_URL = "https://api.vaiz.dev/v4"
+
+
+@pytest.fixture(scope="session")
+def api_token():
+    """Получает API-токен один раз на сессию для teardown-операций."""
+    resp = requests.post(
+        f"{API_URL}/Login",
+        json={"email": FRONTEND_EMAIL, "password": FRONTEND_PASSWORD},
+        timeout=30,
+        verify=False,
+    )
+    return resp.json()["payload"]["token"]
 
 
 def pytest_addoption(parser):
