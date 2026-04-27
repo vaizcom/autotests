@@ -44,7 +44,7 @@ def del_all_spaces(client):
     response = client.post(**get_spaces_endpoint())
     spaces = response.json()['payload']['spaces']
 
-    ids_to_keep = ["6866309d85fb8d104544a61e", "691adf9e4bfde6405d9feb3a"]
+    ids_to_keep = ["6866309d85fb8d104544a61e", "691adf9e4bfde6405d9feb3a", "69eb40574942cdc3cd91a9df"]
 
     for space in spaces:
         if space['_id'] not in ids_to_keep:

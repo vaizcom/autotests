@@ -18,8 +18,8 @@ ALLOWED_CONTENT_CASES = [
         id="inline_formatting"
     ),
     pytest.param(
-        '<a href="https://example.com" target="_blank">link</a>',
-        "Ссылка с href и target=_blank сохраняется",
+        '<a href="https://example.com" target="_blank" rel="noopener noreferrer">link</a>',
+        "Ссылка с href и target=_blank сохраняется (бэкенд добавляет rel=noopener noreferrer)",
         id="anchor_with_href_target"
     ),
     pytest.param(

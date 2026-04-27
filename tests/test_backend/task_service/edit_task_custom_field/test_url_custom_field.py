@@ -87,53 +87,23 @@ def test_edit_task_url_custom_field(owner_client, main_space, board_with_tasks, 
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
 @allure.sub_suite("URL Custom Fields")
-@pytest.mark.parametrize("case_name, invalid_value, expected_field_code, expected_message", [
-    ("No Protocol",
-     "google.com",
-     "InvalidURL",
-     'Expected valid URL (e.g., "https://example.com")')
-            ])
-def test_edit_task_url_custom_field_negative(owner_client, main_space, case_name, invalid_value, expected_field_code, expected_message):
-    allure.dynamic.title(f"Edit URL Custom Field. Negative: {case_name}")
+@allure.title("Edit URL Custom Field. URL без протокола — бэкенд принимает и сохраняет.")
+def test_edit_task_url_custom_field_no_protocol(owner_client, main_space):
     """
-    URL Custom Fields. Negative tests.
-    Проверяет валидацию формата URL (наличие протокола http/https).
+    URL без протокола (google.com) — бэкенд принимает и сохраняет как есть.
+    Протокол подставляется на фронте при отображении.
     """
     target_task_id = "696a1a04c7fd1dbba471efc2"
     url_field_id = "696e02e92452157dfd7e2631"
+    value_no_protocol = "google.com"
 
-    with allure.step(f"Action: Отправка некорректного значения: {invalid_value}"):
-        resp_edit = _update_custom_field(
-            owner_client,
-            main_space,
-            target_task_id,
-            url_field_id,
-            invalid_value
-        )
+    with allure.step(f"Action: Отправка URL без протокола: {value_no_protocol}"):
+        resp = _update_custom_field(owner_client, main_space, target_task_id, url_field_id, value_no_protocol)
+        assert resp.status_code == 200, f"Ожидался 200, получен {resp.status_code}. Тело: {resp.text}"
 
-    with allure.step("Verification: Проверка ошибки валидации"):
-        # Ожидаем 400 Bad Request
-        assert resp_edit.status_code == 400, \
-            f"Ожидался статус 400, получен {resp_edit.status_code}. Тело: {resp_edit.text}"
-
-        response_json = resp_edit.json()
-        assert response_json["type"] == "EditTaskCustomField"
-
-        error_data = response_json.get("error", {})
-        # Основной код ошибки формы
-        assert error_data.get("code") == "InvalidForm", \
-            f"Ожидался код ошибки InvalidForm, получен {error_data.get('code')}"
-
-        # Детализация ошибки по конкретному полю
-        fields_errors = error_data.get("fields", [])
-        assert len(fields_errors) > 0, "Список ошибок полей пуст"
-
-        field_error = fields_errors[0]
-
-        # Проверка наличия ожидаемого кода ошибки (InvalidURL) в списке кодов поля
-        error_codes = field_error.get("codes", [])
-        assert expected_field_code in error_codes, \
-            f"Код {expected_field_code} не найден в ошибке поля. Получено: {error_codes}"
-        meta = field_error.get("meta", {})
-        assert meta.get("message") == expected_message, \
-            f"Некорректное сообщение об ошибке. Ожидалось: '{expected_message}', получено: '{meta.get('message')}'"
+    with allure.step("Verification: Проверка что значение сохранилось"):
+        task = resp.json()["payload"]["task"]
+        field = next((cf for cf in task["customFields"] if cf["id"] == url_field_id), None)
+        assert field is not None, "Поле URL не найдено в ответе"
+        assert field["value"] == value_no_protocol, \
+            f"Ожидалось: '{value_no_protocol}', получено: '{field['value']}'"

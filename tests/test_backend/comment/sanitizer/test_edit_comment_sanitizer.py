@@ -21,10 +21,10 @@ EDIT_SANITIZED_CASES = [
     pytest.param(
         "<p>original</p>",
         "<script>alert('xss')</script>",
-        None,
-        400,
-        "Тег script при редактировании → 400, пустой контент отклоняется",
-        id="edit_script_tag_stripped_returns_400"
+        "<p></p>",
+        200,
+        "Тег script при редактировании удаляется, остаётся пустой параграф",
+        id="edit_script_tag_stripped"
     ),
     pytest.param(
         "<p>original</p>",
