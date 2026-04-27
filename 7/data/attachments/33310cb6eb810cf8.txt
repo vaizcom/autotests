@@ -1,3 +1,0 @@
-Не удалось удалить задачу 69ef406d741e0694b4f7844a после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
-Не удалось удалить задачу 69ef406f741e0694b4f784d5 после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
-Не удалось удалить задачу 69ef4070741e0694b4f78560 после 1 попыток: статус 400, ответ: {"payload":null,"type":"DeleteTask","error":{"code":"NotFound","originalType":"DeleteTask","meta":{"model":"Task"}}}
