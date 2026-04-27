@@ -58,8 +58,6 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
         page.get_by_role("textbox", name="Begin typing to search").fill(settings.AUTOTEST_MEMBER_EMAIL)
         page.get_by_role("textbox", name="Begin typing to search").press("Enter")
         page.get_by_role("button", name="Add members").click()
-        expect(page.get_by_role("button", name="Continue")).to_be_visible(timeout=10000)
-        page.get_by_role("button", name="Continue").click()
 
     with allure.step("Открытие Board"):
         expect(page.get_by_role("button", name="Open board")).to_be_visible(timeout=10000)
@@ -152,7 +150,7 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
             page.get_by_role("menuitem", name="Text").click()
             page.get_by_role("button", name="Text").click()
             page.get_by_role("textbox", name="Empty").fill("123")
-            page.get_by_text("Add new field").click()
+            page.keyboard.press("Escape")
         soft_step("Кастомное поле Text", add_custom_text)
 
     with allure.step(f"Комментарий: {_COMMENT}"):
