@@ -38,8 +38,8 @@ SANITIZED_CONTENT_CASES = [
     ),
     pytest.param(
         "<a href=\"javascript:alert('xss')\">click</a>",
-        '<a target="_blank">click</a>',
-        "javascript: в href удаляется, добавляется target=_blank",
+        '<a target="_blank" rel="noopener noreferrer">click</a>',
+        "javascript: в href удаляется, добавляется target=_blank и rel=noopener noreferrer",
         id="javascript_href_removed"
     ),
     pytest.param(
