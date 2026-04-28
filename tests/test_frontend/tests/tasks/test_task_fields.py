@@ -145,6 +145,8 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
         def add_blockers():
             page.get_by_role("textbox", name="Add blocker").fill(_BLOCKER_NAME)
             page.get_by_role("button", name=re.compile(r"Blockers.*Create task")).get_by_role("button").click()
+            # Ждём пока блокер создастся и появится поле blocking
+            expect(page.get_by_role("textbox", name="Add blocking")).to_be_visible(timeout=10000)
             page.get_by_role("textbox", name="Add blocking").fill(_BLOCKING_NAME)
             page.get_by_role("button", name=re.compile(r"Blocking.*Create task")).get_by_role("button").click()
         soft_step("Блокер и блокинг", add_blockers)
@@ -189,6 +191,7 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
     ]
 
     with allure.step("Сравнение скриншота верхней части задачи"):
+        expect(page.get_by_role("heading", name=_TASK_NAME)).to_be_visible(timeout=10000)
         page.get_by_role("heading", name=_TASK_NAME).scroll_into_view_if_needed()
         page.mouse.move(0, 0)
         page.wait_for_timeout(1000)
