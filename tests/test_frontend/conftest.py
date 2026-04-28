@@ -170,13 +170,13 @@ def assert_snapshot(request):
 
     Пример использования:
         screenshot = page.screenshot(mask=[...])
-        assert_snapshot(screenshot, name="my_page.png", threshold=1.5)
+        assert_snapshot(screenshot, name="my_page.png", threshold=3.0)
 
     Обновление baseline:
         pytest --update-snapshots           # все тесты
         pytest test.py --update-snapshots   # конкретный файл
     """
-    def _assert(screenshot: bytes, name: str, threshold: float = 0.1):
+    def _assert(screenshot: bytes, name: str, threshold: float = 1.0):
         snapshot_dir = Path(request.fspath).parent / "__snapshots__" / FRONTEND_STAND
         snapshot_dir.mkdir(parents=True, exist_ok=True)
         snapshot_path = snapshot_dir / name

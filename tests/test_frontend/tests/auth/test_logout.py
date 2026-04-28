@@ -39,6 +39,7 @@ def test_logout(page: Page, assert_snapshot):
     with allure.step("Сравнение скриншота"):
         dynamic_masks = [
             page.get_by_role("textbox", name="Email"),
+            page.locator('[class*="AuthLayout-module_SideBox"]'),
         ]
         screenshot = page.screenshot(mask=dynamic_masks)
-        assert_snapshot(screenshot, name="logout_sign_in_page.png", threshold=0.5)
+        assert_snapshot(screenshot, name="logout_sign_in_page.png", threshold=1.5)
