@@ -89,6 +89,7 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
         try:
             fn()
         except Exception as e:
+            allure.attach(str(e), name=f"{name} — ошибка", attachment_type=allure.attachment_type.TEXT)
             check.fail(f"{name}: {e}")
 
     with allure.step("Завершение задачи (Complete)"):
