@@ -1,10 +1,12 @@
-.PHONY: lint
+.PHONY: lint clean
 lint:
 	@exec ruff tests --fix
 	@exec ruff format tests
 
-clear:
-	find . -type d -name allure-results -exec rm -rf {} \;
+clean:
+	find . -type d -name allure-results -exec rm -rf {} +
+	find . -type d -name test-results -exec rm -rf {} +
+	rm -rf allure-report
 
 report:
 	allure generate allure-results -o allure-report --clean

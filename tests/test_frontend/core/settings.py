@@ -12,3 +12,7 @@ BASE_URL = {
 
 FRONTEND_EMAIL = environ.get("FRONTEND_EMAIL") or environ.get("OWNER_EMAIL")
 FRONTEND_PASSWORD = environ.get("FRONTEND_PASSWORD") or environ.get("PASSWORD")
+
+AUTOTEST_SPACE_NAME = "Autotest Space"
+AUTOTEST_PROJECT_NAME = "Autotest Project"
+AUTOTEST_MEMBER_EMAIL = environ.get("AUTOTEST_MEMBER_EMAIL", "mastretsovaone+main@gmail.com")
