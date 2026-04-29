@@ -24,3 +24,4 @@ urllib3==2.3.0
 pymongo==4.6.2
 Pillow>=10.0.0
 pytest-check
+pytest-rerunfailures

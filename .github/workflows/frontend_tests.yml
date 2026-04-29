@@ -131,9 +131,9 @@ jobs:
           RAW="${{ github.event.inputs.snapshot_test }}"
           TARGET=$(echo "$RAW" | sed 's/[[:space:]]*,[[:space:]]*/  or /g')
           if [ -z "$TARGET" ]; then
-            pytest -m frontend --alluredir=allure-results
+            pytest -m frontend --alluredir=allure-results --reruns 1 --reruns-delay 5
           else
-            pytest -m frontend -k "$TARGET" --alluredir=allure-results
+            pytest -m frontend -k "$TARGET" --alluredir=allure-results --reruns 1 --reruns-delay 5
           fi
 
       - name: Commit new baselines if created

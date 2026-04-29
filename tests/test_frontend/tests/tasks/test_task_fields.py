@@ -2,7 +2,6 @@ import re
 
 import allure
 import pytest
-import pytest_check as check
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
@@ -26,7 +25,7 @@ _CUSTOM_TEXT_VALUE = "Test value"
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.title("Create task and fill fields")
-def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
+def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot, soft_step):
     """
     Проверяет создание борды и задачи через UI с заполнением полей:
     статус, приоритет, исполнитель, тип, описание, подзадача, комментарий.
@@ -85,46 +84,44 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
         expect(page.get_by_role("heading", name=_TASK_NAME)).to_be_visible(timeout=10000)
 
     # === ПОЛЯ — заполняем все поля задачи, soft assertions чтобы не стопиться на первом падении ===
-    def soft_step(name, fn):
-        try:
-            fn()
-        except Exception as e:
-            allure.attach(str(e), name=f"{name} — ошибка", attachment_type=allure.attachment_type.TEXT)
-            check.fail(f"{name}: {e}")
-
     with allure.step("Завершение задачи (Complete)"):
         soft_step("Complete", lambda: page.locator('[class*="_Check_"]').first.click())
 
     with allure.step("Приоритет: Medium"):
-        soft_step("Приоритет", lambda: (
-            page.get_by_role("button", name="Priority Select priority").click() or
+        def set_priority():
+            page.get_by_role("button", name="Priority Select priority").click()
             page.get_by_text("Medium").click()
-        ))
+            expect(page.get_by_role("button", name=re.compile(r"Priority.*Medium"))).to_be_visible(timeout=5000)
+        soft_step("Приоритет", set_priority)
 
     with allure.step("Исполнитель (assign первый в дропдауне)"):
         def assign():
             page.get_by_role("button", name="Assign Not assigned").click()
             page.locator('.szh-menu-container [class*="SelectFlySearch-module_ItemText"]').first.click()
-            page.locator(".FlyBlock-module_Overlay_k4A8s").click()
+            page.locator('[class*="FlyBlock-module_Overlay"]').click()
+            expect(page.get_by_role("button", name=re.compile(r"Assign\s+\S"))).to_be_visible(timeout=5000)
         soft_step("Исполнитель", assign)
 
     with allure.step("Тип: Green"):
-        soft_step("Тип", lambda: (
-            page.get_by_role("button", name="Types Select type").click() or
+        def set_type():
+            page.get_by_role("button", name="Types Select type").click()
             page.get_by_text("Green").click()
-        ))
+            expect(page.get_by_role("button", name=re.compile(r"Types.*Green"))).to_be_visible(timeout=5000)
+        soft_step("Тип", set_type)
 
     with allure.step(f"Описание: {_DESCRIPTION}"):
-        soft_step("Описание", lambda: (
-            page.locator('[id^="editor-content-"]').get_by_role("paragraph").click() or
+        def set_description():
+            page.locator('[id^="editor-content-"]').get_by_role("paragraph").click()
             page.locator(".tiptap").first.fill(_DESCRIPTION)
-        ))
+            expect(page.locator(".tiptap").first).to_contain_text(_DESCRIPTION, timeout=5000)
+        soft_step("Описание", set_description)
 
     with allure.step(f"Подзадача: {_SUBTASK_NAME}"):
-        soft_step("Подзадача", lambda: (
-            page.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME) or
+        def add_subtask():
+            page.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
             page.keyboard.press("Enter")
-        ))
+            expect(page.get_by_text(_SUBTASK_NAME)).to_be_visible(timeout=5000)
+        soft_step("Подзадача", add_subtask)
 
     with allure.step("Майлстоун"):
         def add_milestone():
@@ -132,6 +129,7 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
             page.get_by_role("menuitem", name="Create milestone").locator("div").first.click()
             page.get_by_role("textbox", name="Type name").fill(_MILESTONE_NAME)
             page.get_by_role("button", name="Add", exact=True).click()
+            expect(page.get_by_role("button", name=re.compile(rf"Milestones.*{_MILESTONE_NAME}"))).to_be_visible(timeout=5000)
         soft_step("Майлстоун", add_milestone)
 
     with allure.step("Дата"):
@@ -140,16 +138,17 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
             date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
             date_input.fill("10.08.2030")
             page.get_by_role("button", name="Apply").click()
+            expect(page.get_by_role("button", name="Dates No dates set")).not_to_be_visible(timeout=5000)
         soft_step("Дата", add_date)
 
     with allure.step("Блокер и блокинг"):
         def add_blockers():
             page.get_by_role("textbox", name="Add blocker").fill(_BLOCKER_NAME)
             page.get_by_role("button", name=re.compile(r"Blockers.*Create task")).get_by_role("button").click()
-            # Ждём пока блокер создастся и появится поле blocking
-            expect(page.get_by_role("textbox", name="Add blocking")).to_be_visible(timeout=10000)
+            expect(page.get_by_text(_BLOCKER_NAME)).to_be_visible(timeout=10000)
             page.get_by_role("textbox", name="Add blocking").fill(_BLOCKING_NAME)
             page.get_by_role("button", name=re.compile(r"Blocking.*Create task")).get_by_role("button").click()
+            expect(page.get_by_text(_BLOCKING_NAME)).to_be_visible(timeout=10000)
         soft_step("Блокер и блокинг", add_blockers)
 
     with allure.step("Кастомное поле Text"):
@@ -200,9 +199,12 @@ def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot):
         screenshot_top = page.screenshot(mask=dynamic_masks)
         assert_snapshot(screenshot_top, name="task_fields_top.png", threshold=1.0)
 
-    with allure.step("Сравнение скриншота нижней части задачи"):
+    with allure.step(
+        "Сравнение скриншота нижней части задачи "
+        "(⚠ если шаги выше упали, скриншот сместится и отличия от эталона будут значительными)"
+    ):
         page.locator('[class*="CommentToolbar-module"]').first.scroll_into_view_if_needed()
-        page.mouse.move(640, 400)
+        page.mouse.move(0, 0)
         page.wait_for_timeout(1000)
 
         screenshot_bottom = page.screenshot(mask=dynamic_masks)
