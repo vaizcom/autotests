@@ -261,9 +261,12 @@ def test_11_comment(page: Page, soft_step):
     _open_task(page, soft_step)
 
     def add_comment():
-        page.locator("#root").get_by_role("textbox").filter(
-            has_text=re.compile(r"^$")
-        ).last.fill(_COMMENT)
+        # Комментарий — tiptap-редактор рядом с CommentToolbar (не путать с полем подзадачи)
+        toolbar = page.locator('[class*="CommentToolbar-module"]').first
+        toolbar.scroll_into_view_if_needed()
+        comment_editor = toolbar.locator('xpath=ancestor::div[contains(@class, "Comment")]').locator(".tiptap")
+        comment_editor.click()
+        comment_editor.fill(_COMMENT)
         send_btn = page.locator('[class*="CommentToolbar-module_Right"]').get_by_role("button").last
         expect(send_btn).to_be_enabled(timeout=5000)
         send_btn.click()

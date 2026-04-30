@@ -1,4 +1,5 @@
 import io
+import os
 import re
 from pathlib import Path
 
@@ -127,14 +128,16 @@ def browser_context_args(browser_context_args, auth_state):
     - ignore_https_errors: игнорирует SSL-ошибки на dev-стенде
     - viewport: фиксирует размер окна для стабильных VRT-скриншотов
     """
-    return {
+    ctx = {
         **browser_context_args,
         "ignore_https_errors": True,
         "storage_state": auth_state,
         "viewport": {"width": 1280, "height": 720},
-        "record_video_dir": "test-results/videos",
-        "record_video_size": {"width": 640, "height": 360},
     }
+    # Видео записывается только на CI — локально видно в headed-браузере
+    if os.environ.get("CI"):
+        ctx["record_video_dir"] = "test-results/videos"
+    return ctx
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
