@@ -1,4 +1,5 @@
 import io
+import re
 from pathlib import Path
 
 import allure
@@ -6,11 +7,52 @@ import pytest
 import pytest_check as check
 import requests
 from PIL import Image, ImageChops, ImageDraw
+from playwright.sync_api import expect
 
+from tests.test_frontend.core import settings
 from tests.test_frontend.core.settings import BASE_URL, FRONTEND_EMAIL, FRONTEND_PASSWORD, FRONTEND_STAND
 
 # API URL для teardown-операций (удаление Space, Project и т.д.)
 API_URL = "https://api.vaiz.dev/v4"
+
+
+def _run_task_cleanup(page, cleanup_info):
+    """Удаляет все карточки с таймстемпом теста прямо на борде."""
+    ts = cleanup_info.get("ts")
+    if not ts:
+        return
+
+    with allure.step(f"Cleanup: удаление задач с таймстемпом {ts}"):
+        # Перезагружаем борду — гарантированно закрывает сайдбар
+        page.goto(settings.AUTOTEST_BOARD_URL)
+        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+
+        deleted = 0
+
+        for _ in range(10):
+            # Ищем карточку-кнопку с таймстемпом
+            card = page.get_by_role("button").filter(has_text=ts).first
+            try:
+                expect(card).to_be_visible(timeout=3000)
+            except Exception:
+                break
+
+            # Наводим на карточку чтобы появилась кнопка "..." и кликаем
+            card.hover()
+            card.locator('[class*="TaskCard-module_Menu"] button').first.click()
+
+            delete_with_sub = page.get_by_text("Delete with subtasks")
+            if delete_with_sub.is_visible():
+                delete_with_sub.click()
+            else:
+                page.get_by_text("Delete task").click()
+
+            page.get_by_role("button", name="Proceed").click()
+            page.wait_for_timeout(2000)
+            deleted += 1
+
+        allure.attach(f"Удалено карточек: {deleted}", name="cleanup result",
+                      attachment_type=allure.attachment_type.TEXT)
 
 
 @pytest.fixture(scope="session")
@@ -91,6 +133,7 @@ def browser_context_args(browser_context_args, auth_state):
         "storage_state": auth_state,
         "viewport": {"width": 1280, "height": 720},
         "record_video_dir": "test-results/videos",
+        "record_video_size": {"width": 640, "height": 360},
     }
 
 
@@ -200,8 +243,13 @@ def attach_on_failure(request, page):
             failure_screenshot = None
             failure_url = None
 
+    # Cleanup задач до закрытия страницы (если есть данные)
+    cleanup_info = getattr(request.node, "_cleanup_task_info", None)
+    if cleanup_info:
+        _run_task_cleanup(page, cleanup_info)
+
     # Закрываем страницу чтобы видео финализировалось
-    video_path = page.video.path() if page.video else None
+    video = page.video
     page.close()
 
     if failed:
@@ -210,8 +258,6 @@ def attach_on_failure(request, page):
                 allure.attach(failure_screenshot, name="screenshot on failure", attachment_type=allure.attachment_type.PNG)
             if failure_url:
                 allure.attach(failure_url, name="page URL", attachment_type=allure.attachment_type.TEXT)
-            if video_path and Path(video_path).exists():
-                allure.attach(Path(video_path).read_bytes(), name="video", attachment_type=allure.attachment_type.WEBM)
             context.tracing.stop(path=str(trace_path))
             allure.attach(trace_path.read_bytes(), name="playwright trace", attachment_type=allure.attachment_type.ZIP)
         except Exception:
@@ -220,9 +266,16 @@ def attach_on_failure(request, page):
         context.tracing.stop()
         trace_path.unlink(missing_ok=True)
 
-    # Удаляем видеофайл — уже приложен к Allure или не нужен
-    if video_path and Path(video_path).exists():
-        Path(video_path).unlink(missing_ok=True)
+    # save_as ждёт полной финализации видео (в отличие от чтения raw-файла)
+    if video:
+        try:
+            video_save_path = trace_path.with_name(f"{request.node.name}_video.webm")
+            video_save_path.parent.mkdir(parents=True, exist_ok=True)
+            video.save_as(str(video_save_path))
+            allure.attach(video_save_path.read_bytes(), name="video", attachment_type=allure.attachment_type.WEBM)
+            video_save_path.unlink(missing_ok=True)
+        except Exception:
+            pass
 
 
 @pytest.fixture

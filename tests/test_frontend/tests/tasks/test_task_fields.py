@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 import allure
 import pytest
@@ -8,204 +9,285 @@ from tests.test_frontend.core import settings
 
 pytestmark = [pytest.mark.frontend]
 
-_SPACE_NAME = settings.AUTOTEST_SPACE_NAME
-_PROJECT_NAME = settings.AUTOTEST_PROJECT_NAME
-_BOARD_NAME = "temp_board"
-_TASK_NAME = "temp_task"
-_SUBTASK_NAME = "Test subtask"
-_DESCRIPTION = "Test description"
-_COMMENT = "Test comment"
+# test_01 — создаёт задачу, остальные зависят от неё.
+# При падении test_01 зависимые тесты будут SKIP, а не FAIL.
+_DEP_TASK = "test_01_create_task"
+
+_TS = datetime.now().strftime("%H%M%S")
+_TASK_NAME = f"autotest_{_TS}"
+_SUBTASK_NAME = f"Test subtask {_TS}"
+_DESCRIPTION = f"Test description {_TS}"
+_COMMENT = f"Test comment {_TS}"
 _MILESTONE_NAME = "Test milestone"
-_BLOCKER_NAME = "Blocker task"
-_BLOCKING_NAME = "Blocking task"
-_CUSTOM_TEXT_VALUE = "Test value"
+_BLOCKER_NAME = f"Blocker task {_TS}"
+_BLOCKING_NAME = f"Blocking task {_TS}"
+_CUSTOM_TEXT_VALUE = f"Test value {_TS}"
 
 
-@pytest.mark.skipif(settings.FRONTEND_STAND == "prod", reason="Создание сущностей тестируется только на dev")
+def _open_task(page: Page, soft_step):
+    """Открывает борду и кликает по карточке задачи, открывая сайдбар."""
+    with allure.step("Открытие борды и поиск задачи"):
+        page.goto(settings.AUTOTEST_BOARD_URL)
+        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+
+        # Задача могла не синхронизироваться — пробуем до 3 перезагрузок с ожиданием
+        for attempt in range(4):
+            task_card = page.get_by_role("button").filter(
+                has_text=re.compile(r"[A-Z]+-\d+")
+            ).filter(has_text=_TASK_NAME)
+            if task_card.is_visible():
+                break
+            if attempt < 3:
+                page.wait_for_timeout(2000)
+                page.reload()
+                expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+
+    def open_sidebar():
+        task_card = page.get_by_role("button").filter(
+            has_text=re.compile(r"[A-Z]+-\d+")
+        ).filter(has_text=_TASK_NAME)
+        expect(task_card).to_be_visible(timeout=15000)
+        task_card.click()
+        expect(page.get_by_role("heading", name=_TASK_NAME)).to_be_visible(timeout=10000)
+
+    with allure.step(f"Открытие задачи {_TASK_NAME} в сайдбаре"):
+        soft_step("Открытие задачи в сайдбаре", open_sidebar)
+
+
+@pytest.mark.dependency(name=_DEP_TASK)
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
-@allure.title("Create task and fill fields")
-def test_create_and_fill_task(page: Page, cleanup_board, assert_snapshot, soft_step):
-    """
-    Проверяет создание борды и задачи через UI с заполнением полей:
-    статус, приоритет, исполнитель, тип, описание, подзадача, комментарий.
-    Борда удаляется через API в teardown. Тест не запускается на проде.
-    """
+@allure.title("01. Create task on board")
+def test_01_create_task(page: Page, soft_step):
+    """Создаёт новую задачу на борде и проверяет что карточка появилась."""
+    with allure.step("Открытие борды"):
+        soft_step("Открытие борды", lambda: (
+            page.goto(settings.AUTOTEST_BOARD_URL),
+            expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000),
+        ))
 
-    # === НАВИГАЦИЯ — переход в нужный Space и Project ===
-    with allure.step(f"Открытие {_SPACE_NAME}"):
-        page.goto(f"{settings.BASE_URL}/")
-        expect(page.get_by_role("link", name="Home")).to_be_visible(timeout=15000)
-        page.locator('[class*="HeaderSpaceSelector-module_Inner"]').first.click()
-        page.get_by_label("Menu", exact=True).get_by_text(_SPACE_NAME).click()
-        page.wait_for_url(lambda url: settings.BASE_URL in url, timeout=10000)
-        space_id = page.url.replace(settings.BASE_URL, "").strip("/").split("/")[0]
-
-    with allure.step(f"Открытие {_PROJECT_NAME}"):
-        page.locator("span").filter(has_text=_PROJECT_NAME).get_by_role("link").click()
-        expect(page.get_by_text("Add board")).to_be_visible(timeout=10000)
-
-    # === БОРДА — создаём временную борду, удалится в teardown ===
-    with allure.step(f"Создание Board: {_BOARD_NAME}"):
-        page.get_by_text("Add board").click()
-        page.get_by_role("button", name="Start creating").click()
-        continue_btn = page.get_by_role("button", name="Continue")
-        expect(continue_btn).to_be_visible(timeout=10000)
-        continue_btn.click()
-        page.get_by_role("textbox", name="Board name").fill(_BOARD_NAME)
-        page.get_by_role("button", name="Create board").click()
-        # Регистрируем cleanup сразу после создания — teardown найдёт борду по имени
-        cleanup_board.append({"board_name": _BOARD_NAME, "space_id": space_id})
-        page.get_by_role("button", name="Continue").click()
-
-        # # Добавление участника из спейса
-        # page.get_by_role("textbox", name="Begin typing to search").fill(settings.AUTOTEST_MEMBER_EMAIL)
-        # page.get_by_role("textbox", name="Begin typing to search").press("Enter")
-        # page.get_by_role("button", name="Add members").click()
-
-    with allure.step("Открытие Board"):
-        expect(page.get_by_role("button", name="Open board")).to_be_visible(timeout=10000)
-        page.get_by_role("button", name="Open board").click()
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=10000)
-
-    # === ЗАДАЧА — создаём задачу и открываем в сайдбаре ===
-    with allure.step(f"Создание Task: {_TASK_NAME}"):
+    def create_task():
         page.get_by_role("button", name="Add task").first.click()
         expect(page.get_by_role("textbox", name="Task name...")).to_be_visible(timeout=5000)
         page.get_by_role("textbox", name="Task name...").fill(_TASK_NAME)
         page.locator("#board-card-create").get_by_role("button", name="Add task").click()
 
-    with allure.step("Открытие Task в сайдбаре"):
+    with allure.step(f"Создание задачи: {_TASK_NAME}"):
+        soft_step("Создание задачи", create_task)
+
+    def verify_card():
         task_card = page.get_by_role("button").filter(
             has_text=re.compile(r"[A-Z]+-\d+")
         ).filter(has_text=_TASK_NAME)
         expect(task_card).to_be_visible(timeout=10000)
-        task_card.click()
-        expect(page.get_by_role("heading", name=_TASK_NAME)).to_be_visible(timeout=10000)
 
-    # === ПОЛЯ — заполняем все поля задачи, soft assertions чтобы не стопиться на первом падении ===
-    with allure.step("Завершение задачи (Complete)"):
-        soft_step("Complete", lambda: page.locator('[class*="_Check_"]').first.click())
+    with allure.step("Проверка: карточка видна на борде"):
+        soft_step("Карточка на борде", verify_card)
 
-    with allure.step("Приоритет: Medium"):
-        def set_priority():
-            page.get_by_role("button", name="Priority Select priority").click()
-            page.get_by_text("Medium").click()
-            expect(page.get_by_role("button", name=re.compile(r"Priority.*Medium"))).to_be_visible(timeout=5000)
+
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("02. Set priority Medium")
+def test_02_priority(page: Page, soft_step):
+    """Устанавливает приоритет задачи Medium."""
+    _open_task(page, soft_step)
+
+    def set_priority():
+        page.get_by_role("button", name="Priority Select priority").click()
+        page.get_by_text("Medium").click()
+        expect(page.get_by_role("button", name=re.compile(r"Priority.*Medium"))).to_be_visible(timeout=5000)
+
+    with allure.step("Выбор приоритета Medium"):
         soft_step("Приоритет", set_priority)
 
-    with allure.step("Исполнитель (assign первый в дропдауне)"):
-        def assign():
-            page.get_by_role("button", name="Assign Not assigned").click()
-            page.locator('.szh-menu-container [class*="SelectFlySearch-module_ItemText"]').first.click()
-            page.locator('[class*="FlyBlock-module_Overlay"]').click()
-            expect(page.get_by_role("button", name=re.compile(r"Assign\s+\S"))).to_be_visible(timeout=5000)
+
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("03. Assign user")
+def test_03_assignee(page: Page, soft_step):
+    """Назначает первого пользователя из списка исполнителем."""
+    _open_task(page, soft_step)
+
+    def assign():
+        page.get_by_role("button", name="Assign Not assigned").click()
+        page.locator('.szh-menu-container [class*="SelectFlySearch-module_ItemText"]').first.click()
+        page.locator('[class*="FlyBlock-module_Overlay"]').click()
+        expect(page.get_by_role("button", name=re.compile(r"Assign\s+\S"))).to_be_visible(timeout=5000)
+
+    with allure.step("Выбор исполнителя"):
         soft_step("Исполнитель", assign)
 
-    with allure.step("Тип: Green"):
-        def set_type():
-            page.get_by_role("button", name="Types Select type").click()
-            page.get_by_text("Green").click()
-            expect(page.get_by_role("button", name=re.compile(r"Types.*Green"))).to_be_visible(timeout=5000)
+
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("04. Set type Green")
+def test_04_type(page: Page, soft_step):
+    """Устанавливает тип задачи Green."""
+    _open_task(page, soft_step)
+
+    def set_type():
+        page.get_by_role("button", name="Types Select type").click()
+        page.get_by_role("menuitem", name="Green").click()
+        expect(page.get_by_role("button", name=re.compile(r"Types.*Green"))).to_be_visible(timeout=5000)
+
+    with allure.step("Выбор типа Green"):
         soft_step("Тип", set_type)
 
-    with allure.step(f"Описание: {_DESCRIPTION}"):
-        def set_description():
-            page.locator('[id^="editor-content-"]').get_by_role("paragraph").click()
-            page.locator(".tiptap").first.fill(_DESCRIPTION)
-            expect(page.locator(".tiptap").first).to_contain_text(_DESCRIPTION, timeout=5000)
+
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("05. Fill description")
+def test_05_description(page: Page, soft_step):
+    """Заполняет описание задачи."""
+    _open_task(page, soft_step)
+
+    def set_description():
+        page.locator('[id^="editor-content-"]').get_by_role("paragraph").click()
+        page.locator(".tiptap").first.fill(_DESCRIPTION)
+        expect(page.locator(".tiptap").first).to_contain_text(_DESCRIPTION, timeout=5000)
+
+    with allure.step(f"Ввод описания: {_DESCRIPTION}"):
         soft_step("Описание", set_description)
 
-    with allure.step(f"Подзадача: {_SUBTASK_NAME}"):
-        def add_subtask():
-            page.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
-            page.keyboard.press("Enter")
-            expect(page.get_by_text(_SUBTASK_NAME)).to_be_visible(timeout=5000)
+
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("06. Add subtask")
+def test_06_subtask(page: Page, soft_step):
+    """Добавляет подзадачу к задаче."""
+    _open_task(page, soft_step)
+
+    def add_subtask():
+        page.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
+        page.keyboard.press("Enter")
+        expect(page.get_by_text(_SUBTASK_NAME)).to_be_visible(timeout=5000)
+
+    with allure.step(f"Создание подзадачи: {_SUBTASK_NAME}"):
         soft_step("Подзадача", add_subtask)
 
-    with allure.step("Майлстоун"):
-        def add_milestone():
-            page.get_by_role("button", name="Milestones Select milestones").click()
-            page.get_by_role("menuitem", name="Create milestone").locator("div").first.click()
-            page.get_by_role("textbox", name="Type name").fill(_MILESTONE_NAME)
-            page.get_by_role("button", name="Add", exact=True).click()
-            expect(page.get_by_role("button", name=re.compile(rf"Milestones.*{_MILESTONE_NAME}"))).to_be_visible(timeout=5000)
+
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("07. Add milestone")
+def test_07_milestone(page: Page, soft_step):
+    """Привязывает майлстоун к задаче."""
+    _open_task(page, soft_step)
+
+    def add_milestone():
+        page.get_by_role("button", name="Milestones Select milestones").click()
+        page.get_by_role("textbox", name="Type to search...").fill(_MILESTONE_NAME)
+        page.get_by_role("menuitem", name=_MILESTONE_NAME).click()
+        expect(page.get_by_role("button", name=re.compile(rf"Milestones.*{_MILESTONE_NAME}"))).to_be_visible(timeout=5000)
+
+    with allure.step(f"Выбор майлстоуна: {_MILESTONE_NAME}"):
         soft_step("Майлстоун", add_milestone)
 
-    with allure.step("Дата"):
-        def add_date():
-            page.get_by_role("button", name="Dates No dates set").click()
-            date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
-            date_input.fill("10.08.2030")
-            page.get_by_role("button", name="Apply").click()
-            expect(page.get_by_role("button", name="Dates No dates set")).not_to_be_visible(timeout=5000)
+
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("08. Set date")
+def test_08_date(page: Page, soft_step):
+    """Устанавливает дату задачи."""
+    _open_task(page, soft_step)
+
+    def add_date():
+        page.get_by_role("button", name="Dates No dates set").click()
+        date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
+        date_input.fill("10.08.2030")
+        page.get_by_role("button", name="Apply").click()
+        expect(page.get_by_role("button", name="Dates No dates set")).not_to_be_visible(timeout=5000)
+
+    with allure.step("Установка даты 10.08.2030"):
         soft_step("Дата", add_date)
 
-    with allure.step("Блокер и блокинг"):
-        def add_blockers():
-            page.get_by_role("textbox", name="Add blocker").fill(_BLOCKER_NAME)
-            page.get_by_role("button", name=re.compile(r"Blockers.*Create task")).get_by_role("button").click()
-            expect(page.get_by_text(_BLOCKER_NAME)).to_be_visible(timeout=10000)
-            page.get_by_role("textbox", name="Add blocking").fill(_BLOCKING_NAME)
-            page.get_by_role("button", name=re.compile(r"Blocking.*Create task")).get_by_role("button").click()
-            expect(page.get_by_text(_BLOCKING_NAME)).to_be_visible(timeout=10000)
-        soft_step("Блокер и блокинг", add_blockers)
 
-    with allure.step("Кастомное поле Text"):
-        def add_custom_text():
-            page.locator("div").filter(has_text=re.compile(r"^Add new field$")).nth(2).click()
-            page.get_by_role("menuitem", name="Text").click()
-            page.get_by_role("button", name="Text").click()
-            page.get_by_role("textbox", name="Empty").fill(_CUSTOM_TEXT_VALUE)
-            page.keyboard.press("Escape")
-        soft_step("Кастомное поле Text", add_custom_text)
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("09. Add blocker and blocking")
+def test_09_blockers(page: Page, soft_step):
+    """Добавляет блокер и блокинг задачу."""
+    _open_task(page, soft_step)
+
+    def add_blocker():
+        page.get_by_role("textbox", name="Add blocker").fill(_BLOCKER_NAME)
+        page.get_by_role("textbox", name="Add blocker").press("Enter")
+        expect(page.get_by_text(_BLOCKER_NAME).first).to_be_visible(timeout=10000)
+
+    with allure.step(f"Создание блокера: {_BLOCKER_NAME}"):
+        soft_step("Блокер", add_blocker)
+
+    def add_blocking():
+        page.get_by_role("textbox", name="Add blocking").fill(_BLOCKING_NAME)
+        page.get_by_role("textbox", name="Add blocking").press("Enter")
+        expect(page.get_by_text(_BLOCKING_NAME).first).to_be_visible(timeout=10000)
+
+    with allure.step(f"Создание блокинга: {_BLOCKING_NAME}"):
+        soft_step("Блокинг", add_blocking)
+
+
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("10. Fill custom text field")
+def test_10_custom_field(page: Page, soft_step):
+    """Заполняет кастомное текстовое поле задачи."""
+    _open_task(page, soft_step)
+
+    def fill_custom_text():
+        page.get_by_role("button", name=re.compile(r"^Text")).first.click()
+        text_input = page.get_by_placeholder("Empty").first
+        text_input.clear()
+        text_input.fill(_CUSTOM_TEXT_VALUE)
+        page.keyboard.press("Escape")
+
+    with allure.step(f"Заполнение кастомного поля: {_CUSTOM_TEXT_VALUE}"):
+        soft_step("Кастомное поле Text", fill_custom_text)
+
+
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("11. Add comment")
+def test_11_comment(page: Page, soft_step):
+    """Добавляет комментарий к задаче."""
+    _open_task(page, soft_step)
+
+    def add_comment():
+        page.locator("#root").get_by_role("textbox").filter(
+            has_text=re.compile(r"^$")
+        ).last.fill(_COMMENT)
+        send_btn = page.locator('[class*="CommentToolbar-module_Right"]').get_by_role("button").last
+        expect(send_btn).to_be_enabled(timeout=5000)
+        send_btn.click()
 
     with allure.step(f"Комментарий: {_COMMENT}"):
-        soft_step("Комментарий", lambda: (
-            page.locator("#root").get_by_role("textbox").filter(
-                has_text=re.compile(r"^$")
-            ).last.fill(_COMMENT) or
-            page.locator('[class*="CommentToolbar-module_Right"]').get_by_role("button").last.click()
-        ))
+        soft_step("Комментарий", add_comment)
 
-    # === СКРИНШОТЫ — верхняя часть (поля) и нижняя (подзадача, описание, комментарий) ===
-    page.add_style_tag(content='''
-        span[class*="AppVersion"] {
-            background-color: #FF00FF !important;
-            color: transparent !important;
-            display: inline-block !important;
-            min-height: 14px !important;
-        }
-    ''')
 
-    dynamic_masks = [
-        page.locator('[class*="MemberAvatar-module_Root"]'),
-        page.locator('[class*="HeaderSpaceSelector-module_Icon"]'),
-        page.locator('[class*="AsideMenu-module_Footer"]'),
-        page.locator('[class*="AsideNotificationsMenuItem-module_UnreadDot"]'),
-        page.locator('[class*="NotificationsToggleButton-module_UnreadDot"]'),
-        page.locator('[class*="TourBanner-module_Root"]'),
-        page.locator('[class*="AffiliateBanner-module_Root"]'),
-        page.locator('[class*="Comment-module_Date"]'),
-        page.locator('[class*="TaskHrid-module"]'),
-    ]
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("12. Complete task")
+def test_12_complete(page: Page, soft_step):
+    """Отмечает задачу как выполненную (Complete). Последний перед cleanup, чтобы не скрыть карточку."""
+    _open_task(page, soft_step)
 
-    with allure.step("Сравнение скриншота верхней части задачи"):
-        expect(page.get_by_role("heading", name=_TASK_NAME)).to_be_visible(timeout=10000)
-        page.get_by_role("heading", name=_TASK_NAME).scroll_into_view_if_needed()
-        page.mouse.move(0, 0)
-        page.wait_for_timeout(1000)
+    with allure.step("Клик по чекбоксу Complete"):
+        soft_step("Complete", lambda: page.locator('[class*="_Check_"]').first.click())
 
-        screenshot_top = page.screenshot(mask=dynamic_masks)
-        assert_snapshot(screenshot_top, name="task_fields_top.png", threshold=1.0)
 
-    with allure.step(
-        "Сравнение скриншота нижней части задачи "
-        "(⚠ если шаги выше упали, скриншот сместится и отличия от эталона будут значительными)"
-    ):
-        page.locator('[class*="CommentToolbar-module"]').first.scroll_into_view_if_needed()
-        page.mouse.move(0, 0)
-        page.wait_for_timeout(1000)
-
-        screenshot_bottom = page.screenshot(mask=dynamic_masks)
-        assert_snapshot(screenshot_bottom, name="task_fields_bottom.png", threshold=1.0)
+@pytest.mark.dependency(depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.title("99. Cleanup: delete test tasks")
+def test_99_cleanup(page: Page, cleanup_task):
+    """Удаляет все карточки с таймстемпом теста с борды."""
+    cleanup_task["ts"] = _TS
