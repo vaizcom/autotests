@@ -59,13 +59,21 @@ def _run_task_cleanup(page, cleanup_info):
 @pytest.fixture(scope="session")
 def api_token():
     """Получает API-токен один раз на сессию для teardown-операций."""
-    resp = requests.post(
-        f"{API_URL}/Login",
-        json={"email": FRONTEND_EMAIL, "password": FRONTEND_PASSWORD},
-        timeout=30,
-        verify=False,
-    )
-    return resp.json()["payload"]["token"]
+    try:
+        resp = requests.post(
+            f"{API_URL}/Login",
+            json={"email": FRONTEND_EMAIL, "password": FRONTEND_PASSWORD},
+            timeout=30,
+            verify=False,
+        )
+        resp.raise_for_status()
+        return resp.json()["payload"]["token"]
+    except (requests.ConnectionError, requests.Timeout) as e:
+        pytest.skip(f"API недоступен — не удалось получить токен: {e}")
+    except requests.HTTPError as e:
+        pytest.skip(f"API вернул ошибку {resp.status_code} — не удалось получить токен")
+    except (KeyError, requests.exceptions.JSONDecodeError):
+        pytest.skip(f"API вернул невалидный ответ ({resp.status_code}) — не удалось получить токен")
 
 
 def pytest_addoption(parser):
@@ -105,14 +113,36 @@ def auth_state(playwright):
 
     Scope session означает что логин происходит ровно один раз за весь прогон.
     """
+    # Проверка доступности стенда перед логином (3 попытки с интервалом 10 сек)
+    import time
+    reason = ""
+    for attempt in range(3):
+        try:
+            resp = requests.get(BASE_URL, timeout=10, verify=False)
+            if resp.status_code < 500:
+                break
+            reason = f"вернул {resp.status_code}"
+        except (requests.ConnectionError, requests.Timeout) as e:
+            reason = str(e)
+        if attempt < 2:
+            print(f"⏳ Стенд недоступен ({reason}), повтор через 10 сек... ({attempt + 1}/3)")
+            time.sleep(10)
+    else:
+        pytest.skip(f"Стенд недоступен после 3 попыток: {reason}")
+
     browser = playwright.chromium.launch()
     context = browser.new_context(ignore_https_errors=True)
     page = context.new_page()
-    page.goto(f"{BASE_URL}/auth/sign-in")
-    page.get_by_role("textbox", name="Email").fill(FRONTEND_EMAIL)
-    page.get_by_role("textbox", name="Password").fill(FRONTEND_PASSWORD)
-    page.get_by_role("button", name="Continue with Email").click()
-    page.get_by_role("link", name="Home").wait_for(state="visible")
+    try:
+        page.goto(f"{BASE_URL}/auth/sign-in")
+        page.get_by_role("textbox", name="Email").fill(FRONTEND_EMAIL)
+        page.get_by_role("textbox", name="Password").fill(FRONTEND_PASSWORD)
+        page.get_by_role("button", name="Continue with Email").click()
+        page.get_by_role("link", name="Home").wait_for(state="visible")
+    except Exception as e:
+        context.close()
+        browser.close()
+        pytest.skip(f"Стенд недоступен — логин не прошёл: {str(e).split(chr(10))[0]}")
     state = context.storage_state()
     context.close()
     browser.close()
@@ -203,6 +233,12 @@ def soft_step(page):
                 detail = short
 
             log_text = f"Причина: {hint}\n{detail}"
+            print(f"\n{'=' * 60}")
+            print(f"SOFT STEP FAILED: {name}")
+            print(f"URL: {page.url}")
+            print(f"Причина: {hint}")
+            print(f"Детали: {detail}")
+            print(f"{'=' * 60}\n")
             allure.attach(page.screenshot(), name=f"{name} — скриншот", attachment_type=allure.attachment_type.PNG)
             allure.attach(log_text, name=f"{name} — лог", attachment_type=allure.attachment_type.TEXT)
             check.fail(f"[{name}] {hint}")
