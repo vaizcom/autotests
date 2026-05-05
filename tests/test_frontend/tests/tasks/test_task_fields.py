@@ -6,6 +6,7 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
+from tests.test_frontend.tests.tasks.conftest import open_card
 
 pytestmark = [pytest.mark.frontend]
 
@@ -23,35 +24,6 @@ _BLOCKER_NAME = f"Blocker task {_TS}"
 _BLOCKING_NAME = f"Blocking task {_TS}"
 _CUSTOM_TEXT_VALUE = f"Test value {_TS}"
 
-
-def _open_task(page: Page, soft_step):
-    """Открывает борду и кликает по карточке задачи, открывая сайдбар."""
-    with allure.step("Открытие борды и поиск задачи"):
-        page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
-
-        # Задача могла не синхронизироваться — пробуем до 3 перезагрузок с ожиданием
-        for attempt in range(4):
-            task_card = page.get_by_role("button").filter(
-                has_text=re.compile(r"[A-Z]+-\d+")
-            ).filter(has_text=_TASK_NAME)
-            if task_card.is_visible():
-                break
-            if attempt < 3:
-                page.wait_for_timeout(2000)
-                page.reload()
-                expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
-
-    def open_sidebar():
-        task_card = page.get_by_role("button").filter(
-            has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=_TASK_NAME)
-        expect(task_card).to_be_visible(timeout=15000)
-        task_card.click()
-        expect(page.get_by_role("heading", name=_TASK_NAME)).to_be_visible(timeout=10000)
-
-    with allure.step(f"Открытие задачи {_TASK_NAME} в сайдбаре"):
-        soft_step("Открытие задачи в сайдбаре", open_sidebar)
 
 
 @pytest.mark.dependency(name=_DEP_TASK)
@@ -91,7 +63,7 @@ def test_01_create_task(page: Page, soft_step):
 @allure.title("02. Set priority Medium")
 def test_02_priority(page: Page, soft_step):
     """Устанавливает приоритет задачи Medium."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     def set_priority():
         page.get_by_role("button", name="Priority Select priority").click()
@@ -108,7 +80,7 @@ def test_02_priority(page: Page, soft_step):
 @allure.title("03. Assign user")
 def test_03_assignee(page: Page, soft_step):
     """Назначает первого пользователя из списка исполнителем."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     def assign():
         page.get_by_role("button", name="Assign Not assigned").click()
@@ -126,7 +98,7 @@ def test_03_assignee(page: Page, soft_step):
 @allure.title("04. Set type Green")
 def test_04_type(page: Page, soft_step):
     """Устанавливает тип задачи Green."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     def set_type():
         page.get_by_role("button", name="Types Select type").click()
@@ -143,7 +115,7 @@ def test_04_type(page: Page, soft_step):
 @allure.title("05. Fill description")
 def test_05_description(page: Page, soft_step):
     """Заполняет описание задачи."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     def set_description():
         page.locator('[id^="editor-content-"]').get_by_role("paragraph").click()
@@ -160,7 +132,7 @@ def test_05_description(page: Page, soft_step):
 @allure.title("06. Add subtask")
 def test_06_subtask(page: Page, soft_step):
     """Добавляет подзадачу к задаче."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     def add_subtask():
         page.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
@@ -177,7 +149,7 @@ def test_06_subtask(page: Page, soft_step):
 @allure.title("07. Add milestone")
 def test_07_milestone(page: Page, soft_step):
     """Привязывает майлстоун к задаче."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     def add_milestone():
         page.get_by_role("button", name="Milestones Select milestones").click()
@@ -195,7 +167,7 @@ def test_07_milestone(page: Page, soft_step):
 @allure.title("08. Set date")
 def test_08_date(page: Page, soft_step):
     """Устанавливает дату задачи."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     def add_date():
         page.get_by_role("button", name="Dates No dates set").click()
@@ -214,7 +186,7 @@ def test_08_date(page: Page, soft_step):
 @allure.title("09. Add blocker and blocking")
 def test_09_blockers(page: Page, soft_step):
     """Добавляет блокер и блокинг задачу."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     def add_blocker():
         page.get_by_role("textbox", name="Add blocker").fill(_BLOCKER_NAME)
@@ -239,7 +211,7 @@ def test_09_blockers(page: Page, soft_step):
 @allure.title("10. Fill custom text field")
 def test_10_custom_field(page: Page, soft_step):
     """Заполняет кастомное текстовое поле задачи."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     def fill_custom_text():
         page.get_by_role("button", name=re.compile(r"^Text")).first.click()
@@ -258,7 +230,7 @@ def test_10_custom_field(page: Page, soft_step):
 @allure.title("11. Add comment")
 def test_11_comment(page: Page, soft_step):
     """Добавляет комментарий к задаче."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     def add_comment():
         # Комментарий — tiptap-редактор рядом с CommentToolbar (не путать с полем подзадачи)
@@ -281,7 +253,7 @@ def test_11_comment(page: Page, soft_step):
 @allure.title("12. Complete task")
 def test_12_complete(page: Page, soft_step):
     """Отмечает задачу как выполненную (Complete). Последний перед cleanup, чтобы не скрыть карточку."""
-    _open_task(page, soft_step)
+    open_card(page, soft_step, _TASK_NAME)
 
     with allure.step("Клик по чекбоксу Complete"):
         soft_step("Complete", lambda: page.locator('[class*="_Check_"]').first.click())

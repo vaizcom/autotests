@@ -1,6 +1,7 @@
 import io
 import os
 import re
+import time
 from pathlib import Path
 
 import allure
@@ -114,7 +115,6 @@ def auth_state(playwright):
     Scope session означает что логин происходит ровно один раз за весь прогон.
     """
     # Проверка доступности стенда перед логином (3 попытки с интервалом 10 сек)
-    import time
     reason = ""
     for attempt in range(3):
         try:
@@ -164,9 +164,7 @@ def browser_context_args(browser_context_args, auth_state):
         "storage_state": auth_state,
         "viewport": {"width": 1280, "height": 720},
     }
-    # Видео записывается только на CI — локально видно в headed-браузере
-    if os.environ.get("CI"):
-        ctx["record_video_dir"] = "test-results/videos"
+    ctx["record_video_dir"] = "test-results/videos"
     return ctx
 
 
@@ -297,6 +295,9 @@ def attach_on_failure(request, page):
                 allure.attach(failure_screenshot, name="screenshot on failure", attachment_type=allure.attachment_type.PNG)
             if failure_url:
                 allure.attach(failure_url, name="page URL", attachment_type=allure.attachment_type.TEXT)
+            rep = getattr(request.node, "rep_call", None)
+            if rep and rep.longrepr:
+                allure.attach(str(rep.longrepr), name="failure log", attachment_type=allure.attachment_type.TEXT)
             context.tracing.stop(path=str(trace_path))
             allure.attach(trace_path.read_bytes(), name="playwright trace", attachment_type=allure.attachment_type.ZIP)
         except Exception:
