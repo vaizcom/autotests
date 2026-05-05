@@ -7,22 +7,29 @@ from playwright.sync_api import expect, Page
 from tests.test_frontend.core import settings
 
 
+def wait_for_card(page: Page, card_name: str, go_to_board: bool = True):
+    """Ждёт появления карточки на борде с ретраями и reload."""
+    if go_to_board:
+        page.goto(settings.AUTOTEST_BOARD_URL)
+    expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+
+    for attempt in range(4):
+        card = page.get_by_role("button").filter(
+            has_text=re.compile(r"[A-Z]+-\d+")
+        ).filter(has_text=card_name)
+        if card.is_visible():
+            return card
+        if attempt < 3:
+            page.wait_for_timeout(2000)
+            page.reload()
+            expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+    return card
+
+
 def open_card(page: Page, soft_step, card_name: str):
     """Открывает борду и кликает по карточке с заданным именем, открывая сайдбар."""
     with allure.step(f"Открытие борды и поиск карточки '{card_name}'"):
-        page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
-
-        for attempt in range(4):
-            task_card = page.get_by_role("button").filter(
-                has_text=re.compile(r"[A-Z]+-\d+")
-            ).filter(has_text=card_name)
-            if task_card.is_visible():
-                break
-            if attempt < 3:
-                page.wait_for_timeout(2000)
-                page.reload()
-                expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+        wait_for_card(page, card_name)
 
     def _open_sidebar():
         task_card = page.get_by_role("button").filter(

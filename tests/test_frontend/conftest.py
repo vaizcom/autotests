@@ -92,6 +92,17 @@ def pytest_addoption(parser):
     )
 
 
+def pytest_collection_modifyitems(items):
+    """Отключает reruns для тестов с маркером dependency.
+
+    Зависимые тесты меняют состояние — повторный запуск после падения
+    приведёт к каскадным ошибкам (например, задача уже сконвертирована).
+    """
+    for item in items:
+        if item.get_closest_marker("dependency"):
+            item.add_marker(pytest.mark.flaky(reruns=0))
+
+
 def pytest_collection_finish(session):
     """Выводит в консоль стенд и URL перед запуском frontend-тестов.
 

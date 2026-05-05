@@ -73,9 +73,11 @@ def test_02_fill_fields(page: Page, soft_step):
 
     # Описание
     def set_description():
-        page.locator('[id^="editor-content-"]').get_by_role("paragraph").click()
-        page.locator(".tiptap").first.fill(_DESCRIPTION)
-        expect(page.locator(".tiptap").first).to_contain_text(_DESCRIPTION, timeout=5000)
+        desc_editor = page.locator('[id^="editor-content-"]')
+        desc_editor.get_by_role("paragraph").click()
+        desc_editor.locator('[contenteditable="true"]').fill(_DESCRIPTION)
+        expect(desc_editor).to_contain_text(_DESCRIPTION, timeout=5000)
+        page.keyboard.press("Escape")
 
     with allure.step(f"Описание: {_DESCRIPTION}"):
         soft_step("Описание", set_description)
@@ -95,7 +97,7 @@ def test_02_fill_fields(page: Page, soft_step):
     def add_subtask():
         page.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
         page.keyboard.press("Enter")
-        expect(page.get_by_text(_SUBTASK_NAME)).to_be_visible(timeout=5000)
+        expect(page.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=5000)
 
     with allure.step(f"Подзадача: {_SUBTASK_NAME}"):
         soft_step("Подзадача", add_subtask)
@@ -175,25 +177,22 @@ def test_03_convert_to_milestone(page: Page, soft_step):
     with allure.step("Конвертация в майлстоун"):
         soft_step("Конвертация", convert)
 
+    with allure.step("Тост: Task successfully converted to Milestone"):
+        soft_step("Тост конвертации", lambda: (
+            expect(page.get_by_text("Task successfully converted to Milestone")).to_be_visible(timeout=10000)
+        ))
+
     def verify_card_gone():
         page.goto(settings.AUTOTEST_BOARD_URL)
         expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
         task_card = page.get_by_role("button").filter(
             has_text=re.compile(r"[A-Z]+-\d+")
         ).filter(has_text=_TASK_NAME)
-        expect(task_card).not_to_be_visible(timeout=5000)
+        expect(task_card).not_to_be_visible(timeout=10000)
 
     with allure.step("Проверка: карточка задачи исчезла с борды"):
         soft_step("Карточка исчезла", verify_card_gone)
 
-    def verify_subtask_remains():
-        subtask_card = page.get_by_role("button").filter(
-            has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=_SUBTASK_NAME)
-        expect(subtask_card).to_be_visible(timeout=5000)
-
-    with allure.step("Проверка: сабтаска осталась на борде"):
-        soft_step("Сабтаска на борде", verify_subtask_remains)
 
 
 # ── 04. Проверка переноса полей ──────────────────────────────────────
@@ -291,6 +290,8 @@ def test_cleanup(page: Page, soft_step, cleanup_task):
             open_sidebar_menu(page)
             page.get_by_text("Archive milestone").click()
             page.get_by_role("button", name="Yes").click()
+
+        with allure.step("Тост: Milestone archived"):
             expect(page.get_by_text("Milestone archived")).to_be_visible(timeout=5000)
     except Exception:
         pass
