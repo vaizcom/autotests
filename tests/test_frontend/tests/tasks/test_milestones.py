@@ -6,7 +6,7 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
-from tests.test_frontend.tests.tasks.conftest import open_card, open_sidebar_menu, _wait_board_ready
+from tests.test_frontend.tests.tasks.conftest import create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready
 
 pytestmark = [pytest.mark.frontend]
 
@@ -32,29 +32,8 @@ _MILESTONE_NAME = "Test milestone"
 @allure.title("01. Create task for conversion")
 def test_01_create_task(page: Page, soft_step):
     """Создаёт задачу, которая будет конвертирована в майлстоун."""
-    with allure.step("Открытие борды"):
-        soft_step("Открытие борды", lambda: (
-            page.goto(settings.AUTOTEST_BOARD_URL),
-            expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000),
-        ))
-
-    def create_task():
-        page.get_by_role("button", name="Add task").first.click()
-        expect(page.get_by_role("textbox", name="Task name...")).to_be_visible(timeout=5000)
-        page.get_by_role("textbox", name="Task name...").fill(_TASK_NAME)
-        page.locator("#board-card-create").get_by_role("button", name="Add task").click()
-
     with allure.step(f"Создание задачи: {_TASK_NAME}"):
-        soft_step("Создание задачи", create_task)
-
-    def verify_card():
-        task_card = page.get_by_role("button").filter(
-            has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=_TASK_NAME)
-        expect(task_card).to_be_visible(timeout=10000)
-
-    with allure.step("Проверка: карточка видна на борде"):
-        soft_step("Карточка на борде", verify_card)
+        soft_step("Создание задачи", lambda: create_task_on_board(page, _TASK_NAME))
 
 
 # ── 02. Заполнение всех полей задачи ─────────────────────────────────

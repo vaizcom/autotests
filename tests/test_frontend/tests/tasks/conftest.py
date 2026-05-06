@@ -53,6 +53,22 @@ def open_card(page: Page, soft_step, card_name: str):
         soft_step(f"Открытие '{card_name}' в сайдбаре", _open_sidebar)
 
 
+def create_task_on_board(page: Page, task_name: str):
+    """Открывает борду, создаёт задачу и проверяет что карточка видна."""
+    page.goto(settings.AUTOTEST_BOARD_URL)
+    expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+
+    page.get_by_role("button", name="Add task").first.click()
+    expect(page.get_by_role("textbox", name="Task name...")).to_be_visible(timeout=5000)
+    page.get_by_role("textbox", name="Task name...").fill(task_name)
+    page.locator("#board-card-create").get_by_role("button", name="Add task").click()
+
+    task_card = page.get_by_role("button").filter(
+        has_text=re.compile(r"[A-Z]+-\d+")
+    ).filter(has_text=task_name)
+    expect(task_card).to_be_visible(timeout=10000)
+
+
 def open_sidebar_menu(page: Page):
     """Кликает по кнопке '...' (три точки) в сайдбаре задачи/майлстоуна."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
