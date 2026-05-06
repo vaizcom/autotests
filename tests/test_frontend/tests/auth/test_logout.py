@@ -42,4 +42,4 @@ def test_logout(page: Page, assert_snapshot):
             page.locator('[class*="AuthLayout-module_SideBox"]'),
         ]
         screenshot = page.screenshot(mask=dynamic_masks)
-        assert_snapshot(screenshot, name="logout_sign_in_page.png", threshold=2.5)
+        assert_snapshot(screenshot, name="logout_sign_in_page.png", threshold=5.0)

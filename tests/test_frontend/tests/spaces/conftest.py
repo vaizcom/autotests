@@ -25,4 +25,7 @@ def cleanup_space(api_token):
     ids = []
     yield ids
     for space_id in ids:
-        _delete_space(api_token, space_id)
+        try:
+            _delete_space(api_token, space_id)
+        except Exception as e:
+            print(f"Cleanup: не удалось удалить Space {space_id}: {e}")
