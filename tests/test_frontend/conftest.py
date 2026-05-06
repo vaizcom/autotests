@@ -193,7 +193,7 @@ def pytest_runtest_makereport(item, call):
 
 
 @pytest.fixture
-def soft_step(page):
+def soft_step(request, page):
     """Обёртка для шагов с soft assertion — тест продолжается при ошибке.
 
     При падении шага:
@@ -201,10 +201,15 @@ def soft_step(page):
     - Прикладывает скриншот страницы и краткий лог к Allure
     - Регистрирует soft failure через pytest-check (тест не останавливается)
 
+    Для тестов с маркером @pytest.mark.dependency шаг падает жёстко (re-raise),
+    чтобы pytest-dependency корректно скипал зависимые тесты.
+
     Использование:
         with allure.step("Приоритет: Medium"):
             soft_step("Приоритет", lambda: page.get_by_text("Medium").click())
     """
+    is_dependency = request.node.get_closest_marker("dependency") is not None
+
     def _soft_step(name, fn, timeout=15000):
         page.set_default_timeout(timeout)
         try:
@@ -250,6 +255,10 @@ def soft_step(page):
             print(f"{'=' * 60}\n")
             allure.attach(page.screenshot(), name=f"{name} — скриншот", attachment_type=allure.attachment_type.PNG)
             allure.attach(log_text, name=f"{name} — лог", attachment_type=allure.attachment_type.TEXT)
+
+            if is_dependency:
+                raise AssertionError(f"[{name}] {hint}") from e
+
             check.fail(f"[{name}] {hint}")
         finally:
             page.set_default_timeout(30000)
@@ -263,23 +272,14 @@ def attach_on_failure(request, page):
 
     Подключается автоматически к каждому тесту (autouse=True).
 
-    До теста: запускает запись Playwright-трейса — видеозапись всех действий
-    браузера со скриншотами и сетевыми запросами.
-
     После теста:
-    - Упал: прикладывает к Allure скриншот страницы в момент падения,
-      URL и Playwright-трейс в zip-архиве.
-    - Прошёл: останавливает трейс без сохранения, удаляет старый zip
-      от предыдущего падения если он остался.
+    - Упал: прикладывает скриншот, URL страницы и failure log
+    - Всегда: прикладывает видеозапись теста
     """
     allure.dynamic.parameter("test_name", request.node.originalname)
 
-    context = page.context
-    context.tracing.start(screenshots=True, snapshots=True)
-
     yield
 
-    trace_path = Path(request.node.fspath).parent / "__snapshots__" / f"{request.node.name}.zip"
     failed = getattr(getattr(request.node, "rep_call", None), "failed", False)
 
     # Снимаем скриншот и URL до закрытия страницы
@@ -300,27 +300,27 @@ def attach_on_failure(request, page):
     video = page.video
     page.close()
 
+    screenshot_path = Path(request.node.fspath).parent / "__snapshots__" / f"{request.node.name}.png"
+
     if failed:
-        try:
-            if failure_screenshot:
-                allure.attach(failure_screenshot, name="screenshot on failure", attachment_type=allure.attachment_type.PNG)
-            if failure_url:
-                allure.attach(failure_url, name="page URL", attachment_type=allure.attachment_type.TEXT)
-            rep = getattr(request.node, "rep_call", None)
-            if rep and rep.longrepr:
-                allure.attach(str(rep.longrepr), name="failure log", attachment_type=allure.attachment_type.TEXT)
-            context.tracing.stop(path=str(trace_path))
-            allure.attach(trace_path.read_bytes(), name="playwright trace", attachment_type=allure.attachment_type.ZIP)
-        except Exception:
-            context.tracing.stop()
+        if failure_screenshot:
+            allure.attach(failure_screenshot, name="screenshot on failure", attachment_type=allure.attachment_type.PNG)
+            # Сохраняем скриншот на диск для быстрого просмотра в IDE
+            screenshot_path.parent.mkdir(parents=True, exist_ok=True)
+            screenshot_path.write_bytes(failure_screenshot)
+        if failure_url:
+            allure.attach(failure_url, name="page URL", attachment_type=allure.attachment_type.TEXT)
+        rep = getattr(request.node, "rep_call", None)
+        if rep and rep.longrepr:
+            allure.attach(str(rep.longrepr), name="failure log", attachment_type=allure.attachment_type.TEXT)
     else:
-        context.tracing.stop()
-        trace_path.unlink(missing_ok=True)
+        screenshot_path.unlink(missing_ok=True)
 
     # save_as ждёт полной финализации видео (в отличие от чтения raw-файла)
     if video:
         try:
-            video_save_path = trace_path.with_name(f"{request.node.name}_video.webm")
+            video_dir = Path(request.node.fspath).parent / "__snapshots__"
+            video_save_path = video_dir / f"{request.node.name}_video.webm"
             video_save_path.parent.mkdir(parents=True, exist_ok=True)
             video.save_as(str(video_save_path))
             allure.attach(video_save_path.read_bytes(), name="video", attachment_type=allure.attachment_type.WEBM)

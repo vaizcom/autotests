@@ -6,11 +6,12 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
-from tests.test_frontend.tests.tasks.conftest import open_card, open_sidebar_menu
+from tests.test_frontend.tests.tasks.conftest import open_card, open_sidebar_menu, _wait_board_ready
 
 pytestmark = [pytest.mark.frontend]
 
 _DEP_TASK = "test_01_create_task"
+_DEP_FILL = "test_02_fill_fields"
 _DEP_CONVERT = "test_03_convert_to_milestone"
 
 _TS = datetime.now().strftime("%H%M%S")
@@ -59,7 +60,7 @@ def test_01_create_task(page: Page, soft_step):
 # ── 02. Заполнение всех полей задачи ─────────────────────────────────
 
 
-@pytest.mark.dependency(depends=[_DEP_TASK])
+@pytest.mark.dependency(name=_DEP_FILL, depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Milestones")
 @allure.title("02. Fill all task fields before conversion")
@@ -161,7 +162,7 @@ def test_02_fill_fields(page: Page, soft_step):
 # ── 03. Конвертация в майлстоун ──────────────────────────────────────
 
 
-@pytest.mark.dependency(name=_DEP_CONVERT, depends=[_DEP_TASK])
+@pytest.mark.dependency(name=_DEP_CONVERT, depends=[_DEP_FILL])
 @allure.parent_suite("Frontend")
 @allure.suite("Milestones")
 @allure.title("03. Convert task to milestone")
@@ -184,11 +185,18 @@ def test_03_convert_to_milestone(page: Page, soft_step):
 
     def verify_card_gone():
         page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
-        task_card = page.get_by_role("button").filter(
-            has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=_TASK_NAME)
-        expect(task_card).not_to_be_visible(timeout=10000)
+        _wait_board_ready(page)
+        for attempt in range(4):
+            task_card = page.get_by_role("button").filter(
+                has_text=re.compile(r"[A-Z]+-\d+")
+            ).filter(has_text=_TASK_NAME)
+            if not task_card.is_visible():
+                break
+            if attempt < 3:
+                page.wait_for_timeout(2000)
+                page.reload()
+                _wait_board_ready(page)
+        expect(task_card).not_to_be_visible(timeout=5000)
 
     with allure.step("Проверка: карточка задачи исчезла с борды"):
         soft_step("Карточка исчезла", verify_card_gone)
@@ -265,7 +273,6 @@ def test_04_verify_fields(page: Page, soft_step):
 # ── Cleanup: архивация ───────────────────────────────────────────
 
 
-@pytest.mark.dependency(depends=[_DEP_CONVERT])
 @allure.parent_suite("Frontend")
 @allure.suite("Milestones")
 @allure.title("99. Cleanup: delete subtask and archive milestone")
