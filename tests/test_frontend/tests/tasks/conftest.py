@@ -69,6 +69,31 @@ def create_task_on_board(page: Page, task_name: str):
     expect(task_card).to_be_visible(timeout=10000)
 
 
+def add_subtask(page: Page, subtask_name: str):
+    """Добавляет подзадачу в открытом сайдбаре задачи."""
+    page.get_by_role("textbox", name="Enter subtask name").fill(subtask_name)
+    page.keyboard.press("Enter")
+    expect(page.get_by_text(subtask_name).first).to_be_visible(timeout=10000)
+
+
+def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):
+    """Открывает карточку на борде и создаёт подзадачи."""
+    card = page.get_by_role("button").filter(
+        has_text=re.compile(r"[A-Z]+-\d+")
+    ).filter(has_text=card_name)
+    card.click()
+    expect(page.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
+    for name in subtask_names:
+        add_subtask(page, name)
+
+
+def set_date(page: Page, date: str):
+    """Устанавливает дату (due) в открытом сайдбаре задачи/майлстоуна."""
+    page.get_by_role("button", name="Dates No dates set").click()
+    page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first.fill(date)
+    page.get_by_role("button", name="Apply").click()
+
+
 def fill_description(page: Page, text: str):
     """Заполняет описание в tiptap-редакторе открытого сайдбара."""
     editor = page.locator(".tiptap").first

@@ -172,3 +172,6 @@ allure-results/
 test-results/
 **/__snapshots__/*.zip
 **/__snapshots__/**/*.png
+
+# Debug TS для локальной отладки тестов
+.debug_ts

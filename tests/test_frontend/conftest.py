@@ -19,27 +19,24 @@ API_URL = "https://api.vaiz.dev/v4"
 
 
 def _run_task_cleanup(page, cleanup_info):
-    """Удаляет все карточки с таймстемпом теста прямо на борде."""
+    """Удаляет карточки с таймстемпом теста на борде."""
     ts = cleanup_info.get("ts")
     if not ts:
         return
 
     with allure.step(f"Cleanup: удаление задач с таймстемпом {ts}"):
-        # Перезагружаем борду — гарантированно закрывает сайдбар
         page.goto(settings.AUTOTEST_BOARD_URL)
         expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
 
         deleted = 0
 
         for _ in range(10):
-            # Ищем карточку-кнопку с таймстемпом
             card = page.get_by_role("button").filter(has_text=ts).first
             try:
                 expect(card).to_be_visible(timeout=3000)
             except Exception:
                 break
 
-            # Наводим на карточку чтобы появилась кнопка "..." и кликаем
             card.hover()
             card.locator('[class*="TaskCard-module_Menu"] button').first.click()
 
@@ -51,6 +48,38 @@ def _run_task_cleanup(page, cleanup_info):
 
             page.get_by_role("button", name="Proceed").click()
             page.wait_for_timeout(2000)
+            deleted += 1
+
+        allure.attach(f"Удалено карточек: {deleted}", name="cleanup result",
+                      attachment_type=allure.attachment_type.TEXT)
+
+
+def cleanup_board(page):
+    """Удаляет все карточки на автотестовой борде."""
+    with allure.step("Cleanup: удаление всех задач на борде"):
+        page.goto(settings.AUTOTEST_BOARD_URL)
+        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+
+        cards = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
+        deleted = 0
+
+        for _ in range(20):
+            try:
+                expect(cards.first).to_be_visible(timeout=3000)
+            except Exception:
+                break
+
+            cards.first.hover()
+            cards.first.locator('[class*="TaskCard-module_Menu"] button').first.click()
+
+            delete_with_sub = page.get_by_text("Delete with subtasks")
+            if delete_with_sub.is_visible():
+                delete_with_sub.click()
+            else:
+                page.get_by_text("Delete task").click()
+
+            page.get_by_role("button", name="Proceed").click()
+            page.wait_for_timeout(1000)
             deleted += 1
 
         allure.attach(f"Удалено карточек: {deleted}", name="cleanup result",
@@ -97,10 +126,24 @@ def pytest_collection_modifyitems(items):
 
     Зависимые тесты меняют состояние — повторный запуск после падения
     приведёт к каскадным ошибкам (например, задача уже сконвертирована).
+
+    Debug-режим (TEST_TS, .debug_ts, или запуск без test_01):
+    снимает маркеры dependency — тест запускается без зависимостей.
     """
+    debug_mode = bool(os.environ.get("TEST_TS"))
+
+    if not debug_mode:
+        has_setup = any("test_01" in i.originalname for i in items)
+        if not has_setup:
+            debug_mode = True
+
     for item in items:
         if item.get_closest_marker("dependency"):
             item.add_marker(pytest.mark.flaky(reruns=0))
+
+    if debug_mode:
+        for item in items:
+            item.own_markers = [m for m in item.own_markers if m.name != "dependency"]
 
 
 def pytest_collection_finish(session):
@@ -296,6 +339,14 @@ def attach_on_failure(request, page):
     if cleanup_info:
         _run_task_cleanup(page, cleanup_info)
 
+    # Debug teardown до закрытия страницы (если есть)
+    debug_teardown = getattr(request.node, "_debug_teardown_fn", None)
+    if debug_teardown:
+        try:
+            debug_teardown(page)
+        except Exception:
+            pass
+
     # Закрываем страницу чтобы видео финализировалось
     video = page.video
     page.close()
@@ -327,6 +378,57 @@ def attach_on_failure(request, page):
             video_save_path.unlink(missing_ok=True)
         except Exception:
             pass
+
+
+@pytest.fixture(autouse=True)
+def _auto_debug(request, page):
+    """Автоматический setup/cleanup при запуске отдельного теста из IDE.
+
+    Тестовый модуль opt-in через module-level функции:
+        _debug_create(page)           — создаёт сущность (задачу, майлстоун)
+        _debug_teardown(page)         — teardown после теста (архивация и т.д.)
+        _debug_extra_setup = {        — доп. setup для конкретных тестов
+            "test_12_...": fn(page),
+        }
+
+    Если модуль не определяет _debug_create — фикстура ничего не делает.
+    При полном прогоне (test_01 в коллекции) — фикстура ничего не делает.
+
+    Teardown сохраняется в request.node._debug_teardown_fn и выполняется
+    в attach_on_failure до page.close() (гарантированно пока страница открыта).
+    """
+    module = request.module
+    create_fn = getattr(module, "_debug_create", None)
+
+    if not create_fn:
+        yield
+        return
+
+    module_items = [i for i in request.session.items if i.fspath == request.fspath]
+    is_full_suite = any("test_01" in i.originalname for i in module_items)
+    current = request.node.originalname
+
+    if is_full_suite or current.startswith(("test_01", "test_99")):
+        yield
+        return
+
+    # Setup
+    create_fn(page)
+
+    extra = getattr(module, "_debug_extra_setup", {})
+    if current in extra:
+        extra[current](page)
+
+    cleanup_fn = getattr(module, "_debug_cleanup", None)
+    if cleanup_fn:
+        cleanup_fn(request)
+
+    # Регистрируем teardown для выполнения в attach_on_failure
+    teardown_fn = getattr(module, "_debug_teardown", None)
+    if teardown_fn:
+        request.node._debug_teardown_fn = teardown_fn
+
+    yield
 
 
 @pytest.fixture
