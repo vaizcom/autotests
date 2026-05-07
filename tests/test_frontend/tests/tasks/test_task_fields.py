@@ -6,7 +6,7 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
-from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board
+from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_comment, fill_description
 
 pytestmark = [pytest.mark.frontend]
 
@@ -96,13 +96,8 @@ def test_05_description(page: Page, soft_step):
     """Заполняет описание задачи."""
     open_card(page, soft_step, _TASK_NAME)
 
-    def set_description():
-        page.locator('[id^="editor-content-"]').get_by_role("paragraph").click()
-        page.locator(".tiptap").first.fill(_DESCRIPTION)
-        expect(page.locator(".tiptap").first).to_contain_text(_DESCRIPTION, timeout=5000)
-
     with allure.step(f"Ввод описания: {_DESCRIPTION}"):
-        soft_step("Описание", set_description)
+        soft_step("Описание", lambda: fill_description(page, _DESCRIPTION))
 
 
 @pytest.mark.dependency(depends=[_DEP_TASK])
@@ -211,19 +206,8 @@ def test_11_comment(page: Page, soft_step):
     """Добавляет комментарий к задаче."""
     open_card(page, soft_step, _TASK_NAME)
 
-    def add_comment():
-        # Комментарий — tiptap-редактор рядом с CommentToolbar (не путать с полем подзадачи)
-        toolbar = page.locator('[class*="CommentToolbar-module"]').first
-        toolbar.scroll_into_view_if_needed()
-        comment_editor = toolbar.locator('xpath=ancestor::div[contains(@class, "Comment")]').locator(".tiptap")
-        comment_editor.click()
-        comment_editor.fill(_COMMENT)
-        send_btn = page.locator('[class*="CommentToolbar-module_Right"]').get_by_role("button").last
-        expect(send_btn).to_be_enabled(timeout=5000)
-        send_btn.click()
-
     with allure.step(f"Комментарий: {_COMMENT}"):
-        soft_step("Комментарий", add_comment)
+        soft_step("Комментарий", lambda: add_comment(page, _COMMENT))
 
 
 @pytest.mark.dependency(depends=[_DEP_TASK])

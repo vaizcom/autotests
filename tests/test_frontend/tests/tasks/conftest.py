@@ -69,6 +69,26 @@ def create_task_on_board(page: Page, task_name: str):
     expect(task_card).to_be_visible(timeout=10000)
 
 
+def fill_description(page: Page, text: str):
+    """Заполняет описание в tiptap-редакторе открытого сайдбара."""
+    editor = page.locator(".tiptap").first
+    editor.click()
+    editor.fill(text)
+    expect(editor).to_contain_text(text, timeout=5000)
+
+
+def add_comment(page: Page, comment_text: str):
+    """Вводит и отправляет комментарий в открытом сайдбаре задачи/майлстоуна."""
+    toolbar = page.locator('[class*="CommentToolbar-module"]').first
+    toolbar.scroll_into_view_if_needed()
+    comment_editor = toolbar.locator('xpath=ancestor::div[contains(@class, "Comment")]').locator(".tiptap")
+    comment_editor.click()
+    comment_editor.fill(comment_text)
+    send_btn = page.locator('[class*="CommentToolbar-module_Right"]').get_by_role("button").last
+    expect(send_btn).to_be_enabled(timeout=5000)
+    send_btn.click()
+
+
 def open_sidebar_menu(page: Page):
     """Кликает по кнопке '...' (три точки) в сайдбаре задачи/майлстоуна."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')

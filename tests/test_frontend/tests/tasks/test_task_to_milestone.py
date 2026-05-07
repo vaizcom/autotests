@@ -6,7 +6,10 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
-from tests.test_frontend.tests.tasks.conftest import create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready
+from tests.test_frontend.tests.tasks.conftest import (
+    create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready,
+    add_comment, fill_description,
+)
 
 pytestmark = [pytest.mark.frontend]
 
@@ -52,15 +55,8 @@ def test_02_fill_fields(page: Page, soft_step):
     # ── Поля, которые переносятся ──
 
     # Описание
-    def set_description():
-        desc_editor = page.locator('[id^="editor-content-"]')
-        desc_editor.get_by_role("paragraph").click()
-        desc_editor.locator('[contenteditable="true"]').fill(_DESCRIPTION)
-        expect(desc_editor).to_contain_text(_DESCRIPTION, timeout=5000)
-        page.keyboard.press("Escape")
-
     with allure.step(f"Описание: {_DESCRIPTION}"):
-        soft_step("Описание", set_description)
+        soft_step("Описание", lambda: fill_description(page, _DESCRIPTION))
 
     # Дата
     def set_date():
@@ -83,18 +79,8 @@ def test_02_fill_fields(page: Page, soft_step):
         soft_step("Подзадача", add_subtask)
 
     # Комментарий
-    def add_comment():
-        toolbar = page.locator('[class*="CommentToolbar-module"]').first
-        toolbar.scroll_into_view_if_needed()
-        comment_editor = toolbar.locator('xpath=ancestor::div[contains(@class, "Comment")]').locator(".tiptap")
-        comment_editor.click()
-        comment_editor.fill(_COMMENT)
-        send_btn = page.locator('[class*="CommentToolbar-module_Right"]').get_by_role("button").last
-        expect(send_btn).to_be_enabled(timeout=5000)
-        send_btn.click()
-
     with allure.step(f"Комментарий: {_COMMENT}"):
-        soft_step("Комментарий", add_comment)
+        soft_step("Комментарий", lambda: add_comment(page, _COMMENT))
 
     # ── Поля, которые теряются при конвертации ──
 
@@ -167,8 +153,8 @@ def test_03_convert_to_milestone(page: Page, soft_step):
         _wait_board_ready(page)
         for attempt in range(4):
             task_card = page.get_by_role("button").filter(
-                has_text=re.compile(r"[A-Z]+-\d+")
-            ).filter(has_text=_TASK_NAME)
+                has_text=re.compile(rf"·\s*{re.escape(_TASK_NAME)}")
+            )
             if not task_card.is_visible():
                 break
             if attempt < 3:
@@ -179,7 +165,6 @@ def test_03_convert_to_milestone(page: Page, soft_step):
 
     with allure.step("Проверка: карточка задачи исчезла с борды"):
         soft_step("Карточка исчезла", verify_card_gone)
-
 
 
 # ── 04. Проверка переноса полей ──────────────────────────────────────
