@@ -29,6 +29,7 @@ _CUSTOM_TEXT_VALUE = f"Test value {_TS}"
 @pytest.mark.dependency(name=_DEP_TASK)
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("01. Create task on board")
 def test_01_create_task(page: Page, soft_step):
     """Создаёт новую задачу на борде и проверяет что карточка появилась."""
@@ -39,6 +40,7 @@ def test_01_create_task(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("02. Set priority Medium")
 def test_02_priority(page: Page, soft_step):
     """Устанавливает приоритет задачи Medium."""
@@ -56,6 +58,7 @@ def test_02_priority(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("03. Assign user")
 def test_03_assignee(page: Page, soft_step):
     """Назначает первого пользователя из списка исполнителем."""
@@ -74,6 +77,7 @@ def test_03_assignee(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("04. Set type Green")
 def test_04_type(page: Page, soft_step):
     """Устанавливает тип задачи Green."""
@@ -91,6 +95,7 @@ def test_04_type(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("05. Fill description")
 def test_05_description(page: Page, soft_step):
     """Заполняет описание задачи."""
@@ -103,6 +108,7 @@ def test_05_description(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("06. Add subtask")
 def test_06_subtask(page: Page, soft_step):
     """Добавляет подзадачу к задаче."""
@@ -120,6 +126,7 @@ def test_06_subtask(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("07. Add milestone")
 def test_07_milestone(page: Page, soft_step):
     """Привязывает майлстоун к задаче."""
@@ -138,6 +145,7 @@ def test_07_milestone(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("08. Set date")
 def test_08_date(page: Page, soft_step):
     """Устанавливает дату задачи."""
@@ -157,6 +165,7 @@ def test_08_date(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("09. Add blocker and blocking")
 def test_09_blockers(page: Page, soft_step):
     """Добавляет блокер и блокинг задачу."""
@@ -182,6 +191,7 @@ def test_09_blockers(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("10. Fill custom text field")
 def test_10_custom_field(page: Page, soft_step):
     """Заполняет кастомное текстовое поле задачи."""
@@ -201,6 +211,7 @@ def test_10_custom_field(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("11. Add comment")
 def test_11_comment(page: Page, soft_step):
     """Добавляет комментарий к задаче."""
@@ -213,6 +224,7 @@ def test_11_comment(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("12. Complete task")
 def test_12_complete(page: Page, soft_step):
     """Отмечает задачу как выполненную (Complete). Последний перед cleanup, чтобы не скрыть карточку."""
@@ -225,6 +237,7 @@ def test_12_complete(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Fields")
 @allure.title("99. Cleanup: delete test tasks")
 def test_99_cleanup(page: Page, cleanup_task):
     """Удаляет все карточки с таймстемпом теста с борды."""

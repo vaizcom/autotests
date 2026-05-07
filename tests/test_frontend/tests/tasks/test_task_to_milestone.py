@@ -32,6 +32,7 @@ _MILESTONE_NAME = "Test milestone"
 @pytest.mark.dependency(name=_DEP_TASK)
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Convert to Milestone")
 @allure.title("01. Create task for conversion")
 def test_01_create_task(page: Page, soft_step):
     """Создаёт задачу, которая будет конвертирована в майлстоун."""
@@ -45,6 +46,7 @@ def test_01_create_task(page: Page, soft_step):
 @pytest.mark.dependency(name=_DEP_FILL, depends=[_DEP_TASK])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Convert to Milestone")
 @allure.title("02. Fill all task fields before conversion")
 def test_02_fill_fields(page: Page, soft_step):
     """Заполняет все поля задачи перед конвертацией.
@@ -130,6 +132,7 @@ def test_02_fill_fields(page: Page, soft_step):
 @pytest.mark.dependency(name=_DEP_CONVERT, depends=[_DEP_FILL])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Convert to Milestone")
 @allure.title("03. Convert task to milestone")
 def test_03_convert_to_milestone(page: Page, soft_step):
     """Конвертирует задачу в майлстоун через меню сайдбара."""
@@ -173,6 +176,7 @@ def test_03_convert_to_milestone(page: Page, soft_step):
 @pytest.mark.dependency(depends=[_DEP_CONVERT])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Convert to Milestone")
 @allure.title("04. Verify milestone fields via subtask")
 def test_04_verify_fields(page: Page, soft_step):
     """Открывает сабтаску на борде, проверяет milestone field,
@@ -239,6 +243,7 @@ def test_04_verify_fields(page: Page, soft_step):
 
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
+@allure.sub_suite("Convert to Milestone")
 @allure.title("99. Cleanup: delete subtask and archive milestone")
 def test_cleanup(page: Page, soft_step, cleanup_task):
     """Архивирует майлстоун и удаляет сабтаску для очистки борды."""
