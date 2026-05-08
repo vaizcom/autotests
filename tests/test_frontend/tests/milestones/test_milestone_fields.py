@@ -228,7 +228,7 @@ def test_07_complete_tasks(page: Page, soft_step):
             .filter(has_text=re.compile(r"[A-Z]+-\d+"))
             .filter(has_text=task_name)
         )
-        task_row.locator("label").click()
+        task_row.locator('label[role="checkbox"]').click()
 
     # ── Complete задачи 1 → "1 completed of 2" ──
 

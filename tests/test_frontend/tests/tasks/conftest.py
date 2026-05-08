@@ -87,6 +87,55 @@ def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):
         add_subtask(page, name)
 
 
+def wait_for_subtask_rows(page: Page, card_name: str, subtask_name: str):
+    """Ждёт загрузки строк подзадач с ретраями и reload."""
+    heading = page.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
+    heading.scroll_into_view_if_needed()
+
+    for attempt in range(4):
+        if page.get_by_text(subtask_name).first.is_visible(timeout=3000):
+            return
+        if attempt < 3:
+            page.reload()
+            _wait_board_ready(page)
+            card = page.get_by_role("button").filter(
+                has_text=re.compile(r"[A-Z]+-\d+")
+            ).filter(has_text=card_name)
+            card.click()
+            expect(page.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
+            heading = page.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
+            heading.scroll_into_view_if_needed()
+    expect(page.get_by_text(subtask_name).first).to_be_visible(timeout=5000)
+
+
+def toggle_subtask_complete(page: Page, subtask_name: str):
+    """Кликает чекбокс подзадачи по имени. Работает независимо от DOM-структуры."""
+    btn = page.get_by_role("button").filter(has_text=subtask_name)
+    expect(btn).to_be_visible(timeout=10000)
+    btn.scroll_into_view_if_needed()
+
+    # Чекбокс внутри кнопки
+    cb = btn.locator('label[role="checkbox"]')
+    if cb.count() > 0:
+        cb.click()
+        return
+
+    # Чекбокс в соседней ячейке — ищем ближайший контейнер с чекбоксами
+    container = btn.locator("xpath=ancestor::div[.//label[@role='checkbox']][1]")
+    checkboxes = container.locator('label[role="checkbox"]')
+
+    if checkboxes.count() == 1:
+        checkboxes.click()
+        return
+
+    # Несколько чекбоксов — совпадение по индексу с кнопками
+    buttons = container.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
+    for i in range(buttons.count()):
+        if subtask_name in buttons.nth(i).inner_text():
+            checkboxes.nth(i).click()
+            return
+
+
 def set_date(page: Page, date: str):
     """Устанавливает дату (due) в открытом сайдбаре задачи/майлстоуна."""
     page.get_by_role("button", name="Dates No dates set").click()

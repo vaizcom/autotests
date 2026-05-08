@@ -7,7 +7,7 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.conftest import cleanup_board
-from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_subtask, create_subtasks, set_date, add_comment, fill_description
+from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_subtask, create_subtasks, toggle_subtask_complete, set_date, add_comment, fill_description
 
 pytestmark = [pytest.mark.frontend]
 
@@ -288,24 +288,13 @@ def test_12_complete_subtasks(page: Page, soft_step):
     """Завершает и снимает завершение подзадач, проверяет счётчики."""
     open_card(page, soft_step, _TASK_NAME)
 
-    # Ждём загрузки таблицы подзадач (данные подгружаются асинхронно после навигации)
+    # Скроллим к секции подзадач
     page.get_by_role("heading", name=re.compile(r"\d+ subtasks?")).scroll_into_view_if_needed()
-    expect(
-        page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+")).first
-    ).to_be_visible(timeout=10000)
-
-    def toggle_complete(subtask_name):
-        subtask_row = (
-            page.get_by_role("button")
-            .filter(has_text=re.compile(r"[A-Z]+-\d+"))
-            .filter(has_text=subtask_name)
-        )
-        subtask_row.locator("label").click()
 
     # ── Complete подзадачи 1 → "1 completed of 2" ──
 
     with allure.step(f"Завершение подзадачи: {_SUBTASK_NAME}"):
-        soft_step("Завершение подзадачи 1", lambda: toggle_complete(_SUBTASK_NAME))
+        soft_step("Завершение подзадачи 1", lambda: toggle_subtask_complete(page, _SUBTASK_NAME))
 
     with allure.step("Проверка: 1 completed of 2"):
         soft_step("1 completed of 2", lambda: (
@@ -315,7 +304,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
     # ── Complete подзадачи 2 → "All 2 completed" ──
 
     with allure.step(f"Завершение подзадачи: {_SUBTASK_NAME_2}"):
-        soft_step("Завершение подзадачи 2", lambda: toggle_complete(_SUBTASK_NAME_2))
+        soft_step("Завершение подзадачи 2", lambda: toggle_subtask_complete(page, _SUBTASK_NAME_2))
 
     with allure.step("Проверка: All 2 completed"):
         soft_step("All 2 completed", lambda: (
@@ -325,7 +314,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
     # ── Uncomplete подзадачи 1 → "1 completed of 2" ──
 
     with allure.step(f"Снятие завершения: {_SUBTASK_NAME}"):
-        soft_step("Снятие завершения подзадачи 1", lambda: toggle_complete(_SUBTASK_NAME))
+        soft_step("Снятие завершения подзадачи 1", lambda: toggle_subtask_complete(page, _SUBTASK_NAME))
 
     with allure.step("Проверка: 1 completed of 2 (после снятия)"):
         soft_step("1 completed of 2 (после снятия)", lambda: (
@@ -335,7 +324,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
     # ── Uncomplete подзадачи 2 → "0 completed of 2" ──
 
     with allure.step(f"Снятие завершения: {_SUBTASK_NAME_2}"):
-        soft_step("Снятие завершения подзадачи 2", lambda: toggle_complete(_SUBTASK_NAME_2))
+        soft_step("Снятие завершения подзадачи 2", lambda: toggle_subtask_complete(page, _SUBTASK_NAME_2))
 
     with allure.step("Проверка: 0 completed of 2"):
         soft_step("0 completed of 2", lambda: (
