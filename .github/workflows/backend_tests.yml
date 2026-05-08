@@ -130,6 +130,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Fix Allure redirect for subdirectory
+        if: always()
+        run: sed -i 's|URL=https://vaizcom.github.io/autotests/|URL=https://vaizcom.github.io/autotests/backend/|' allure-history/index.html
+
       - name: 🚀 Publish Allure Report to GitHub Pages (Backend)
         uses: peaceiris/actions-gh-pages@v4
         if: always()
