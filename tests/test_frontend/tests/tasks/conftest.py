@@ -159,6 +159,7 @@ def fill_description(page: Page, text: str):
     editor = page.locator(".tiptap").first
     expect(editor).to_be_visible(timeout=5000)
     editor.click()
+    expect(editor).to_have_attribute("contenteditable", "true", timeout=5000)
     editor.fill(text)
     expect(editor).to_contain_text(text, timeout=5000)
 
