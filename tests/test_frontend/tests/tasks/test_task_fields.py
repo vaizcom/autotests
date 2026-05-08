@@ -288,8 +288,10 @@ def test_12_complete_subtasks(page: Page, soft_step):
     """Завершает и снимает завершение подзадач, проверяет счётчики."""
     open_card(page, soft_step, _TASK_NAME)
 
-    # Скроллим к секции подзадач
-    page.get_by_role("heading", name=re.compile(r"\d+ subtasks?")).scroll_into_view_if_needed()
+    # Скроллим к секции подзадач и ждём загрузки строк
+    heading = page.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
+    heading.scroll_into_view_if_needed()
+    expect(page.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=15000)
 
     # ── Complete подзадачи 1 → "1 completed of 2" ──
 

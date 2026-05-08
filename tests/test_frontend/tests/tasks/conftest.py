@@ -156,10 +156,9 @@ def set_date(page: Page, date: str):
 
 def fill_description(page: Page, text: str):
     """Заполняет описание в tiptap-редакторе открытого сайдбара."""
-    editor = page.locator(".tiptap").first
-    expect(editor).to_be_visible(timeout=5000)
+    editor = page.locator('.tiptap[contenteditable="true"]').first
+    expect(editor).to_be_visible(timeout=10000)
     editor.click()
-    expect(editor).to_have_attribute("contenteditable", "true", timeout=5000)
     editor.fill(text)
     expect(editor).to_contain_text(text, timeout=5000)
 
