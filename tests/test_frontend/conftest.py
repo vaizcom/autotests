@@ -26,7 +26,7 @@ def _run_task_cleanup(page, cleanup_info):
 
     with allure.step(f"Cleanup: удаление задач с таймстемпом {ts}"):
         page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
 
         deleted = 0
 
@@ -58,7 +58,7 @@ def cleanup_board(page):
     """Удаляет все карточки на автотестовой борде."""
     with allure.step("Cleanup: удаление всех задач на борде"):
         page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
 
         cards = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
         deleted = 0

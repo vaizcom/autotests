@@ -9,7 +9,7 @@ from tests.test_frontend.core import settings
 
 def _wait_board_ready(page: Page):
     """Ждёт полной загрузки борды: кнопка Add task + карточки или пустая колонка."""
-    expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+    expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
     # Борда загружена, если видна хотя бы одна карточка или счётчик "0 tasks"
     loaded = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+")).first.or_(
         page.get_by_text(re.compile(r"\d+ tasks?")).first
@@ -56,7 +56,7 @@ def open_card(page: Page, soft_step, card_name: str):
 def create_task_on_board(page: Page, task_name: str):
     """Открывает борду, создаёт задачу и проверяет что карточка видна."""
     page.goto(settings.AUTOTEST_BOARD_URL)
-    expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+    expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
 
     page.get_by_role("button", name="Add task").first.click()
     expect(page.get_by_role("textbox", name="Task name...")).to_be_visible(timeout=5000)

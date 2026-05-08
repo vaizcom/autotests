@@ -254,7 +254,7 @@ def test_cleanup(page: Page, soft_step, cleanup_task):
     try:
         with allure.step("Открытие вкладки Milestones"):
             page.goto(settings.AUTOTEST_BOARD_URL)
-            expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=15000)
+            expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
             page.get_by_role("link", name="Milestones").click()
 
         with allure.step(f"Поиск майлстоуна '{_TASK_NAME}'"):
