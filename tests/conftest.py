@@ -42,6 +42,20 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
 )
 
 
+def pytest_configure(config):
+    """Разделяет allure-results для backend и frontend тестов."""
+    if not getattr(config.option, "allure_report_dir", None):
+        return
+
+    args = " ".join(str(a) for a in (config.option.file_or_dir or []))
+    markexpr = getattr(config.option, "markexpr", "") or ""
+
+    if "test_frontend" in args or "frontend" in markexpr:
+        config.option.allure_report_dir = "allure-results-frontend"
+    elif "test_backend" in args or "backend" in markexpr:
+        config.option.allure_report_dir = "allure-results-backend"
+
+
 def pytest_collection_finish(session):
     has_backend = any(item.get_closest_marker('backend') for item in session.items)
     if has_backend:
