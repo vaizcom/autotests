@@ -43,7 +43,9 @@ from tests.test_backend.data.endpoints.Space.space_endpoints import (
 
 
 def pytest_configure(config):
-    """Разделяет allure-results для backend и frontend тестов."""
+    """Разделяет allure-results для backend и frontend тестов (только локально)."""
+    if os.getenv("CI"):
+        return
     if not getattr(config.option, "allure_report_dir", None):
         return
 
