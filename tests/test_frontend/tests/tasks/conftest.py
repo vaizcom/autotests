@@ -156,11 +156,13 @@ def set_date(page: Page, date: str):
 
 def fill_description(page: Page, text: str):
     """Заполняет описание в tiptap-редакторе открытого сайдбара."""
-    editor = page.locator('.tiptap[contenteditable="true"]').first
+    editor = page.locator(".tiptap").first
     expect(editor).to_be_visible(timeout=10000)
     editor.click()
-    editor.fill(text)
-    expect(editor).to_contain_text(text, timeout=5000)
+    editable = page.locator('.tiptap[contenteditable="true"]').first
+    expect(editable).to_be_visible(timeout=5000)
+    editable.fill(text)
+    expect(editable).to_contain_text(text, timeout=5000)
 
 
 def add_comment(page: Page, comment_text: str):
