@@ -279,8 +279,11 @@ def soft_step(request, page):
             elif "disabled" in full and "enabled" in full:
                 hint = "Элемент заблокирован (disabled) — проверьте состояние UI"
                 detail = short
-            elif "Timeout" in full and "waiting for" in full:
+            elif ("Timeout" in full or "timeout" in full) and "waiting for" in full:
                 hint = "Элемент не найден — возможно изменился UI или локатор устарел"
+                detail = short
+            elif "expected to be" in full:
+                hint = "Проверка не прошла — элемент не соответствует ожиданию"
                 detail = short
             elif "not visible" in full or "not attached" in full:
                 hint = "Элемент не виден на странице — проверьте, что поле отображается"

@@ -71,9 +71,15 @@ def create_task_on_board(page: Page, task_name: str):
 
 def add_subtask(page: Page, subtask_name: str):
     """Добавляет подзадачу в открытом сайдбаре задачи."""
-    page.get_by_role("textbox", name="Enter subtask name").fill(subtask_name)
+    textbox = page.get_by_role("textbox", name="Enter subtask name")
+    expect(textbox).to_be_visible(timeout=5000)
+    textbox.fill(subtask_name)
     page.keyboard.press("Enter")
-    expect(page.get_by_text(subtask_name).first).to_be_visible(timeout=10000)
+    expect(
+        page.get_by_role("button")
+        .filter(has_text=re.compile(r"[A-Z]+-\d+"))
+        .filter(has_text=subtask_name)
+    ).to_be_visible(timeout=10000)
 
 
 def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):
@@ -81,6 +87,7 @@ def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):
     card = page.get_by_role("button").filter(
         has_text=re.compile(r"[A-Z]+-\d+")
     ).filter(has_text=card_name)
+    expect(card).to_be_visible(timeout=10000)
     card.click()
     expect(page.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
     for name in subtask_names:
@@ -111,7 +118,7 @@ def wait_for_subtask_rows(page: Page, card_name: str, subtask_name: str):
 def toggle_subtask_complete(page: Page, subtask_name: str):
     """Кликает чекбокс подзадачи по имени. Работает независимо от DOM-структуры."""
     btn = page.get_by_role("button").filter(has_text=subtask_name)
-    expect(btn).to_be_visible(timeout=10000)
+    expect(btn).to_be_visible(timeout=15000)
     btn.scroll_into_view_if_needed()
 
     # Чекбокс внутри кнопки
@@ -138,14 +145,19 @@ def toggle_subtask_complete(page: Page, subtask_name: str):
 
 def set_date(page: Page, date: str):
     """Устанавливает дату (due) в открытом сайдбаре задачи/майлстоуна."""
-    page.get_by_role("button", name="Dates No dates set").click()
-    page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first.fill(date)
+    dates_btn = page.get_by_role("button", name="Dates No dates set")
+    expect(dates_btn).to_be_visible(timeout=5000)
+    dates_btn.click()
+    date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
+    expect(date_input).to_be_visible(timeout=5000)
+    date_input.fill(date)
     page.get_by_role("button", name="Apply").click()
 
 
 def fill_description(page: Page, text: str):
     """Заполняет описание в tiptap-редакторе открытого сайдбара."""
     editor = page.locator(".tiptap").first
+    expect(editor).to_be_visible(timeout=5000)
     editor.click()
     editor.fill(text)
     expect(editor).to_contain_text(text, timeout=5000)
@@ -167,6 +179,7 @@ def open_sidebar_menu(page: Page):
     """Кликает по кнопке '...' (три точки) в сайдбаре задачи/майлстоуна."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
     more_btn = sidebar.locator('[class*="IconButton-module_Root"]:has(path[d^="M7.25 12"])').first
+    expect(more_btn).to_be_visible(timeout=5000)
     more_btn.click()
 
 
