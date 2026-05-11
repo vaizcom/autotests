@@ -244,14 +244,16 @@ def soft_step(request, page):
     - Прикладывает скриншот страницы и краткий лог к Allure
     - Регистрирует soft failure через pytest-check (тест не останавливается)
 
-    Для тестов с маркером @pytest.mark.dependency шаг падает жёстко (re-raise),
-    чтобы pytest-dependency корректно скипал зависимые тесты.
+    Для тестов-источников зависимости (@pytest.mark.dependency(name=...))
+    шаг падает жёстко (re-raise), чтобы pytest-dependency скипал зависимые тесты.
+    Тесты с только depends= используют soft failure.
 
     Использование:
         with allure.step("Приоритет: Medium"):
             soft_step("Приоритет", lambda: page.get_by_text("Medium").click())
     """
-    is_dependency = request.node.get_closest_marker("dependency") is not None
+    dep_marker = request.node.get_closest_marker("dependency")
+    is_dependency = dep_marker is not None and dep_marker.kwargs.get("name") is not None
 
     def _soft_step(name, fn, timeout=15000):
         page.set_default_timeout(timeout)
