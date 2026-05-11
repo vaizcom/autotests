@@ -229,11 +229,6 @@ def test_10_comment(page: Page, soft_step):
 # ── 11. Добавление подзадач + счётчики ─────────────────────────────
 
 
-@pytest.mark.dependency(name=_DEP_SUBTASK, depends=[_DEP_TASK])
-@allure.parent_suite("Frontend")
-@allure.suite("Tasks")
-@allure.sub_suite("Fields")
-@allure.title("11. Add subtasks and verify counters")
 def _check_counter(page: Page, name: str, check_fn):
     """Soft-проверка счётчика: логирует в Allure, но не ломает тест.
 
@@ -257,6 +252,11 @@ def _check_counter(page: Page, name: str, check_fn):
             )
 
 
+@pytest.mark.dependency(name=_DEP_SUBTASK, depends=[_DEP_TASK])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.sub_suite("Fields")
+@allure.title("11. Add subtasks and verify counters")
 def test_11_add_subtasks(page: Page, soft_step):
     """Добавляет две подзадачи, проверяет счётчик на каждом шаге."""
     open_card(page, soft_step, _TASK_NAME)
