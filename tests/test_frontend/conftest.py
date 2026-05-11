@@ -14,6 +14,18 @@ from playwright.sync_api import expect
 from tests.test_frontend.core import settings
 from tests.test_frontend.core.settings import BASE_URL, FRONTEND_EMAIL, FRONTEND_PASSWORD, FRONTEND_STAND
 
+
+def pytest_configure(config):
+    """Локальные дефолты: --headed --slowmo 500 --video on (если не CI)."""
+    if os.environ.get("CI"):
+        return
+    if not config.option.headed:
+        config.option.headed = True
+    if not config.option.slowmo:
+        config.option.slowmo = 500
+    if not config.option.video:
+        config.option.video = "on"
+
 # API URL для teardown-операций (удаление Space, Project и т.д.)
 API_URL = "https://api.vaiz.dev/v4"
 
