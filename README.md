@@ -7,6 +7,20 @@
 * Install allure: `brew install allure`
 * Install playwright: `playwright install`
 
+## Allure отчёты
+
+Отчёты публикуются на GitHub Pages:
+- **Frontend:** https://vaizcom.github.io/autotests/frontend/
+- **Backend:** https://vaizcom.github.io/autotests/backend/
+- **Навигация:** https://vaizcom.github.io/autotests/
+
+Хранятся последние 20 прогонов. История и тренды доступны внутри отчёта (график Trend на главной).
+
+## Troubleshooting
+
+### Проблемы с бродкастами / реактивностью на фронте
+Если на dev-стенде перестали обновляться счётчики, статусы или другие данные без перезагрузки страницы — запустить мануально воркфлоу **"Staging × Static Assets"** в основном репозитории Vaiz. Это пересобирает статику и восстанавливает websocket-соединения.
+
 ## Бекенд тесты
 
 ### Запуск в GitHub Actions
