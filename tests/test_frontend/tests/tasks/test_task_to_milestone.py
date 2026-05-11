@@ -201,7 +201,7 @@ def test_04_verify_fields(page: Page, soft_step):
 
     with allure.step("Проверка описания"):
         soft_step("Описание", lambda: (
-            expect(page.locator(".tiptap").first).to_contain_text(_DESCRIPTION, timeout=5000)
+            expect(page.locator('.tiptap').filter(has_text=_DESCRIPTION).first).to_be_visible(timeout=5000)
         ))
 
     with allure.step("Проверка даты"):

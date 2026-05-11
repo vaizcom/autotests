@@ -134,7 +134,7 @@ def test_04_description(page: Page, soft_step):
 
     with allure.step("Проверка описания"):
         soft_step("Описание сохранено", lambda: (
-            expect(page.locator(".tiptap").first).to_contain_text(_DESCRIPTION, timeout=5000)
+            expect(page.locator('.tiptap').filter(has_text=_DESCRIPTION).first).to_be_visible(timeout=5000)
         ))
 
 

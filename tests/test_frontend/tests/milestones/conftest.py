@@ -13,7 +13,9 @@ def create_milestone_on_board(page: Page, milestone_name: str):
     expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
     page.get_by_role("link", name="Milestones").click()
 
-    page.get_by_text("Add new Milestone").click()
+    add_btn = page.get_by_text("Add new Milestone")
+    expect(add_btn).to_be_visible(timeout=5000)
+    add_btn.click()
     expect(page.get_by_role("textbox", name="Enter name...")).to_be_visible(timeout=5000)
     page.get_by_role("textbox", name="Enter name...").fill(milestone_name)
     page.keyboard.press("Enter")
@@ -36,6 +38,7 @@ def open_milestone(page: Page, milestone_name: str):
 def add_task_to_milestone(page: Page, task_name: str):
     """Добавляет задачу в открытый майлстоун."""
     task_input = page.get_by_role("textbox", name="Enter task name")
+    expect(task_input).to_be_visible(timeout=5000)
     task_input.click()
     task_input.fill(task_name)
     page.keyboard.press("Enter")

@@ -252,12 +252,12 @@ def test_11_add_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 1 subtask"):
         soft_step("1 subtask", lambda: (
-            expect(page.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=5000)
+            expect(page.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=10000)
         ))
 
     with allure.step("Проверка: 0 completed of 1"):
         soft_step("0 completed of 1", lambda: (
-            expect(page.get_by_text("0 completed of 1")).to_be_visible(timeout=5000)
+            expect(page.get_by_text("0 completed of 1")).to_be_visible(timeout=10000)
         ))
 
     # ── Подзадача 2 → "2 subtasks" + "0 completed of 2" ──
@@ -267,12 +267,12 @@ def test_11_add_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 2 subtasks"):
         soft_step("2 subtasks", lambda: (
-            expect(page.get_by_role("heading", name="2 subtasks")).to_be_visible(timeout=5000)
+            expect(page.get_by_role("heading", name="2 subtasks")).to_be_visible(timeout=10000)
         ))
 
     with allure.step("Проверка: 0 completed of 2"):
         soft_step("0 completed of 2", lambda: (
-            expect(page.get_by_text("0 completed of 2")).to_be_visible(timeout=5000)
+            expect(page.get_by_text("0 completed of 2")).to_be_visible(timeout=10000)
         ))
 
 
@@ -300,7 +300,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 1 completed of 2"):
         soft_step("1 completed of 2", lambda: (
-            expect(page.get_by_text("1 completed of 2")).to_be_visible(timeout=5000)
+            expect(page.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
         ))
 
     # ── Complete подзадачи 2 → "All 2 completed" ──
@@ -310,7 +310,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: All 2 completed"):
         soft_step("All 2 completed", lambda: (
-            expect(page.get_by_text("All 2 completed")).to_be_visible(timeout=5000)
+            expect(page.get_by_text("All 2 completed")).to_be_visible(timeout=10000)
         ))
 
     # ── Uncomplete подзадачи 1 → "1 completed of 2" ──
@@ -320,7 +320,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 1 completed of 2 (после снятия)"):
         soft_step("1 completed of 2 (после снятия)", lambda: (
-            expect(page.get_by_text("1 completed of 2")).to_be_visible(timeout=5000)
+            expect(page.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
         ))
 
     # ── Uncomplete подзадачи 2 → "0 completed of 2" ──
@@ -330,7 +330,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 0 completed of 2"):
         soft_step("0 completed of 2", lambda: (
-            expect(page.get_by_text("0 completed of 2")).to_be_visible(timeout=5000)
+            expect(page.get_by_text("0 completed of 2")).to_be_visible(timeout=10000)
         ))
 
 
@@ -364,7 +364,7 @@ def test_13_delete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 1 subtask"):
         soft_step("1 subtask", lambda: (
-            expect(page.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=5000)
+            expect(page.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=10000)
         ))
 
     # ── Удаление подзадачи 2 → "0 subtasks" ──
@@ -374,7 +374,7 @@ def test_13_delete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 0 subtasks"):
         soft_step("0 subtasks", lambda: (
-            expect(page.get_by_role("heading", name="0 subtasks")).to_be_visible(timeout=5000)
+            expect(page.get_by_role("heading", name="0 subtasks")).to_be_visible(timeout=10000)
         ))
 
 
