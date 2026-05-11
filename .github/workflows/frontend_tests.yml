@@ -167,9 +167,7 @@ jobs:
 
       - name: Fix Allure redirect for subdirectory
         if: always()
-        run: |
-          sudo chmod -R u+w allure-history
-          sed -i 's|URL=https://vaizcom.github.io/autotests/|URL=https://vaizcom.github.io/autotests/frontend/|' allure-history/index.html
+        run: sudo sed -i 's|URL=https://vaizcom.github.io/autotests/|URL=https://vaizcom.github.io/autotests/frontend/|' allure-history/index.html
 
       - name: Publish Allure Report to GitHub Pages (Frontend)
         uses: peaceiris/actions-gh-pages@v4
