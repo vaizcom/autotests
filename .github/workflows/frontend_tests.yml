@@ -179,6 +179,30 @@ jobs:
           keep_files: true
           full_commit_message: "deploy: frontend allure report"
 
+      - name: Ensure root navigation page
+        if: always()
+        run: |
+          mkdir -p root-page
+          cat > root-page/index.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html lang="ru">
+          <head><meta charset="utf-8"><title>Allure Reports</title>
+          <style>body{font-family:sans-serif;max-width:400px;margin:80px auto}a{display:block;margin:16px 0;font-size:20px}</style>
+          </head><body><h1>Allure Reports</h1>
+          <a href="frontend/">Frontend Tests</a>
+          <a href="backend/">Backend Tests</a>
+          </body></html>
+          HTMLEOF
+
+      - name: Publish root navigation page
+        uses: peaceiris/actions-gh-pages@v4
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./root-page
+          keep_files: true
+          full_commit_message: "deploy: root navigation page"
+
       - name: Add Allure link to summary
         if: always()
         run: |
