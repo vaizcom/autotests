@@ -7,7 +7,7 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.conftest import cleanup_board
-from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_subtask, create_subtasks, toggle_subtask_complete, set_date, add_comment, fill_description
+from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_subtask, create_subtasks, wait_for_subtask_rows, toggle_subtask_complete, set_date, add_comment, fill_description
 
 pytestmark = [pytest.mark.frontend]
 
@@ -307,9 +307,10 @@ def test_12_complete_subtasks(page: Page, soft_step, sidebar):
     """Завершает и снимает завершение подзадач, проверяет счётчики."""
     open_card(page, soft_step, _TASK_NAME)
 
-    # Скроллим к секции подзадач и ждём загрузки строк
+    # Скроллим сайдбар до конца чтобы подзадачи попали в viewport
     heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
     heading.scroll_into_view_if_needed()
+    sidebar.evaluate("el => el.scrollTop = el.scrollHeight")
     expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=15000)
 
     # ── Complete подзадачи 1 → "1 completed of 2" ──
