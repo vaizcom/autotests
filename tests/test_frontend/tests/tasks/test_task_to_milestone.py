@@ -118,6 +118,7 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
     def set_milestone():
         sidebar.get_by_role("button", name="Milestones Select milestones").click()
         page.get_by_role("textbox", name="Type to search...").fill(_MILESTONE_NAME)
+        expect(page.get_by_role("menuitem", name=_MILESTONE_NAME)).to_be_visible(timeout=5000)
         page.get_by_role("menuitem", name=_MILESTONE_NAME).click()
         expect(sidebar.get_by_role("button", name=re.compile(rf"Milestones.*{_MILESTONE_NAME}"))).to_be_visible(timeout=5000)
 
