@@ -178,3 +178,6 @@ test-results/
 
 # Debug TS для локальной отладки тестов
 .debug_ts
+
+# Claude Code
+CLAUDE.md
