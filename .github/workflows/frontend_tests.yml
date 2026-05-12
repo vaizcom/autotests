@@ -171,21 +171,12 @@ jobs:
         if: always()
         run: sudo sed -i "s|URL=https://vaizcom.github.io/autotests/|URL=https://vaizcom.github.io/autotests/frontend/${{ env.FRONTEND_STAND }}/|" allure-history/index.html
 
-      - name: Publish Allure Report to GitHub Pages (Frontend)
-        uses: peaceiris/actions-gh-pages@v4
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./allure-history
-          destination_dir: frontend/${{ env.FRONTEND_STAND }}
-          keep_files: true
-          full_commit_message: "deploy: frontend ${{ env.FRONTEND_STAND }} allure report"
-
-      - name: Ensure root navigation page
+      - name: Prepare deploy directory
         if: always()
         run: |
-          mkdir -p root-page
-          cat > root-page/index.html << 'HTMLEOF'
+          mkdir -p deploy/frontend/${{ env.FRONTEND_STAND }}
+          cp -r allure-history/* deploy/frontend/${{ env.FRONTEND_STAND }}/
+          cat > deploy/index.html << 'HTMLEOF'
           <!DOCTYPE html>
           <html lang="ru">
           <head><meta charset="utf-8"><title>Allure Reports</title>
@@ -207,14 +198,14 @@ jobs:
           </body></html>
           HTMLEOF
 
-      - name: Publish root navigation page
+      - name: Publish to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./root-page
+          publish_dir: ./deploy
           keep_files: true
-          full_commit_message: "deploy: root navigation page"
+          full_commit_message: "deploy: frontend ${{ env.FRONTEND_STAND }} allure report"
 
       - name: Add Allure link to summary
         if: always()
