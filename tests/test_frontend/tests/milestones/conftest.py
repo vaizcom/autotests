@@ -38,8 +38,12 @@ def open_milestone(page: Page, milestone_name: str):
 def add_task_to_milestone(page: Page, task_name: str):
     """Добавляет задачу в открытый майлстоун."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    task_input = sidebar.get_by_role("textbox", name="Enter task name")
-    expect(task_input).to_be_visible(timeout=5000)
+    expect(
+        sidebar.locator('[data-tutorial-anchor="SUBTASK_LIST_ROOT"]'),
+        "Секция задач не найдена в сайдбаре — UI не загрузился",
+    ).to_be_visible(timeout=10000)
+    task_input = sidebar.locator('[data-tutorial-anchor="SUBTASK_LIST_ADD_SEARCH"] input')
+    expect(task_input, "Поле ввода задачи не найдено в секции задач").to_be_visible(timeout=5000)
     task_input.click()
     task_input.fill(task_name)
     page.keyboard.press("Enter")
