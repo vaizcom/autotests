@@ -307,10 +307,8 @@ def test_12_complete_subtasks(page: Page, soft_step, sidebar):
     """Завершает и снимает завершение подзадач, проверяет счётчики."""
     open_card(page, soft_step, _TASK_NAME)
 
-    # Скроллим сайдбар до конца чтобы подзадачи попали в viewport
-    heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
-    heading.scroll_into_view_if_needed()
-    sidebar.evaluate("el => el.scrollTop = el.scrollHeight")
+    # Скроллим к Description (сразу после сабтасок) — подзадачи окажутся в viewport
+    sidebar.locator('.tiptap').first.scroll_into_view_if_needed()
     expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=15000)
 
     # ── Complete подзадачи 1 → "1 completed of 2" ──
