@@ -106,6 +106,8 @@ jobs:
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
           echo "| **Stand** | $TEST_STAND_NAME |" >> $GITHUB_STEP_SUMMARY
           echo "| **Scope** | $TEST_SCOPE |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | ${{ github.head_ref || github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | ${GITHUB_SHA::7} |" >> $GITHUB_STEP_SUMMARY
 
       - name: ✅ Check if the API is available from the agent
         continue-on-error: false
@@ -134,14 +136,14 @@ jobs:
           allure_results: allure-results
           allure_report: allure-report
           allure_history: allure-history
-          gh_pages: gh-pages/backend
+          gh_pages: gh-pages/backend/${{ env.TEST_STAND_NAME }}
           keep_reports: 20
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fix Allure redirect for subdirectory
         if: always()
-        run: sudo sed -i 's|URL=https://vaizcom.github.io/autotests/|URL=https://vaizcom.github.io/autotests/backend/|' allure-history/index.html
+        run: sudo sed -i "s|URL=https://vaizcom.github.io/autotests/|URL=https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/|" allure-history/index.html
 
       - name: 🚀 Publish Allure Report to GitHub Pages (Backend)
         uses: peaceiris/actions-gh-pages@v4
@@ -149,9 +151,9 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./allure-history
-          destination_dir: backend
+          destination_dir: backend/${{ env.TEST_STAND_NAME }}
           keep_files: true
-          full_commit_message: "deploy: backend allure report"
+          full_commit_message: "deploy: backend ${{ env.TEST_STAND_NAME }} allure report"
 
       - name: Ensure root navigation page
         if: always()
@@ -161,10 +163,21 @@ jobs:
           <!DOCTYPE html>
           <html lang="ru">
           <head><meta charset="utf-8"><title>Allure Reports</title>
-          <style>body{font-family:sans-serif;max-width:400px;margin:80px auto}a{display:block;margin:16px 0;font-size:20px}</style>
-          </head><body><h1>Allure Reports</h1>
-          <a href="frontend/">Frontend Tests</a>
-          <a href="backend/">Backend Tests</a>
+          <style>
+            body{font-family:sans-serif;max-width:500px;margin:80px auto}
+            h1{margin-bottom:32px}
+            h2{margin:24px 0 8px;font-size:20px}
+            a{display:block;margin:4px 0 4px 16px;font-size:18px}
+          </style>
+          </head><body>
+          <h1>Allure Reports</h1>
+          <h2>Frontend Tests</h2>
+          <a href="frontend/dev/">Dev</a>
+          <a href="frontend/prod/">Prod</a>
+          <h2>Backend Tests</h2>
+          <a href="backend/dev/">Dev</a>
+          <a href="backend/kuber_dev/">Kuber Dev</a>
+          <a href="backend/kuber_uat/">Kuber UAT</a>
           </body></html>
           HTMLEOF
 
@@ -182,7 +195,7 @@ jobs:
         run: |
           REPORT_NUM=$(ls -d allure-history/[0-9]* 2>/dev/null | sort -n | tail -1 | xargs basename)
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📊 **Allure Report**: [Открыть отчёт](https://vaizcom.github.io/autotests/backend/${REPORT_NUM}/)" >> $GITHUB_STEP_SUMMARY
+          echo "📊 **Allure Report**: [Открыть отчёт](https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/${REPORT_NUM}/)" >> $GITHUB_STEP_SUMMARY
 
       - name: 📝 Comment Allure Report link on PR
         if: github.event_name == 'pull_request'
@@ -206,7 +219,7 @@ jobs:
 
             const sha = context.payload.pull_request.head.sha.substring(0, 7);
             const time = new Date().toISOString();
-            const link = "https://vaizcom.github.io/autotests/backend/";
+            const link = "https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/";
 
             await github.rest.issues.createComment({
               issue_number: context.payload.pull_request.number,
