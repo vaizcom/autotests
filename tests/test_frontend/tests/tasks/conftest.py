@@ -47,7 +47,8 @@ def open_card(page: Page, soft_step, card_name: str):
         ).filter(has_text=card_name)
         expect(task_card).to_be_visible(timeout=15000)
         task_card.click()
-        expect(page.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
+        sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+        expect(sidebar.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
 
     with allure.step(f"Открытие карточки '{card_name}' в сайдбаре"):
         soft_step(f"Открытие '{card_name}' в сайдбаре", _open_sidebar)
@@ -71,12 +72,13 @@ def create_task_on_board(page: Page, task_name: str):
 
 def add_subtask(page: Page, subtask_name: str):
     """Добавляет подзадачу в открытом сайдбаре задачи."""
-    textbox = page.get_by_role("textbox", name="Enter subtask name")
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    textbox = sidebar.get_by_role("textbox", name="Enter subtask name")
     expect(textbox).to_be_visible(timeout=5000)
     textbox.fill(subtask_name)
     page.keyboard.press("Enter")
     expect(
-        page.get_by_role("button")
+        sidebar.get_by_role("button")
         .filter(has_text=re.compile(r"[A-Z]+-\d+"))
         .filter(has_text=subtask_name)
     ).to_be_visible(timeout=10000)
@@ -89,18 +91,20 @@ def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):
     ).filter(has_text=card_name)
     expect(card).to_be_visible(timeout=10000)
     card.click()
-    expect(page.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    expect(sidebar.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
     for name in subtask_names:
         add_subtask(page, name)
 
 
 def wait_for_subtask_rows(page: Page, card_name: str, subtask_name: str):
     """Ждёт загрузки строк подзадач с ретраями и reload."""
-    heading = page.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
     heading.scroll_into_view_if_needed()
 
     for attempt in range(4):
-        if page.get_by_text(subtask_name).first.is_visible(timeout=3000):
+        if sidebar.get_by_text(subtask_name).first.is_visible(timeout=3000):
             return
         if attempt < 3:
             page.reload()
@@ -109,15 +113,16 @@ def wait_for_subtask_rows(page: Page, card_name: str, subtask_name: str):
                 has_text=re.compile(r"[A-Z]+-\d+")
             ).filter(has_text=card_name)
             card.click()
-            expect(page.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
-            heading = page.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
+            expect(sidebar.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
+            heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
             heading.scroll_into_view_if_needed()
-    expect(page.get_by_text(subtask_name).first).to_be_visible(timeout=5000)
+    expect(sidebar.get_by_text(subtask_name).first).to_be_visible(timeout=5000)
 
 
 def toggle_subtask_complete(page: Page, subtask_name: str):
     """Кликает чекбокс подзадачи по имени. Работает независимо от DOM-структуры."""
-    btn = page.get_by_role("button").filter(has_text=subtask_name)
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    btn = sidebar.get_by_role("button").filter(has_text=subtask_name)
     expect(btn).to_be_visible(timeout=15000)
     btn.scroll_into_view_if_needed()
 
@@ -145,7 +150,8 @@ def toggle_subtask_complete(page: Page, subtask_name: str):
 
 def set_date(page: Page, date: str):
     """Устанавливает дату (due) в открытом сайдбаре задачи/майлстоуна."""
-    dates_btn = page.get_by_role("button", name="Dates No dates set")
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    dates_btn = sidebar.get_by_role("button", name="Dates No dates set")
     expect(dates_btn).to_be_visible(timeout=5000)
     dates_btn.click()
     date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
@@ -158,8 +164,9 @@ def set_date(page: Page, date: str):
 
 def fill_description(page: Page, text: str):
     """Заполняет описание в tiptap-редакторе открытого сайдбара."""
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
     # Описание — .tiptap вне секции комментариев (работает на задачах и майлстоунах)
-    editor = page.locator(
+    editor = sidebar.locator(
         '//*[contains(@class, "tiptap") and not(ancestor::*[contains(@class, "Comment")])]'
     ).first
     expect(editor).to_be_visible(timeout=10000)
@@ -172,14 +179,15 @@ def fill_description(page: Page, text: str):
 
 def add_comment(page: Page, comment_text: str):
     """Вводит и отправляет комментарий в открытом сайдбаре задачи/майлстоуна."""
-    toolbar = page.locator('[class*="CommentToolbar-module"]').first
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    toolbar = sidebar.locator('[class*="CommentToolbar-module"]').first
     expect(toolbar).to_be_visible(timeout=5000)
     toolbar.scroll_into_view_if_needed()
     comment_editor = toolbar.locator('xpath=ancestor::div[contains(@class, "Comment")]').locator(".tiptap")
     expect(comment_editor).to_be_visible(timeout=5000)
     comment_editor.click()
     comment_editor.fill(comment_text)
-    send_btn = page.locator('[class*="CommentToolbar-module_Right"]').get_by_role("button").last
+    send_btn = sidebar.locator('[class*="CommentToolbar-module_Right"]').get_by_role("button").last
     expect(send_btn).to_be_enabled(timeout=5000)
     send_btn.click()
 

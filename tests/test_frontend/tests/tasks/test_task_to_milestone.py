@@ -48,7 +48,7 @@ def test_01_create_task(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
 @allure.title("02. Fill all task fields before conversion")
-def test_02_fill_fields(page: Page, soft_step):
+def test_02_fill_fields(page: Page, soft_step, sidebar):
     """Заполняет все поля задачи перед конвертацией.
     Переносятся: название, описание, дата, подзадача, комментарий.
     Теряются: приоритет, исполнитель, тип, майлстоун."""
@@ -62,20 +62,20 @@ def test_02_fill_fields(page: Page, soft_step):
 
     # Дата
     def set_date():
-        page.get_by_role("button", name="Dates No dates set").click()
+        sidebar.get_by_role("button", name="Dates No dates set").click()
         date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
         date_input.fill(_DATE)
         page.get_by_role("button", name="Apply").click()
-        expect(page.get_by_role("button", name="Dates No dates set")).not_to_be_visible(timeout=5000)
+        expect(sidebar.get_by_role("button", name="Dates No dates set")).not_to_be_visible(timeout=5000)
 
     with allure.step(f"Дата: {_DATE}"):
         soft_step("Дата", set_date)
 
     # Подзадача
     def add_subtask():
-        page.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
+        sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
         page.keyboard.press("Enter")
-        expect(page.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=5000)
+        expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=5000)
 
     with allure.step(f"Подзадача: {_SUBTASK_NAME}"):
         soft_step("Подзадача", add_subtask)
@@ -88,38 +88,38 @@ def test_02_fill_fields(page: Page, soft_step):
 
     # Приоритет
     def set_priority():
-        page.get_by_role("button", name="Priority Select priority").click()
+        sidebar.get_by_role("button", name="Priority Select priority").click()
         page.get_by_text("Medium").click()
-        expect(page.get_by_role("button", name=re.compile(r"Priority.*Medium"))).to_be_visible(timeout=5000)
+        expect(sidebar.get_by_role("button", name=re.compile(r"Priority.*Medium"))).to_be_visible(timeout=5000)
 
     with allure.step("Приоритет: Medium"):
         soft_step("Приоритет", set_priority)
 
     # Исполнитель
     def set_assignee():
-        page.get_by_role("button", name="Assign Not assigned").click()
+        sidebar.get_by_role("button", name="Assign Not assigned").click()
         page.locator('.szh-menu-container [class*="SelectFlySearch-module_ItemText"]').first.click()
         page.locator('[class*="FlyBlock-module_Overlay"]').click()
-        expect(page.get_by_role("button", name=re.compile(r"Assign\s+\S"))).to_be_visible(timeout=5000)
+        expect(sidebar.get_by_role("button", name=re.compile(r"Assign\s+\S"))).to_be_visible(timeout=5000)
 
     with allure.step("Исполнитель"):
         soft_step("Исполнитель", set_assignee)
 
     # Тип
     def set_type():
-        page.get_by_role("button", name="Types Select type").click()
+        sidebar.get_by_role("button", name="Types Select type").click()
         page.get_by_role("menuitem", name="Green").click()
-        expect(page.get_by_role("button", name=re.compile(r"Types.*Green"))).to_be_visible(timeout=5000)
+        expect(sidebar.get_by_role("button", name=re.compile(r"Types.*Green"))).to_be_visible(timeout=5000)
 
     with allure.step("Тип: Green"):
         soft_step("Тип", set_type)
 
     # Майлстоун
     def set_milestone():
-        page.get_by_role("button", name="Milestones Select milestones").click()
+        sidebar.get_by_role("button", name="Milestones Select milestones").click()
         page.get_by_role("textbox", name="Type to search...").fill(_MILESTONE_NAME)
         page.get_by_role("menuitem", name=_MILESTONE_NAME).click()
-        expect(page.get_by_role("button", name=re.compile(rf"Milestones.*{_MILESTONE_NAME}"))).to_be_visible(timeout=5000)
+        expect(sidebar.get_by_role("button", name=re.compile(rf"Milestones.*{_MILESTONE_NAME}"))).to_be_visible(timeout=5000)
 
     with allure.step(f"Майлстоун: {_MILESTONE_NAME}"):
         soft_step("Майлстоун", set_milestone)
@@ -178,7 +178,7 @@ def test_03_convert_to_milestone(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
 @allure.title("04. Verify milestone fields via subtask")
-def test_04_verify_fields(page: Page, soft_step):
+def test_04_verify_fields(page: Page, soft_step, sidebar):
     """Открывает сабтаску на борде, проверяет milestone field,
     переходит на майлстоун по бейджу и проверяет перенос полей."""
     open_card(page, soft_step, _SUBTASK_NAME)
@@ -187,53 +187,53 @@ def test_04_verify_fields(page: Page, soft_step):
 
     with allure.step("Milestone field на сабтаске"):
         soft_step("Milestone field", lambda: (
-            expect(page.get_by_role("button", name=re.compile(rf"Milestones.*{_TASK_NAME}"))).to_be_visible(timeout=5000)
+            expect(sidebar.get_by_role("button", name=re.compile(rf"Milestones.*{_TASK_NAME}"))).to_be_visible(timeout=5000)
         ))
 
     # ── Переход на майлстоун по иконке-ссылке (hard fail) ──
 
     with allure.step("Переход на майлстоун по иконке-ссылке"):
-        milestone_field = page.get_by_role("button", name=re.compile(rf"Milestones.*{_TASK_NAME}"))
+        milestone_field = sidebar.get_by_role("button", name=re.compile(rf"Milestones.*{_TASK_NAME}"))
         milestone_field.locator('i[class*="Badge-module_Icon"]').click()
-        expect(page.get_by_role("heading", name=_TASK_NAME)).to_be_visible(timeout=10000)
+        expect(sidebar.get_by_role("heading", name=_TASK_NAME)).to_be_visible(timeout=10000)
 
     # ── Проверка полей майлстоуна (перенеслись) ──
 
     with allure.step("Проверка описания"):
         soft_step("Описание", lambda: (
-            expect(page.locator('.tiptap').filter(has_text=_DESCRIPTION).first).to_be_visible(timeout=5000)
+            expect(sidebar.locator('.tiptap').filter(has_text=_DESCRIPTION).first).to_be_visible(timeout=5000)
         ))
 
     with allure.step("Проверка даты"):
         soft_step("Дата", lambda: (
-            expect(page.get_by_role("button", name=re.compile(r"Dates.*2030"))).to_be_visible(timeout=5000)
+            expect(sidebar.get_by_role("button", name=re.compile(r"Dates.*2030"))).to_be_visible(timeout=5000)
         ))
 
     with allure.step("Проверка подзадачи"):
         soft_step("Подзадача", lambda: (
-            expect(page.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=5000)
+            expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=5000)
         ))
 
     with allure.step("Проверка комментария"):
         soft_step("Комментарий", lambda: (
-            expect(page.get_by_text(_COMMENT)).to_be_visible(timeout=5000)
+            expect(sidebar.get_by_text(_COMMENT)).to_be_visible(timeout=5000)
         ))
 
     # ── Поля, которые должны были потеряться ──
 
     with allure.step("Приоритет отсутствует"):
         soft_step("Приоритет потерян", lambda: (
-            expect(page.get_by_role("button", name=re.compile(r"Priority.*Medium"))).not_to_be_visible(timeout=3000)
+            expect(sidebar.get_by_role("button", name=re.compile(r"Priority.*Medium"))).not_to_be_visible(timeout=3000)
         ))
 
     with allure.step("Исполнитель отсутствует"):
         soft_step("Исполнитель потерян", lambda: (
-            expect(page.get_by_role("button", name=re.compile(r"Assign\s+\S"))).not_to_be_visible(timeout=3000)
+            expect(sidebar.get_by_role("button", name=re.compile(r"Assign\s+\S"))).not_to_be_visible(timeout=3000)
         ))
 
     with allure.step("Тип отсутствует"):
         soft_step("Тип потерян", lambda: (
-            expect(page.get_by_role("button", name=re.compile(r"Types.*Green"))).not_to_be_visible(timeout=3000)
+            expect(sidebar.get_by_role("button", name=re.compile(r"Types.*Green"))).not_to_be_visible(timeout=3000)
         ))
 
 

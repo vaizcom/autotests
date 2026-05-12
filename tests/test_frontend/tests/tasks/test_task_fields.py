@@ -67,14 +67,14 @@ def test_01_create_task(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("02. Set priority Medium")
-def test_02_priority(page: Page, soft_step):
+def test_02_priority(page: Page, soft_step, sidebar):
     """Устанавливает приоритет задачи Medium."""
     open_card(page, soft_step, _TASK_NAME)
 
     def set_priority():
-        page.get_by_role("button", name="Priority Select priority").click()
+        sidebar.get_by_role("button", name="Priority Select priority").click()
         page.get_by_text("Medium").click()
-        expect(page.get_by_role("button", name=re.compile(r"Priority.*Medium"))).to_be_visible(timeout=5000)
+        expect(sidebar.get_by_role("button", name=re.compile(r"Priority.*Medium"))).to_be_visible(timeout=5000)
 
     with allure.step("Выбор приоритета Medium"):
         soft_step("Приоритет", set_priority)
@@ -85,15 +85,15 @@ def test_02_priority(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("03. Assign user")
-def test_03_assignee(page: Page, soft_step):
+def test_03_assignee(page: Page, soft_step, sidebar):
     """Назначает первого пользователя из списка исполнителем."""
     open_card(page, soft_step, _TASK_NAME)
 
     def assign():
-        page.get_by_role("button", name="Assign Not assigned").click()
+        sidebar.get_by_role("button", name="Assign Not assigned").click()
         page.locator('.szh-menu-container [class*="SelectFlySearch-module_ItemText"]').first.click()
         page.locator('[class*="FlyBlock-module_Overlay"]').click()
-        expect(page.get_by_role("button", name=re.compile(r"Assign\s+\S"))).to_be_visible(timeout=5000)
+        expect(sidebar.get_by_role("button", name=re.compile(r"Assign\s+\S"))).to_be_visible(timeout=5000)
 
     with allure.step("Выбор исполнителя"):
         soft_step("Исполнитель", assign)
@@ -104,14 +104,14 @@ def test_03_assignee(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("04. Set type Green")
-def test_04_type(page: Page, soft_step):
+def test_04_type(page: Page, soft_step, sidebar):
     """Устанавливает тип задачи Green."""
     open_card(page, soft_step, _TASK_NAME)
 
     def set_type():
-        page.get_by_role("button", name="Types Select type").click()
+        sidebar.get_by_role("button", name="Types Select type").click()
         page.get_by_role("menuitem", name="Green").click()
-        expect(page.get_by_role("button", name=re.compile(r"Types.*Green"))).to_be_visible(timeout=5000)
+        expect(sidebar.get_by_role("button", name=re.compile(r"Types.*Green"))).to_be_visible(timeout=5000)
 
     with allure.step("Выбор типа Green"):
         soft_step("Тип", set_type)
@@ -135,15 +135,15 @@ def test_05_description(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("06. Add milestone")
-def test_06_milestone(page: Page, soft_step):
+def test_06_milestone(page: Page, soft_step, sidebar):
     """Привязывает майлстоун к задаче."""
     open_card(page, soft_step, _TASK_NAME)
 
     def add_milestone():
-        page.get_by_role("button", name="Milestones Select milestones").click()
+        sidebar.get_by_role("button", name="Milestones Select milestones").click()
         page.get_by_role("textbox", name="Type to search...").fill(_MILESTONE_NAME)
         page.get_by_role("menuitem", name=_MILESTONE_NAME).click()
-        expect(page.get_by_role("button", name=re.compile(rf"Milestones.*{_MILESTONE_NAME}"))).to_be_visible(timeout=5000)
+        expect(sidebar.get_by_role("button", name=re.compile(rf"Milestones.*{_MILESTONE_NAME}"))).to_be_visible(timeout=5000)
 
     with allure.step(f"Выбор майлстоуна: {_MILESTONE_NAME}"):
         soft_step("Майлстоун", add_milestone)
@@ -154,7 +154,7 @@ def test_06_milestone(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("07. Set date")
-def test_07_date(page: Page, soft_step):
+def test_07_date(page: Page, soft_step, sidebar):
     """Устанавливает дату задачи."""
     open_card(page, soft_step, _TASK_NAME)
 
@@ -163,7 +163,7 @@ def test_07_date(page: Page, soft_step):
 
     with allure.step("Проверка даты"):
         soft_step("Дата сохранена", lambda: (
-            expect(page.get_by_role("button", name="Dates No dates set")).not_to_be_visible(timeout=5000)
+            expect(sidebar.get_by_role("button", name="Dates No dates set")).not_to_be_visible(timeout=5000)
         ))
 
 
@@ -172,22 +172,22 @@ def test_07_date(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("08. Add blocker and blocking")
-def test_08_blockers(page: Page, soft_step):
+def test_08_blockers(page: Page, soft_step, sidebar):
     """Добавляет блокер и блокинг задачу."""
     open_card(page, soft_step, _TASK_NAME)
 
     def add_blocker():
-        page.get_by_role("textbox", name="Add blocker").fill(_BLOCKER_NAME)
-        page.get_by_role("textbox", name="Add blocker").press("Enter")
-        expect(page.get_by_text(_BLOCKER_NAME).first).to_be_visible(timeout=10000)
+        sidebar.get_by_role("textbox", name="Add blocker").fill(_BLOCKER_NAME)
+        sidebar.get_by_role("textbox", name="Add blocker").press("Enter")
+        expect(sidebar.get_by_text(_BLOCKER_NAME).first).to_be_visible(timeout=10000)
 
     with allure.step(f"Создание блокера: {_BLOCKER_NAME}"):
         soft_step("Блокер", add_blocker)
 
     def add_blocking():
-        page.get_by_role("textbox", name="Add blocking").fill(_BLOCKING_NAME)
-        page.get_by_role("textbox", name="Add blocking").press("Enter")
-        expect(page.get_by_text(_BLOCKING_NAME).first).to_be_visible(timeout=10000)
+        sidebar.get_by_role("textbox", name="Add blocking").fill(_BLOCKING_NAME)
+        sidebar.get_by_role("textbox", name="Add blocking").press("Enter")
+        expect(sidebar.get_by_text(_BLOCKING_NAME).first).to_be_visible(timeout=10000)
 
     with allure.step(f"Создание блокинга: {_BLOCKING_NAME}"):
         soft_step("Блокинг", add_blocking)
@@ -198,12 +198,12 @@ def test_08_blockers(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("09. Fill custom text field")
-def test_09_custom_field(page: Page, soft_step):
+def test_09_custom_field(page: Page, soft_step, sidebar):
     """Заполняет кастомное текстовое поле задачи."""
     open_card(page, soft_step, _TASK_NAME)
 
     def fill_custom_text():
-        page.get_by_role("button", name=re.compile(r"^Text")).first.click()
+        sidebar.get_by_role("button", name=re.compile(r"^Text")).first.click()
         text_input = page.get_by_placeholder("Empty").first
         text_input.clear()
         text_input.fill(_CUSTOM_TEXT_VALUE)
@@ -257,7 +257,7 @@ def _check_counter(page: Page, name: str, check_fn):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("11. Add subtasks and verify counters")
-def test_11_add_subtasks(page: Page, soft_step):
+def test_11_add_subtasks(page: Page, soft_step, sidebar):
     """Добавляет две подзадачи, проверяет счётчик на каждом шаге."""
     open_card(page, soft_step, _TASK_NAME)
 
@@ -265,7 +265,7 @@ def test_11_add_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 0 subtasks"):
         soft_step("0 subtasks", lambda: (
-            expect(page.get_by_role("heading", name="0 subtasks")).to_be_visible(timeout=5000)
+            expect(sidebar.get_by_role("heading", name="0 subtasks")).to_be_visible(timeout=5000)
         ))
 
     # ── Подзадача 1 → "1 subtask" + "0 completed of 1" ──
@@ -274,11 +274,11 @@ def test_11_add_subtasks(page: Page, soft_step):
         soft_step("Добавление подзадачи 1", lambda: add_subtask(page, _SUBTASK_NAME))
 
     _check_counter(page, "1 subtask", lambda: (
-        expect(page.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=10000)
+        expect(sidebar.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=10000)
     ))
 
     _check_counter(page, "0 completed of 1", lambda: (
-        expect(page.get_by_text("0 completed of 1")).to_be_visible(timeout=10000)
+        expect(sidebar.get_by_text("0 completed of 1")).to_be_visible(timeout=10000)
     ))
 
     # ── Подзадача 2 → "2 subtasks" + "0 completed of 2" ──
@@ -287,11 +287,11 @@ def test_11_add_subtasks(page: Page, soft_step):
         soft_step("Добавление подзадачи 2", lambda: add_subtask(page, _SUBTASK_NAME_2))
 
     _check_counter(page, "2 subtasks", lambda: (
-        expect(page.get_by_role("heading", name="2 subtasks")).to_be_visible(timeout=10000)
+        expect(sidebar.get_by_role("heading", name="2 subtasks")).to_be_visible(timeout=10000)
     ))
 
     _check_counter(page, "0 completed of 2", lambda: (
-        expect(page.get_by_text("0 completed of 2")).to_be_visible(timeout=10000)
+        expect(sidebar.get_by_text("0 completed of 2")).to_be_visible(timeout=10000)
     ))
 
 
@@ -303,14 +303,14 @@ def test_11_add_subtasks(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("12. Verify subtask completion counters")
-def test_12_complete_subtasks(page: Page, soft_step):
+def test_12_complete_subtasks(page: Page, soft_step, sidebar):
     """Завершает и снимает завершение подзадач, проверяет счётчики."""
     open_card(page, soft_step, _TASK_NAME)
 
     # Скроллим к секции подзадач и ждём загрузки строк
-    heading = page.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
+    heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
     heading.scroll_into_view_if_needed()
-    expect(page.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=15000)
+    expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=15000)
 
     # ── Complete подзадачи 1 → "1 completed of 2" ──
 
@@ -319,7 +319,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 1 completed of 2"):
         soft_step("1 completed of 2", lambda: (
-            expect(page.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
+            expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
         ))
 
     # ── Complete подзадачи 2 → "All 2 completed" ──
@@ -329,7 +329,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: All 2 completed"):
         soft_step("All 2 completed", lambda: (
-            expect(page.get_by_text("All 2 completed")).to_be_visible(timeout=10000)
+            expect(sidebar.get_by_text("All 2 completed")).to_be_visible(timeout=10000)
         ))
 
     # ── Uncomplete подзадачи 1 → "1 completed of 2" ──
@@ -339,7 +339,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 1 completed of 2 (после снятия)"):
         soft_step("1 completed of 2 (после снятия)", lambda: (
-            expect(page.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
+            expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
         ))
 
     # ── Uncomplete подзадачи 2 → "0 completed of 2" ──
@@ -349,7 +349,7 @@ def test_12_complete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 0 completed of 2"):
         soft_step("0 completed of 2", lambda: (
-            expect(page.get_by_text("0 completed of 2")).to_be_visible(timeout=10000)
+            expect(sidebar.get_by_text("0 completed of 2")).to_be_visible(timeout=10000)
         ))
 
 
@@ -361,13 +361,13 @@ def test_12_complete_subtasks(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("13. Delete subtasks and verify counters")
-def test_13_delete_subtasks(page: Page, soft_step):
+def test_13_delete_subtasks(page: Page, soft_step, sidebar):
     """Удаляет подзадачи из таблицы задачи, проверяет уменьшение счётчика."""
     open_card(page, soft_step, _TASK_NAME)
 
     def delete_subtask(subtask_name):
         subtask_row = (
-            page.get_by_role("button")
+            sidebar.get_by_role("button")
             .filter(has_text=re.compile(r"[A-Z]+-\d+"))
             .filter(has_text=subtask_name)
         )
@@ -383,7 +383,7 @@ def test_13_delete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 1 subtask"):
         soft_step("1 subtask", lambda: (
-            expect(page.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=10000)
+            expect(sidebar.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=10000)
         ))
 
     # ── Удаление подзадачи 2 → "0 subtasks" ──
@@ -393,7 +393,7 @@ def test_13_delete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 0 subtasks"):
         soft_step("0 subtasks", lambda: (
-            expect(page.get_by_role("heading", name="0 subtasks")).to_be_visible(timeout=10000)
+            expect(sidebar.get_by_role("heading", name="0 subtasks")).to_be_visible(timeout=10000)
         ))
 
 
@@ -405,12 +405,11 @@ def test_13_delete_subtasks(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("14. Complete task")
-def test_14_complete(page: Page, soft_step):
+def test_14_complete(page: Page, soft_step, sidebar):
     """Отмечает задачу как выполненную (Complete)."""
     open_card(page, soft_step, _TASK_NAME)
 
     def complete_task():
-        sidebar = page.locator('[class*="RightSidebar-module_Root"]')
         checkbox = sidebar.locator('label[role="checkbox"]').first
         checkbox.click()
         expect(checkbox.locator("input")).to_be_checked(timeout=5000)

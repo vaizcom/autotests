@@ -449,6 +449,12 @@ def _auto_debug(request, page):
 
 
 @pytest.fixture
+def sidebar(page):
+    """Локатор правого сайдбара — для скоупинга проверок полей."""
+    return page.locator('[class*="RightSidebar-module_Root"]')
+
+
+@pytest.fixture
 def assert_snapshot(request):
     """Фикстура для визуального сравнения скриншотов (VRT).
 

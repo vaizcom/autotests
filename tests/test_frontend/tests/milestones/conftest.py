@@ -37,13 +37,14 @@ def open_milestone(page: Page, milestone_name: str):
 
 def add_task_to_milestone(page: Page, task_name: str):
     """Добавляет задачу в открытый майлстоун."""
-    task_input = page.get_by_role("textbox", name="Enter task name")
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    task_input = sidebar.get_by_role("textbox", name="Enter task name")
     expect(task_input).to_be_visible(timeout=5000)
     task_input.click()
     task_input.fill(task_name)
     page.keyboard.press("Enter")
     expect(
-        page.get_by_role("button")
+        sidebar.get_by_role("button")
         .filter(has_text=re.compile(r"[A-Z]+-\d+"))
         .filter(has_text=task_name)
     ).to_be_visible(timeout=10000)
