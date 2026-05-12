@@ -156,6 +156,9 @@ cython_debug/
 logs/allure-result
 allure-report/
 
+# macOS
+.DS_Store
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
@@ -168,6 +171,13 @@ allure-results/
 
 **/allure-results/
 
-# VRT артефакты Playwright (не коммитить, только baseline)
+# VRT артефакты Playwright
 test-results/
 **/__snapshots__/*.zip
+**/__snapshots__/**/*.png
+
+# Debug TS для локальной отладки тестов
+.debug_ts
+
+# Claude Code
+CLAUDE.md

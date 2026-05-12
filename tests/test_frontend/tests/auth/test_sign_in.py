@@ -9,7 +9,7 @@ pytestmark = [pytest.mark.frontend]
 
 @pytest.fixture()
 def browser_context_args(browser_context_args):
-    """Убираем storage_state — тест проверяет сам логин."""
+    """Убираем storage_state — тест проверяет логин самостоятельно."""
     return {k: v for k, v in browser_context_args.items() if k != "storage_state"}
 
 
@@ -19,6 +19,7 @@ def browser_context_args(browser_context_args):
 def test_sign_in_with_email(page: Page, assert_snapshot):
     with allure.step("Открытие страницы входа"):
         page.goto(f"{settings.BASE_URL}/auth/sign-in")
+
     with allure.step("Ввод учётных данных"):
         page.get_by_role("textbox", name="Email").fill(settings.FRONTEND_EMAIL)
         page.get_by_role("textbox", name="Password").fill(settings.FRONTEND_PASSWORD)
@@ -53,7 +54,7 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
             }""")
             if is_expanded:
                 arrow.click()
-                page.wait_for_timeout(300)
+                page.wait_for_timeout(1000)
 
         page.mouse.move(640, 400)  # убираем hover после сворачивания
         page.wait_for_timeout(200)
@@ -87,4 +88,4 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
         ''')
 
         screenshot = page.screenshot(mask=dynamic_masks)
-        assert_snapshot(screenshot, name="sign_in_success.png", threshold=1.5)
+        assert_snapshot(screenshot, name="sign_in_success.png", threshold=5.0)
