@@ -157,6 +157,7 @@ def set_date(page: Page, date: str):
     date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
     expect(date_input).to_be_visible(timeout=5000)
     date_input.fill(date)
+    expect(date_input).to_have_value(date, timeout=5000)
     apply_btn = page.get_by_role("button", name="Apply")
     expect(apply_btn).to_be_enabled(timeout=5000)
     apply_btn.click()
