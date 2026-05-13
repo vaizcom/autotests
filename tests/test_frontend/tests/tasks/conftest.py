@@ -193,6 +193,33 @@ def add_comment(page: Page, comment_text: str):
     send_btn.click()
 
 
+def create_milestone_from_dropdown(page: Page, milestone_name: str):
+    """Создаёт майлстоун из dropdown поля Milestones в открытом сайдбаре."""
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    milestones_btn = sidebar.get_by_role("button", name=re.compile(r"^Milestones"))
+    expect(milestones_btn).to_be_visible(timeout=5000)
+    milestones_btn.click()
+    create_item = page.get_by_role("menuitem", name="Create milestone")
+    expect(create_item).to_be_visible(timeout=5000)
+    create_item.locator("div").first.click()
+    name_input = page.get_by_role("textbox", name="Type name")
+    expect(name_input).to_be_visible(timeout=5000)
+    name_input.fill(milestone_name)
+    page.get_by_role("button", name="Add", exact=True).click()
+    expect(milestones_btn.filter(has_text=milestone_name)).to_be_visible(timeout=5000)
+
+
+def remove_milestone_from_dropdown(page: Page, milestone_name: str):
+    """Снимает майлстоун в dropdown поля Milestones в открытом сайдбаре."""
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    milestones_btn = sidebar.get_by_role("button", name=re.compile(r"^Milestones"))
+    expect(milestones_btn).to_be_visible(timeout=5000)
+    milestones_btn.click()
+    item = page.get_by_role("menuitem", name=milestone_name)
+    expect(item).to_be_visible(timeout=5000)
+    item.click()
+
+
 def open_sidebar_menu(page: Page):
     """Кликает по кнопке '...' (три точки) в сайдбаре задачи/майлстоуна."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')

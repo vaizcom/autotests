@@ -7,7 +7,8 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.conftest import cleanup_board
-from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_subtask, create_subtasks, wait_for_subtask_rows, toggle_subtask_complete, set_date, add_comment, fill_description
+from tests.test_frontend.tests.milestones.conftest import cleanup_milestones
+from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_subtask, create_subtasks, wait_for_subtask_rows, toggle_subtask_complete, set_date, add_comment, fill_description, create_milestone_from_dropdown, remove_milestone_from_dropdown
 
 pytestmark = [pytest.mark.frontend]
 
@@ -23,7 +24,8 @@ _SUBTASK_NAME = f"Test subtask {_TS}"
 _SUBTASK_NAME_2 = f"Test subtask 2 {_TS}"
 _DESCRIPTION = f"Test description {_TS}"
 _COMMENT = f"Test comment {_TS}"
-_MILESTONE_NAME = "Test milestone"
+_MILESTONE_NAME = f"MS Alpha {_TS}"
+_MILESTONE_NAME_2 = f"MS Beta {_TS}"
 _BLOCKER_NAME = f"Blocker task {_TS}"
 _BLOCKING_NAME = f"Blocking task {_TS}"
 _CUSTOM_TEXT_VALUE = f"Test value {_TS}"
@@ -134,19 +136,44 @@ def test_05_description(page: Page, soft_step):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
-@allure.title("06. Add milestone")
+@allure.title("06. Milestones: create, multi-select, remove")
 def test_06_milestone(page: Page, soft_step, sidebar):
-    """Привязывает майлстоун к задаче."""
+    """Создаёт майлстоуны из dropdown задачи, проверяет мульти-назначение и удаление."""
     open_card(page, soft_step, _TASK_NAME)
 
-    def add_milestone():
-        sidebar.get_by_role("button", name="Milestones Select milestones").click()
-        page.get_by_role("textbox", name="Type to search...").fill(_MILESTONE_NAME)
-        page.get_by_role("menuitem", name=_MILESTONE_NAME).click()
-        expect(sidebar.get_by_role("button", name=re.compile(rf"Milestones.*{_MILESTONE_NAME}"))).to_be_visible(timeout=5000)
+    milestones_btn = sidebar.get_by_role("button", name=re.compile(r"^Milestones"))
 
-    with allure.step(f"Выбор майлстоуна: {_MILESTONE_NAME}"):
-        soft_step("Майлстоун", add_milestone)
+    # ── Создание МС 1 ──
+
+    with allure.step(f"Создание майлстоуна: {_MILESTONE_NAME}"):
+        soft_step("Создание MILESTONE 1", lambda: create_milestone_from_dropdown(page, _MILESTONE_NAME))
+
+    # ── Создание МС 2 (добавляется к МС 1) → оба видны ──
+
+    def create_second():
+        create_milestone_from_dropdown(page, _MILESTONE_NAME_2)
+        expect(milestones_btn.filter(has_text=_MILESTONE_NAME)).to_be_visible(timeout=5000)
+
+    with allure.step(f"Создание и проверка обоих: {_MILESTONE_NAME_2}"):
+        soft_step("Создание MILESTONE 2 + оба видны", create_second)
+
+    # ── Удалить МС 1 → остался только МС 2 ──
+
+    def remove_first():
+        remove_milestone_from_dropdown(page, _MILESTONE_NAME)
+        expect(milestones_btn.filter(has_text=_MILESTONE_NAME_2)).to_be_visible(timeout=5000)
+
+    with allure.step(f"Удаление майлстоуна: {_MILESTONE_NAME}"):
+        soft_step("Удаление MILESTONE 1", remove_first)
+
+    # ── Удалить МС 2 → пустое состояние ──
+
+    def remove_second():
+        remove_milestone_from_dropdown(page, _MILESTONE_NAME_2)
+        expect(sidebar.get_by_role("button", name="Milestones Select milestones")).to_be_visible(timeout=5000)
+
+    with allure.step(f"Удаление майлстоуна: {_MILESTONE_NAME_2}"):
+        soft_step("Удаление MILESTONE 2", remove_second)
 
 
 @pytest.mark.dependency(depends=[_DEP_TASK])
@@ -424,7 +451,8 @@ def test_14_complete(page: Page, soft_step, sidebar):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
-@allure.title("99. Cleanup: delete test tasks")
+@allure.title("99. Cleanup: delete test tasks and milestones")
 def test_99_cleanup(page: Page, cleanup_task):
-    """Удаляет все карточки с таймстемпом теста с борды."""
+    """Удаляет все карточки с таймстемпом теста с борды и архивирует созданные майлстоуны."""
     cleanup_task["ts"] = _TS
+    cleanup_milestones(page, keep_names=["Test milestone"])

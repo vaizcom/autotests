@@ -142,9 +142,9 @@ def cleanup_milestones(page: Page, keep_names: list[str] | None = None):
         # Первый проход
         archived = _archive_visible()
 
-        # Если что-то архивировали — reload и второй проход (виртуальный скролл)
+        # Если что-то архивировали — заново открыть вкладку и второй проход (виртуальный скролл)
         if archived > 0:
-            page.reload()
+            page.goto(settings.AUTOTEST_BOARD_URL)
             expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
             page.get_by_role("link", name="Milestones").click()
             page.wait_for_timeout(2000)
