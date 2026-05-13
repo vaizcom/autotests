@@ -287,10 +287,11 @@ def create_parent_and_subtasks(create_task_in_main, client_fixture, owner_client
     Создает родительскую задачу с milestone parent_ms_1,
     три подзадачи: первая с milestone subtask_ms_1,
     вторая с milestone subtask_ms_2, третья без milestone.
+    Задачи распределяются по разным группам борды.
 
     Возвращает:
-        created_tasks (list): список всех созданных задач
         ids (dict): словарь с ключами 'parent', 'subtask1', 'subtask2', 'subtask3' и их _id
+        ms (dict): словарь с ID майлстоунов
     """
     parent_ms_1 = get_parent_ms_1(owner_client, main_space, main_board)
     subtask_ms_1 = get_subtask_ms_1(owner_client, main_space, main_board)
@@ -302,6 +303,13 @@ def create_parent_and_subtasks(create_task_in_main, client_fixture, owner_client
         "subtask_ms_2": subtask_ms_2
     }
 
+    # Получаем группы борды для распределения задач по разным колонкам
+    resp = owner_client.post(**get_board_endpoint(main_board, main_space))
+    groups = resp.json()["payload"]["board"]["groups"]
+    assert len(groups) >= 2, "На борде меньше 2 групп"
+    group_a = groups[0]["_id"]
+    group_b = groups[1]["_id"]
+
     created_tasks = []
 
     with allure.step('Создание родительской задачи с milestone parent_ms_1'):
@@ -309,6 +317,7 @@ def create_parent_and_subtasks(create_task_in_main, client_fixture, owner_client
             client_fixture,
             name="Parent Task with milestone parent_ms_1",
             milestones=[parent_ms_1],
+            group=group_a,
         )
         created_tasks.append(parent_task)
         parent_task_id = parent_task["_id"]
@@ -319,6 +328,7 @@ def create_parent_and_subtasks(create_task_in_main, client_fixture, owner_client
             name="Subtask 1 with milestone subtask_ms_1",
             milestones=[subtask_ms_1],
             parent_task=parent_task_id,
+            group=group_b,
         )
         created_tasks.append(subtask1)
         subtask1_id = subtask1["_id"]
@@ -329,6 +339,7 @@ def create_parent_and_subtasks(create_task_in_main, client_fixture, owner_client
             name="Subtask 2 with milestone subtask_ms_2",
             milestones=[subtask_ms_2],
             parent_task=parent_task_id,
+            group=group_a,
         )
         created_tasks.append(subtask2)
         subtask2_id = subtask2["_id"]
@@ -339,9 +350,20 @@ def create_parent_and_subtasks(create_task_in_main, client_fixture, owner_client
             name="Subtask 3 without milestone",
             milestones=[],
             parent_task=parent_task_id,
+            group=group_b,
         )
         created_tasks.append(subtask3)
         subtask3_id = subtask3["_id"]
+
+    # Проверяем что задачи попали в назначенные группы
+    assert parent_task["group"] == group_a, \
+        f"Parent: ожидалась группа {group_a}, получена {parent_task['group']}"
+    assert subtask1["group"] == group_b, \
+        f"Subtask1: ожидалась группа {group_b}, получена {subtask1['group']}"
+    assert subtask2["group"] == group_a, \
+        f"Subtask2: ожидалась группа {group_a}, получена {subtask2['group']}"
+    assert subtask3["group"] == group_b, \
+        f"Subtask3: ожидалась группа {group_b}, получена {subtask3['group']}"
 
     ids = {
         "parent": parent_task_id,

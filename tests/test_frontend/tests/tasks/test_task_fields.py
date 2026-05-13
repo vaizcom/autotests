@@ -138,7 +138,11 @@ def test_05_description(page: Page, soft_step):
 @allure.sub_suite("Fields")
 @allure.title("06. Milestones: create, multi-select, remove")
 def test_06_milestone(page: Page, soft_step, sidebar):
-    """Создаёт майлстоуны из dropdown задачи, проверяет мульти-назначение и удаление."""
+    """Создаёт майлстоуны из dropdown задачи, проверяет мульти-назначение и удаление.
+
+    Обратную связь (задача видна внутри МС) проверяет API-тест
+    test_tasks_visibility_in_correct_milestones — кросс-навигация на E2E не нужна.
+    """
     open_card(page, soft_step, _TASK_NAME)
 
     milestones_btn = sidebar.get_by_role("button", name=re.compile(r"^Milestones"))
