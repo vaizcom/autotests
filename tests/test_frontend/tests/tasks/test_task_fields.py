@@ -307,9 +307,12 @@ def test_12_complete_subtasks(page: Page, soft_step, sidebar):
     """Завершает и снимает завершение подзадач, проверяет счётчики."""
     open_card(page, soft_step, _TASK_NAME)
 
-    # Скроллим к Description (сразу после сабтасок) — подзадачи окажутся в viewport
-    sidebar.locator('.tiptap').first.scroll_into_view_if_needed()
-    expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=15000)
+    # Ждём появления строки подзадачи в DOM (без скролла — как в test_13)
+    expect(
+        sidebar.get_by_role("button")
+        .filter(has_text=re.compile(r"[A-Z]+-\d+"))
+        .filter(has_text=_SUBTASK_NAME)
+    ).to_be_visible(timeout=15000)
 
     # ── Complete подзадачи 1 → "1 completed of 2" ──
 
