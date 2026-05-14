@@ -8,7 +8,7 @@ from playwright.sync_api import expect, Page
 
 from tests.test_frontend.conftest import cleanup_board
 from tests.test_frontend.tests.milestones.conftest import cleanup_milestones
-from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_subtask, create_subtasks, wait_for_subtask_rows, toggle_subtask_complete, set_date, add_comment, fill_description, create_milestone_from_dropdown, remove_milestone_from_dropdown
+from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_subtask, create_subtasks, wait_for_subtask_rows, toggle_subtask_complete, set_date, add_comment, fill_description, create_milestone_from_dropdown, remove_milestone_from_dropdown, find_subtask_row_by_name
 
 pytestmark = [pytest.mark.frontend]
 
@@ -338,12 +338,11 @@ def test_12_complete_subtasks(page: Page, soft_step, sidebar):
     """Завершает и снимает завершение подзадач, проверяет счётчики."""
     open_card(page, soft_step, _TASK_NAME)
 
-    # Ждём появления строки подзадачи в DOM (без скролла — как в test_13)
-    expect(
-        sidebar.get_by_role("button")
-        .filter(has_text=re.compile(r"[A-Z]+-\d+"))
-        .filter(has_text=_SUBTASK_NAME)
-    ).to_be_visible(timeout=15000)
+    # Скролл к секции подзадач — scrollHeight промахивается мимо строк (virtual scroll).
+    heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
+    expect(heading).to_be_attached(timeout=10000)
+    heading.scroll_into_view_if_needed()
+    expect(find_subtask_row_by_name(sidebar, _SUBTASK_NAME)).to_be_visible(timeout=15000)
 
     # ── Complete подзадачи 1 → "1 completed of 2" ──
 
