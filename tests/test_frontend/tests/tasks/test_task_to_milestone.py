@@ -8,7 +8,7 @@ from playwright.sync_api import expect, Page
 from tests.test_frontend.core import settings
 from tests.test_frontend.tests.tasks.conftest import (
     create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready,
-    add_comment, fill_description, find_subtask_row_by_name,
+    add_comment, fill_description, find_subtask_row_by_name, _scroll_to_subtasks,
 )
 
 pytestmark = [pytest.mark.frontend]
@@ -318,10 +318,7 @@ def test_05_subtask_hierarchy(page: Page, sidebar):
 
     with allure.step(f"Проверка: {_SUB_SUBTASK_NAME} видна как подзадача {_SUBTASK_NAME}"):
         expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
-        # Скролл к секции подзадач — scrollHeight промахивается мимо строк
-        heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
-        expect(heading).to_be_attached(timeout=10000)
-        heading.scroll_into_view_if_needed()
+        _scroll_to_subtasks(sidebar)
         expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
 
 

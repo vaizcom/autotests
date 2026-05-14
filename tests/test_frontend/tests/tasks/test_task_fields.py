@@ -338,11 +338,8 @@ def test_12_complete_subtasks(page: Page, soft_step, sidebar):
     """Завершает и снимает завершение подзадач, проверяет счётчики."""
     open_card(page, soft_step, _TASK_NAME)
 
-    # Скролл к секции подзадач — scrollHeight промахивается мимо строк (virtual scroll).
-    heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
-    expect(heading).to_be_attached(timeout=10000)
-    heading.scroll_into_view_if_needed()
-    expect(find_subtask_row_by_name(sidebar, _SUBTASK_NAME)).to_be_visible(timeout=15000)
+    # Строки подзадач лениво загружаются — wait_for_subtask_rows делает retry с reload.
+    wait_for_subtask_rows(page, _TASK_NAME, _SUBTASK_NAME)
 
     # ── Complete подзадачи 1 → "1 completed of 2" ──
 

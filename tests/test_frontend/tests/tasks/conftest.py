@@ -100,26 +100,36 @@ def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):
         add_subtask(page, name)
 
 
+def _scroll_to_subtasks(sidebar):
+    """Скроллит сайдбар к секции подзадач через JS (устойчиво к ре-рендерам)."""
+    sidebar.evaluate("""root => {
+        for (const h of root.querySelectorAll('[role="heading"]')) {
+            if (/\\d+ subtasks?/.test(h.textContent)) {
+                h.scrollIntoView({block: 'start'});
+                return;
+            }
+        }
+    }""")
+
+
 def wait_for_subtask_rows(page: Page, card_name: str, subtask_name: str):
     """Ждёт загрузки строк подзадач с ретраями и reload."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
-    heading.scroll_into_view_if_needed()
 
     for attempt in range(4):
-        if sidebar.get_by_text(subtask_name).first.is_visible(timeout=3000):
+        page.wait_for_load_state("networkidle")
+        _scroll_to_subtasks(sidebar)
+        if find_subtask_row_by_name(sidebar, subtask_name).is_visible(timeout=5000):
             return
         if attempt < 3:
             page.reload()
             _wait_board_ready(page)
             card = page.get_by_role("button").filter(
                 has_text=re.compile(r"[A-Z]+-\d+")
-            ).filter(has_text=card_name)
+            ).filter(has_text=card_name).first
             card.click()
             expect(sidebar.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
-            heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
-            heading.scroll_into_view_if_needed()
-    expect(sidebar.get_by_text(subtask_name).first).to_be_visible(timeout=5000)
+    expect(find_subtask_row_by_name(sidebar, subtask_name)).to_be_visible(timeout=5000)
 
 
 def toggle_subtask_complete(page: Page, subtask_name: str):
@@ -127,7 +137,7 @@ def toggle_subtask_complete(page: Page, subtask_name: str):
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
     btn = sidebar.get_by_role("button").filter(has_text=subtask_name)
     expect(btn).to_be_visible(timeout=15000)
-    btn.scroll_into_view_if_needed()
+    btn.evaluate("el => el.scrollIntoView({block: 'center'})")
 
     # Чекбокс внутри кнопки
     cb = btn.locator('label[role="checkbox"]')
@@ -159,7 +169,8 @@ def set_date(page: Page, date: str):
     dates_btn.click()
     date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
     expect(date_input).to_be_visible(timeout=5000)
-    date_input.fill(date)
+    date_input.click()
+    date_input.press_sequentially(date, delay=50)
     expect(date_input).to_have_value(date, timeout=5000)
     apply_btn = page.get_by_role("button", name="Apply")
     expect(apply_btn).to_be_enabled(timeout=5000)
