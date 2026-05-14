@@ -7,6 +7,13 @@ from playwright.sync_api import expect, Page
 from tests.test_frontend.core import settings
 
 
+def find_subtask_row_by_name(container, name: str):
+    """Строка в таблице подзадач с ID задачи (FRONT-XXX) и заданным именем."""
+    return container.get_by_role("button").filter(
+        has_text=re.compile(r"[A-Z]+-\d+")
+    ).filter(has_text=name)
+
+
 def _wait_board_ready(page: Page):
     """Ждёт полной загрузки борды: кнопка Add task + карточки или пустая колонка."""
     expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
@@ -77,11 +84,7 @@ def add_subtask(page: Page, subtask_name: str):
     expect(textbox).to_be_visible(timeout=5000)
     textbox.fill(subtask_name)
     page.keyboard.press("Enter")
-    expect(
-        sidebar.get_by_role("button")
-        .filter(has_text=re.compile(r"[A-Z]+-\d+"))
-        .filter(has_text=subtask_name)
-    ).to_be_visible(timeout=10000)
+    expect(find_subtask_row_by_name(sidebar, subtask_name)).to_be_visible(timeout=10000)
 
 
 def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):

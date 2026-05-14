@@ -8,7 +8,7 @@ from playwright.sync_api import expect, Page
 from tests.test_frontend.core import settings
 from tests.test_frontend.tests.tasks.conftest import (
     create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready,
-    add_comment, fill_description,
+    add_comment, fill_description, find_subtask_row_by_name,
 )
 
 pytestmark = [pytest.mark.frontend]
@@ -54,13 +54,11 @@ def _setup_fill(page):
     fill_description(page, _DESCRIPTION)
     add_subtask(page, _SUBTASK_NAME)
     # Подподзадача
-    sidebar.get_by_role("button").filter(
-        has_text=re.compile(r"[A-Z]+-\d+")
-    ).filter(has_text=_SUBTASK_NAME).first.click()
+    find_subtask_row_by_name(sidebar, _SUBTASK_NAME).first.click()
     expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
     sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUB_SUBTASK_NAME)
     page.keyboard.press("Enter")
-    expect(sidebar.get_by_text(_SUB_SUBTASK_NAME).first).to_be_visible(timeout=5000)
+    expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=5000)
 
 
 def _setup_convert(page):
@@ -78,6 +76,7 @@ def _setup_convert(page):
 _debug_extra_setup = {
     "test_03_convert_to_milestone": _setup_fill,
     "test_04_verify_fields": _setup_convert,
+    "test_05_subtask_hierarchy": _setup_convert,
 }
 
 
@@ -130,7 +129,7 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
     def add_subtask():
         sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
         page.keyboard.press("Enter")
-        expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=5000)
+        expect(find_subtask_row_by_name(sidebar, _SUBTASK_NAME)).to_be_visible(timeout=5000)
 
     with allure.step(f"Подзадача: {_SUBTASK_NAME}"):
         soft_step("Подзадача", add_subtask)
@@ -182,17 +181,15 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
 
     # ── Подподзадача (последний шаг — уходим в сайдбар подзадачи) ──
 
-    def add_sub_subtask():
-        sidebar.get_by_role("button").filter(
-            has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=_SUBTASK_NAME).first.click()
+    def add_sub_sub_task():
+        find_subtask_row_by_name(sidebar, _SUBTASK_NAME).first.click()
         expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
         sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUB_SUBTASK_NAME)
         page.keyboard.press("Enter")
-        expect(sidebar.get_by_text(_SUB_SUBTASK_NAME).first).to_be_visible(timeout=5000)
+        expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=5000)
 
     with allure.step(f"Подподзадача: {_SUB_SUBTASK_NAME}"):
-        soft_step("Подподзадача", add_sub_subtask)
+        soft_step("Подподзадача", add_sub_sub_task)
 
 
 # ── 03. Конвертация в майлстоун ──────────────────────────────────────
@@ -280,7 +277,7 @@ def test_04_verify_fields(page: Page, soft_step, sidebar):
 
     with allure.step("Проверка подзадачи"):
         soft_step("Подзадача", lambda: (
-            expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=5000)
+            expect(find_subtask_row_by_name(sidebar, _SUBTASK_NAME)).to_be_visible(timeout=5000)
         ))
 
     with allure.step("Проверка комментария"):
@@ -317,11 +314,12 @@ def test_04_verify_fields(page: Page, soft_step, sidebar):
 @allure.title("05. Subtask hierarchy preserved after conversion")
 def test_05_subtask_hierarchy(page: Page, sidebar):
     """Проверяет что подзадача с вложенной подподзадачей сохранила иерархию после конвертации."""
-    open_card(page, lambda _n, fn: fn(), _SUBTASK_NAME) # открывает ConvSub на борде
+    open_card(page, lambda _n, fn: fn(), _SUBTASK_NAME)
 
     with allure.step(f"Проверка: {_SUB_SUBTASK_NAME} видна как подзадача {_SUBTASK_NAME}"):
         expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
-        expect(sidebar.get_by_text(_SUB_SUBTASK_NAME).first).to_be_visible(timeout=5000)
+        sidebar.evaluate("el => el.scrollTop = el.scrollHeight")
+        expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
 
 
 # ── Cleanup: архивация ───────────────────────────────────────────
