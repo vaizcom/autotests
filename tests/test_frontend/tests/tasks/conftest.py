@@ -103,7 +103,10 @@ def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):
 def _scroll_to_subtasks(sidebar):
     """Скроллит сайдбар к секции подзадач через JS (устойчиво к ре-рендерам)."""
     sidebar.evaluate("""root => {
-        for (const h of root.querySelectorAll('[role="heading"]')) {
+        const headings = root.querySelectorAll(
+            'h1, h2, h3, h4, h5, h6, [role="heading"]'
+        );
+        for (const h of headings) {
             if (/\\d+ subtasks?/.test(h.textContent)) {
                 h.scrollIntoView({block: 'start'});
                 return;
@@ -119,6 +122,14 @@ def wait_for_subtask_rows(page: Page, card_name: str, subtask_name: str):
     for attempt in range(4):
         page.wait_for_load_state("networkidle")
         _scroll_to_subtasks(sidebar)
+        page.wait_for_timeout(1000)
+
+        heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
+        if heading.is_visible(timeout=3000):
+            heading.click()
+            page.wait_for_load_state("networkidle")
+            page.wait_for_timeout(1000)
+
         if find_subtask_row_by_name(sidebar, subtask_name).is_visible(timeout=5000):
             return
         if attempt < 3:
@@ -139,10 +150,11 @@ def toggle_subtask_complete(page: Page, subtask_name: str):
     expect(btn).to_be_visible(timeout=15000)
     btn.evaluate("el => el.scrollIntoView({block: 'center'})")
 
+    # JS-клик обходит перехват pointer events контейнером Subtasks-module_Root
     # Чекбокс внутри кнопки
     cb = btn.locator('label[role="checkbox"]')
     if cb.count() > 0:
-        cb.click()
+        cb.evaluate("el => el.click()")
         return
 
     # Чекбокс в соседней ячейке — ищем ближайший контейнер с чекбоксами
@@ -150,14 +162,14 @@ def toggle_subtask_complete(page: Page, subtask_name: str):
     checkboxes = container.locator('label[role="checkbox"]')
 
     if checkboxes.count() == 1:
-        checkboxes.click()
+        checkboxes.evaluate("el => el.click()")
         return
 
     # Несколько чекбоксов — совпадение по индексу с кнопками
     buttons = container.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
     for i in range(buttons.count()):
         if subtask_name in buttons.nth(i).inner_text():
-            checkboxes.nth(i).click()
+            checkboxes.nth(i).evaluate("el => el.click()")
             return
 
 

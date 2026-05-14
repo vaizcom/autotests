@@ -24,7 +24,7 @@ def pytest_configure(config):
     if not config.option.slowmo:
         config.option.slowmo = 500
     if not config.option.video:
-        config.option.video = "on"
+        config.option.video = "off"
 
 
 @pytest.fixture(scope="session")
