@@ -7,6 +7,13 @@ from playwright.sync_api import expect, Page
 from tests.test_frontend.core import settings
 
 
+def find_subtask_row_by_name(container, name: str):
+    """Строка в таблице подзадач с ID задачи (FRONT-XXX) и заданным именем."""
+    return container.get_by_role("button").filter(
+        has_text=re.compile(r"[A-Z]+-\d+")
+    ).filter(has_text=name)
+
+
 def _wait_board_ready(page: Page):
     """Ждёт полной загрузки борды: кнопка Add task + карточки или пустая колонка."""
     expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
@@ -26,7 +33,7 @@ def wait_for_card(page: Page, card_name: str, go_to_board: bool = True):
     for attempt in range(4):
         card = page.get_by_role("button").filter(
             has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=card_name)
+        ).filter(has_text=card_name).first
         if card.is_visible():
             return card
         if attempt < 3:
@@ -44,7 +51,7 @@ def open_card(page: Page, soft_step, card_name: str):
     def _open_sidebar():
         task_card = page.get_by_role("button").filter(
             has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=card_name)
+        ).filter(has_text=card_name).first
         expect(task_card).to_be_visible(timeout=15000)
         task_card.click()
         sidebar = page.locator('[class*="RightSidebar-module_Root"]')
@@ -77,11 +84,7 @@ def add_subtask(page: Page, subtask_name: str):
     expect(textbox).to_be_visible(timeout=5000)
     textbox.fill(subtask_name)
     page.keyboard.press("Enter")
-    expect(
-        sidebar.get_by_role("button")
-        .filter(has_text=re.compile(r"[A-Z]+-\d+"))
-        .filter(has_text=subtask_name)
-    ).to_be_visible(timeout=10000)
+    expect(find_subtask_row_by_name(sidebar, subtask_name)).to_be_visible(timeout=10000)
 
 
 def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):
@@ -97,26 +100,47 @@ def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):
         add_subtask(page, name)
 
 
+def _scroll_to_subtasks(sidebar):
+    """Скроллит сайдбар к секции подзадач через JS (устойчиво к ре-рендерам)."""
+    sidebar.evaluate("""root => {
+        const headings = root.querySelectorAll(
+            'h1, h2, h3, h4, h5, h6, [role="heading"]'
+        );
+        for (const h of headings) {
+            if (/\\d+ subtasks?/.test(h.textContent)) {
+                h.scrollIntoView({block: 'start'});
+                return;
+            }
+        }
+    }""")
+
+
 def wait_for_subtask_rows(page: Page, card_name: str, subtask_name: str):
     """Ждёт загрузки строк подзадач с ретраями и reload."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
-    heading.scroll_into_view_if_needed()
 
     for attempt in range(4):
-        if sidebar.get_by_text(subtask_name).first.is_visible(timeout=3000):
+        page.wait_for_load_state("networkidle")
+        _scroll_to_subtasks(sidebar)
+        page.wait_for_timeout(1000)
+
+        heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
+        if heading.is_visible(timeout=3000):
+            heading.click()
+            page.wait_for_load_state("networkidle")
+            page.wait_for_timeout(1000)
+
+        if find_subtask_row_by_name(sidebar, subtask_name).is_visible(timeout=5000):
             return
         if attempt < 3:
             page.reload()
             _wait_board_ready(page)
             card = page.get_by_role("button").filter(
                 has_text=re.compile(r"[A-Z]+-\d+")
-            ).filter(has_text=card_name)
+            ).filter(has_text=card_name).first
             card.click()
             expect(sidebar.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
-            heading = sidebar.get_by_role("heading", name=re.compile(r"\d+ subtasks?"))
-            heading.scroll_into_view_if_needed()
-    expect(sidebar.get_by_text(subtask_name).first).to_be_visible(timeout=5000)
+    expect(find_subtask_row_by_name(sidebar, subtask_name)).to_be_visible(timeout=5000)
 
 
 def toggle_subtask_complete(page: Page, subtask_name: str):
@@ -124,12 +148,13 @@ def toggle_subtask_complete(page: Page, subtask_name: str):
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
     btn = sidebar.get_by_role("button").filter(has_text=subtask_name)
     expect(btn).to_be_visible(timeout=15000)
-    btn.scroll_into_view_if_needed()
+    btn.evaluate("el => el.scrollIntoView({block: 'center'})")
 
+    # JS-клик обходит перехват pointer events контейнером Subtasks-module_Root
     # Чекбокс внутри кнопки
     cb = btn.locator('label[role="checkbox"]')
     if cb.count() > 0:
-        cb.click()
+        cb.evaluate("el => el.click()")
         return
 
     # Чекбокс в соседней ячейке — ищем ближайший контейнер с чекбоксами
@@ -137,14 +162,14 @@ def toggle_subtask_complete(page: Page, subtask_name: str):
     checkboxes = container.locator('label[role="checkbox"]')
 
     if checkboxes.count() == 1:
-        checkboxes.click()
+        checkboxes.evaluate("el => el.click()")
         return
 
     # Несколько чекбоксов — совпадение по индексу с кнопками
     buttons = container.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
     for i in range(buttons.count()):
         if subtask_name in buttons.nth(i).inner_text():
-            checkboxes.nth(i).click()
+            checkboxes.nth(i).evaluate("el => el.click()")
             return
 
 
@@ -156,7 +181,8 @@ def set_date(page: Page, date: str):
     dates_btn.click()
     date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
     expect(date_input).to_be_visible(timeout=5000)
-    date_input.fill(date)
+    date_input.click()
+    date_input.press_sequentially(date, delay=50)
     expect(date_input).to_have_value(date, timeout=5000)
     apply_btn = page.get_by_role("button", name="Apply")
     expect(apply_btn).to_be_enabled(timeout=5000)
@@ -191,6 +217,33 @@ def add_comment(page: Page, comment_text: str):
     send_btn = sidebar.locator('[class*="CommentToolbar-module_Right"]').get_by_role("button").last
     expect(send_btn).to_be_enabled(timeout=5000)
     send_btn.click()
+
+
+def create_milestone_from_dropdown(page: Page, milestone_name: str):
+    """Создаёт майлстоун из dropdown поля Milestones в открытом сайдбаре."""
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    milestones_btn = sidebar.get_by_role("button", name=re.compile(r"^Milestones"))
+    expect(milestones_btn).to_be_visible(timeout=5000)
+    milestones_btn.click()
+    create_item = page.get_by_role("menuitem", name="Create milestone")
+    expect(create_item).to_be_visible(timeout=5000)
+    create_item.locator("div").first.click()
+    name_input = page.get_by_role("textbox", name="Type name")
+    expect(name_input).to_be_visible(timeout=5000)
+    name_input.fill(milestone_name)
+    page.get_by_role("button", name="Add", exact=True).click()
+    expect(milestones_btn.filter(has_text=milestone_name)).to_be_visible(timeout=5000)
+
+
+def remove_milestone_from_dropdown(page: Page, milestone_name: str):
+    """Снимает майлстоун в dropdown поля Milestones в открытом сайдбаре."""
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    milestones_btn = sidebar.get_by_role("button", name=re.compile(r"^Milestones"))
+    expect(milestones_btn).to_be_visible(timeout=5000)
+    milestones_btn.click()
+    item = page.get_by_role("menuitem", name=milestone_name)
+    expect(item).to_be_visible(timeout=5000)
+    item.click()
 
 
 def open_sidebar_menu(page: Page):

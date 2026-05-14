@@ -8,7 +8,7 @@ from playwright.sync_api import expect, Page
 from tests.test_frontend.core import settings
 from tests.test_frontend.tests.tasks.conftest import (
     create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready,
-    add_comment, fill_description,
+    add_comment, fill_description, find_subtask_row_by_name, _scroll_to_subtasks,
 )
 
 pytestmark = [pytest.mark.frontend]
@@ -18,12 +18,66 @@ _DEP_FILL = "test_02_fill_fields"
 _DEP_CONVERT = "test_03_convert_to_milestone"
 
 _TS = datetime.now().strftime("%H%M%S")
-_TASK_NAME = f"milestone_{_TS}"
-_SUBTASK_NAME = f"Sub milestone {_TS}"
+_TASK_NAME = f"ConvTask {_TS}"
+_SUBTASK_NAME = f"ConvSub {_TS}"
+_SUB_SUBTASK_NAME = f"ConvSubSub {_TS}"
 _DESCRIPTION = f"Milestone desc {_TS}"
 _COMMENT = f"Milestone comment {_TS}"
 _DATE = "10.08.2030"
 _MILESTONE_NAME = "Test milestone"
+
+
+# ── Auto-debug: setup/cleanup при запуске отдельного теста из IDE ──
+
+
+def _debug_create(page):
+    create_task_on_board(page, _TASK_NAME)
+
+
+def _debug_teardown(page):
+    from tests.test_frontend.conftest import cleanup_board
+    from tests.test_frontend.tests.milestones.conftest import cleanup_milestones
+    cleanup_milestones(page, keep_names=["Test milestone"])
+    cleanup_board(page)
+
+
+def _setup_fill(page):
+    """Заполняет поля задачи для тестов, зависящих от test_02."""
+    from tests.test_frontend.tests.tasks.conftest import add_subtask, fill_description
+    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
+    card = page.get_by_role("button").filter(
+        has_text=re.compile(r"[A-Z]+-\d+")
+    ).filter(has_text=_TASK_NAME).first
+    expect(card).to_be_visible(timeout=10000)
+    card.click()
+    expect(sidebar.get_by_role("heading", name=_TASK_NAME)).to_be_visible(timeout=10000)
+    fill_description(page, _DESCRIPTION)
+    add_subtask(page, _SUBTASK_NAME)
+    # Подподзадача
+    find_subtask_row_by_name(sidebar, _SUBTASK_NAME).first.click()
+    expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
+    sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUB_SUBTASK_NAME)
+    page.keyboard.press("Enter")
+    expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=5000)
+
+
+def _setup_convert(page):
+    """Заполняет поля + конвертирует задачу для тестов, зависящих от test_03."""
+    from tests.test_frontend.tests.tasks.conftest import open_card, open_sidebar_menu, _wait_board_ready
+    _setup_fill(page)
+    # Возвращаемся на родительскую задачу и конвертируем
+    open_card(page, lambda name, fn: fn(), _TASK_NAME)
+    open_sidebar_menu(page)
+    page.get_by_text("Convert to Milestone").click()
+    page.get_by_role("button", name="Convert").click()
+    expect(page.get_by_text("Task successfully converted to Milestone")).to_be_visible(timeout=10000)
+
+
+_debug_extra_setup = {
+    "test_03_convert_to_milestone": _setup_fill,
+    "test_04_verify_fields": _setup_convert,
+    "test_05_subtask_hierarchy": _setup_convert,
+}
 
 
 # ── 01. Создание задачи ──────────────────────────────────────────────
@@ -75,7 +129,7 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
     def add_subtask():
         sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
         page.keyboard.press("Enter")
-        expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=5000)
+        expect(find_subtask_row_by_name(sidebar, _SUBTASK_NAME)).to_be_visible(timeout=5000)
 
     with allure.step(f"Подзадача: {_SUBTASK_NAME}"):
         soft_step("Подзадача", add_subtask)
@@ -125,6 +179,17 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
     with allure.step(f"Майлстоун: {_MILESTONE_NAME}"):
         soft_step("Майлстоун", set_milestone)
 
+    # ── Подподзадача (последний шаг — уходим в сайдбар подзадачи) ──
+
+    def add_sub_sub_task():
+        find_subtask_row_by_name(sidebar, _SUBTASK_NAME).first.click()
+        expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
+        sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUB_SUBTASK_NAME)
+        page.keyboard.press("Enter")
+        expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=5000)
+
+    with allure.step(f"Подподзадача: {_SUB_SUBTASK_NAME}"):
+        soft_step("Подподзадача", add_sub_sub_task)
 
 
 # ── 03. Конвертация в майлстоун ──────────────────────────────────────
@@ -212,7 +277,7 @@ def test_04_verify_fields(page: Page, soft_step, sidebar):
 
     with allure.step("Проверка подзадачи"):
         soft_step("Подзадача", lambda: (
-            expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=5000)
+            expect(find_subtask_row_by_name(sidebar, _SUBTASK_NAME)).to_be_visible(timeout=5000)
         ))
 
     with allure.step("Проверка комментария"):
@@ -237,6 +302,24 @@ def test_04_verify_fields(page: Page, soft_step, sidebar):
             expect(sidebar.get_by_role("button", name=re.compile(r"Types.*Green"))).not_to_be_visible(timeout=3000)
         ))
 
+
+
+# ── 05. Проверка сохранения иерархии подзадач ───────────────────────
+
+
+@pytest.mark.dependency(depends=[_DEP_CONVERT])
+@allure.parent_suite("Frontend")
+@allure.suite("Tasks")
+@allure.sub_suite("Convert to Milestone")
+@allure.title("05. Subtask hierarchy preserved after conversion")
+def test_05_subtask_hierarchy(page: Page, sidebar):
+    """Проверяет что подзадача с вложенной подподзадачей сохранила иерархию после конвертации."""
+    open_card(page, lambda _n, fn: fn(), _SUBTASK_NAME)
+
+    with allure.step(f"Проверка: {_SUB_SUBTASK_NAME} видна как подзадача {_SUBTASK_NAME}"):
+        expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
+        _scroll_to_subtasks(sidebar)
+        expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
 
 
 # ── Cleanup: архивация ───────────────────────────────────────────

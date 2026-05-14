@@ -172,7 +172,11 @@ def test_05_dates(page: Page, soft_step, sidebar):
 @allure.sub_suite("Fields")
 @allure.title("06. Add tasks and verify counters")
 def test_06_add_tasks(page: Page, soft_step, sidebar):
-    """Добавляет две задачи в майлстоун, проверяет счётчик на каждом шаге."""
+    """Добавляет две задачи в майлстоун, проверяет счётчик на каждом шаге.
+
+    Обратную связь (МС виден в карточке задачи) проверяет API-тест
+    test_tasks_visibility_in_correct_milestones — кросс-навигация на E2E не нужна.
+    """
     open_milestone(page, _MILESTONE_NAME)
 
 

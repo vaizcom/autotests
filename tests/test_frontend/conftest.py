@@ -24,7 +24,22 @@ def pytest_configure(config):
     if not config.option.slowmo:
         config.option.slowmo = 500
     if not config.option.video:
-        config.option.video = "on"
+        config.option.video = "off"
+
+
+@pytest.fixture(scope="session")
+def browser_type_launch_args(pytestconfig):
+    """Launch args для браузера: headed + slowmo локально, headless в CI."""
+    launch_options = {}
+    if pytestconfig.getoption("--headed"):
+        launch_options["headless"] = False
+    slowmo = pytestconfig.getoption("--slowmo")
+    if slowmo:
+        launch_options["slow_mo"] = slowmo
+    channel = pytestconfig.getoption("--browser-channel")
+    if channel:
+        launch_options["channel"] = channel
+    return launch_options
 
 # API URL для teardown-операций (удаление Space, Project и т.д.)
 API_URL = "https://api.vaiz.dev/v4"
