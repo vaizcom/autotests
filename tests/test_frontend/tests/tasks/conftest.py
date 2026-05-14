@@ -26,7 +26,7 @@ def wait_for_card(page: Page, card_name: str, go_to_board: bool = True):
     for attempt in range(4):
         card = page.get_by_role("button").filter(
             has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=card_name)
+        ).filter(has_text=card_name).first
         if card.is_visible():
             return card
         if attempt < 3:
@@ -44,7 +44,7 @@ def open_card(page: Page, soft_step, card_name: str):
     def _open_sidebar():
         task_card = page.get_by_role("button").filter(
             has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=card_name)
+        ).filter(has_text=card_name).first
         expect(task_card).to_be_visible(timeout=15000)
         task_card.click()
         sidebar = page.locator('[class*="RightSidebar-module_Root"]')
