@@ -1,0 +1,23 @@
+page = <Page url='https://app.vaiz.com/687655d8e38db1f0877954fa/p/69f1d23f309d2c55d510eddf/b/69f1d25b309d2c55d510f174?taskId=TTSTPRJC-377'>
+soft_step = <function soft_step.<locals>._soft_step at 0x7efe80b5d6c0>
+sidebar = <Locator frame=<Frame name= url='https://app.vaiz.com/687655d8e38db1f0877954fa/p/69f1d23f309d2c55d510eddf/b/69f1d25b309d2c55d510f174?taskId=TTSTPRJC-377'> selector='[class*="RightSidebar-module_Root"]'>
+
+    @pytest.mark.dependency(depends=[_DEP_SUBTASK])
+    @allure.parent_suite("Frontend")
+    @allure.suite("Tasks")
+    @allure.sub_suite("Fields")
+    @allure.title("12. Verify subtask completion counters")
+    def test_12_complete_subtasks(page: Page, soft_step, sidebar):
+        """Завершает и снимает завершение подзадач, проверяет счётчики."""
+        open_card(page, soft_step, _TASK_NAME)
+    
+        # Скроллим к Description (сразу после сабтасок) — подзадачи окажутся в viewport
+        sidebar.locator('.tiptap').first.scroll_into_view_if_needed()
+>       expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=15000)
+E       AssertionError: Locator expected to be visible
+E       Actual value: <element(s) not found> 
+E       Call log:
+E         - LocatorAssertions.to_be_visible with timeout 15000ms
+E         -   - waiting for locator("[class*=\"RightSidebar-module_Root\"]").get_by_text("Test subtask 113921").first
+
+tests/test_frontend/tests/tasks/test_task_fields.py:312: AssertionError
