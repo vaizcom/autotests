@@ -4,13 +4,14 @@ import allure
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
+from tests.test_frontend.core.locators import Board
 from tests.test_frontend.tests.tasks.conftest import open_sidebar_menu
 
 
 def create_milestone_on_board(page: Page, milestone_name: str):
     """Открывает вкладку Milestones на борде и создаёт новый майлстоун."""
     page.goto(settings.AUTOTEST_BOARD_URL)
-    expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+    expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
     page.get_by_role("link", name="Milestones").click()
 
     add_btn = page.get_by_text("Add new Milestone")
@@ -26,7 +27,7 @@ def create_milestone_on_board(page: Page, milestone_name: str):
 def open_milestone(page: Page, milestone_name: str):
     """Открывает вкладку Milestones и кликает по майлстоуну."""
     page.goto(settings.AUTOTEST_BOARD_URL)
-    expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+    expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
     page.get_by_role("link", name="Milestones").click()
 
     milestone = page.get_by_text(milestone_name).first
@@ -98,7 +99,7 @@ def cleanup_milestones(page: Page, keep_names: list[str] | None = None):
 
     with allure.step(f"Cleanup: архивация майлстоунов (кроме {keep or 'никого'})"):
         page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
         page.get_by_role("link", name="Milestones").click()
         page.wait_for_timeout(2000)
 
@@ -145,7 +146,7 @@ def cleanup_milestones(page: Page, keep_names: list[str] | None = None):
         # Если что-то архивировали — заново открыть вкладку и второй проход (виртуальный скролл)
         if archived > 0:
             page.goto(settings.AUTOTEST_BOARD_URL)
-            expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+            expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
             page.get_by_role("link", name="Milestones").click()
             page.wait_for_timeout(2000)
             archived += _archive_visible()

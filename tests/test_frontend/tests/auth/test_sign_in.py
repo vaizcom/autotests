@@ -3,6 +3,7 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
+from tests.test_frontend.core.locators import Header, Sidebar
 
 pytestmark = [pytest.mark.frontend]
 
@@ -29,14 +30,14 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
 
     with allure.step("Проверка успешного входа"):
         expect(page).not_to_have_url(f"{settings.BASE_URL}/auth/sign-in", timeout=15000)
-        expect(page.get_by_role("link", name="Home")).to_be_visible(timeout=15000)
+        expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
 
     with allure.step("Сравнение скриншота"):
-        page.get_by_role("link", name="Archive").wait_for(state="visible")
+        page.get_by_test_id(Sidebar.ARCHIVE).wait_for(state="visible")
 
         # Фиксируем известный раздел → Home всегда активен в сайдбаре
-        page.get_by_role("link", name="Home").click()
-        page.get_by_role("link", name="Archive").wait_for(state="visible")
+        page.get_by_test_id(Sidebar.HOME).click()
+        page.get_by_test_id(Sidebar.ARCHIVE).wait_for(state="visible")
         page.mouse.move(640, 400)  # убираем hover с Home
 
         # Сворачиваем все раскрытые секции сайдбара → фиксируем известное состояние
@@ -68,7 +69,7 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
             page.locator('[class*="HomeScreen-module_Avatar"]'),          # аватар/обложка на главной
             page.locator('[class*="HomeScreen-module_Title"]'),           # приветствие "Hello, auto!"
             page.locator('[class*="HomeScreen-module_TimeBlock"]'),       # время и дата
-            page.locator('[class*="HeaderSpaceSelector-module_Inner"]'),  # селектор Space в хедере
+            page.get_by_test_id(Header.SPACE_SELECTOR),                      # селектор Space в хедере
             page.locator('[class*="HomeScreenCard-module_Root"]'),        # карточки (задачи, документы, избранное)
             page.locator('[class*="HomeScreenTipCard-module_Tips"]'),     # совет недели
             page.locator('[class*="HomeScreenStuff-module_Root"]'),       # блок Spaces

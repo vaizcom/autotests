@@ -5,6 +5,7 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
+from tests.test_frontend.core.locators import Header, Sidebar
 
 pytestmark = [pytest.mark.frontend]
 
@@ -24,10 +25,10 @@ def test_logout(page: Page, assert_snapshot):
         page.get_by_role("textbox", name="Email").fill(settings.FRONTEND_EMAIL)
         page.get_by_role("textbox", name="Password").fill(settings.FRONTEND_PASSWORD)
         page.get_by_role("button", name="Continue with Email").click()
-        expect(page.get_by_role("link", name="Home")).to_be_visible(timeout=15000)
+        expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
 
     with allure.step("Открытие меню пользователя"):
-        page.locator('[class*="MemberAvatar-module_Root"]').first.click()
+        page.get_by_test_id(Header.AVATAR).click()
 
     with allure.step("Нажатие Log Out"):
         page.get_by_text("Log Out").click()

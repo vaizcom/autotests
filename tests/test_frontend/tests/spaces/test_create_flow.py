@@ -5,6 +5,7 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
+from tests.test_frontend.core.locators import Board, Header, Sidebar, SpaceSelector
 
 pytestmark = [pytest.mark.frontend]
 
@@ -28,11 +29,11 @@ def test_create_space_with_project_board_task(page: Page, cleanup_space, assert_
     # === SPACE ===
     with allure.step("Открытие приложения"):
         page.goto(f"{settings.BASE_URL}/")
-        expect(page.get_by_role("link", name="Home")).to_be_visible(timeout=15000)
+        expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
 
     with allure.step(f"Создание Space: {_SPACE_NAME}"):
-        page.get_by_text("Marina's Space").first.click()
-        page.get_by_text("Create new space").click()
+        page.get_by_test_id(Header.SPACE_SELECTOR).click()
+        page.get_by_test_id(SpaceSelector.CREATE).click()
         page.get_by_role("button", name="Start creating").click()
         page.get_by_role("textbox", name="Name").fill(_SPACE_NAME)
         page.get_by_role("button", name="Create space").click()
@@ -43,7 +44,7 @@ def test_create_space_with_project_board_task(page: Page, cleanup_space, assert_
         page.wait_for_url(lambda url: url != f"{settings.BASE_URL}/", timeout=10000)
         space_id = page.url.rstrip("/").split("/")[-1]
         cleanup_space.append(space_id)
-        expect(page.get_by_role("link", name="Home")).to_be_visible(timeout=10000)
+        expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=10000)
 
     # === PROJECT ===
     with allure.step(f"Создание Project: {_PROJECT_NAME}"):
@@ -93,7 +94,7 @@ def test_create_space_with_project_board_task(page: Page, cleanup_space, assert_
     # === TASK ===
     with allure.step(f"Создание Task: {_TASK_NAME}"):
         page.get_by_role("link", name=_BOARD_NAME).click()
-        page.get_by_role("button", name="Add task").first.click()
+        page.get_by_test_id(Board.CREATE_TASK).first.click()
         page.get_by_role("textbox", name="Task name...").fill(_TASK_NAME)
         page.locator("#board-card-create").get_by_role("button", name="Add task").click()
 

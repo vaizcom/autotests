@@ -6,6 +6,7 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
+from tests.test_frontend.core.locators import Board
 from tests.test_frontend.tests.tasks.conftest import (
     create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready,
     add_comment, fill_description, find_subtask_row_by_name, _scroll_to_subtasks,
@@ -338,7 +339,7 @@ def test_cleanup(page: Page, soft_step, cleanup_task):
     try:
         with allure.step("Открытие вкладки Milestones"):
             page.goto(settings.AUTOTEST_BOARD_URL)
-            expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+            expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
             page.get_by_role("link", name="Milestones").click()
 
         with allure.step(f"Поиск майлстоуна '{_TASK_NAME}'"):

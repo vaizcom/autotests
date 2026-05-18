@@ -12,6 +12,7 @@ from PIL import Image, ImageChops, ImageDraw
 from playwright.sync_api import expect
 
 from tests.test_frontend.core import settings
+from tests.test_frontend.core.locators import Board, Sidebar, TaskCard
 from tests.test_frontend.core.settings import BASE_URL, FRONTEND_EMAIL, FRONTEND_PASSWORD, FRONTEND_STAND
 
 
@@ -53,7 +54,7 @@ def _run_task_cleanup(page, cleanup_info):
 
     with allure.step(f"Cleanup: удаление задач с таймстемпом {ts}"):
         page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
 
         deleted = 0
 
@@ -65,7 +66,7 @@ def _run_task_cleanup(page, cleanup_info):
                 break
 
             card.hover()
-            card.locator('[class*="TaskCard-module_Menu"] button').first.click()
+            card.get_by_test_id(TaskCard.MENU).click()
 
             delete_with_sub = page.get_by_text("Delete with subtasks")
             if delete_with_sub.is_visible():
@@ -85,7 +86,7 @@ def cleanup_board(page):
     """Удаляет все карточки на автотестовой борде."""
     with allure.step("Cleanup: удаление всех задач на борде"):
         page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
 
         cards = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
         deleted = 0
@@ -97,7 +98,7 @@ def cleanup_board(page):
                 break
 
             cards.first.hover()
-            cards.first.locator('[class*="TaskCard-module_Menu"] button').first.click()
+            cards.first.get_by_test_id(TaskCard.MENU).click()
 
             delete_with_sub = page.get_by_text("Delete with subtasks")
             if delete_with_sub.is_visible():
@@ -185,8 +186,14 @@ def pytest_collection_finish(session):
         print(f"🌐 UI URL: {BASE_URL}\n")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _configure_test_id(playwright):
+    """Playwright по умолчанию ищет data-testid, переключаем на data-test-id."""
+    playwright.selectors.set_test_id_attribute("data-test-id")
+
+
 @pytest.fixture(scope="session")
-def auth_state(playwright):
+def auth_state(playwright, _configure_test_id):
     """Логинится один раз на сессию и сохраняет состояние браузера.
 
     Открывает отдельный браузер, проходит логин и сохраняет куки и localStorage
@@ -219,7 +226,7 @@ def auth_state(playwright):
         page.get_by_role("textbox", name="Email").fill(FRONTEND_EMAIL)
         page.get_by_role("textbox", name="Password").fill(FRONTEND_PASSWORD)
         page.get_by_role("button", name="Continue with Email").click()
-        page.get_by_role("link", name="Home").wait_for(state="visible")
+        page.get_by_test_id(Sidebar.HOME).wait_for(state="visible")
     except Exception as e:
         context.close()
         browser.close()
