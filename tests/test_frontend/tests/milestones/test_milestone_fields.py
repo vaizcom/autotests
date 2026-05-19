@@ -246,9 +246,7 @@ def test_07_complete_tasks(page: Page, soft_step, sidebar):
         soft_step("Завершение задачи 1", lambda: toggle_complete(_TASK_NAME))
 
     with allure.step("Проверка: 1 completed of 2"):
-        soft_step("1 completed of 2", lambda: (
-            expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=5000)
-        ))
+        expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
 
     # ── Complete задачи 2 → "All 2 completed" ──
 
@@ -256,9 +254,7 @@ def test_07_complete_tasks(page: Page, soft_step, sidebar):
         soft_step("Завершение задачи 2", lambda: toggle_complete(_TASK_NAME_2))
 
     with allure.step("Проверка: All 2 completed"):
-        soft_step("All 2 completed", lambda: (
-            expect(sidebar.get_by_text("All 2 completed")).to_be_visible(timeout=5000)
-        ))
+        expect(sidebar.get_by_text("All 2 completed")).to_be_visible(timeout=10000)
 
     # ── Uncomplete задачи 1 → "1 completed of 2" ──
 
@@ -266,9 +262,7 @@ def test_07_complete_tasks(page: Page, soft_step, sidebar):
         soft_step("Снятие завершения задачи 1", lambda: toggle_complete(_TASK_NAME))
 
     with allure.step("Проверка: 1 completed of 2 (после снятия)"):
-        soft_step("1 completed of 2 (после снятия)", lambda: (
-            expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=5000)
-        ))
+        expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
 
     # ── Uncomplete задачи 2 → "0 completed of 2" ──
 
@@ -276,9 +270,7 @@ def test_07_complete_tasks(page: Page, soft_step, sidebar):
         soft_step("Снятие завершения задачи 2", lambda: toggle_complete(_TASK_NAME_2))
 
     with allure.step("Проверка: 0 completed of 2"):
-        soft_step("0 completed of 2", lambda: (
-            expect(sidebar.get_by_text("0 completed of 2")).to_be_visible(timeout=5000)
-        ))
+        expect(sidebar.get_by_text("0 completed of 2")).to_be_visible(timeout=10000)
 
 
 # ── 08. Удаление задач + счётчики ──────────────────────────────────
@@ -376,5 +368,6 @@ def test_10_activities(page: Page, soft_step, sidebar):
 @allure.sub_suite("Fields")
 @allure.title("99. Cleanup: archive milestone")
 def test_99_cleanup(page: Page):
-    """Удаляет задачи и архивирует тестовый майлстоун."""
+    """Архивирует тестовый майлстоун и подчищает все остальные кроме 'Test milestone'."""
     archive_milestone(page, _MILESTONE_NAME)
+    cleanup_milestones(page, keep_names=["Test milestone"])

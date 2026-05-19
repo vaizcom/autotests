@@ -14,11 +14,9 @@ def create_milestone_on_board(page: Page, milestone_name: str):
     expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
     page.get_by_role("link", name="Milestones").click()
 
-    add_btn = page.get_by_text("Add new Milestone")
-    expect(add_btn).to_be_visible(timeout=5000)
-    add_btn.click()
-    expect(page.get_by_role("textbox", name="Enter name...")).to_be_visible(timeout=5000)
-    page.get_by_role("textbox", name="Enter name...").fill(milestone_name)
+    name_input = page.get_by_placeholder("Enter milestone name...")
+    expect(name_input).to_be_visible(timeout=5000)
+    name_input.fill(milestone_name)
     page.keyboard.press("Enter")
 
     expect(page.get_by_role("heading", name=milestone_name)).to_be_visible(timeout=10000)
@@ -103,11 +101,30 @@ def cleanup_milestones(page: Page, keep_names: list[str] | None = None):
         page.get_by_role("link", name="Milestones").click()
         page.wait_for_timeout(2000)
 
+        _ROW_SELECTOR = '[class*="MilestoneBoard-module_Row"]'
+
+        def _check_stale_selector():
+            """Проверяет, что селектор строк находит элементы. Иначе — скриншот + warning."""
+            if page.locator(_ROW_SELECTOR).count() > 0:
+                return
+            # Страница загружена (инпут виден), но строки не найдены — селектор устарел
+            if page.get_by_placeholder("Enter milestone name...").is_visible(timeout=3000):
+                allure.attach(
+                    page.screenshot(),
+                    name="⚠️ cleanup: селектор строк не находит элементов",
+                    attachment_type=allure.attachment_type.PNG,
+                )
+                print(
+                    f"⚠️ cleanup_milestones: селектор '{_ROW_SELECTOR}' не нашёл строк, "
+                    f"но страница Milestones загружена — возможно CSS-класс изменился"
+                )
+
         def _archive_visible():
             """Архивирует видимые в DOM майлстоуны. Возвращает кол-во архивированных."""
+            _check_stale_selector()
             count = 0
             for _ in range(20):
-                rows = page.locator('[class*="List-module_VirtualItem"]')
+                rows = page.locator(_ROW_SELECTOR)
                 found = False
 
                 for i in range(rows.count()):

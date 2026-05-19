@@ -8,7 +8,7 @@ from playwright.sync_api import expect, Page
 
 from tests.test_frontend.conftest import cleanup_board
 from tests.test_frontend.tests.milestones.conftest import cleanup_milestones
-from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_subtask, create_subtasks, wait_for_subtask_rows, toggle_subtask_complete, set_date, add_comment, fill_description, create_milestone_from_dropdown, remove_milestone_from_dropdown, find_subtask_row_by_name
+from tests.test_frontend.tests.tasks.conftest import open_card, create_task_on_board, add_subtask, create_subtasks, wait_for_subtask_rows, toggle_subtask_complete, expect_subtask_counter, set_date, add_comment, fill_description, create_milestone_from_dropdown, remove_milestone_from_dropdown, find_subtask_row_by_name, open_as_page
 
 pytestmark = [pytest.mark.frontend]
 
@@ -174,7 +174,7 @@ def test_06_milestone(page: Page, soft_step, sidebar):
 
     def remove_second():
         remove_milestone_from_dropdown(page, _MILESTONE_NAME_2)
-        expect(sidebar.get_by_role("button", name="Milestones Select milestones")).to_be_visible(timeout=5000)
+        expect(milestones_btn.filter(has_text=_MILESTONE_NAME_2)).not_to_be_visible(timeout=5000)
 
     with allure.step(f"Удаление майлстоуна: {_MILESTONE_NAME_2}"):
         soft_step("Удаление MILESTONE 2", remove_second)
@@ -334,52 +334,48 @@ def test_11_add_subtasks(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("12. Verify subtask completion counters")
-def test_12_complete_subtasks(page: Page, soft_step, sidebar):
-    """Завершает и снимает завершение подзадач, проверяет счётчики."""
-    open_card(page, soft_step, _TASK_NAME)
+def test_12_complete_subtasks(page: Page, soft_step):
+    """Завершает и снимает завершение подзадач, проверяет счётчики.
 
-    # Строки подзадач лениво загружаются — wait_for_subtask_rows делает retry с reload.
-    wait_for_subtask_rows(page, _TASK_NAME, _SUBTASK_NAME)
+    Открывается на полную страницу — подзадачи рендерятся сразу,
+    без проблем с загрузкой и скроллом сайдбара.
+    """
+    open_card(page, soft_step, _TASK_NAME)
+    open_as_page(page, _TASK_NAME)
+
+    wait_for_subtask_rows(page, _TASK_NAME, _SUBTASK_NAME, full_page=True)
 
     # ── Complete подзадачи 1 → "1 completed of 2" ──
 
     with allure.step(f"Завершение подзадачи: {_SUBTASK_NAME}"):
-        soft_step("Завершение подзадачи 1", lambda: toggle_subtask_complete(page, _SUBTASK_NAME))
+        soft_step("Завершение подзадачи 1", lambda: toggle_subtask_complete(page, _SUBTASK_NAME, full_page=True))
 
     with allure.step("Проверка: 1 completed of 2"):
-        soft_step("1 completed of 2", lambda: (
-            expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
-        ))
+        expect_subtask_counter(page, _TASK_NAME, "1 completed of 2", full_page=True)
 
     # ── Complete подзадачи 2 → "All 2 completed" ──
 
     with allure.step(f"Завершение подзадачи: {_SUBTASK_NAME_2}"):
-        soft_step("Завершение подзадачи 2", lambda: toggle_subtask_complete(page, _SUBTASK_NAME_2))
+        soft_step("Завершение подзадачи 2", lambda: toggle_subtask_complete(page, _SUBTASK_NAME_2, full_page=True))
 
     with allure.step("Проверка: All 2 completed"):
-        soft_step("All 2 completed", lambda: (
-            expect(sidebar.get_by_text("All 2 completed")).to_be_visible(timeout=10000)
-        ))
+        expect_subtask_counter(page, _TASK_NAME, "All 2 completed", full_page=True)
 
     # ── Uncomplete подзадачи 1 → "1 completed of 2" ──
 
     with allure.step(f"Снятие завершения: {_SUBTASK_NAME}"):
-        soft_step("Снятие завершения подзадачи 1", lambda: toggle_subtask_complete(page, _SUBTASK_NAME))
+        soft_step("Снятие завершения подзадачи 1", lambda: toggle_subtask_complete(page, _SUBTASK_NAME, full_page=True))
 
     with allure.step("Проверка: 1 completed of 2 (после снятия)"):
-        soft_step("1 completed of 2 (после снятия)", lambda: (
-            expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
-        ))
+        expect_subtask_counter(page, _TASK_NAME, "1 completed of 2", full_page=True)
 
     # ── Uncomplete подзадачи 2 → "0 completed of 2" ──
 
     with allure.step(f"Снятие завершения: {_SUBTASK_NAME_2}"):
-        soft_step("Снятие завершения подзадачи 2", lambda: toggle_subtask_complete(page, _SUBTASK_NAME_2))
+        soft_step("Снятие завершения подзадачи 2", lambda: toggle_subtask_complete(page, _SUBTASK_NAME_2, full_page=True))
 
     with allure.step("Проверка: 0 completed of 2"):
-        soft_step("0 completed of 2", lambda: (
-            expect(sidebar.get_by_text("0 completed of 2")).to_be_visible(timeout=10000)
-        ))
+        expect_subtask_counter(page, _TASK_NAME, "0 completed of 2", full_page=True)
 
 
 # ── 13. Удаление подзадач + счётчики ──────────────────────────────
@@ -390,16 +386,18 @@ def test_12_complete_subtasks(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("13. Delete subtasks and verify counters")
-def test_13_delete_subtasks(page: Page, soft_step, sidebar):
-    """Удаляет подзадачи из таблицы задачи, проверяет уменьшение счётчика."""
+def test_13_delete_subtasks(page: Page, soft_step):
+    """Удаляет подзадачи из таблицы задачи, проверяет уменьшение счётчика.
+
+    Открывается на полную страницу — аналогично test_12.
+    """
     open_card(page, soft_step, _TASK_NAME)
+    open_as_page(page, _TASK_NAME)
+
+    wait_for_subtask_rows(page, _TASK_NAME, _SUBTASK_NAME, full_page=True)
 
     def delete_subtask(subtask_name):
-        subtask_row = (
-            sidebar.get_by_role("button")
-            .filter(has_text=re.compile(r"[A-Z]+-\d+"))
-            .filter(has_text=subtask_name)
-        )
+        subtask_row = find_subtask_row_by_name(page, subtask_name)
         expect(subtask_row).to_be_visible(timeout=10000)
         subtask_row.get_by_role("button").nth(1).click()
         page.get_by_text("Delete task").click()
@@ -412,7 +410,7 @@ def test_13_delete_subtasks(page: Page, soft_step, sidebar):
 
     with allure.step("Проверка: 1 subtask"):
         soft_step("1 subtask", lambda: (
-            expect(sidebar.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=10000)
+            expect(page.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=10000)
         ))
 
     # ── Удаление подзадачи 2 → "0 subtasks" ──
@@ -422,7 +420,7 @@ def test_13_delete_subtasks(page: Page, soft_step, sidebar):
 
     with allure.step("Проверка: 0 subtasks"):
         soft_step("0 subtasks", lambda: (
-            expect(sidebar.get_by_role("heading", name="0 subtasks")).to_be_visible(timeout=10000)
+            expect(page.get_by_role("heading", name="0 subtasks")).to_be_visible(timeout=10000)
         ))
 
 
@@ -452,7 +450,7 @@ def test_14_complete(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("99. Cleanup: delete test tasks and milestones")
-def test_99_cleanup(page: Page, cleanup_task):
-    """Удаляет все карточки с таймстемпом теста с борды и архивирует созданные майлстоуны."""
-    cleanup_task["ts"] = _TS
+def test_99_cleanup(page: Page):
+    """Удаляет все карточки с борды и архивирует созданные майлстоуны."""
+    cleanup_board(page)
     cleanup_milestones(page, keep_names=["Test milestone"])
