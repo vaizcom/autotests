@@ -1,0 +1,6 @@
+FAILURE: [VRT board_with_task.png] Скриншот отличается от baseline на 4.83% (допустимо 3.0%). Для обновления: pytest --update-snapshots / в CI: snapshot_test=test_create_space_with_project_board_task
+tests/test_frontend/tests/spaces/test_create_flow.py:130 in test_create_space_with_project_board_task() -> assert_snapshot(screenshot, name="board_with_task.png", threshold=3.0)
+tests/test_frontend/conftest.py:562 in _assert() -> check.fail(
+
+------------------------------------------------------------
+Failed Checks: 1
