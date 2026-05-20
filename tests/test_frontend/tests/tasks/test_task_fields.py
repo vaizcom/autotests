@@ -386,18 +386,12 @@ def test_12_complete_subtasks(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Fields")
 @allure.title("13. Delete subtasks and verify counters")
-def test_13_delete_subtasks(page: Page, soft_step):
-    """Удаляет подзадачи из таблицы задачи, проверяет уменьшение счётчика.
-
-    Открывается на полную страницу — аналогично test_12.
-    """
+def test_13_delete_subtasks(page: Page, soft_step, sidebar):
+    """Удаляет подзадачи из таблицы задачи, проверяет уменьшение счётчика."""
     open_card(page, soft_step, _TASK_NAME)
-    open_as_page(page, _TASK_NAME)
-
-    wait_for_subtask_rows(page, _TASK_NAME, _SUBTASK_NAME, full_page=True)
 
     def delete_subtask(subtask_name):
-        subtask_row = find_subtask_row_by_name(page, subtask_name)
+        subtask_row = find_subtask_row_by_name(sidebar, subtask_name)
         expect(subtask_row).to_be_visible(timeout=10000)
         subtask_row.get_by_role("button").nth(1).click()
         page.get_by_text("Delete task").click()
@@ -410,7 +404,7 @@ def test_13_delete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 1 subtask"):
         soft_step("1 subtask", lambda: (
-            expect(page.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=10000)
+            expect(sidebar.get_by_role("heading", name=re.compile(r"\b1 subtask\b"))).to_be_visible(timeout=10000)
         ))
 
     # ── Удаление подзадачи 2 → "0 subtasks" ──
@@ -420,7 +414,7 @@ def test_13_delete_subtasks(page: Page, soft_step):
 
     with allure.step("Проверка: 0 subtasks"):
         soft_step("0 subtasks", lambda: (
-            expect(page.get_by_role("heading", name="0 subtasks")).to_be_visible(timeout=10000)
+            expect(sidebar.get_by_role("heading", name="0 subtasks")).to_be_visible(timeout=10000)
         ))
 
 
