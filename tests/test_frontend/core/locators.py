@@ -12,6 +12,15 @@
 """
 
 
+class Auth:
+    EMAIL_INPUT = "auth.steps.email-step.input.email"
+    EMAIL_SUBMIT = "auth.steps.email-step.button.submit"
+    PASSWORD_INPUT = "auth.steps.password-step.input.password"
+    PASSWORD_SUBMIT = "auth.steps.password-step.button.submit"
+    GOOGLE = "auth.steps.o-auth-block.button.google"
+    GITHUB = "auth.steps.o-auth-block.button.github"
+
+
 class Header:
     BURGER = "header.burger-button.button"
     SPACE_SELECTOR = "header.space.selector"

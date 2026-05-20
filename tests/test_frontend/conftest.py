@@ -12,7 +12,7 @@ from PIL import Image, ImageChops, ImageDraw
 from playwright.sync_api import expect
 
 from tests.test_frontend.core import settings
-from tests.test_frontend.core.locators import Board, Sidebar, TaskCard
+from tests.test_frontend.core.locators import Auth, Board, Header, Sidebar, SpaceSelector, TaskCard
 from tests.test_frontend.core.settings import BASE_URL, FRONTEND_EMAIL, FRONTEND_PASSWORD, FRONTEND_STAND
 
 
@@ -223,10 +223,19 @@ def auth_state(playwright, _configure_test_id):
     page = context.new_page()
     try:
         page.goto(f"{BASE_URL}/auth/sign-in")
-        page.get_by_role("textbox", name="Email").fill(FRONTEND_EMAIL)
-        page.get_by_role("textbox", name="Password").fill(FRONTEND_PASSWORD)
-        page.get_by_role("button", name="Continue with Email").click()
-        page.get_by_test_id(Sidebar.HOME).wait_for(state="visible")
+        # Step 1: Email
+        page.get_by_test_id(Auth.EMAIL_INPUT).fill(FRONTEND_EMAIL)
+        page.get_by_test_id(Auth.EMAIL_SUBMIT).click()
+        # Step 2: Password
+        page.get_by_test_id(Auth.PASSWORD_INPUT).wait_for(state="visible", timeout=10000)
+        page.get_by_test_id(Auth.PASSWORD_INPUT).fill(FRONTEND_PASSWORD)
+        page.get_by_test_id(Auth.PASSWORD_SUBMIT).click()
+        # Wait for redirect
+        page.get_by_test_id(Sidebar.HOME).wait_for(state="visible", timeout=15000)
+        # Navigate to autotest space
+        page.get_by_test_id(Header.SPACE_SELECTOR).click()
+        page.get_by_test_id(SpaceSelector.space(settings.AUTOTEST_SPACE_ID)).click()
+        page.get_by_test_id(Sidebar.HOME).wait_for(state="visible", timeout=10000)
     except Exception as e:
         context.close()
         browser.close()

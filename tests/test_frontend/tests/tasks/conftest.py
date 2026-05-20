@@ -1,4 +1,6 @@
+import os
 import re
+from datetime import datetime
 
 import allure
 import pytest
@@ -6,6 +8,47 @@ from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
 from tests.test_frontend.core.locators import Board
+
+# ── Shared constants ──────────────────────────────────────────────────
+
+_TS = os.environ.get("TEST_TS") or datetime.now().strftime("%H%M%S")
+TASK_NAME = f"autotest_{_TS}"
+
+
+# ── Session fixture: создание задачи + cleanup ────────────────────────
+
+@pytest.fixture(scope="session", autouse=True)
+def _shared_task_lifecycle(playwright, auth_state, _configure_test_id):
+    """Создаёт autotest задачу перед первым тестом, cleanup в finalizer."""
+    browser = playwright.chromium.launch()
+    ctx = browser.new_context(
+        storage_state=auth_state,
+        ignore_https_errors=True,
+        viewport={"width": 1280, "height": 720},
+    )
+    page = ctx.new_page()
+    create_task_on_board(page, TASK_NAME)
+    page.close()
+    ctx.close()
+    browser.close()
+
+    yield
+
+    from tests.test_frontend.conftest import cleanup_board
+    from tests.test_frontend.tests.milestones.conftest import cleanup_milestones
+
+    browser = playwright.chromium.launch()
+    ctx = browser.new_context(
+        storage_state=auth_state,
+        ignore_https_errors=True,
+        viewport={"width": 1280, "height": 720},
+    )
+    page = ctx.new_page()
+    cleanup_board(page)
+    cleanup_milestones(page, keep_names=["Test milestone"])
+    page.close()
+    ctx.close()
+    browser.close()
 
 
 def find_subtask_row_by_name(container, name: str):

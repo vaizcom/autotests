@@ -77,7 +77,7 @@ def _setup_convert(page):
 _debug_extra_setup = {
     "test_03_convert_to_milestone": _setup_fill,
     "test_04_verify_fields": _setup_convert,
-    "test_05_subtask_hierarchy": _setup_convert,
+    "test_05_subtasks_kept": _setup_convert,
 }
 
 
@@ -88,7 +88,7 @@ _debug_extra_setup = {
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("01. Create task for conversion")
+@allure.title("01. Создать Task для конвертации")
 def test_01_create_task(page: Page, soft_step):
     """Создаёт задачу, которая будет конвертирована в майлстоун."""
     with allure.step(f"Создание задачи: {_TASK_NAME}"):
@@ -102,7 +102,7 @@ def test_01_create_task(page: Page, soft_step):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("02. Fill all task fields before conversion")
+@allure.title("02. Заполнить все поля Task перед конвертацией")
 def test_02_fill_fields(page: Page, soft_step, sidebar):
     """Заполняет все поля задачи перед конвертацией.
     Переносятся: название, описание, дата, подзадача, комментарий.
@@ -200,7 +200,7 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("03. Convert task to milestone")
+@allure.title("03. Конвертировать Task в Milestone")
 def test_03_convert_to_milestone(page: Page, soft_step):
     """Конвертирует задачу в майлстоун через меню сайдбара."""
     open_card(page, soft_step, _TASK_NAME)
@@ -244,7 +244,7 @@ def test_03_convert_to_milestone(page: Page, soft_step):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("04. Verify milestone fields via subtask")
+@allure.title("04. Проверить поля Milestone через Subtask")
 def test_04_verify_fields(page: Page, soft_step, sidebar):
     """Открывает сабтаску на борде, проверяет milestone field,
     переходит на майлстоун по бейджу и проверяет перенос полей."""
@@ -312,9 +312,9 @@ def test_04_verify_fields(page: Page, soft_step, sidebar):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("05. Subtask hierarchy preserved after conversion")
-def test_05_subtask_hierarchy(page: Page, sidebar):
-    """Проверяет что подзадача с вложенной подподзадачей сохранила иерархию после конвертации."""
+@allure.title("05. Subtasks сохранились после конвертации")
+def test_05_subtasks_kept(page: Page, sidebar):
+    """Проверяет что подзадача с вложенной подподзадачей сохранились после конвертации."""
     open_card(page, lambda _n, fn: fn(), _SUBTASK_NAME)
 
     with allure.step(f"Проверка: {_SUB_SUBTASK_NAME} видна как подзадача {_SUBTASK_NAME}"):
@@ -329,7 +329,7 @@ def test_05_subtask_hierarchy(page: Page, sidebar):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("99. Cleanup: delete subtask and archive milestone")
+@allure.title("99. Очистка: удалить Subtask и архивировать Milestone")
 def test_cleanup(page: Page, soft_step, cleanup_task):
     """Архивирует майлстоун и удаляет сабтаску для очистки борды."""
     # cleanup_task удалит сабтаску (и другие карточки с _TS) после теста

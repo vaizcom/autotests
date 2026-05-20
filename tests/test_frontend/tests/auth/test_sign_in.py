@@ -3,7 +3,7 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
-from tests.test_frontend.core.locators import Header, Sidebar
+from tests.test_frontend.core.locators import Auth, Header, Sidebar, SpaceSelector
 
 pytestmark = [pytest.mark.frontend]
 
@@ -21,16 +21,23 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
     with allure.step("Открытие страницы входа"):
         page.goto(f"{settings.BASE_URL}/auth/sign-in")
 
-    with allure.step("Ввод учётных данных"):
-        page.get_by_role("textbox", name="Email").fill(settings.FRONTEND_EMAIL)
-        page.get_by_role("textbox", name="Password").fill(settings.FRONTEND_PASSWORD)
+    with allure.step("Ввод email"):
+        page.get_by_test_id(Auth.EMAIL_INPUT).fill(settings.FRONTEND_EMAIL)
+        page.get_by_test_id(Auth.EMAIL_SUBMIT).click()
 
-    with allure.step("Нажатие кнопки Continue with Email"):
-        page.get_by_role("button", name="Continue with Email").click()
+    with allure.step("Ввод пароля"):
+        page.get_by_test_id(Auth.PASSWORD_INPUT).wait_for(state="visible", timeout=10000)
+        page.get_by_test_id(Auth.PASSWORD_INPUT).fill(settings.FRONTEND_PASSWORD)
+        page.get_by_test_id(Auth.PASSWORD_SUBMIT).click()
 
     with allure.step("Проверка успешного входа"):
         expect(page).not_to_have_url(f"{settings.BASE_URL}/auth/sign-in", timeout=15000)
         expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
+
+    with allure.step("Переход в autotest space"):
+        page.get_by_test_id(Header.SPACE_SELECTOR).click()
+        page.get_by_test_id(SpaceSelector.space(settings.AUTOTEST_SPACE_ID)).click()
+        page.get_by_test_id(Sidebar.HOME).wait_for(state="visible", timeout=10000)
 
     with allure.step("Сравнение скриншота"):
         page.get_by_test_id(Sidebar.ARCHIVE).wait_for(state="visible")
@@ -40,22 +47,17 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
         page.get_by_test_id(Sidebar.ARCHIVE).wait_for(state="visible")
         page.mouse.move(640, 400)  # убираем hover с Home
 
-        # Сворачиваем все раскрытые секции сайдбара → фиксируем известное состояние
-        for arrow in page.locator('[class*="_ArrowBox_"]').all():
-            is_expanded = arrow.evaluate("""el => {
-                const header = el.parentElement;
-                let next = header?.nextElementSibling;
-                while (next) {
-                    if (next.className?.includes('CollabsedBox')) {
-                        return next.offsetHeight > 0;
-                    }
-                    next = next.nextElementSibling;
-                }
-                return false;
-            }""")
-            if is_expanded:
-                arrow.click()
-                page.wait_for_timeout(1000)
+        # Сворачиваем раскрытые секции сайдбара → фиксируем известное состояние
+        # ADD_DOC один test-id на обе секции (Space Docs / Personal Docs) → .first/.last
+        collapsible = [
+            (Sidebar.PROJECTS, page.get_by_test_id(Sidebar.ADD_PROJECT)),
+            (Sidebar.SPACE_DOCS, page.get_by_test_id(Sidebar.ADD_DOC).first),
+            (Sidebar.PERSONAL_DOCS, page.get_by_test_id(Sidebar.ADD_DOC).last),
+        ]
+        for section_id, child in collapsible:
+            if child.is_visible(timeout=1000):
+                page.get_by_test_id(section_id).click()
+                page.wait_for_timeout(500)
 
         page.mouse.move(640, 400)  # убираем hover после сворачивания
         page.wait_for_timeout(200)
