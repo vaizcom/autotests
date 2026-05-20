@@ -1,0 +1,51 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"Создаёт задачу, которая будет конвертирована в майлстоун.","3175","01. Create task for conversion","Frontend","Wed May 20 07:45:51 UTC 2026","passed","Wed May 20 07:45:54 UTC 2026","Convert to Milestone","Tasks","",""
+"Отмечает задачу как выполненную (Complete).","4493","14. Complete task","Frontend","Wed May 20 07:45:16 UTC 2026","passed","Wed May 20 07:45:20 UTC 2026","Fields","Tasks","",""
+"Добавляет две задачи в майлстоун, проверяет счётчик на каждом шаге.
+
+    Обратную связь (МС виден в карточке задачи) проверяет API-тест
+    test_tasks_visibility_in_correct_milestones — кросс-навигация на E2E не нужна.
+    ","5277","06. Add tasks and verify counters","Frontend","Wed May 20 07:43:29 UTC 2026","passed","Wed May 20 07:43:35 UTC 2026","Fields","Milestones","",""
+"Удаляет задачи из таблицы майлстоуна, проверяет уменьшение счётчика.","9157","08. Delete tasks and verify counters","Frontend","Wed May 20 07:43:43 UTC 2026","passed","Wed May 20 07:43:52 UTC 2026","Fields","Milestones","",""
+"Заполняет и проверяет описание майлстоуна (tiptap-редактор после секции задач).","4038","04. Set and verify description","Frontend","Wed May 20 07:43:20 UTC 2026","passed","Wed May 20 07:43:24 UTC 2026","Fields","Milestones","",""
+"Заполняет и проверяет короткое описание майлстоуна.","3568","03. Set short description","Frontend","Wed May 20 07:43:17 UTC 2026","passed","Wed May 20 07:43:20 UTC 2026","Fields","Milestones","",""
+"Открывает сабтаску на борде, проверяет milestone field,
+    переходит на майлстоун по бейджу и проверяет перенос полей.","4407","04. Verify milestone fields via subtask","Frontend","Wed May 20 07:46:16 UTC 2026","passed","Wed May 20 07:46:21 UTC 2026","Convert to Milestone","Tasks","",""
+"Заполняет все поля задачи перед конвертацией.
+    Переносятся: название, описание, дата, подзадача, комментарий.
+    Теряются: приоритет, исполнитель, тип, майлстоун.","15640","02. Fill all task fields before conversion","Frontend","Wed May 20 07:45:54 UTC 2026","passed","Wed May 20 07:46:10 UTC 2026","Convert to Milestone","Tasks","",""
+"Устанавливает и проверяет даты майлстоуна.","4610","05. Set and verify dates","Frontend","Wed May 20 07:43:25 UTC 2026","passed","Wed May 20 07:43:29 UTC 2026","Fields","Milestones","",""
+"Добавляет блокер и блокинг задачу.","5696","08. Add blocker and blocking","Frontend","Wed May 20 07:44:45 UTC 2026","passed","Wed May 20 07:44:50 UTC 2026","Fields","Tasks","",""
+"Назначает первого пользователя из списка исполнителем.","3825","03. Assign user","Frontend","Wed May 20 07:44:21 UTC 2026","passed","Wed May 20 07:44:25 UTC 2026","Fields","Tasks","",""
+"Добавляет комментарий к майлстоуну и проверяет.","4298","09. Add comment and verify","Frontend","Wed May 20 07:43:52 UTC 2026","passed","Wed May 20 07:43:57 UTC 2026","Fields","Milestones","",""
+"Добавляет две подзадачи, проверяет счётчик на каждом шаге.","4714","11. Add subtasks and verify counters","Frontend","Wed May 20 07:44:59 UTC 2026","passed","Wed May 20 07:45:04 UTC 2026","Fields","Tasks","",""
+"Архивирует майлстоун и удаляет сабтаску для очистки борды.","4102","99. Cleanup: delete subtask and archive milestone","Frontend","Wed May 20 07:46:24 UTC 2026","passed","Wed May 20 07:46:29 UTC 2026","Convert to Milestone","Tasks","",""
+"Создаёт майлстоуны из dropdown задачи, проверяет мульти-назначение и удаление.
+
+    Обратную связь (задача видна внутри МС) проверяет API-тест
+    test_tasks_visibility_in_correct_milestones — кросс-навигация на E2E не нужна.
+    ","6458","06. Milestones: create, multi-select, remove","Frontend","Wed May 20 07:44:33 UTC 2026","passed","Wed May 20 07:44:40 UTC 2026","Fields","Tasks","",""
+"Создаёт майлстоун через вкладку Milestones на борде.","3729","01. Create milestone on board","Frontend","Wed May 20 07:43:09 UTC 2026","passed","Wed May 20 07:43:13 UTC 2026","Fields","Milestones","",""
+"Завершает и снимает завершение задач, проверяет счётчики.","8135","07. Verify task completion counters","Frontend","Wed May 20 07:43:35 UTC 2026","passed","Wed May 20 07:43:43 UTC 2026","Fields","Milestones","",""
+"Конвертирует задачу в майлстоун через меню сайдбара.","5969","03. Convert task to milestone","Frontend","Wed May 20 07:46:10 UTC 2026","passed","Wed May 20 07:46:16 UTC 2026","Convert to Milestone","Tasks","",""
+"Завершает и снимает завершение подзадач, проверяет счётчики.","6010","12. Verify subtask completion counters","Frontend","Wed May 20 07:45:04 UTC 2026","passed","Wed May 20 07:45:10 UTC 2026","Fields","Tasks","",""
+"
+    Smoke-тест, проверяющий полный флоу создания сущностей: Space → Project → Board → Task.
+    По завершении скриншот доски сравнивается с baseline. Space удаляется через API в teardown.
+    Тест не запускается на проде, так как создание сущностей тестируется только на dev.
+    ","0","Create space → project → board → task","Frontend","Wed May 20 07:44:05 UTC 2026","skipped","Wed May 20 07:44:05 UTC 2026","","Smoke","",""
+"Заполняет кастомное текстовое поле задачи.","3759","09. Fill custom text field","Frontend","Wed May 20 07:44:51 UTC 2026","passed","Wed May 20 07:44:54 UTC 2026","Fields","Tasks","",""
+"Проверяет что вкладка Activities отображается.","3130","10. Verify Activities tab","Frontend","Wed May 20 07:43:57 UTC 2026","passed","Wed May 20 07:44:00 UTC 2026","Fields","Milestones","",""
+"","12421","Sign in with email","Frontend","Wed May 20 07:42:57 UTC 2026","passed","Wed May 20 07:43:09 UTC 2026","","Auth","",""
+"Устанавливает дату задачи.","4508","07. Set date","Frontend","Wed May 20 07:44:40 UTC 2026","passed","Wed May 20 07:44:45 UTC 2026","Fields","Tasks","",""
+"Проверяет что подзадача с вложенной подподзадачей сохранила иерархию после конвертации.","3233","05. Subtask hierarchy preserved after conversion","Frontend","Wed May 20 07:46:21 UTC 2026","passed","Wed May 20 07:46:24 UTC 2026","Convert to Milestone","Tasks","",""
+"Удаляет все карточки с таймстемпом теста с борды и архивирует созданные майлстоуны.","17092","99. Cleanup: delete test tasks and milestones","Frontend","Wed May 20 07:45:20 UTC 2026","passed","Wed May 20 07:45:38 UTC 2026","Fields","Tasks","",""
+"Добавляет комментарий к задаче.","4153","10. Add comment","Frontend","Wed May 20 07:44:55 UTC 2026","passed","Wed May 20 07:44:59 UTC 2026","Fields","Tasks","",""
+"Удаляет задачи и архивирует тестовый майлстоун.","4203","99. Cleanup: archive milestone","Frontend","Wed May 20 07:44:00 UTC 2026","passed","Wed May 20 07:44:04 UTC 2026","Fields","Milestones","",""
+"Удаляет подзадачи из таблицы задачи, проверяет уменьшение счётчика.","5571","13. Delete subtasks and verify counters","Frontend","Wed May 20 07:45:10 UTC 2026","passed","Wed May 20 07:45:16 UTC 2026","Fields","Tasks","",""
+"","8048","Logout","Frontend","Wed May 20 07:42:48 UTC 2026","passed","Wed May 20 07:42:56 UTC 2026","","Auth","",""
+"Создаёт новую задачу на борде и проверяет что карточка появилась.","3309","01. Create task on board","Frontend","Wed May 20 07:44:05 UTC 2026","passed","Wed May 20 07:44:08 UTC 2026","Fields","Tasks","",""
+"Заполняет описание задачи.","3986","05. Fill description","Frontend","Wed May 20 07:44:29 UTC 2026","passed","Wed May 20 07:44:33 UTC 2026","Fields","Tasks","",""
+"Устанавливает тип задачи Green.","3838","04. Set type Green","Frontend","Wed May 20 07:44:25 UTC 2026","passed","Wed May 20 07:44:29 UTC 2026","Fields","Tasks","",""
+"Проверяет что название майлстоуна отображается корректно.","3400","02. Verify milestone name","Frontend","Wed May 20 07:43:13 UTC 2026","passed","Wed May 20 07:43:16 UTC 2026","Fields","Milestones","",""
+"Устанавливает приоритет задачи Medium.","13090","02. Set priority Medium","Frontend","Wed May 20 07:44:08 UTC 2026","passed","Wed May 20 07:44:21 UTC 2026","Fields","Tasks","",""
