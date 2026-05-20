@@ -91,7 +91,7 @@ def archive_milestone(page: Page, milestone_name: str):
         pass
 
 
-def cleanup_milestones(page: Page, keep_names: list[str] | None = None):
+def cleanup_milestones(page: Page, keep_names=None):
     """Архивирует все майлстоуны на борде кроме указанных в keep_names. Best effort."""
     keep = set(keep_names or [])
 
