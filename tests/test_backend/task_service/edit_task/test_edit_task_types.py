@@ -69,7 +69,7 @@ def test_edit_task_clear_types_with_empty_list(owner_client, main_space, make_ta
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task")
 @allure.sub_suite("Types edit Task")
-@allure.title("Edit Task Types: Проверка ошибки при передаче повторяющихся типов (APP-4046)")
+@allure.title("Edit Task Types: Проверка ошибки при передаче повторяющихся типов (APP-4046-Done)")
 def test_edit_task_duplicate_types_error(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Проверяет, что при попытке редактирования задачи с повторяющимися типами

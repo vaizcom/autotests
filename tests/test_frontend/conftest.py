@@ -1,6 +1,8 @@
 import io
 import os
 import re
+import shutil
+import subprocess
 import time
 from pathlib import Path
 
@@ -202,6 +204,17 @@ def auth_state(playwright, _configure_test_id):
 
     Scope session означает что логин происходит ровно один раз за весь прогон.
     """
+    # Подключаем WARP VPN если он установлен, но не подключён (только локально)
+    if not os.environ.get("CI") and shutil.which("warp-cli"):
+        try:
+            status = subprocess.run(["warp-cli", "status"], capture_output=True, text=True, timeout=5)
+            if "Disconnected" in status.stdout:
+                subprocess.run(["warp-cli", "connect"], capture_output=True, timeout=10)
+                time.sleep(3)
+                print("🔗 WARP VPN подключён автоматически")
+        except Exception:
+            pass
+
     # Проверка доступности стенда перед логином (3 попытки с интервалом 10 сек)
     reason = ""
     for attempt in range(3):
