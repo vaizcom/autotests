@@ -1,0 +1,6 @@
+FAILURE: [Мультиселект] Элемент не найден — возможно изменился UI или локатор устарел
+tests/test_frontend/tests/tasks/test_03_type.py:116 in test_03_multiselect() -> soft_step("Мультиселект", multiselect)
+tests/test_frontend/conftest.py:366 in _soft_step() -> check.fail(f"[{name}] {hint}")
+
+------------------------------------------------------------
+Failed Checks: 1
