@@ -1,4 +1,5 @@
 import re
+import sys
 
 import allure
 import pytest
@@ -7,6 +8,8 @@ from playwright.sync_api import expect, Page
 from tests.test_frontend.tests.tasks.conftest import TASK_NAME, open_card
 
 pytestmark = [pytest.mark.frontend]
+
+_MULTISELECT_MOD = "Meta" if sys.platform == "darwin" else "Control"
 
 
 def _open_type_dropdown(page, sidebar):
@@ -37,7 +40,7 @@ def _set_type(page, sidebar, type_name: str):
 def _add_type(page, sidebar, type_name: str):
     """Добавляет тип через ⌘+клик (мультиселект)."""
     _open_type_dropdown(page, sidebar)
-    page.get_by_role("menuitem", name=type_name).click(modifiers=["Meta"])
+    page.get_by_role("menuitem", name=type_name).click(modifiers=[_MULTISELECT_MOD])
     _close_dropdown(page)
 
 
@@ -132,7 +135,7 @@ def test_04_remove_one(page: Page, soft_step, sidebar):
 
     def remove_one():
         _open_type_dropdown(page, sidebar)
-        page.get_by_role("menuitem", name="Green").click(modifiers=["Meta"])
+        page.get_by_role("menuitem", name="Green").click(modifiers=[_MULTISELECT_MOD])
         _close_dropdown(page)
         expect(sidebar.get_by_role("button", name=re.compile(r"Types.*Blue"))).to_be_visible(timeout=5000)
         expect(sidebar.get_by_role("button", name=re.compile(r"Types.*Green"))).not_to_be_visible(timeout=3000)
