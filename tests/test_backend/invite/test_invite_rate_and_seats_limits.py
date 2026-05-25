@@ -1,11 +1,11 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.invite.invite_endpoint import remove_invite_endpoint
-
 from test_backend.data.endpoints.invite.invite_endpoint import (
-    invite_to_space_endpoint
+    invite_to_space_endpoint,
+    remove_invite_endpoint,
 )
+from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 
 pytestmark = [pytest.mark.backend]
 
@@ -15,7 +15,7 @@ pytestmark = [pytest.mark.backend]
 @allure.title("Проверка лимитов: SeatsLimitReached и Too Many Requests")
 def test_invite_rate_and_seats_limits(temp_client):
     """
-    Лимиты: 10 мест в спейсе (1 занято создателем) и 20 инвайтов в час.
+    Лимиты: 13 мест в спейсе (1 создатель + 3 системных + 9 свободных) и 20 инвайтов в час.
     Сценарий:
     1. Отправляем 9 инвайтов (успешно), 10-й возвращает SeatsLimitReached.
     2. Удаляем 9 инвайтов.
@@ -24,6 +24,15 @@ def test_invite_rate_and_seats_limits(temp_client):
     5. Отправляем 21-й инвайт и получаем 429 Too Many Requests.
     """
     client, space_id = temp_client
+
+    # Cleanup: удаляем все существующие инвайты (на случай rerun)
+    with allure.step("Cleanup: удаление существующих инвайтов"):
+        resp = client.post(**get_space_members_endpoint(space_id=space_id))
+        if resp.status_code == 200:
+            members = resp.json().get("payload", {}).get("members", [])
+            for m in members:
+                if m.get("status") == "Invited":
+                    client.post(**remove_invite_endpoint(space_id=space_id, member_id=m["_id"]))
 
     emails_batch_1 = [f"rate_limit_1_{i}@autotest.com" for i in range(1, 10)]  # 9 email-ов
     emails_batch_2 = [f"rate_limit_2_{i}@autotest.com" for i in range(1, 10)]  # 9 email-ов
