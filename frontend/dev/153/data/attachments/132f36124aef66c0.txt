@@ -1,0 +1,39 @@
+page = <Page url='https://app.vaiz.dev/69eb40574942cdc3cd91a9df/p/69eb40a74942cdc3cd91aab8/b/69f1f33d75af2693b6652325/m?milestoneId=6a143ab0016351b9f102f6a1'>
+soft_step = <function soft_step.<locals>._soft_step at 0x7fc1bf242480>
+sidebar = <Locator frame=<Frame name= url='https://app.vaiz.dev/69eb40574942cdc3cd91a9df/p/69eb40a74942cdc3cd91aab8/b/69f1f33d75af2693b6652325/m?milestoneId=6a143ab0016351b9f102f6a1'> selector='[class*="RightSidebar-module_Root"]'>
+
+    @pytest.mark.dependency(depends=[_DEP_TASK_LIST])
+    @allure.parent_suite("Frontend")
+    @allure.suite("Milestones")
+    @allure.sub_suite("Fields")
+    @allure.title("07. Verify task completion counters")
+    def test_07_complete_tasks(page: Page, soft_step, sidebar):
+        """Завершает и снимает завершение задач, проверяет счётчики."""
+        open_milestone(page, _MILESTONE_NAME)
+    
+>       wait_for_task_rows(page, _MILESTONE_NAME)
+
+tests/test_frontend/tests/milestones/test_milestone_fields.py:233: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = <Page url='https://app.vaiz.dev/69eb40574942cdc3cd91a9df/p/69eb40a74942cdc3cd91aab8/b/69f1f33d75af2693b6652325/m?milestoneId=6a143ab0016351b9f102f6a1'>
+milestone_name = 'autotest_ms_120310'
+
+    def wait_for_task_rows(page: Page, milestone_name: str):
+        """Ждёт загрузки строк задач в таблице майлстоуна с ретраями и reload."""
+        task_rows = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
+        for attempt in range(4):
+            if task_rows.first.is_visible():
+                return
+            if attempt < 3:
+                page.wait_for_timeout(2000)
+                page.reload()
+                expect(page.get_by_role("heading", name=milestone_name)).to_be_visible(timeout=10000)
+>       expect(task_rows.first).to_be_visible(timeout=5000)
+E       AssertionError: Locator expected to be visible
+E       Actual value: <element(s) not found> 
+E       Call log:
+E         - LocatorAssertions.to_be_visible with timeout 5000ms
+E         -   - waiting for get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+")).first
+
+tests/test_frontend/tests/milestones/conftest.py:66: AssertionError
