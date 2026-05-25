@@ -9,7 +9,7 @@ pytestmark = [pytest.mark.frontend]
 
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
-@allure.sub_suite("Lifecycle")
+@allure.sub_suite("Complete")
 @allure.title("01. Завершить Task")
 def test_01_complete(page: Page, soft_step, sidebar):
     """Отмечает задачу как выполненную (Complete)."""
