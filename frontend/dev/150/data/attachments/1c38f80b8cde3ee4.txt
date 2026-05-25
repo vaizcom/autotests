@@ -1,0 +1,6 @@
+FAILURE: [Проект виден] Элемент не найден — возможно изменился UI или локатор устарел
+tests/test_frontend/tests/spaces/test_navigation.py:33 in test_navigation() -> soft_step("Проект виден", lambda: (
+tests/test_frontend/conftest.py:366 in _soft_step() -> check.fail(f"[{name}] {hint}")
+
+------------------------------------------------------------
+Failed Checks: 1

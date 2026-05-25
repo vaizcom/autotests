@@ -1,0 +1,46 @@
+page = <Page url='https://app.vaiz.dev/6a14100f348b585724e4dfb3'>
+cleanup_space = ['6a14100f348b585724e4dfb3']
+assert_snapshot = <function assert_snapshot.<locals>._assert at 0x7ff48200f4c0>
+
+    @pytest.mark.skipif(settings.FRONTEND_STAND == "prod", reason="Создание сущностей тестируется только на dev")
+    @allure.parent_suite("Frontend")
+    @allure.suite("Smoke")
+    @allure.title("Create space → project → task")
+    def test_create_space_with_project_and_task(page: Page, cleanup_space, assert_snapshot):
+        """
+        Smoke-тест: создание Space → wizard (Project + Board) → Task.
+        Space удаляется через API в teardown.
+        """
+        # === SPACE ===
+        with allure.step("Открытие приложения"):
+            page.goto(f"{settings.BASE_URL}/")
+            expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
+    
+        with allure.step(f"Создание Space: {_SPACE_NAME}"):
+            page.get_by_test_id(Header.SPACE_SELECTOR).click()
+            expect(page.get_by_test_id(SpaceSelector.CREATE)).to_be_visible(timeout=5000)
+            page.get_by_test_id(SpaceSelector.CREATE).click()
+            expect(page.get_by_role("button", name="Start creating")).to_be_visible(timeout=5000)
+            page.get_by_role("button", name="Start creating").click()
+            expect(page.get_by_role("textbox", name="Name")).to_be_visible(timeout=5000)
+            page.get_by_role("textbox", name="Name").fill(_SPACE_NAME)
+            page.get_by_role("button", name="Create space").click()
+    
+        with allure.step("Переключение в новый Space"):
+            expect(page.get_by_role("button", name="Switch to Space")).to_be_visible(timeout=15000)
+            page.get_by_role("button", name="Switch to Space").click()
+            page.wait_for_url(lambda url: url != f"{settings.BASE_URL}/", timeout=10000)
+            path = page.url.replace(settings.BASE_URL, "").strip("/")
+            space_id = path.split("/")[0]
+            cleanup_space.append(space_id)
+    
+        # === WIZARD: Set up your Workspace ===
+        with allure.step(f"Wizard: настройка Workspace + Project '{_PROJECT_NAME}'"):
+>           expect(page.get_by_role("textbox", name="Space Name")).to_be_visible(timeout=10000)
+E           AssertionError: Locator expected to be visible
+E           Actual value: <element(s) not found> 
+E           Call log:
+E             - LocatorAssertions.to_be_visible with timeout 10000ms
+E             -   - waiting for get_by_role("textbox", name="Space Name")
+
+tests/test_frontend/tests/smoke/test_create_flow.py:49: AssertionError
