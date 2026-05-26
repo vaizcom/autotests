@@ -277,6 +277,7 @@ def set_date(page: Page, date: str):
     date_input.press_sequentially(date, delay=50)
     page.keyboard.press("Tab")
     expect(date_input).to_have_value(date, timeout=5000)
+    page.wait_for_timeout(1000)
     apply_btn = page.get_by_role("button", name="Apply")
     expect(apply_btn).to_be_enabled(timeout=10000)
     apply_btn.click()
