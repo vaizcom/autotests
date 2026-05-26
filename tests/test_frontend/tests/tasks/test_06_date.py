@@ -1,3 +1,5 @@
+import re
+
 import allure
 import pytest
 from playwright.sync_api import expect, Page
@@ -20,5 +22,5 @@ def test_01_set(page: Page, soft_step, sidebar):
 
     with allure.step("Проверка даты"):
         soft_step("Дата сохранена", lambda: (
-            expect(sidebar.get_by_role("button", name="Dates No dates set")).not_to_be_visible(timeout=5000)
+            expect(sidebar.get_by_text(re.compile(r"10 Aug 30"))).to_be_visible(timeout=5000)
         ))

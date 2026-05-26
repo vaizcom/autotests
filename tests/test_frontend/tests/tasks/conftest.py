@@ -268,7 +268,7 @@ def expect_subtask_counter(page: Page, card_name: str, text: str, *, full_page: 
 def set_date(page: Page, date: str):
     """Устанавливает дату (due) в открытом сайдбаре задачи/майлстоуна."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    dates_btn = sidebar.get_by_role("button", name="Dates No dates set")
+    dates_btn = sidebar.get_by_text("No dates set")
     expect(dates_btn).to_be_visible(timeout=5000)
     dates_btn.click()
     date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first

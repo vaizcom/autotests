@@ -31,8 +31,8 @@ _DESCRIPTION = f"Milestone description {_TS}"
 _TASK_NAME = f"MS task {_TS}"
 _TASK_NAME_2 = f"MS task 2 {_TS}"
 _COMMENT = f"MS comment {_TS}"
-_DATE_START = "01.08.2030"
-_DATE_DUE = "10.08.2030"
+_DATE_START = "10.08.2030"
+_DATE_DUE = "19.08.2030"
 
 
 
@@ -159,7 +159,7 @@ def test_05_dates(page: Page, soft_step, sidebar):
 
     with allure.step("Проверка дат"):
         soft_step("Даты сохранены", lambda: (
-            expect(sidebar.get_by_role("button", name=re.compile(r"Dates.*2030"))).to_be_visible(timeout=5000)
+            expect(sidebar.get_by_text(re.compile(r"10 Aug 30"))).to_be_visible(timeout=5000)
         ))
 
 
