@@ -1,0 +1,34 @@
+page = <Page url='https://app.vaiz.dev/69eb40574942cdc3cd91a9df/p/69eb40a74942cdc3cd91aab8/b/69f1f33d75af2693b6652325/m'>
+soft_step = <function soft_step.<locals>._soft_step at 0x7fce7fa02b60>
+sidebar = <Locator frame=<Frame name= url='https://app.vaiz.dev/69eb40574942cdc3cd91a9df/p/69eb40a74942cdc3cd91aab8/b/69f1f33d75af2693b6652325/m'> selector='[class*="RightSidebar-module_Root"]'>
+
+    @pytest.mark.dependency(depends=[_DEP_CREATE])
+    @allure.parent_suite("Frontend")
+    @allure.suite("Milestones")
+    @allure.sub_suite("Fields")
+    @allure.title("04. Set and verify description")
+    def test_04_description(page: Page, soft_step, sidebar):
+        """Заполняет и проверяет описание майлстоуна (tiptap-редактор после секции задач)."""
+>       open_milestone(page, _MILESTONE_NAME)
+
+tests/test_frontend/tests/milestones/test_milestone_fields.py:132: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+page = <Page url='https://app.vaiz.dev/69eb40574942cdc3cd91a9df/p/69eb40a74942cdc3cd91aab8/b/69f1f33d75af2693b6652325/m'>
+milestone_name = 'autotest_ms_075149'
+
+    def open_milestone(page: Page, milestone_name: str):
+        """Открывает вкладку Milestones и кликает по майлстоуну."""
+        page.goto(settings.AUTOTEST_BOARD_URL)
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
+        page.get_by_role("link", name="Milestones").click()
+    
+        milestone = page.get_by_text(milestone_name).first
+>       expect(milestone).to_be_visible(timeout=5000)
+E       AssertionError: Locator expected to be visible
+E       Actual value: <element(s) not found> 
+E       Call log:
+E         - LocatorAssertions.to_be_visible with timeout 5000ms
+E         -   - waiting for get_by_text("autotest_ms_075149").first
+
+tests/test_frontend/tests/milestones/conftest.py:32: AssertionError
