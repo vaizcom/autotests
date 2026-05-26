@@ -14,7 +14,7 @@ def create_milestone_on_board(page: Page, milestone_name: str):
     expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
     page.get_by_role("link", name="Milestones").click()
 
-    name_input = page.get_by_placeholder("Enter milestone name...")
+    name_input = page.get_by_placeholder("Enter milestone name")
     expect(name_input).to_be_visible(timeout=5000)
     name_input.fill(milestone_name)
     page.keyboard.press("Enter")
@@ -37,12 +37,8 @@ def open_milestone(page: Page, milestone_name: str):
 def add_task_to_milestone(page: Page, task_name: str):
     """Добавляет задачу в открытый майлстоун."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    expect(
-        sidebar.locator('[data-tutorial-anchor="SUBTASK_LIST_ROOT"]'),
-        "Секция задач не найдена в сайдбаре — UI не загрузился",
-    ).to_be_visible(timeout=10000)
-    task_input = sidebar.locator('[data-tutorial-anchor="SUBTASK_LIST_ADD_SEARCH"] input')
-    expect(task_input, "Поле ввода задачи не найдено в секции задач").to_be_visible(timeout=5000)
+    task_input = sidebar.get_by_placeholder("Enter task name")
+    expect(task_input).to_be_visible(timeout=10000)
     task_input.click()
     task_input.fill(task_name)
     page.keyboard.press("Enter")
@@ -108,7 +104,7 @@ def cleanup_milestones(page: Page, keep_names=None):
             if page.locator(_ROW_SELECTOR).count() > 0:
                 return
             # Страница загружена (инпут виден), но строки не найдены — селектор устарел
-            if page.get_by_placeholder("Enter milestone name...").is_visible(timeout=3000):
+            if page.get_by_placeholder("Enter milestone name").is_visible(timeout=3000):
                 allure.attach(
                     page.screenshot(),
                     name="⚠️ cleanup: селектор строк не находит элементов",
