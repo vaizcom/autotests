@@ -15,7 +15,7 @@ from tests.test_frontend.tests.milestones.conftest import (
     archive_milestone,
     cleanup_milestones,
 )
-from tests.test_frontend.tests.tasks.conftest import add_comment, fill_description, set_date
+from tests.test_frontend.tests.tasks.conftest import add_comment, fill_description, future_date, set_date
 
 pytestmark = [pytest.mark.frontend]
 
@@ -31,8 +31,8 @@ _DESCRIPTION = f"Milestone description {_TS}"
 _TASK_NAME = f"MS task {_TS}"
 _TASK_NAME_2 = f"MS task 2 {_TS}"
 _COMMENT = f"MS comment {_TS}"
-_DATE_START = "10.08.2030"
-_DATE_DUE = "19.08.2030"
+_DATE_START = future_date(10)
+_DATE_DUE = future_date(19)
 
 
 
@@ -158,8 +158,11 @@ def test_05_dates(page: Page, soft_step, sidebar):
         soft_step("Установка дат", lambda: set_date(page, date=_DATE_START))
 
     with allure.step("Проверка дат"):
+        # "10.08.2026" → "10 August 2026"
+        _d = datetime.strptime(_DATE_START, "%d.%m.%Y")
+        _expected = f"{_d.day} {_d.strftime('%B')} {_d.year}"
         soft_step("Даты сохранены", lambda: (
-            expect(sidebar.get_by_text(re.compile(r"10 Aug 30"))).to_be_visible(timeout=5000)
+            expect(sidebar.get_by_text(_expected)).to_be_visible(timeout=5000)
         ))
 
 

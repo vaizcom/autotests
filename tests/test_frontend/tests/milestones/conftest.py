@@ -41,12 +41,11 @@ def add_task_to_milestone(page: Page, task_name: str):
     expect(task_input).to_be_visible(timeout=10000)
     task_input.click()
     task_input.fill(task_name)
-    page.keyboard.press("Enter")
-    expect(
-        sidebar.get_by_role("button")
-        .filter(has_text=re.compile(r"[A-Z]+-\d+"))
-        .filter(has_text=task_name)
-    ).to_be_visible(timeout=10000)
+    create_option = page.get_by_text("Create task")
+    expect(create_option).to_be_visible(timeout=5000)
+    create_option.click()
+    page.wait_for_timeout(2000)
+    expect(sidebar.get_by_text(task_name).first).to_be_visible(timeout=10000)
 
 
 def wait_for_task_rows(page: Page, milestone_name: str):

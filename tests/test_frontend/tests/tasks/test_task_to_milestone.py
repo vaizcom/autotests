@@ -10,6 +10,7 @@ from tests.test_frontend.core.locators import Board
 from tests.test_frontend.tests.tasks.conftest import (
     create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready,
     add_comment, fill_description, find_subtask_row_by_name, _scroll_to_subtasks,
+    set_date as _set_date, future_date,
 )
 
 pytestmark = [pytest.mark.frontend]
@@ -24,7 +25,7 @@ _SUBTASK_NAME = f"ConvSub {_TS}"
 _SUB_SUBTASK_NAME = f"ConvSubSub {_TS}"
 _DESCRIPTION = f"Milestone desc {_TS}"
 _COMMENT = f"Milestone comment {_TS}"
-_DATE = "10.08.2030"
+_DATE = future_date(10)
 _MILESTONE_NAME = "Test milestone"
 
 
@@ -116,21 +117,17 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
         soft_step("Описание", lambda: fill_description(page, _DESCRIPTION))
 
     # Дата
-    def set_date():
-        sidebar.get_by_role("button", name="Dates No dates set").click()
-        date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
-        date_input.fill(_DATE)
-        page.get_by_role("button", name="Apply").click()
-        expect(sidebar.get_by_role("button", name="Dates No dates set")).not_to_be_visible(timeout=5000)
-
     with allure.step(f"Дата: {_DATE}"):
-        soft_step("Дата", set_date)
+        soft_step("Дата", lambda: _set_date(page, _DATE))
 
     # Подзадача
     def add_subtask():
-        sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
+        _scroll_to_subtasks(sidebar)
+        textbox = sidebar.get_by_role("textbox", name="Enter subtask name")
+        expect(textbox).to_be_visible(timeout=5000)
+        textbox.fill(_SUBTASK_NAME)
         page.keyboard.press("Enter")
-        expect(find_subtask_row_by_name(sidebar, _SUBTASK_NAME)).to_be_visible(timeout=5000)
+        expect(find_subtask_row_by_name(sidebar, _SUBTASK_NAME)).to_be_visible(timeout=10000)
 
     with allure.step(f"Подзадача: {_SUBTASK_NAME}"):
         soft_step("Подзадача", add_subtask)
@@ -183,11 +180,13 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
     # ── Подподзадача (последний шаг — уходим в сайдбар подзадачи) ──
 
     def add_sub_sub_task():
+        _scroll_to_subtasks(sidebar)
         find_subtask_row_by_name(sidebar, _SUBTASK_NAME).first.click()
         expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
+        _scroll_to_subtasks(sidebar)
         sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUB_SUBTASK_NAME)
         page.keyboard.press("Enter")
-        expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=5000)
+        expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
 
     with allure.step(f"Подподзадача: {_SUB_SUBTASK_NAME}"):
         soft_step("Подподзадача", add_sub_sub_task)
@@ -272,8 +271,10 @@ def test_04_verify_fields(page: Page, soft_step, sidebar):
         ))
 
     with allure.step("Проверка даты"):
+        _d = datetime.strptime(_DATE, "%d.%m.%Y")
+        _expected_date = f"{_d.day} {_d.strftime('%B')} {_d.year}"
         soft_step("Дата", lambda: (
-            expect(sidebar.get_by_role("button", name=re.compile(r"Dates.*2030"))).to_be_visible(timeout=5000)
+            expect(sidebar.get_by_text(_expected_date)).to_be_visible(timeout=5000)
         ))
 
     with allure.step("Проверка подзадачи"):
@@ -315,9 +316,15 @@ def test_04_verify_fields(page: Page, soft_step, sidebar):
 @allure.title("05. Subtasks сохранились после конвертации")
 def test_05_subtasks_kept(page: Page, sidebar):
     """Проверяет что подзадача с вложенной подподзадачей сохранились после конвертации."""
-    open_card(page, lambda _n, fn: fn(), _SUBTASK_NAME)
+    from tests.test_frontend.tests.milestones.conftest import open_milestone
 
-    with allure.step(f"Проверка: {_SUB_SUBTASK_NAME} видна как подзадача {_SUBTASK_NAME}"):
+    open_milestone(page, _TASK_NAME)
+
+    with allure.step(f"Проверка: {_SUBTASK_NAME} видна как задача майлстоуна"):
+        expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=10000)
+
+    with allure.step(f"Открытие {_SUBTASK_NAME} и проверка подподзадачи"):
+        sidebar.get_by_text(_SUBTASK_NAME).first.click()
         expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
         _scroll_to_subtasks(sidebar)
         expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)

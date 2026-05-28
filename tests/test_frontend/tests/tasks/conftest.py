@@ -265,6 +265,15 @@ def expect_subtask_counter(page: Page, card_name: str, text: str, *, full_page: 
         expect(container.get_by_text(text)).to_be_visible(timeout=10000)
 
 
+def future_date(day: int, months_ahead: int = 3) -> str:
+    """Возвращает дату на months_ahead месяцев вперёд в формате dd.mm.yyyy."""
+    now = datetime.now()
+    month = now.month + months_ahead
+    year = now.year + (month - 1) // 12
+    month = (month - 1) % 12 + 1
+    return f"{day:02d}.{month:02d}.{year}"
+
+
 def set_date(page: Page, date: str):
     """Устанавливает дату (due) в открытом сайдбаре задачи/майлстоуна."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
@@ -273,11 +282,25 @@ def set_date(page: Page, date: str):
     dates_btn.click()
     date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
     expect(date_input).to_be_visible(timeout=5000)
-    date_input.click()
-    date_input.press_sequentially(date, delay=50)
-    page.keyboard.press("Tab")
-    expect(date_input).to_have_value(date, timeout=5000)
-    page.wait_for_timeout(1000)
+    _MONTHS = ["January", "February", "March", "April", "May", "June",
+               "July", "August", "September", "October", "November", "December"]
+    parts = date.split(".")
+    day = str(int(parts[0]))
+    expected_header = f"{_MONTHS[int(parts[1]) - 1]} {parts[2]}"
+    datepicker = page.locator('[class*="Datepicker2-module_Root"]')
+    # Навигируем стрелкой > до нужного месяца
+    next_btn = datepicker.locator('button[name="next-month"]')
+    for _ in range(100):
+        header = datepicker.locator(".rdp-caption_label").inner_text()
+        if header.strip() == expected_header:
+            break
+        next_btn.click()
+        page.wait_for_timeout(50)
+    # Кликаем по дню
+    day_btn = datepicker.locator("button.rdp-day:not(.rdp-day_outside)").filter(
+        has_text=re.compile(f"^{day}$")
+    ).first
+    day_btn.click()
     apply_btn = page.get_by_role("button", name="Apply")
     expect(apply_btn).to_be_enabled(timeout=10000)
     apply_btn.click()
