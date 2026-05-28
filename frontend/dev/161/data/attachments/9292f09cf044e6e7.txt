@@ -1,0 +1,6 @@
+FAILURE: [Комментарий] Элемент не найден — возможно изменился UI или локатор устарел
+tests/test_frontend/tests/tasks/test_12_task_to_milestone.py:286 in test_04_verify_milestone_fields() -> soft_step("Комментарий", lambda: (
+tests/test_frontend/conftest.py:366 in _soft_step() -> check.fail(f"[{name}] {hint}")
+
+------------------------------------------------------------
+Failed Checks: 1

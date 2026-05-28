@@ -1,0 +1,22 @@
+page = <Page url='https://app.vaiz.dev/'>
+assert_snapshot = <function assert_snapshot.<locals>._assert at 0x7f7aae20d620>
+
+    @allure.parent_suite("Frontend")
+    @allure.suite("Auth")
+    @allure.title("Logout")
+    def test_logout(page: Page, assert_snapshot):
+        with allure.step("Вход в систему"):
+            page.goto(f"{settings.BASE_URL}/auth/sign-in")
+            page.get_by_test_id(Auth.EMAIL_INPUT).fill(settings.FRONTEND_EMAIL)
+            page.get_by_test_id(Auth.EMAIL_SUBMIT).click()
+            page.get_by_test_id(Auth.PASSWORD_INPUT).wait_for(state="visible", timeout=10000)
+            page.get_by_test_id(Auth.PASSWORD_INPUT).fill(settings.FRONTEND_PASSWORD)
+            page.get_by_test_id(Auth.PASSWORD_SUBMIT).click()
+>           expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
+E           AssertionError: Locator expected to be visible
+E           Actual value: <element(s) not found> 
+E           Call log:
+E             - LocatorAssertions.to_be_visible with timeout 15000ms
+E             -   - waiting for get_by_test_id("aside.aside-menu.list-item.home")
+
+tests/test_frontend/tests/auth/test_logout.py:30: AssertionError
