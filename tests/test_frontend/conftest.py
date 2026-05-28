@@ -18,6 +18,20 @@ from tests.test_frontend.core.locators import Auth, Board, Header, Sidebar, Spac
 from tests.test_frontend.core.settings import BASE_URL, FRONTEND_EMAIL, FRONTEND_PASSWORD, FRONTEND_STAND
 
 
+def pytest_sessionstart(session):
+    """Проверяет доступность стенда перед запуском тестов (3 попытки)."""
+    for attempt in range(1, 4):
+        try:
+            resp = requests.get(BASE_URL, timeout=10, verify=False)
+            resp.raise_for_status()
+            return
+        except Exception as e:
+            if attempt < 3:
+                time.sleep(5)
+            else:
+                pytest.exit(f"Стенд {BASE_URL} недоступен после 3 попыток: {e}", returncode=1)
+
+
 def pytest_configure(config):
     """Локальные дефолты: --headed --slowmo 500 --video on (если не CI)."""
     if os.environ.get("CI"):
@@ -298,11 +312,12 @@ def soft_step(request, page):
     При падении шага:
     - Классифицирует ошибку Playwright в человекочитаемую подсказку
     - Прикладывает скриншот страницы и краткий лог к Allure
-    - Регистрирует soft failure через pytest-check (тест не останавливается)
+    - Собирает ошибки — тест продолжается до конца
 
-    Для тестов-источников зависимости (@pytest.mark.dependency(name=...))
-    шаг падает жёстко (re-raise), чтобы pytest-dependency скипал зависимые тесты.
-    Тесты с только depends= используют soft failure.
+    После выполнения всех шагов:
+    - Если были ошибки — raise AssertionError (триггерит pytest-rerunfailures)
+    - Для тестов-источников зависимости (@pytest.mark.dependency(name=...))
+      шаг падает жёстко сразу (re-raise), чтобы pytest-dependency скипал зависимые тесты.
 
     Использование:
         with allure.step("Приоритет: Medium"):
@@ -310,6 +325,8 @@ def soft_step(request, page):
     """
     dep_marker = request.node.get_closest_marker("dependency")
     is_dependency = dep_marker is not None and dep_marker.kwargs.get("name") is not None
+
+    failures = []
 
     def _soft_step(name, fn, timeout=15000):
         page.set_default_timeout(timeout)
@@ -363,11 +380,15 @@ def soft_step(request, page):
             if is_dependency:
                 raise AssertionError(f"[{name}] {hint}") from e
 
-            check.fail(f"[{name}] {hint}")
+            failures.append(f"[{name}] {hint}")
         finally:
             page.set_default_timeout(30000)
 
-    return _soft_step
+    yield _soft_step
+
+    if failures:
+        msg = f"Soft step failures ({len(failures)}):\n" + "\n".join(f"  - {f}" for f in failures)
+        raise AssertionError(msg)
 
 
 @pytest.fixture(autouse=True)
