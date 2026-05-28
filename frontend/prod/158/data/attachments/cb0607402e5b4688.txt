@@ -1,0 +1,6 @@
+FAILURE: [VRT logout_sign_in_page.png] Скриншот отличается от baseline на 92.88% (допустимо 3.0%). Для обновления: pytest --update-snapshots / в CI: snapshot_test=test_logout
+tests/test_frontend/tests/auth/test_logout.py:53 in test_logout() -> assert_snapshot(screenshot, name="logout_sign_in_page.png", threshold=3.0)
+tests/test_frontend/conftest.py:584 in _assert() -> check.fail(
+
+------------------------------------------------------------
+Failed Checks: 1
