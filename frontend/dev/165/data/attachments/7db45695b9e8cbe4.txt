@@ -1,0 +1,29 @@
+page = <Page url='https://app.vaiz.dev/69eb40574942cdc3cd91a9df/p/69eb40a74942cdc3cd91aab8/b/69f1f33d75af2693b6652325/m?taskId=FRONT-1993'>
+sidebar = <Locator frame=<Frame name= url='https://app.vaiz.dev/69eb40574942cdc3cd91a9df/p/69eb40a74942cdc3cd91aab8/b/69f1f33d75af2693b6652325/m?taskId=FRONT-1993'> selector='[class*="RightSidebar-module_Root"]'>
+
+    @pytest.mark.dependency(depends=[_DEP_CONVERT])
+    @allure.parent_suite("Frontend")
+    @allure.suite("Tasks")
+    @allure.sub_suite("Convert to Milestone")
+    @allure.title("05. Subtasks сохранились после конвертации")
+    def test_05_verify_subtasks_kept(page: Page, sidebar):
+        """Проверяет что подзадача с вложенной подподзадачей сохранились после конвертации."""
+        from tests.test_frontend.tests.milestones.conftest import open_milestone
+    
+        open_milestone(page, _TASK_NAME)
+    
+        with allure.step(f"Проверка: {_SUBTASK_NAME} видна как задача майлстоуна"):
+            expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=10000)
+    
+        with allure.step(f"Открытие {_SUBTASK_NAME} и проверка подподзадачи"):
+            sidebar.get_by_text(_SUBTASK_NAME).first.click()
+            expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
+            _scroll_to_subtasks(sidebar)
+>           expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
+E           AssertionError: Locator expected to be visible
+E           Actual value: <element(s) not found> 
+E           Call log:
+E             - LocatorAssertions.to_be_visible with timeout 10000ms
+E             -   - waiting for locator("[class*=\"RightSidebar-module_Root\"]").get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+")).filter(has_text="ConvSubSub 121011")
+
+tests/test_frontend/tests/tasks/test_12_task_to_milestone.py:330: AssertionError
