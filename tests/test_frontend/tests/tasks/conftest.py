@@ -1,6 +1,6 @@
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import allure
 import pytest
@@ -265,13 +265,10 @@ def expect_subtask_counter(page: Page, card_name: str, text: str, *, full_page: 
         expect(container.get_by_text(text)).to_be_visible(timeout=10000)
 
 
-def future_date(day: int, months_ahead: int = 3) -> str:
-    """Возвращает дату на months_ahead месяцев вперёд в формате dd.mm.yyyy."""
-    now = datetime.now()
-    month = now.month + months_ahead
-    year = now.year + (month - 1) // 12
-    month = (month - 1) % 12 + 1
-    return f"{day:02d}.{month:02d}.{year}"
+def future_date(days_ahead: int = 90) -> str:
+    """Возвращает дату через days_ahead дней в формате dd.mm.yyyy."""
+    d = datetime.now() + timedelta(days=days_ahead)
+    return d.strftime("%d.%m.%Y")
 
 
 def set_date(page: Page, date: str):

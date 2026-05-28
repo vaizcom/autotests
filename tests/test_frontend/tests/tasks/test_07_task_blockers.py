@@ -14,7 +14,7 @@ _BLOCKING_NAME = f"Blocking task {_TS}"
 @allure.suite("Tasks")
 @allure.sub_suite("Blockers")
 @allure.title("01. Добавить Blocker и Blocking")
-def test_01_add(page: Page, soft_step, sidebar):
+def test_01_add_task_blocker_and_blocking(page: Page, soft_step, sidebar):
     """Добавляет блокер и блокинг задачу."""
     open_card(page, soft_step, TASK_NAME)
 

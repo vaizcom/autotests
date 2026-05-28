@@ -11,7 +11,7 @@ pytestmark = [pytest.mark.frontend]
 @allure.suite("Tasks")
 @allure.sub_suite("Complete")
 @allure.title("01. Завершить Task")
-def test_01_complete(page: Page, soft_step, sidebar):
+def test_01_complete_task(page: Page, soft_step, sidebar):
     """Отмечает задачу как выполненную (Complete)."""
     open_card(page, soft_step, TASK_NAME)
 

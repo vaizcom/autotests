@@ -13,7 +13,7 @@ pytestmark = [pytest.mark.frontend]
 @allure.suite("Tasks")
 @allure.sub_suite("Assignee")
 @allure.title("01. Назначить Assignee")
-def test_01_assign(page: Page, soft_step, sidebar):
+def test_01_assign_task_user(page: Page, soft_step, sidebar):
     """Назначает первого пользователя из списка исполнителем."""
     open_card(page, soft_step, TASK_NAME)
 

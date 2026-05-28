@@ -15,7 +15,7 @@ pytestmark = [pytest.mark.frontend]
 _SUBTASK_NAME = f"Test subtask {_TS}"
 _SUBTASK_NAME_2 = f"Test subtask 2 {_TS}"
 
-_DEP_ADD = "test_01_add"
+_DEP_ADD = "test_01_add_task_subtasks"
 
 
 # ── Auto-debug: setup подзадач при запуске отдельного теста из IDE ──
@@ -30,8 +30,8 @@ def _setup_subtasks(page):
 
 
 _debug_extra_setup = {
-    "test_02_complete": _setup_subtasks,
-    "test_03_delete": _setup_subtasks,
+    "test_02_complete_task_subtask": _setup_subtasks,
+    "test_03_delete_task_subtask": _setup_subtasks,
 }
 
 
@@ -66,7 +66,7 @@ def _check_counter(page: Page, name: str, check_fn):
 @allure.suite("Tasks")
 @allure.sub_suite("Subtasks")
 @allure.title("01. Добавить Subtasks и проверить счётчики")
-def test_01_add(page: Page, soft_step, sidebar):
+def test_01_add_task_subtasks(page: Page, soft_step, sidebar):
     """Добавляет две подзадачи, проверяет счётчик на каждом шаге."""
     open_card(page, soft_step, TASK_NAME)
 
@@ -111,7 +111,7 @@ def test_01_add(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Subtasks")
 @allure.title("02. Завершить Subtask и проверить счётчики")
-def test_02_complete(page: Page, soft_step):
+def test_02_complete_task_subtask(page: Page, soft_step):
     """Завершает и снимает завершение подзадач, проверяет счётчики.
 
     Открывается на полную страницу — подзадачи рендерятся сразу,
@@ -162,7 +162,7 @@ def test_02_complete(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Subtasks")
 @allure.title("03. Удалить Subtask и проверить счётчики")
-def test_03_delete(page: Page, soft_step, sidebar):
+def test_03_delete_task_subtask(page: Page, soft_step, sidebar):
     """Удаляет подзадачи из таблицы задачи, проверяет уменьшение счётчика."""
     open_card(page, soft_step, TASK_NAME)
 

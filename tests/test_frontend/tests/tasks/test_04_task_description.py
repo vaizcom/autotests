@@ -13,7 +13,7 @@ _DESCRIPTION = f"Test description {_TS}"
 @allure.suite("Tasks")
 @allure.sub_suite("Description")
 @allure.title("01. Заполнить Description")
-def test_01_fill(page: Page, soft_step):
+def test_01_fill_task_description(page: Page, soft_step):
     """Заполняет описание задачи."""
     open_card(page, soft_step, TASK_NAME)
 

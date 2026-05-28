@@ -15,7 +15,7 @@ _CUSTOM_TEXT_VALUE = f"Test value {_TS}"
 @allure.suite("Tasks")
 @allure.sub_suite("Custom Fields")
 @allure.title("01. Заполнить Custom Field")
-def test_01_fill(page: Page, soft_step, sidebar):
+def test_01_fill_task_custom_field(page: Page, soft_step, sidebar):
     """Заполняет кастомное текстовое поле задачи."""
     open_card(page, soft_step, TASK_NAME)
 

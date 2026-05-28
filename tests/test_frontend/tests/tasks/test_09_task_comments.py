@@ -13,7 +13,7 @@ _COMMENT = f"Test comment {_TS}"
 @allure.suite("Tasks")
 @allure.sub_suite("Comments")
 @allure.title("01. Добавить Comment")
-def test_01_add(page: Page, soft_step):
+def test_01_add_task_comment(page: Page, soft_step):
     """Добавляет комментарий к задаче."""
     open_card(page, soft_step, TASK_NAME)
 

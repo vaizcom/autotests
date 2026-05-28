@@ -17,7 +17,7 @@ _MILESTONE_NAME_2 = f"MS Beta {_TS}"
 @allure.suite("Tasks")
 @allure.sub_suite("Milestones")
 @allure.title("01. Создать, выбрать и удалить Milestones")
-def test_01_create_multiselect_remove(page: Page, soft_step, sidebar):
+def test_01_create_multiselect_remove_task_milestone(page: Page, soft_step, sidebar):
     """Создаёт майлстоуны из dropdown задачи, проверяет мульти-назначение и удаление."""
     open_card(page, soft_step, TASK_NAME)
 

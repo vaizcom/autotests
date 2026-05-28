@@ -8,7 +8,7 @@ from tests.test_frontend.tests.tasks.conftest import TASK_NAME, open_card, set_d
 
 pytestmark = [pytest.mark.frontend]
 
-_DATE = future_date(10)
+_DATE = future_date(30)
 
 
 @allure.parent_suite("Frontend")

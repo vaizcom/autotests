@@ -13,7 +13,7 @@ pytestmark = [pytest.mark.frontend]
 @allure.suite("Tasks")
 @allure.sub_suite("Priority")
 @allure.title("01. Установить Medium")
-def test_01_set(page: Page, soft_step, sidebar):
+def test_01_set_task_priority(page: Page, soft_step, sidebar):
     """Устанавливает приоритет задачи Medium."""
     open_card(page, soft_step, TASK_NAME)
 
@@ -30,7 +30,7 @@ def test_01_set(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Priority")
 @allure.title("02. Изменить: Medium → High")
-def test_02_edit(page: Page, soft_step, sidebar):
+def test_02_edit_task_priority(page: Page, soft_step, sidebar):
     """Меняет приоритет задачи с Medium на High."""
     open_card(page, soft_step, TASK_NAME)
 
@@ -47,7 +47,7 @@ def test_02_edit(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Priority")
 @allure.title("03. Сбросить Priority")
-def test_03_clear(page: Page, soft_step, sidebar):
+def test_03_clear_task_priority(page: Page, soft_step, sidebar):
     """Снимает приоритет задачи."""
     open_card(page, soft_step, TASK_NAME)
 

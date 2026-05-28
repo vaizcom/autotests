@@ -58,7 +58,7 @@ def _clear_type(page, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Type")
 @allure.title("01. Установить Type Green")
-def test_01_set(page: Page, soft_step, sidebar):
+def test_01_set_task_type(page: Page, soft_step, sidebar):
     """Открывает дропдаун, проверяет отображение элементов, выбирает Green."""
     open_card(page, soft_step, TASK_NAME)
 
@@ -80,7 +80,7 @@ def test_01_set(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Type")
 @allure.title("02. Search в дропдауне")
-def test_02_search(page: Page, soft_step, sidebar):
+def test_02_search_task_type(page: Page, soft_step, sidebar):
     """Проверяет фильтрацию по поиску в дропдауне Types."""
     open_card(page, soft_step, TASK_NAME)
 
@@ -101,7 +101,7 @@ def test_02_search(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Type")
 @allure.title("03. Мультиселект Types (⌘ + клик)")
-def test_03_multiselect(page: Page, soft_step, sidebar):
+def test_03_multiselect_task_type(page: Page, soft_step, sidebar):
     """Устанавливает Green, добавляет Blue через ⌘+клик, проверяет что оба видны."""
     open_card(page, soft_step, TASK_NAME)
 
@@ -123,7 +123,7 @@ def test_03_multiselect(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Type")
 @allure.title("04. Убрать один Type (⌘ + клик)")
-def test_04_remove_one(page: Page, soft_step, sidebar):
+def test_04_remove_one_task_type(page: Page, soft_step, sidebar):
     """Устанавливает Green+Blue, снимает Green через ⌘+клик, остаётся Blue."""
     open_card(page, soft_step, TASK_NAME)
 
@@ -148,7 +148,7 @@ def test_04_remove_one(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Type")
 @allure.title("05. Замена Types без ⌘")
-def test_05_replace(page: Page, soft_step, sidebar):
+def test_05_replace_task_type(page: Page, soft_step, sidebar):
     """Устанавливает Green+Blue, клик по Pink без ⌘ — заменяет все на Pink."""
     open_card(page, soft_step, TASK_NAME)
 
@@ -173,7 +173,7 @@ def test_05_replace(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Type")
 @allure.title("06. Clear type")
-def test_06_clear(page: Page, soft_step, sidebar):
+def test_06_clear_task_type(page: Page, soft_step, sidebar):
     """Устанавливает тип, сбрасывает через Clear type."""
     open_card(page, soft_step, TASK_NAME)
 
@@ -195,7 +195,7 @@ def test_06_clear(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Type")
 @allure.title("07. New type: форма создания типа")
-def test_07_create_new(page: Page, soft_step, sidebar):
+def test_07_create_new_task_type(page: Page, soft_step, sidebar):
     """Проверяет форму создания нового типа: инпут, кнопка Add, цвета и иконки."""
     open_card(page, soft_step, TASK_NAME)
 

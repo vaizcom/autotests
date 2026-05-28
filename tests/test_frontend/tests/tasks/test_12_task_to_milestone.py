@@ -15,9 +15,9 @@ from tests.test_frontend.tests.tasks.conftest import (
 
 pytestmark = [pytest.mark.frontend]
 
-_DEP_TASK = "test_01_create_task"
-_DEP_FILL = "test_02_fill_fields"
-_DEP_CONVERT = "test_03_convert_to_milestone"
+_DEP_TASK = "test_01_create_task_for_conversion"
+_DEP_FILL = "test_02_fill_task_fields"
+_DEP_CONVERT = "test_03_convert_task_to_milestone"
 
 _TS = datetime.now().strftime("%H%M%S")
 _TASK_NAME = f"ConvTask {_TS}"
@@ -25,7 +25,7 @@ _SUBTASK_NAME = f"ConvSub {_TS}"
 _SUB_SUBTASK_NAME = f"ConvSubSub {_TS}"
 _DESCRIPTION = f"Milestone desc {_TS}"
 _COMMENT = f"Milestone comment {_TS}"
-_DATE = future_date(10)
+_DATE = future_date()
 _MILESTONE_NAME = "Test milestone"
 
 
@@ -76,9 +76,9 @@ def _setup_convert(page):
 
 
 _debug_extra_setup = {
-    "test_03_convert_to_milestone": _setup_fill,
-    "test_04_verify_fields": _setup_convert,
-    "test_05_subtasks_kept": _setup_convert,
+    "test_03_convert_task_to_milestone": _setup_fill,
+    "test_04_verify_milestone_fields": _setup_convert,
+    "test_05_verify_subtasks_kept": _setup_convert,
 }
 
 
@@ -90,7 +90,7 @@ _debug_extra_setup = {
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
 @allure.title("01. Создать Task для конвертации")
-def test_01_create_task(page: Page, soft_step):
+def test_01_create_task_for_conversion(page: Page, soft_step):
     """Создаёт задачу, которая будет конвертирована в майлстоун."""
     with allure.step(f"Создание задачи: {_TASK_NAME}"):
         soft_step("Создание задачи", lambda: create_task_on_board(page, _TASK_NAME))
@@ -104,7 +104,7 @@ def test_01_create_task(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
 @allure.title("02. Заполнить все поля Task перед конвертацией")
-def test_02_fill_fields(page: Page, soft_step, sidebar):
+def test_02_fill_task_fields(page: Page, soft_step, sidebar):
     """Заполняет все поля задачи перед конвертацией.
     Переносятся: название, описание, дата, подзадача, комментарий.
     Теряются: приоритет, исполнитель, тип, майлстоун."""
@@ -200,7 +200,7 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
 @allure.title("03. Конвертировать Task в Milestone")
-def test_03_convert_to_milestone(page: Page, soft_step):
+def test_03_convert_task_to_milestone(page: Page, soft_step):
     """Конвертирует задачу в майлстоун через меню сайдбара."""
     open_card(page, soft_step, _TASK_NAME)
 
@@ -244,7 +244,7 @@ def test_03_convert_to_milestone(page: Page, soft_step):
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
 @allure.title("04. Проверить поля Milestone через Subtask")
-def test_04_verify_fields(page: Page, soft_step, sidebar):
+def test_04_verify_milestone_fields(page: Page, soft_step, sidebar):
     """Открывает сабтаску на борде, проверяет milestone field,
     переходит на майлстоун по бейджу и проверяет перенос полей."""
     open_card(page, soft_step, _SUBTASK_NAME)
@@ -314,7 +314,7 @@ def test_04_verify_fields(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
 @allure.title("05. Subtasks сохранились после конвертации")
-def test_05_subtasks_kept(page: Page, sidebar):
+def test_05_verify_subtasks_kept(page: Page, sidebar):
     """Проверяет что подзадача с вложенной подподзадачей сохранились после конвертации."""
     from tests.test_frontend.tests.milestones.conftest import open_milestone
 
@@ -337,7 +337,7 @@ def test_05_subtasks_kept(page: Page, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
 @allure.title("99. Очистка: удалить Subtask и архивировать Milestone")
-def test_cleanup(page: Page, soft_step, cleanup_task):
+def test_99_cleanup_milestone(page: Page, soft_step, cleanup_task):
     """Архивирует майлстоун и удаляет сабтаску для очистки борды."""
     # cleanup_task удалит сабтаску (и другие карточки с _TS) после теста
     cleanup_task["ts"] = _TS
