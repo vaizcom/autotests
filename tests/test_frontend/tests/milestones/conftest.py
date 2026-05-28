@@ -4,20 +4,19 @@ import allure
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
+from tests.test_frontend.core.locators import Board
 from tests.test_frontend.tests.tasks.conftest import open_sidebar_menu
 
 
 def create_milestone_on_board(page: Page, milestone_name: str):
     """Открывает вкладку Milestones на борде и создаёт новый майлстоун."""
     page.goto(settings.AUTOTEST_BOARD_URL)
-    expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+    expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
     page.get_by_role("link", name="Milestones").click()
 
-    add_btn = page.get_by_text("Add new Milestone")
-    expect(add_btn).to_be_visible(timeout=5000)
-    add_btn.click()
-    expect(page.get_by_role("textbox", name="Enter name...")).to_be_visible(timeout=5000)
-    page.get_by_role("textbox", name="Enter name...").fill(milestone_name)
+    name_input = page.get_by_placeholder("Enter milestone name")
+    expect(name_input).to_be_visible(timeout=5000)
+    name_input.fill(milestone_name)
     page.keyboard.press("Enter")
 
     expect(page.get_by_role("heading", name=milestone_name)).to_be_visible(timeout=10000)
@@ -26,7 +25,7 @@ def create_milestone_on_board(page: Page, milestone_name: str):
 def open_milestone(page: Page, milestone_name: str):
     """Открывает вкладку Milestones и кликает по майлстоуну."""
     page.goto(settings.AUTOTEST_BOARD_URL)
-    expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+    expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
     page.get_by_role("link", name="Milestones").click()
 
     milestone = page.get_by_text(milestone_name).first
@@ -38,20 +37,15 @@ def open_milestone(page: Page, milestone_name: str):
 def add_task_to_milestone(page: Page, task_name: str):
     """Добавляет задачу в открытый майлстоун."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    expect(
-        sidebar.locator('[data-tutorial-anchor="SUBTASK_LIST_ROOT"]'),
-        "Секция задач не найдена в сайдбаре — UI не загрузился",
-    ).to_be_visible(timeout=10000)
-    task_input = sidebar.locator('[data-tutorial-anchor="SUBTASK_LIST_ADD_SEARCH"] input')
-    expect(task_input, "Поле ввода задачи не найдено в секции задач").to_be_visible(timeout=5000)
+    task_input = sidebar.get_by_placeholder("Enter task name")
+    expect(task_input).to_be_visible(timeout=10000)
     task_input.click()
     task_input.fill(task_name)
-    page.keyboard.press("Enter")
-    expect(
-        sidebar.get_by_role("button")
-        .filter(has_text=re.compile(r"[A-Z]+-\d+"))
-        .filter(has_text=task_name)
-    ).to_be_visible(timeout=10000)
+    create_option = page.get_by_text("Create task")
+    expect(create_option).to_be_visible(timeout=5000)
+    create_option.click()
+    page.wait_for_timeout(2000)
+    expect(sidebar.get_by_text(task_name).first).to_be_visible(timeout=10000)
 
 
 def wait_for_task_rows(page: Page, milestone_name: str):
@@ -92,21 +86,40 @@ def archive_milestone(page: Page, milestone_name: str):
         pass
 
 
-def cleanup_milestones(page: Page, keep_names: list[str] | None = None):
+def cleanup_milestones(page: Page, keep_names=None):
     """Архивирует все майлстоуны на борде кроме указанных в keep_names. Best effort."""
     keep = set(keep_names or [])
 
     with allure.step(f"Cleanup: архивация майлстоунов (кроме {keep or 'никого'})"):
         page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
         page.get_by_role("link", name="Milestones").click()
         page.wait_for_timeout(2000)
 
+        _ROW_SELECTOR = '[class*="MilestoneBoard-module_Row"]'
+
+        def _check_stale_selector():
+            """Проверяет, что селектор строк находит элементы. Иначе — скриншот + warning."""
+            if page.locator(_ROW_SELECTOR).count() > 0:
+                return
+            # Страница загружена (инпут виден), но строки не найдены — селектор устарел
+            if page.get_by_placeholder("Enter milestone name").is_visible(timeout=3000):
+                allure.attach(
+                    page.screenshot(),
+                    name="⚠️ cleanup: селектор строк не находит элементов",
+                    attachment_type=allure.attachment_type.PNG,
+                )
+                print(
+                    f"⚠️ cleanup_milestones: селектор '{_ROW_SELECTOR}' не нашёл строк, "
+                    f"но страница Milestones загружена — возможно CSS-класс изменился"
+                )
+
         def _archive_visible():
             """Архивирует видимые в DOM майлстоуны. Возвращает кол-во архивированных."""
+            _check_stale_selector()
             count = 0
             for _ in range(20):
-                rows = page.locator('[class*="List-module_VirtualItem"]')
+                rows = page.locator(_ROW_SELECTOR)
                 found = False
 
                 for i in range(rows.count()):
@@ -145,7 +158,7 @@ def cleanup_milestones(page: Page, keep_names: list[str] | None = None):
         # Если что-то архивировали — заново открыть вкладку и второй проход (виртуальный скролл)
         if archived > 0:
             page.goto(settings.AUTOTEST_BOARD_URL)
-            expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+            expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
             page.get_by_role("link", name="Milestones").click()
             page.wait_for_timeout(2000)
             archived += _archive_visible()

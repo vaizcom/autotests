@@ -6,16 +6,18 @@ import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
+from tests.test_frontend.core.locators import Board
 from tests.test_frontend.tests.tasks.conftest import (
     create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready,
     add_comment, fill_description, find_subtask_row_by_name, _scroll_to_subtasks,
+    set_date as _set_date, future_date,
 )
 
 pytestmark = [pytest.mark.frontend]
 
-_DEP_TASK = "test_01_create_task"
-_DEP_FILL = "test_02_fill_fields"
-_DEP_CONVERT = "test_03_convert_to_milestone"
+_DEP_TASK = "test_01_create_task_for_conversion"
+_DEP_FILL = "test_02_fill_task_fields"
+_DEP_CONVERT = "test_03_convert_task_to_milestone"
 
 _TS = datetime.now().strftime("%H%M%S")
 _TASK_NAME = f"ConvTask {_TS}"
@@ -23,7 +25,7 @@ _SUBTASK_NAME = f"ConvSub {_TS}"
 _SUB_SUBTASK_NAME = f"ConvSubSub {_TS}"
 _DESCRIPTION = f"Milestone desc {_TS}"
 _COMMENT = f"Milestone comment {_TS}"
-_DATE = "10.08.2030"
+_DATE = future_date()
 _MILESTONE_NAME = "Test milestone"
 
 
@@ -74,9 +76,9 @@ def _setup_convert(page):
 
 
 _debug_extra_setup = {
-    "test_03_convert_to_milestone": _setup_fill,
-    "test_04_verify_fields": _setup_convert,
-    "test_05_subtask_hierarchy": _setup_convert,
+    "test_03_convert_task_to_milestone": _setup_fill,
+    "test_04_verify_milestone_fields": _setup_convert,
+    "test_05_verify_subtasks_kept": _setup_convert,
 }
 
 
@@ -87,8 +89,8 @@ _debug_extra_setup = {
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("01. Create task for conversion")
-def test_01_create_task(page: Page, soft_step):
+@allure.title("01. Создать Task для конвертации")
+def test_01_create_task_for_conversion(page: Page, soft_step):
     """Создаёт задачу, которая будет конвертирована в майлстоун."""
     with allure.step(f"Создание задачи: {_TASK_NAME}"):
         soft_step("Создание задачи", lambda: create_task_on_board(page, _TASK_NAME))
@@ -101,8 +103,8 @@ def test_01_create_task(page: Page, soft_step):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("02. Fill all task fields before conversion")
-def test_02_fill_fields(page: Page, soft_step, sidebar):
+@allure.title("02. Заполнить все поля Task перед конвертацией")
+def test_02_fill_task_fields(page: Page, soft_step, sidebar):
     """Заполняет все поля задачи перед конвертацией.
     Переносятся: название, описание, дата, подзадача, комментарий.
     Теряются: приоритет, исполнитель, тип, майлстоун."""
@@ -115,21 +117,17 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
         soft_step("Описание", lambda: fill_description(page, _DESCRIPTION))
 
     # Дата
-    def set_date():
-        sidebar.get_by_role("button", name="Dates No dates set").click()
-        date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
-        date_input.fill(_DATE)
-        page.get_by_role("button", name="Apply").click()
-        expect(sidebar.get_by_role("button", name="Dates No dates set")).not_to_be_visible(timeout=5000)
-
     with allure.step(f"Дата: {_DATE}"):
-        soft_step("Дата", set_date)
+        soft_step("Дата", lambda: _set_date(page, _DATE))
 
     # Подзадача
     def add_subtask():
-        sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUBTASK_NAME)
+        _scroll_to_subtasks(sidebar)
+        textbox = sidebar.get_by_role("textbox", name="Enter subtask name")
+        expect(textbox).to_be_visible(timeout=5000)
+        textbox.fill(_SUBTASK_NAME)
         page.keyboard.press("Enter")
-        expect(find_subtask_row_by_name(sidebar, _SUBTASK_NAME)).to_be_visible(timeout=5000)
+        expect(find_subtask_row_by_name(sidebar, _SUBTASK_NAME)).to_be_visible(timeout=10000)
 
     with allure.step(f"Подзадача: {_SUBTASK_NAME}"):
         soft_step("Подзадача", add_subtask)
@@ -182,11 +180,13 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
     # ── Подподзадача (последний шаг — уходим в сайдбар подзадачи) ──
 
     def add_sub_sub_task():
+        _scroll_to_subtasks(sidebar)
         find_subtask_row_by_name(sidebar, _SUBTASK_NAME).first.click()
         expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
+        _scroll_to_subtasks(sidebar)
         sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUB_SUBTASK_NAME)
         page.keyboard.press("Enter")
-        expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=5000)
+        expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
 
     with allure.step(f"Подподзадача: {_SUB_SUBTASK_NAME}"):
         soft_step("Подподзадача", add_sub_sub_task)
@@ -199,8 +199,8 @@ def test_02_fill_fields(page: Page, soft_step, sidebar):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("03. Convert task to milestone")
-def test_03_convert_to_milestone(page: Page, soft_step):
+@allure.title("03. Конвертировать Task в Milestone")
+def test_03_convert_task_to_milestone(page: Page, soft_step):
     """Конвертирует задачу в майлстоун через меню сайдбара."""
     open_card(page, soft_step, _TASK_NAME)
 
@@ -243,8 +243,8 @@ def test_03_convert_to_milestone(page: Page, soft_step):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("04. Verify milestone fields via subtask")
-def test_04_verify_fields(page: Page, soft_step, sidebar):
+@allure.title("04. Проверить поля Milestone через Subtask")
+def test_04_verify_milestone_fields(page: Page, soft_step, sidebar):
     """Открывает сабтаску на борде, проверяет milestone field,
     переходит на майлстоун по бейджу и проверяет перенос полей."""
     open_card(page, soft_step, _SUBTASK_NAME)
@@ -271,8 +271,10 @@ def test_04_verify_fields(page: Page, soft_step, sidebar):
         ))
 
     with allure.step("Проверка даты"):
+        _d = datetime.strptime(_DATE, "%d.%m.%Y")
+        _expected_date = f"{_d.day} {_d.strftime('%B')} {_d.year}"
         soft_step("Дата", lambda: (
-            expect(sidebar.get_by_role("button", name=re.compile(r"Dates.*2030"))).to_be_visible(timeout=5000)
+            expect(sidebar.get_by_text(_expected_date)).to_be_visible(timeout=5000)
         ))
 
     with allure.step("Проверка подзадачи"):
@@ -311,12 +313,18 @@ def test_04_verify_fields(page: Page, soft_step, sidebar):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("05. Subtask hierarchy preserved after conversion")
-def test_05_subtask_hierarchy(page: Page, sidebar):
-    """Проверяет что подзадача с вложенной подподзадачей сохранила иерархию после конвертации."""
-    open_card(page, lambda _n, fn: fn(), _SUBTASK_NAME)
+@allure.title("05. Subtasks сохранились после конвертации")
+def test_05_verify_subtasks_kept(page: Page, sidebar):
+    """Проверяет что подзадача с вложенной подподзадачей сохранились после конвертации."""
+    from tests.test_frontend.tests.milestones.conftest import open_milestone
 
-    with allure.step(f"Проверка: {_SUB_SUBTASK_NAME} видна как подзадача {_SUBTASK_NAME}"):
+    open_milestone(page, _TASK_NAME)
+
+    with allure.step(f"Проверка: {_SUBTASK_NAME} видна как задача майлстоуна"):
+        expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=10000)
+
+    with allure.step(f"Открытие {_SUBTASK_NAME} и проверка подподзадачи"):
+        sidebar.get_by_text(_SUBTASK_NAME).first.click()
         expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
         _scroll_to_subtasks(sidebar)
         expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
@@ -328,8 +336,8 @@ def test_05_subtask_hierarchy(page: Page, sidebar):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("99. Cleanup: delete subtask and archive milestone")
-def test_cleanup(page: Page, soft_step, cleanup_task):
+@allure.title("99. Очистка: удалить Subtask и архивировать Milestone")
+def test_99_cleanup_milestone(page: Page, soft_step, cleanup_task):
     """Архивирует майлстоун и удаляет сабтаску для очистки борды."""
     # cleanup_task удалит сабтаску (и другие карточки с _TS) после теста
     cleanup_task["ts"] = _TS
@@ -338,7 +346,7 @@ def test_cleanup(page: Page, soft_step, cleanup_task):
     try:
         with allure.step("Открытие вкладки Milestones"):
             page.goto(settings.AUTOTEST_BOARD_URL)
-            expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+            expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
             page.get_by_role("link", name="Milestones").click()
 
         with allure.step(f"Поиск майлстоуна '{_TASK_NAME}'"):

@@ -79,15 +79,6 @@ jobs:
           echo "Test stand: $TEST_STAND_NAME"
           echo "API URL: $API_URL"
 
-      - name: ☁️ Setup VPN
-        uses: ./.github/actions/cloudflare
-        with:
-          CLOUDFLARE_AUTH_CLIENT_ID: ${{ vars.CF_TOKEN_NAME }}
-          CLOUDFLARE_AUTH_CLIENT_SECRET: ${{ secrets.CF_TOKEN }}
-
-      - name: Adding static DNS
-        run: echo "10.114.16.5 app.vaiz.dev api.vaiz.dev" | sudo tee -a /etc/hosts
-
       - name: ❌ Clean old Allure results
         run: rm -rf allure-results
 

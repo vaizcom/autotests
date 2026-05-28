@@ -1,6 +1,8 @@
 import io
 import os
 import re
+import shutil
+import subprocess
 import time
 from pathlib import Path
 
@@ -12,6 +14,7 @@ from PIL import Image, ImageChops, ImageDraw
 from playwright.sync_api import expect
 
 from tests.test_frontend.core import settings
+from tests.test_frontend.core.locators import Auth, Board, Header, Sidebar, SpaceSelector, TaskCard
 from tests.test_frontend.core.settings import BASE_URL, FRONTEND_EMAIL, FRONTEND_PASSWORD, FRONTEND_STAND
 
 
@@ -53,7 +56,7 @@ def _run_task_cleanup(page, cleanup_info):
 
     with allure.step(f"Cleanup: удаление задач с таймстемпом {ts}"):
         page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
 
         deleted = 0
 
@@ -65,7 +68,7 @@ def _run_task_cleanup(page, cleanup_info):
                 break
 
             card.hover()
-            card.locator('[class*="TaskCard-module_Menu"] button').first.click()
+            card.get_by_test_id(TaskCard.MENU).click()
 
             delete_with_sub = page.get_by_text("Delete with subtasks")
             if delete_with_sub.is_visible():
@@ -85,7 +88,7 @@ def cleanup_board(page):
     """Удаляет все карточки на автотестовой борде."""
     with allure.step("Cleanup: удаление всех задач на борде"):
         page.goto(settings.AUTOTEST_BOARD_URL)
-        expect(page.get_by_role("button", name="Add task").first).to_be_visible(timeout=25000)
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
 
         cards = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
         deleted = 0
@@ -97,7 +100,7 @@ def cleanup_board(page):
                 break
 
             cards.first.hover()
-            cards.first.locator('[class*="TaskCard-module_Menu"] button').first.click()
+            cards.first.get_by_test_id(TaskCard.MENU).click()
 
             delete_with_sub = page.get_by_text("Delete with subtasks")
             if delete_with_sub.is_visible():
@@ -185,8 +188,14 @@ def pytest_collection_finish(session):
         print(f"🌐 UI URL: {BASE_URL}\n")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _configure_test_id(playwright):
+    """Playwright по умолчанию ищет data-testid, переключаем на data-test-id."""
+    playwright.selectors.set_test_id_attribute("data-test-id")
+
+
 @pytest.fixture(scope="session")
-def auth_state(playwright):
+def auth_state(playwright, _configure_test_id):
     """Логинится один раз на сессию и сохраняет состояние браузера.
 
     Открывает отдельный браузер, проходит логин и сохраняет куки и localStorage
@@ -195,6 +204,17 @@ def auth_state(playwright):
 
     Scope session означает что логин происходит ровно один раз за весь прогон.
     """
+    # Подключаем WARP VPN если он установлен, но не подключён (только локально)
+    if not os.environ.get("CI") and shutil.which("warp-cli"):
+        try:
+            status = subprocess.run(["warp-cli", "status"], capture_output=True, text=True, timeout=5)
+            if "Disconnected" in status.stdout:
+                subprocess.run(["warp-cli", "connect"], capture_output=True, timeout=10)
+                time.sleep(3)
+                print("🔗 WARP VPN подключён автоматически")
+        except Exception:
+            pass
+
     # Проверка доступности стенда перед логином (3 попытки с интервалом 10 сек)
     reason = ""
     for attempt in range(3):
@@ -216,10 +236,19 @@ def auth_state(playwright):
     page = context.new_page()
     try:
         page.goto(f"{BASE_URL}/auth/sign-in")
-        page.get_by_role("textbox", name="Email").fill(FRONTEND_EMAIL)
-        page.get_by_role("textbox", name="Password").fill(FRONTEND_PASSWORD)
-        page.get_by_role("button", name="Continue with Email").click()
-        page.get_by_role("link", name="Home").wait_for(state="visible")
+        # Step 1: Email
+        page.get_by_test_id(Auth.EMAIL_INPUT).fill(FRONTEND_EMAIL)
+        page.get_by_test_id(Auth.EMAIL_SUBMIT).click()
+        # Step 2: Password
+        page.get_by_test_id(Auth.PASSWORD_INPUT).wait_for(state="visible", timeout=10000)
+        page.get_by_test_id(Auth.PASSWORD_INPUT).fill(FRONTEND_PASSWORD)
+        page.get_by_test_id(Auth.PASSWORD_SUBMIT).click()
+        # Wait for redirect
+        page.get_by_test_id(Sidebar.HOME).wait_for(state="visible", timeout=15000)
+        # Navigate to autotest space
+        page.get_by_test_id(Header.SPACE_SELECTOR).click()
+        page.get_by_test_id(SpaceSelector.space(settings.AUTOTEST_SPACE_ID)).click()
+        page.get_by_test_id(Sidebar.HOME).wait_for(state="visible", timeout=10000)
     except Exception as e:
         context.close()
         browser.close()

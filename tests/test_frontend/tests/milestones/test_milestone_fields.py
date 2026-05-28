@@ -15,14 +15,14 @@ from tests.test_frontend.tests.milestones.conftest import (
     archive_milestone,
     cleanup_milestones,
 )
-from tests.test_frontend.tests.tasks.conftest import add_comment, fill_description, set_date
+from tests.test_frontend.tests.tasks.conftest import add_comment, fill_description, future_date, set_date
 
 pytestmark = [pytest.mark.frontend]
 
 # test_01 — создаёт майлстоун, остальные зависят от него.
 # При запуске отдельного теста через IDE — майлстоун создаётся и архивируется автоматически.
 _DEP_CREATE = "test_01_create_milestone"
-_DEP_TASK_LIST = "test_06_add_tasks"
+_DEP_TASK_LIST = "test_06_add_tasks_to_milestone"
 
 _TS = os.environ.get("TEST_TS") or datetime.now().strftime("%H%M%S")
 _MILESTONE_NAME = f"autotest_ms_{_TS}"
@@ -31,8 +31,8 @@ _DESCRIPTION = f"Milestone description {_TS}"
 _TASK_NAME = f"MS task {_TS}"
 _TASK_NAME_2 = f"MS task 2 {_TS}"
 _COMMENT = f"MS comment {_TS}"
-_DATE_START = "01.08.2030"
-_DATE_DUE = "10.08.2030"
+_DATE_START = future_date()
+_DATE_DUE = future_date(100)
 
 
 
@@ -57,8 +57,8 @@ def _setup_tasks(page):
 
 
 _debug_extra_setup = {
-    "test_07_complete_tasks": _setup_tasks,
-    "test_08_delete_tasks": _setup_tasks,
+    "test_07_complete_milestone_tasks": _setup_tasks,
+    "test_08_delete_milestone_tasks": _setup_tasks,
 }
 
 
@@ -84,7 +84,7 @@ def test_01_create_milestone(page: Page, soft_step):
 @allure.suite("Milestones")
 @allure.sub_suite("Fields")
 @allure.title("02. Verify milestone name")
-def test_02_name(page: Page, soft_step, sidebar):
+def test_02_verify_milestone_name(page: Page, soft_step, sidebar):
     """Проверяет что название майлстоуна отображается корректно."""
     open_milestone(page, _MILESTONE_NAME)
 
@@ -103,7 +103,7 @@ def test_02_name(page: Page, soft_step, sidebar):
 @allure.suite("Milestones")
 @allure.sub_suite("Fields")
 @allure.title("03. Set short description")
-def test_03_short_description(page: Page, soft_step, sidebar):
+def test_03_set_short_description(page: Page, soft_step, sidebar):
     """Заполняет и проверяет короткое описание майлстоуна."""
     open_milestone(page, _MILESTONE_NAME)
 
@@ -127,7 +127,7 @@ def test_03_short_description(page: Page, soft_step, sidebar):
 @allure.suite("Milestones")
 @allure.sub_suite("Fields")
 @allure.title("04. Set and verify description")
-def test_04_description(page: Page, soft_step, sidebar):
+def test_04_set_description(page: Page, soft_step, sidebar):
     """Заполняет и проверяет описание майлстоуна (tiptap-редактор после секции задач)."""
     open_milestone(page, _MILESTONE_NAME)
 
@@ -149,7 +149,7 @@ def test_04_description(page: Page, soft_step, sidebar):
 @allure.suite("Milestones")
 @allure.sub_suite("Fields")
 @allure.title("05. Set and verify dates")
-def test_05_dates(page: Page, soft_step, sidebar):
+def test_05_set_milestone_dates(page: Page, soft_step, sidebar):
     """Устанавливает и проверяет даты майлстоуна."""
     open_milestone(page, _MILESTONE_NAME)
 
@@ -158,8 +158,11 @@ def test_05_dates(page: Page, soft_step, sidebar):
         soft_step("Установка дат", lambda: set_date(page, date=_DATE_START))
 
     with allure.step("Проверка дат"):
+        # "10.08.2026" → "10 August 2026"
+        _d = datetime.strptime(_DATE_START, "%d.%m.%Y")
+        _expected = f"{_d.day} {_d.strftime('%B')} {_d.year}"
         soft_step("Даты сохранены", lambda: (
-            expect(sidebar.get_by_role("button", name=re.compile(r"Dates.*2030"))).to_be_visible(timeout=5000)
+            expect(sidebar.get_by_text(_expected)).to_be_visible(timeout=5000)
         ))
 
 
@@ -171,7 +174,7 @@ def test_05_dates(page: Page, soft_step, sidebar):
 @allure.suite("Milestones")
 @allure.sub_suite("Fields")
 @allure.title("06. Add tasks and verify counters")
-def test_06_add_tasks(page: Page, soft_step, sidebar):
+def test_06_add_tasks_to_milestone(page: Page, soft_step, sidebar):
     """Добавляет две задачи в майлстоун, проверяет счётчик на каждом шаге.
 
     Обратную связь (МС виден в карточке задачи) проверяет API-тест
@@ -226,7 +229,7 @@ def test_06_add_tasks(page: Page, soft_step, sidebar):
 @allure.suite("Milestones")
 @allure.sub_suite("Fields")
 @allure.title("07. Verify task completion counters")
-def test_07_complete_tasks(page: Page, soft_step, sidebar):
+def test_07_complete_milestone_tasks(page: Page, soft_step, sidebar):
     """Завершает и снимает завершение задач, проверяет счётчики."""
     open_milestone(page, _MILESTONE_NAME)
 
@@ -246,9 +249,7 @@ def test_07_complete_tasks(page: Page, soft_step, sidebar):
         soft_step("Завершение задачи 1", lambda: toggle_complete(_TASK_NAME))
 
     with allure.step("Проверка: 1 completed of 2"):
-        soft_step("1 completed of 2", lambda: (
-            expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=5000)
-        ))
+        expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
 
     # ── Complete задачи 2 → "All 2 completed" ──
 
@@ -256,9 +257,7 @@ def test_07_complete_tasks(page: Page, soft_step, sidebar):
         soft_step("Завершение задачи 2", lambda: toggle_complete(_TASK_NAME_2))
 
     with allure.step("Проверка: All 2 completed"):
-        soft_step("All 2 completed", lambda: (
-            expect(sidebar.get_by_text("All 2 completed")).to_be_visible(timeout=5000)
-        ))
+        expect(sidebar.get_by_text("All 2 completed")).to_be_visible(timeout=10000)
 
     # ── Uncomplete задачи 1 → "1 completed of 2" ──
 
@@ -266,9 +265,7 @@ def test_07_complete_tasks(page: Page, soft_step, sidebar):
         soft_step("Снятие завершения задачи 1", lambda: toggle_complete(_TASK_NAME))
 
     with allure.step("Проверка: 1 completed of 2 (после снятия)"):
-        soft_step("1 completed of 2 (после снятия)", lambda: (
-            expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=5000)
-        ))
+        expect(sidebar.get_by_text("1 completed of 2")).to_be_visible(timeout=10000)
 
     # ── Uncomplete задачи 2 → "0 completed of 2" ──
 
@@ -276,9 +273,7 @@ def test_07_complete_tasks(page: Page, soft_step, sidebar):
         soft_step("Снятие завершения задачи 2", lambda: toggle_complete(_TASK_NAME_2))
 
     with allure.step("Проверка: 0 completed of 2"):
-        soft_step("0 completed of 2", lambda: (
-            expect(sidebar.get_by_text("0 completed of 2")).to_be_visible(timeout=5000)
-        ))
+        expect(sidebar.get_by_text("0 completed of 2")).to_be_visible(timeout=10000)
 
 
 # ── 08. Удаление задач + счётчики ──────────────────────────────────
@@ -289,7 +284,7 @@ def test_07_complete_tasks(page: Page, soft_step, sidebar):
 @allure.suite("Milestones")
 @allure.sub_suite("Fields")
 @allure.title("08. Delete tasks and verify counters")
-def test_08_delete_tasks(page: Page, soft_step, sidebar):
+def test_08_delete_milestone_tasks(page: Page, soft_step, sidebar):
     """Удаляет задачи из таблицы майлстоуна, проверяет уменьшение счётчика."""
     open_milestone(page, _MILESTONE_NAME)
 
@@ -334,7 +329,7 @@ def test_08_delete_tasks(page: Page, soft_step, sidebar):
 @allure.suite("Milestones")
 @allure.sub_suite("Fields")
 @allure.title("09. Add comment and verify")
-def test_09_comments(page: Page, soft_step, sidebar):
+def test_09_add_milestone_comment(page: Page, soft_step, sidebar):
     """Добавляет комментарий к майлстоуну и проверяет."""
     open_milestone(page, _MILESTONE_NAME)
 
@@ -357,7 +352,7 @@ def test_09_comments(page: Page, soft_step, sidebar):
 @allure.suite("Milestones")
 @allure.sub_suite("Fields")
 @allure.title("10. Verify Activities tab")
-def test_10_activities(page: Page, soft_step, sidebar):
+def test_10_verify_activities_tab(page: Page, soft_step, sidebar):
     """Проверяет что вкладка Activities отображается."""
     open_milestone(page, _MILESTONE_NAME)
 
@@ -375,6 +370,7 @@ def test_10_activities(page: Page, soft_step, sidebar):
 @allure.suite("Milestones")
 @allure.sub_suite("Fields")
 @allure.title("99. Cleanup: archive milestone")
-def test_99_cleanup(page: Page):
-    """Удаляет задачи и архивирует тестовый майлстоун."""
+def test_99_cleanup_milestone(page: Page):
+    """Архивирует тестовый майлстоун и подчищает все остальные кроме 'Test milestone'."""
     archive_milestone(page, _MILESTONE_NAME)
+    cleanup_milestones(page, keep_names=["Test milestone"])
