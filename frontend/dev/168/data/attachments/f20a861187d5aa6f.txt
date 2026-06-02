@@ -1,0 +1,14 @@
+tests/test_frontend/tests/milestones/test_milestone_fields.py:200: in <lambda>
+    expect(sidebar.get_by_role("heading", name=re.compile(r"\b1 task\b"))).to_be_visible(timeout=5000)
+E   AssertionError: Locator expected to be visible
+E   Actual value: <element(s) not found> 
+E   Call log:
+E     - LocatorAssertions.to_be_visible with timeout 5000ms
+E     -   - waiting for locator("[class*=\"RightSidebar-module_Root\"]").get_by_role("heading", name=re.compile(r"\b1 task\b"))
+
+The above exception was the direct cause of the following exception:
+tests/test_frontend/tests/milestones/test_milestone_fields.py:199: in test_06_add_tasks_to_milestone
+    soft_step("1 task", lambda: (
+tests/test_frontend/conftest.py:381: in _soft_step
+    raise AssertionError(f"[{name}] {hint}") from e
+E   AssertionError: [1 task] Элемент не найден — возможно изменился UI или локатор устарел

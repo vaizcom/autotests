@@ -1,0 +1,2 @@
+Счётчик не обновился
+Locator expected to be visible
