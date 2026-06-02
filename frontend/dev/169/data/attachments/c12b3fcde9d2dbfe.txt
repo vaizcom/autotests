@@ -1,0 +1,9 @@
+tests/test_frontend/tests/milestones/test_milestone_fields.py:89: in test_02_verify_milestone_name
+    open_milestone(page, _MILESTONE_NAME)
+tests/test_frontend/tests/milestones/conftest.py:28: in open_milestone
+    expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
+E   AssertionError: Locator expected to be visible
+E   Actual value: <element(s) not found> 
+E   Call log:
+E     - LocatorAssertions.to_be_visible with timeout 25000ms
+E     -   - waiting for get_by_test_id("kanban-board.column.molecules.create-task-button.button").first
