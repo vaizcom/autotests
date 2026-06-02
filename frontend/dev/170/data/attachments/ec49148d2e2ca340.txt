@@ -1,0 +1,14 @@
+tests/test_frontend/tests/tasks/test_12_task_to_milestone.py:185: in add_sub_sub_task
+    expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
+E   AssertionError: Locator expected to be visible
+E   Actual value: <element(s) not found> 
+E   Call log:
+E     - LocatorAssertions.to_be_visible with timeout 10000ms
+E     -   - waiting for locator("[class*=\"RightSidebar-module_Root\"]").get_by_role("heading", name="ConvSub 133542")
+
+The above exception was the direct cause of the following exception:
+tests/test_frontend/tests/tasks/test_12_task_to_milestone.py:192: in test_02_fill_task_fields
+    soft_step("Подподзадача", add_sub_sub_task)
+tests/test_frontend/conftest.py:381: in _soft_step
+    raise AssertionError(f"[{name}] {hint}") from e
+E   AssertionError: [Подподзадача] Элемент не найден — возможно изменился UI или локатор устарел
