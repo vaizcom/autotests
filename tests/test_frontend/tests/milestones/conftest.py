@@ -63,9 +63,9 @@ def wait_for_task_rows(page: Page, milestone_name: str):
 
 def delete_milestone_tasks(page: Page):
     """Удаляет все задачи внутри открытого майлстоуна. Best effort."""
-    tasks = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
-    while tasks.first.is_visible(timeout=3000):
-        tasks.first.get_by_role("button").nth(2).click()
+    rows = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
+    while rows.first.is_visible(timeout=3000):
+        rows.first.get_by_role("button").last.click()
         page.get_by_text("Delete task").click()
         page.get_by_role("button", name="Proceed").click()
         page.wait_for_timeout(1000)

@@ -15,7 +15,7 @@ from tests.test_frontend.tests.milestones.conftest import (
     archive_milestone,
     cleanup_milestones,
 )
-from tests.test_frontend.tests.tasks.conftest import add_comment, fill_description, future_date, set_date
+from tests.test_frontend.tests.tasks.conftest import add_comment, fill_description, future_date, set_date, delete_task_in_table
 
 pytestmark = [pytest.mark.frontend]
 
@@ -291,14 +291,7 @@ def test_08_delete_milestone_tasks(page: Page, soft_step, sidebar):
     wait_for_task_rows(page, _MILESTONE_NAME)
 
     def delete_task(task_name):
-        task_row = (
-            sidebar.get_by_role("button")
-            .filter(has_text=re.compile(r"[A-Z]+-\d+"))
-            .filter(has_text=task_name)
-        )
-        task_row.get_by_role("button").nth(2).click()
-        page.get_by_text("Delete task").click()
-        page.get_by_role("button", name="Proceed").click()
+        delete_task_in_table(page, sidebar, task_name)
 
     # ── Удаление задачи 1 → "1 task" ──
 

@@ -234,7 +234,7 @@ def test_03_convert_task_to_milestone(page: Page, soft_step):
 # ── 04. Проверка переноса полей ──────────────────────────────────────
 
 
-@pytest.mark.dependency(depends=[_DEP_FILL])
+@pytest.mark.dependency(depends=[_DEP_CONVERT])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
@@ -304,7 +304,7 @@ def test_04_verify_milestone_fields(page: Page, soft_step, sidebar):
 # ── 05. Проверка сохранения иерархии подзадач ───────────────────────
 
 
-@pytest.mark.dependency(depends=[_DEP_FILL])
+@pytest.mark.dependency(depends=[_DEP_CONVERT])
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
