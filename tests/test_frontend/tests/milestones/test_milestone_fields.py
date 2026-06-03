@@ -296,7 +296,7 @@ def test_08_delete_milestone_tasks(page: Page, soft_step, sidebar):
             .filter(has_text=re.compile(r"[A-Z]+-\d+"))
             .filter(has_text=task_name)
         )
-        task_row.get_by_role("button").nth(1).click()
+        task_row.get_by_role("button").nth(2).click()
         page.get_by_text("Delete task").click()
         page.get_by_role("button", name="Proceed").click()
 
