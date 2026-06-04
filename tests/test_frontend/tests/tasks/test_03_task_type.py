@@ -21,11 +21,11 @@ def _open_type_dropdown(page, sidebar):
 
 
 def _close_dropdown(page):
-    """Закрывает дропдаун кликом по области страницы."""
+    """Закрывает дропдаун нажатием Escape."""
     menuitem = page.get_by_role("menuitem").first
     if not menuitem.is_visible(timeout=1000):
         return
-    page.mouse.click(640, 360)
+    page.keyboard.press("Escape")
     expect(menuitem).not_to_be_visible(timeout=5000)
 
 
