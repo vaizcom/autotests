@@ -12,13 +12,32 @@ def get_token(role: str = 'guest') -> str:
     if not credentials:
         raise ValueError(f'Unknown role: {role}')
 
-    login_url = f"{API_URL.rstrip('/')}/Login"
+    base_url = API_URL.rstrip('/')
     headers = {'Content-Type': 'application/json'}
-    response = requests.post(login_url, headers=headers, json=credentials)
 
-    assert response.status_code == 202, f'Login failed ({response.status_code}): {response.text}'
+    # Шаг 1: AuthWithEmail
+    resp = requests.post(
+        f"{base_url}/AuthWithEmail",
+        headers=headers,
+        json={"email": credentials['email']}
+    )
+    assert resp.status_code == 200, f'AuthWithEmail failed ({resp.status_code}): {resp.text}'
 
-    token = response.json()['payload']['token']
+    payload = resp.json().get("payload", {})
+    temp_token = payload.get("tempToken")
+    assert temp_token, f'tempToken отсутствует в ответе AuthWithEmail для {role}'
+
+    # Шаг 2: VerifyPassword
+    resp = requests.post(
+        f"{base_url}/VerifyPassword",
+        headers=headers,
+        json={"tempToken": temp_token, "password": credentials['password']}
+    )
+    assert resp.status_code == 200, f'VerifyPassword failed ({resp.status_code}): {resp.text}'
+
+    token = resp.json().get("payload", {}).get("authToken")
+    assert token, f'authToken отсутствует в ответе VerifyPassword для {role}'
+
     _token_cache[role] = token
     return token
 
