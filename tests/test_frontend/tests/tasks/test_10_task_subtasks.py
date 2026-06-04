@@ -6,7 +6,7 @@ from playwright.sync_api import expect, Page
 
 from tests.test_frontend.tests.tasks.conftest import (
     TASK_NAME, _TS, open_card, add_subtask, create_subtasks,
-    find_subtask_row_by_name, wait_for_subtask_rows,
+    find_subtask_row_by_name, delete_task_in_table, wait_for_subtask_rows,
     toggle_subtask_complete, expect_subtask_counter, open_as_page,
 )
 
@@ -167,11 +167,7 @@ def test_03_delete_task_subtask(page: Page, soft_step, sidebar):
     open_card(page, soft_step, TASK_NAME)
 
     def delete_subtask(subtask_name):
-        subtask_row = find_subtask_row_by_name(sidebar, subtask_name)
-        expect(subtask_row).to_be_visible(timeout=10000)
-        subtask_row.get_by_role("button").nth(1).click()
-        page.get_by_text("Delete task").click()
-        page.get_by_role("button", name="Proceed").click()
+        delete_task_in_table(page, sidebar, subtask_name)
 
     # ── Удаление подзадачи 1 → "1 subtask" ──
 

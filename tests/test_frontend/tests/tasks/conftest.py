@@ -58,6 +58,15 @@ def find_subtask_row_by_name(container, name: str):
     ).filter(has_text=name)
 
 
+def delete_task_in_table(page: Page, container, task_name: str):
+    """Удаляет задачу/подзадачу из таблицы по имени (подзадачи, майлстоуны)."""
+    row = find_subtask_row_by_name(container, task_name)
+    expect(row).to_be_visible(timeout=10000)
+    row.get_by_role("button").last.click()
+    page.get_by_text("Delete task").click()
+    page.get_by_role("button", name="Proceed").click()
+
+
 def _wait_board_ready(page: Page):
     """Ждёт полной загрузки борды: кнопка Add task + карточки или пустая колонка."""
     expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)

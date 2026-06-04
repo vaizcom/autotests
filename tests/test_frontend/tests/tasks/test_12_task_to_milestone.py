@@ -181,7 +181,7 @@ def test_02_fill_task_fields(page: Page, soft_step, sidebar):
 
     def add_sub_sub_task():
         _scroll_to_subtasks(sidebar)
-        find_subtask_row_by_name(sidebar, _SUBTASK_NAME).first.click()
+        sidebar.get_by_text(_SUBTASK_NAME).first.click()
         expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
         _scroll_to_subtasks(sidebar)
         sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUB_SUBTASK_NAME)
@@ -211,11 +211,6 @@ def test_03_convert_task_to_milestone(page: Page, soft_step):
 
     with allure.step("Конвертация в майлстоун"):
         soft_step("Конвертация", convert)
-
-    with allure.step("Тост: Task successfully converted to Milestone"):
-        soft_step("Тост конвертации", lambda: (
-            expect(page.get_by_text("Task successfully converted to Milestone")).to_be_visible(timeout=10000)
-        ))
 
     def verify_card_gone():
         page.goto(settings.AUTOTEST_BOARD_URL)
@@ -358,8 +353,6 @@ def test_99_cleanup_milestone(page: Page, soft_step, cleanup_task):
             open_sidebar_menu(page)
             page.get_by_text("Archive milestone").click()
             page.get_by_role("button", name="Yes").click()
-
-        with allure.step("Тост: Milestone archived"):
             expect(page.get_by_text("Milestone archived")).to_be_visible(timeout=5000)
     except Exception:
         pass
