@@ -15,10 +15,13 @@ pytestmark = [pytest.mark.backend]
 
 
 def get_otp_from_mongo(db, temp_token):
-    """Декодирует tempToken JWT, достаёт id и находит OTP в confirmtokens.
+    """
+    Декодирует tempToken JWT, достаёт id и находит OTP в confirmtokens.
+
     В браузере https://www.jwt.io/ вставить tempToken и получить id,
     Этот id = _id записи в коллекции confirmtokens,
-    найти в монго по запросу {_id:ObjectId('id')} и извлеч otp_code"""
+    найти в монго по запросу {_id:ObjectId('id')} и извлеч otp_code
+    """
 
     payload_part = temp_token.split('.')[1]
     # Добавляем padding для base64
