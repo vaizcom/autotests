@@ -24,7 +24,6 @@ def get_otp_from_mongo(db, temp_token):
     """
 
     payload_part = temp_token.split('.')[1]
-    # Добавляем padding для base64
     payload_json = base64.urlsafe_b64decode(payload_part + '==')
     token_data = json.loads(payload_json)
     confirm_id = token_data['id']
@@ -40,57 +39,69 @@ def get_otp_from_mongo(db, temp_token):
 
 @allure.parent_suite("Auth Service")
 @allure.suite("New_Registration")
-@allure.sub_suite("AuthWithEmail + VerifyOtp")
-def test_register_via_auth_with_email(db):
+@allure.sub_suite("VerifyOtp — повторное использование tempToken")
+def test_verify_otp_reuse_temp_token(db):
     """
-    Новый флоу регистрации: AuthWithEmail → OTP из Mongo → VerifyOtp.
+    Негативный тест: tempToken нельзя использовать повторно после успешной регистрации.
     """
-    allure.dynamic.title("Register (AuthWithEmail): Успешная регистрация нового пользователя")
+    allure.dynamic.title("VerifyOtp: отказ — повторное использование tempToken")
 
     base_url = API_URL
     timestamp = int(time.time())
-    new_email = f"autotest_{timestamp}@gmail.com"
+    new_email = f"autotest_reuse_{timestamp}@gmail.com"
 
-    # --- Шаг 1: AuthWithEmail с новым email ---
-    with allure.step(f"Шаг 1: AuthWithEmail — новый email {new_email}"):
+    # --- Шаг 1: получаем tempToken ---
+    with allure.step("AuthWithEmail — получение tempToken (needOTP)"):
         endpoint = auth_with_email_endpoint(email=new_email)
         url = f"{base_url.rstrip('/')}{endpoint['path']}"
 
         resp = requests.post(url, json=endpoint['json'], headers=endpoint['headers'])
-
         assert resp.status_code == 200, \
             f"AuthWithEmail вернул {resp.status_code}. Ответ: {resp.text}"
 
-        resp_json = resp.json()
-        assert resp_json.get("type") == "AuthWithEmail", \
-            f"Ожидался type='AuthWithEmail', получено: {resp_json.get('type')}"
-
-        payload = resp_json.get("payload", {})
+        payload = resp.json().get("payload", {})
         assert payload.get("needOTP") is True, \
-            f"Ожидался needOTP=true для нового email, получено: {payload}"
+            f"Ожидался needOTP=true, получено: {payload}"
 
         temp_token = payload.get("tempToken")
         assert temp_token, "tempToken отсутствует в ответе AuthWithEmail"
 
     # --- Шаг 2: достаём OTP из MongoDB ---
-    with allure.step("Шаг 2: Получение OTP-кода из MongoDB"):
+    with allure.step("Получение OTP-кода из MongoDB"):
         otp_code = get_otp_from_mongo(db, temp_token)
 
-    # --- Шаг 3: VerifyOtp ---
-    with allure.step(f"Шаг 3: VerifyOtp — подтверждение OTP ({otp_code})"):
+    # --- Шаг 3: успешная регистрация ---
+    with allure.step("VerifyOtp — успешная регистрация"):
+        endpoint = verify_otp_endpoint(temp_token=temp_token, otp=otp_code)
+        url = f"{base_url.rstrip('/')}{endpoint['path']}"
+
+        resp = requests.post(url, json=endpoint['json'], headers=endpoint['headers'])
+        assert resp.status_code == 200, \
+            f"VerifyOtp вернул {resp.status_code}. Ответ: {resp.text}"
+
+        auth_token = resp.json().get("payload", {}).get("authToken")
+        assert auth_token, "authToken отсутствует в ответе VerifyOtp"
+
+    # --- Шаг 4: повторное использование того же tempToken ---
+    with allure.step("Повторный VerifyOtp с тем же tempToken"):
         endpoint = verify_otp_endpoint(temp_token=temp_token, otp=otp_code)
         url = f"{base_url.rstrip('/')}{endpoint['path']}"
 
         resp = requests.post(url, json=endpoint['json'], headers=endpoint['headers'])
 
-        assert resp.status_code == 200, \
-            f"VerifyOtp вернул {resp.status_code}. Ответ: {resp.text}"
+        assert resp.status_code == 400, \
+            f"Ожидался статус 400, получен {resp.status_code}. Ответ: {resp.text}"
 
+    with allure.step("Проверка структуры ошибки"):
         resp_json = resp.json()
-        payload = resp_json.get("payload", {})
 
-        auth_token = payload.get("authToken")
-        assert auth_token, "authToken отсутствует в ответе VerifyOtp"
+        assert resp_json.get("type") == "VerifyOtp", \
+            f"Ожидался type='VerifyOtp', получено: {resp_json.get('type')}"
+        assert resp_json.get("payload") is None, \
+            f"Ожидался payload=null, получено: {resp_json.get('payload')}"
 
-        assert payload.get("newUser") is True, \
-            f"Ожидался newUser=true для нового пользователя, получено: {payload.get('newUser')}"
+        error = resp_json.get("error", {})
+        assert error.get("code") == "JwtDoesNotExits", \
+            f"Ожидался error.code='JwtDoesNotExits', получено: {error.get('code')}"
+        assert error.get("originalType") == "VerifyOtp", \
+            f"Ожидался originalType='VerifyOtp', получено: {error.get('originalType')}"

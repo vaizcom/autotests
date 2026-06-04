@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("Auth Service")
-@allure.suite("Login")
+@allure.suite("New_Login")
 @allure.sub_suite("VerifyPassword — повторное использование tempToken")
 def test_verify_reuse_temp_token():
     """

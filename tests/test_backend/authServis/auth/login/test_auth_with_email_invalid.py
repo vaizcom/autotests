@@ -9,7 +9,7 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("Auth Service")
-@allure.suite("Login")
+@allure.suite("New_Login")
 @allure.sub_suite("AuthWithEmail — невалидный email")
 @pytest.mark.parametrize("invalid_email, description", [
     ("invalid-email-format", "без @"),

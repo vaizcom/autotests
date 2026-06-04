@@ -1,3 +1,5 @@
+import time
+
 import allure
 import pytest
 import requests
@@ -10,7 +12,7 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("Auth Service")
-@allure.suite("Login")
+@allure.suite("New_Login")
 @allure.sub_suite("VerifyPassword — невалидный tempToken")
 @pytest.mark.parametrize("temp_token, expected_error_code, description", [
     ("invalid.token.value", "JwtIncorrect", "мусорный токен"),
@@ -49,7 +51,7 @@ def test_verify_password_invalid_temp_token(temp_token, expected_error_code, des
 
 
 @allure.parent_suite("Auth Service")
-@allure.suite("Login")
+@allure.suite("New_Login")
 @allure.sub_suite("VerifyPassword — невалидный tempToken")
 def test_verify_auth_token_as_temp_token():
     """
@@ -97,3 +99,52 @@ def test_verify_auth_token_as_temp_token():
             f"Ожидался error.code='JwtDoesNotExits', получено: {error.get('code')}"
         assert error.get("originalType") == "VerifyPassword", \
             f"Ожидался originalType='VerifyPassword', получено: {error.get('originalType')}"
+
+
+@allure.parent_suite("Auth Service")
+@allure.suite("New_Login")
+@allure.sub_suite("VerifyPassword — невалидный tempToken")
+def test_otp_token_in_verify_password():
+    """
+    Кросс-степ: tempToken от needOTP (регистрация) нельзя использовать в VerifyPassword.
+    """
+    allure.dynamic.title("Межшаговая подмена: otp-токен → VerifyPassword")
+
+    base_url = API_URL
+    timestamp = int(time.time())
+    new_email = f"autotest_cross_{timestamp}@gmail.com"
+
+    with allure.step("AuthWithEmail — получение tempToken (needOTP)"):
+        endpoint = auth_with_email_endpoint(email=new_email)
+        url = f"{base_url.rstrip('/')}{endpoint['path']}"
+
+        resp = requests.post(url, json=endpoint['json'], headers=endpoint['headers'])
+        assert resp.status_code == 200
+
+        payload = resp.json().get("payload", {})
+        assert payload.get("needOTP") is True
+        temp_token = payload.get("tempToken")
+
+    with allure.step("VerifyPassword с otp-токеном"):
+        endpoint = verify_password_endpoint(temp_token=temp_token, password="123456")
+        url = f"{base_url.rstrip('/')}{endpoint['path']}"
+
+        resp = requests.post(url, json=endpoint['json'], headers=endpoint['headers'])
+
+        assert resp.status_code == 400, \
+            f"Ожидался статус 400, получен {resp.status_code}. Ответ: {resp.text}"
+
+    with allure.step("Проверка структуры ошибки"):
+        resp_json = resp.json()
+
+        assert resp_json.get("type") == "VerifyPassword"
+        assert resp_json.get("payload") is None
+
+        error = resp_json.get("error", {})
+        assert error.get("code") == "InvalidForm"
+        assert error.get("originalType") == "VerifyPassword"
+
+        fields = error.get("fields", [])
+        password_errors = [f for f in fields if f.get("name") == "password"]
+        assert len(password_errors) > 0, f"Не найдена ошибка для поля password. Ответ: {resp_json}"
+        assert "WrongCredentials" in password_errors[0].get("codes", [])

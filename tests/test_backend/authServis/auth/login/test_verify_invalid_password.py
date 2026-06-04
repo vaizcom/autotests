@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("Auth Service")
-@allure.suite("Login")
+@allure.suite("New_Login")
 @allure.sub_suite("VerifyPassword — негативные")
 @pytest.mark.parametrize("wrong_password, expected_code, description", [
     ("wrong_password", "WrongCredentials", "неверный пароль"),

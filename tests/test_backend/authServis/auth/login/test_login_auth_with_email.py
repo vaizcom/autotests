@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("Auth Service")
-@allure.suite("Login")
+@allure.suite("New_Login")
 @allure.sub_suite("AuthWithEmail + VerifyPassword")
 @pytest.mark.parametrize("email_case_func, title_suffix", [
     (lambda s: s.lower(), "обычный email"),

@@ -64,6 +64,17 @@ def pytest_collection_finish(session):
         print(f'\n🧪 Running on stand: {settings.TEST_STAND_NAME}')
         print(f'🔗 API URL: {settings.API_URL}\n')
 
+        # Проверяем доступность стенда
+        try:
+            resp = requests.get(settings.API_URL, timeout=10)
+        except requests.exceptions.ConnectionError:
+            pytest.exit(f"Стенд недоступен ({settings.API_URL}) — ConnectionError", returncode=1)
+        except requests.exceptions.Timeout:
+            pytest.exit(f"Стенд недоступен ({settings.API_URL}) — Timeout", returncode=1)
+
+        if resp.status_code >= 500:
+            pytest.exit(f"Стенд отвечает ошибкой {resp.status_code} ({settings.API_URL})", returncode=1)
+
 @pytest.fixture(scope="session")
 def mongo_client():
     """Создает подключение к MongoDB на время всего прогона тестов."""

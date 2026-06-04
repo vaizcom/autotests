@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("Auth Service")
-@allure.suite("Registration")
+@allure.suite("New_Registration")
 @allure.sub_suite("VerifyOtp — негативные")
 @pytest.mark.parametrize("otp, expected_error_code, expected_field_code, description", [
     ("000000", "InvalidForm", "OTPCodeNotValid", "неверный OTP"),
@@ -79,7 +79,7 @@ def test_verify_otp_invalid_code(otp, expected_error_code, expected_field_code, 
 
 
 @allure.parent_suite("Auth Service")
-@allure.suite("Registration")
+@allure.suite("New_Registration")
 @allure.sub_suite("VerifyOtp — невалидный tempToken")
 @pytest.mark.parametrize("temp_token, expected_error_code, description", [
     ("invalid.token", "JwtIncorrect", "мусорный токен"),
@@ -115,3 +115,50 @@ def test_verify_otp_invalid_token(temp_token, expected_error_code, description):
             f"Ожидался error.code='{expected_error_code}', получено: {error.get('code')}"
         assert error.get("originalType") == "VerifyOtp", \
             f"Ожидался originalType='VerifyOtp', получено: {error.get('originalType')}"
+
+
+@allure.parent_suite("Auth Service")
+@allure.suite("New_Registration")
+@allure.sub_suite("VerifyOtp — невалидный tempToken")
+def test_password_token_in_verify_otp():
+    """
+    Кросс-степ: tempToken от needPassword (логин) нельзя использовать в VerifyOtp.
+    """
+    allure.dynamic.title("Межшаговая подмена: password-токен → VerifyOtp")
+
+    base_url = API_URL
+
+    with allure.step("AuthWithEmail — получение tempToken (needPassword)"):
+        endpoint = auth_with_email_endpoint(email="mastretsovaone+main@gmail.com")
+        url = f"{base_url.rstrip('/')}{endpoint['path']}"
+
+        resp = requests.post(url, json=endpoint['json'], headers=endpoint['headers'])
+        assert resp.status_code == 200
+
+        payload = resp.json().get("payload", {})
+        assert payload.get("needPassword") is True
+        temp_token = payload.get("tempToken")
+
+    with allure.step("VerifyOtp с password-токеном"):
+        endpoint = verify_otp_endpoint(temp_token=temp_token, otp="123456")
+        url = f"{base_url.rstrip('/')}{endpoint['path']}"
+
+        resp = requests.post(url, json=endpoint['json'], headers=endpoint['headers'])
+
+        assert resp.status_code == 400, \
+            f"Ожидался статус 400, получен {resp.status_code}. Ответ: {resp.text}"
+
+    with allure.step("Проверка структуры ошибки"):
+        resp_json = resp.json()
+
+        assert resp_json.get("type") == "VerifyOtp"
+        assert resp_json.get("payload") is None
+
+        error = resp_json.get("error", {})
+        assert error.get("code") == "InvalidForm"
+        assert error.get("originalType") == "VerifyOtp"
+
+        fields = error.get("fields", [])
+        otp_errors = [f for f in fields if f.get("name") == "otp"]
+        assert len(otp_errors) > 0, f"Не найдена ошибка для поля otp. Ответ: {resp_json}"
+        assert "OTPCodeNotValid" in otp_errors[0].get("codes", [])
