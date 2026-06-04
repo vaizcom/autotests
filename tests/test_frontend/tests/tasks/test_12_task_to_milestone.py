@@ -10,7 +10,7 @@ from tests.test_frontend.core.locators import Board
 from tests.test_frontend.tests.tasks.conftest import (
     create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready,
     add_comment, fill_description, find_subtask_row_by_name, _scroll_to_subtasks,
-    set_date as _set_date, future_date,
+    set_date as _set_date, future_date, wait_for_subtask_rows,
 )
 
 pytestmark = [pytest.mark.frontend]
@@ -140,7 +140,10 @@ def test_02_fill_task_fields(page: Page, soft_step, sidebar):
 
     # Приоритет
     def set_priority():
-        sidebar.get_by_role("button", name="Priority Select priority").click()
+        btn = sidebar.get_by_role("button", name="Priority Select priority")
+        expect(btn).to_be_visible(timeout=5000)
+        btn.click()
+        expect(page.get_by_text("Medium")).to_be_visible(timeout=5000)
         page.get_by_text("Medium").click()
         expect(sidebar.get_by_role("button", name=re.compile(r"Priority.*Medium"))).to_be_visible(timeout=5000)
 
@@ -149,9 +152,15 @@ def test_02_fill_task_fields(page: Page, soft_step, sidebar):
 
     # Исполнитель
     def set_assignee():
-        sidebar.get_by_role("button", name="Assign Not assigned").click()
-        page.locator('.szh-menu-container [class*="SelectFlySearch-module_ItemText"]').first.click()
-        page.locator('[class*="FlyBlock-module_Overlay"]').click()
+        btn = sidebar.get_by_role("button", name="Assign Not assigned")
+        expect(btn).to_be_visible(timeout=5000)
+        btn.click()
+        item = page.locator('.szh-menu-container [class*="SelectFlySearch-module_ItemText"]').first
+        expect(item).to_be_visible(timeout=5000)
+        item.click()
+        overlay = page.locator('[class*="FlyBlock-module_Overlay"]')
+        expect(overlay).to_be_visible(timeout=5000)
+        overlay.click()
         expect(sidebar.get_by_role("button", name=re.compile(r"Assign\s+\S"))).to_be_visible(timeout=5000)
 
     with allure.step("Исполнитель"):
@@ -159,17 +168,28 @@ def test_02_fill_task_fields(page: Page, soft_step, sidebar):
 
     # Тип
     def set_type():
-        sidebar.get_by_role("button", name="Types Select type").click()
+        btn = sidebar.get_by_role("button", name="Types Select type")
+        expect(btn).to_be_visible(timeout=5000)
+        btn.click()
+        expect(page.get_by_role("menuitem", name="Green")).to_be_visible(timeout=5000)
         page.get_by_role("menuitem", name="Green").click()
+        # Закрываем дропдаун если остался открытым (headless CI)
+        if page.get_by_role("menuitem").first.is_visible(timeout=1000):
+            page.keyboard.press("Escape")
         expect(sidebar.get_by_role("button", name=re.compile(r"Types.*Green"))).to_be_visible(timeout=5000)
 
     with allure.step("Тип: Green"):
         soft_step("Тип", set_type)
 
-    # Майлстоун
+    # Майлстоун (переоткрываем карточку — sidebar может стать нестабильным)
     def set_milestone():
-        sidebar.get_by_role("button", name="Milestones Select milestones").click()
-        page.get_by_role("textbox", name="Type to search...").fill(_MILESTONE_NAME)
+        open_card(page, soft_step, _TASK_NAME)
+        btn = sidebar.get_by_role("button", name=re.compile(r"^Milestones "))
+        expect(btn).to_be_visible(timeout=5000)
+        btn.click()
+        search = page.get_by_role("textbox", name="Type to search...")
+        expect(search).to_be_visible(timeout=5000)
+        search.fill(_MILESTONE_NAME)
         expect(page.get_by_role("menuitem", name=_MILESTONE_NAME)).to_be_visible(timeout=5000)
         page.get_by_role("menuitem", name=_MILESTONE_NAME).click()
         expect(sidebar.get_by_role("button", name=re.compile(rf"Milestones.*{_MILESTONE_NAME}"))).to_be_visible(timeout=5000)
@@ -180,11 +200,15 @@ def test_02_fill_task_fields(page: Page, soft_step, sidebar):
     # ── Подподзадача (последний шаг — уходим в сайдбар подзадачи) ──
 
     def add_sub_sub_task():
-        _scroll_to_subtasks(sidebar)
-        sidebar.get_by_text(_SUBTASK_NAME).first.click()
+        open_card(page, soft_step, _TASK_NAME)
+        wait_for_subtask_rows(page, _TASK_NAME, _SUBTASK_NAME)
+        # Кликаем по названию (не по всей строке — центр wide row попадает в неактивную колонку)
+        find_subtask_row_by_name(sidebar, _SUBTASK_NAME).first.get_by_text(_SUBTASK_NAME).click()
         expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
         _scroll_to_subtasks(sidebar)
-        sidebar.get_by_role("textbox", name="Enter subtask name").fill(_SUB_SUBTASK_NAME)
+        textbox = sidebar.get_by_role("textbox", name="Enter subtask name")
+        expect(textbox).to_be_visible(timeout=5000)
+        textbox.fill(_SUB_SUBTASK_NAME)
         page.keyboard.press("Enter")
         expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
 
@@ -314,6 +338,7 @@ def test_05_verify_subtasks_kept(page: Page, sidebar):
     from tests.test_frontend.tests.milestones.conftest import open_milestone
 
     open_milestone(page, _TASK_NAME)
+    page.wait_for_timeout(1000)
 
     with allure.step(f"Проверка: {_SUBTASK_NAME} видна как задача майлстоуна"):
         expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=10000)
