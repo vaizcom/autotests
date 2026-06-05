@@ -125,7 +125,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull origin "$BRANCH"
-          git add -f tests/test_frontend/
+          git add -f tests/test_frontend/tests/**/__snapshots__/**/*.png
           git diff --cached --quiet || git commit -m "chore: update VRT baselines on CI"
           git push origin "$BRANCH"
 
@@ -140,14 +140,6 @@ jobs:
             pytest tests/test_frontend/ -m frontend -k "$TARGET" --alluredir=allure-results --slowmo 100 --reruns 1 --reruns-delay 5 --maxfail=5
           fi
 
-      - name: Commit new baselines if created
-        run: |
-          BRANCH="${{ github.head_ref || github.ref_name }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull origin "$BRANCH"
-          git add -f tests/test_frontend/
-          git diff --cached --quiet || (git commit -m "chore: auto-commit new VRT baselines" && git push origin "$BRANCH")
 
       - name: Get Allure history
         uses: actions/checkout@v4
