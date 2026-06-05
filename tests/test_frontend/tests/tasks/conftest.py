@@ -370,9 +370,9 @@ def remove_milestone_from_dropdown(page: Page, milestone_name: str):
 
 
 def open_sidebar_menu(page: Page):
-    """Кликает по кнопке '...' (три точки) в сайдбаре задачи/майлстоуна."""
-    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    more_btn = sidebar.locator('[class*="IconButton-module_Root"]:has(path[d^="M7.25 12"])').first
+    """Кликает по кнопке '...' (три точки) в шапке сайдбара задачи/майлстоуна."""
+    header_menu = page.locator('[class*="TaskEditorHeaderSlot-module_Menu"]')
+    more_btn = header_menu.locator('[class*="IconButton-module_Root"]:has(path[d^="M3.5 10"])')
     expect(more_btn).to_be_visible(timeout=5000)
     more_btn.click()
 
