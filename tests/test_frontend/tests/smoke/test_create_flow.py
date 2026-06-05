@@ -46,7 +46,7 @@ def test_create_space_with_project_and_task(page: Page, cleanup_space, assert_sn
         space_id = path.split("/")[0]
         cleanup_space.append(space_id)
 
-    with allure.step("Wizard: пропуск приглашения"):
+    with allure.step("Wizard: пропуск приглашения пользователей (invite users)"):
         expect(page.get_by_role("button", name="Next")).to_be_visible(timeout=10000)
         page.get_by_role("button", name="Next").click()
 
