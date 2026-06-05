@@ -8,7 +8,7 @@ from tests.test_frontend.core.locators import Board, Header, Sidebar, SpaceSelec
 pytestmark = [pytest.mark.frontend]
 
 _SPACE_NAME = "Smoke Test Space"
-_PROJECT_NAME = "Smoke Project"
+_PROJECT_NAME = "Your first project"
 _TASK_NAME = "New Task"
 
 
@@ -18,7 +18,7 @@ _TASK_NAME = "New Task"
 @allure.title("Create space → project → task")
 def test_create_space_with_project_and_task(page: Page, cleanup_space, assert_snapshot):
     """
-    Smoke-тест: создание Space → wizard (Project + Board) → Task.
+    Smoke-тест: создание Space → открытие дефолтного Project → Task.
     Space удаляется через API в teardown.
     """
     # === SPACE ===
@@ -26,12 +26,14 @@ def test_create_space_with_project_and_task(page: Page, cleanup_space, assert_sn
         page.goto(f"{settings.BASE_URL}/")
         expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
 
-    with allure.step(f"Создание Space: {_SPACE_NAME}"):
+    with allure.step("Открытие диалога создания Space"):
         page.get_by_test_id(Header.SPACE_SELECTOR).click()
         expect(page.get_by_test_id(SpaceSelector.CREATE)).to_be_visible(timeout=5000)
         page.get_by_test_id(SpaceSelector.CREATE).click()
         expect(page.get_by_role("button", name="Start creating")).to_be_visible(timeout=5000)
         page.get_by_role("button", name="Start creating").click()
+
+    with allure.step(f"Создание Space: {_SPACE_NAME}"):
         expect(page.get_by_role("textbox", name="Name")).to_be_visible(timeout=5000)
         page.get_by_role("textbox", name="Name").fill(_SPACE_NAME)
         page.get_by_role("button", name="Create space").click()
@@ -44,19 +46,13 @@ def test_create_space_with_project_and_task(page: Page, cleanup_space, assert_sn
         space_id = path.split("/")[0]
         cleanup_space.append(space_id)
 
-    # === WIZARD: Set up your Workspace ===
-    with allure.step(f"Wizard: настройка Workspace + Project '{_PROJECT_NAME}'"):
-        expect(page.get_by_role("textbox", name="Space Name")).to_be_visible(timeout=10000)
-        page.get_by_role("textbox", name="Space Name").clear()
-        page.get_by_role("textbox", name="Space Name").fill(_SPACE_NAME)
-        expect(page.get_by_role("textbox", name="My project")).to_be_visible(timeout=5000)
-        page.get_by_role("textbox", name="My project").clear()
-        page.get_by_role("textbox", name="My project").fill(_PROJECT_NAME)
-        page.get_by_role("button", name="Continue").click()
+    with allure.step("Wizard: пропуск приглашения"):
+        expect(page.get_by_role("button", name="Next")).to_be_visible(timeout=10000)
+        page.get_by_role("button", name="Next").click()
 
-    with allure.step("Пропуск приглашения (Invite a teammate)"):
-        expect(page.get_by_role("button", name="Skip for now")).to_be_visible(timeout=10000)
-        page.get_by_role("button", name="Skip for now").click()
+    with allure.step("Wizard: завершение настройки"):
+        expect(page.get_by_role("button", name="Finish")).to_be_visible(timeout=5000)
+        page.get_by_role("button", name="Finish").click()
 
     with allure.step("Ожидание загрузки Space"):
         expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=10000)
@@ -103,4 +99,4 @@ def test_create_space_with_project_and_task(page: Page, cleanup_space, assert_sn
         ''')
 
         screenshot = page.screenshot(mask=dynamic_masks)
-        assert_snapshot(screenshot, name="board_with_task.png", threshold=3.0)
+        assert_snapshot(screenshot, name="board_with_task.png", threshold=1.0)
