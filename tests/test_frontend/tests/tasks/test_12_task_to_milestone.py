@@ -342,7 +342,7 @@ def test_05_verify_subtasks_kept(page: Page, soft_step, sidebar):
     from tests.test_frontend.tests.milestones.conftest import open_milestone
 
     with allure.step(f"Предусловие: Task '{_TASK_NAME}' конвертирован в Milestone (test_02 → test_03), "
-                      f"подзадача '{_SUBTASK_NAME}' с подподзадачей '{_SUB_SUBTASK_NAME}' созданы в test_02"):
+                      f"SUB_TASK '{_SUBTASK_NAME}' с SUB_SUB_TASK '{_SUB_SUBTASK_NAME}' созданы в test_02"):
         pass
 
     with allure.step(f"Открытие майлстоуна '{_TASK_NAME}' на борде"):
