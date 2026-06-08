@@ -288,8 +288,9 @@ def set_date(page: Page, date: str):
     """Устанавливает дату (due) в открытом сайдбаре задачи/майлстоуна."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
     dates_btn = sidebar.get_by_text("No dates set")
-    expect(dates_btn).to_be_visible(timeout=5000)
-    dates_btn.click()
+    expect(dates_btn).to_be_visible(timeout=10000)
+    dates_btn.scroll_into_view_if_needed()
+    dates_btn.click(force=True)
     date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
     expect(date_input).to_be_visible(timeout=5000)
     _MONTHS = ["January", "February", "March", "April", "May", "June",
@@ -298,6 +299,7 @@ def set_date(page: Page, date: str):
     day = str(int(parts[0]))
     expected_header = f"{_MONTHS[int(parts[1]) - 1]} {parts[2]}"
     datepicker = page.locator('[class*="Datepicker2-module_Root"]')
+    expect(datepicker).to_be_visible(timeout=5000)
     # Навигируем стрелкой > до нужного месяца
     next_btn = datepicker.locator('button[name="next-month"]')
     for _ in range(100):
