@@ -266,6 +266,10 @@ def test_03_convert_task_to_milestone(page: Page, soft_step):
 def test_04_verify_milestone_fields(page: Page, soft_step, sidebar):
     """Открывает сабтаску на борде, проверяет milestone field,
     переходит на майлстоун по бейджу и проверяет перенос полей."""
+    with allure.step(f"Предусловие: Task '{_TASK_NAME}' конвертирован в Milestone (test_03), "
+                      f"поля заполнены в test_02 (описание, дата, подзадача, комментарий, приоритет, тип, исполнитель)"):
+        pass
+
     open_card(page, soft_step, _SUBTASK_NAME)
 
     # ── Проверка milestone field на сабтаске ──
@@ -333,21 +337,34 @@ def test_04_verify_milestone_fields(page: Page, soft_step, sidebar):
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
 @allure.title("05. Subtasks сохранились после конвертации")
-def test_05_verify_subtasks_kept(page: Page, sidebar):
+def test_05_verify_subtasks_kept(page: Page, soft_step, sidebar):
     """Проверяет что подзадача с вложенной подподзадачей сохранились после конвертации."""
     from tests.test_frontend.tests.milestones.conftest import open_milestone
 
-    open_milestone(page, _TASK_NAME)
-    page.wait_for_timeout(1000)
+    with allure.step(f"Предусловие: Task '{_TASK_NAME}' конвертирован в Milestone (test_02 → test_03), "
+                      f"подзадача '{_SUBTASK_NAME}' с подподзадачей '{_SUB_SUBTASK_NAME}' созданы в test_02"):
+        pass
 
-    with allure.step(f"Проверка: {_SUBTASK_NAME} видна как задача майлстоуна"):
-        expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=10000)
+    with allure.step(f"Открытие майлстоуна '{_TASK_NAME}' на борде"):
+        open_milestone(page, _TASK_NAME)
+        page.wait_for_timeout(1000)
 
-    with allure.step(f"Открытие {_SUBTASK_NAME} и проверка подподзадачи"):
+    with allure.step(f"Проверка: подзадача '{_SUBTASK_NAME}' видна в списке задач майлстоуна"):
+        soft_step("Подзадача в майлстоуне", lambda: (
+            expect(sidebar.get_by_text(_SUBTASK_NAME).first).to_be_visible(timeout=10000)
+        ))
+
+    with allure.step(f"Открытие подзадачи '{_SUBTASK_NAME}' в сайдбаре"):
         sidebar.get_by_text(_SUBTASK_NAME).first.click()
         expect(sidebar.get_by_role("heading", name=_SUBTASK_NAME)).to_be_visible(timeout=10000)
+
+    with allure.step("Скролл к секции подзадач"):
         _scroll_to_subtasks(sidebar)
-        expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
+
+    with allure.step(f"Проверка: подподзадача '{_SUB_SUBTASK_NAME}' сохранилась"):
+        soft_step("Подподзадача сохранилась", lambda: (
+            expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
+        ))
 
 
 # ── Cleanup: архивация ───────────────────────────────────────────
