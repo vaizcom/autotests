@@ -20,7 +20,11 @@ _TS = datetime.now().strftime("%H%M%S")
 def test_01_create_task_in_each_column(page: Page, soft_step):
     """Проверяет что задачу можно создать в каждой колонке борда."""
     page.goto(settings.AUTOTEST_BOARD_URL)
-    expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
+    try:
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
+    except Exception:
+        page.reload()
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
 
     columns = page.get_by_test_id(Board.CREATE_TASK)
     column_count = columns.count()
@@ -63,7 +67,11 @@ def test_01_create_task_in_each_column(page: Page, soft_step):
 def test_99_cleanup_column_tasks(page: Page):
     """Удаляет задачи col_*, созданные тестом создания в колонках."""
     page.goto(settings.AUTOTEST_BOARD_URL)
-    expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
+    try:
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
+    except Exception:
+        page.reload()
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
 
     cards = page.get_by_role("button").filter(
         has_text=re.compile(r"[A-Z]+-\d+")

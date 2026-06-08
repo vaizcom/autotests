@@ -69,7 +69,11 @@ def delete_task_in_table(page: Page, container, task_name: str):
 
 def _wait_board_ready(page: Page):
     """Ждёт полной загрузки борды: кнопка Add task + карточки или пустая колонка."""
-    expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
+    try:
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
+    except Exception:
+        page.reload()
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
     # Борда загружена, если видна хотя бы одна карточка или счётчик "0 tasks"
     loaded = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+")).first.or_(
         page.get_by_text(re.compile(r"\d+ tasks?")).first
@@ -117,7 +121,7 @@ def open_card(page: Page, soft_step, card_name: str):
 def create_task_on_board(page: Page, task_name: str):
     """Открывает борду, создаёт задачу и проверяет что карточка видна."""
     page.goto(settings.AUTOTEST_BOARD_URL)
-    expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
+    _wait_board_ready(page)
 
     page.get_by_test_id(Board.CREATE_TASK).first.click()
     expect(page.get_by_role("textbox", name="Task name...")).to_be_visible(timeout=5000)
@@ -284,8 +288,9 @@ def set_date(page: Page, date: str):
     """Устанавливает дату (due) в открытом сайдбаре задачи/майлстоуна."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
     dates_btn = sidebar.get_by_text("No dates set")
-    expect(dates_btn).to_be_visible(timeout=5000)
-    dates_btn.click()
+    expect(dates_btn).to_be_visible(timeout=10000)
+    dates_btn.scroll_into_view_if_needed()
+    dates_btn.click(force=True)
     date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
     expect(date_input).to_be_visible(timeout=5000)
     _MONTHS = ["January", "February", "March", "April", "May", "June",
@@ -294,6 +299,7 @@ def set_date(page: Page, date: str):
     day = str(int(parts[0]))
     expected_header = f"{_MONTHS[int(parts[1]) - 1]} {parts[2]}"
     datepicker = page.locator('[class*="Datepicker2-module_Root"]')
+    expect(datepicker).to_be_visible(timeout=5000)
     # Навигируем стрелкой > до нужного месяца
     next_btn = datepicker.locator('button[name="next-month"]')
     for _ in range(100):
@@ -370,11 +376,11 @@ def remove_milestone_from_dropdown(page: Page, milestone_name: str):
 
 
 def open_sidebar_menu(page: Page):
-    """Кликает по кнопке '...' (три точки) в сайдбаре задачи/майлстоуна."""
-    sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    more_btn = sidebar.locator('[class*="IconButton-module_Root"]:has(path[d^="M7.25 12"])').first
-    expect(more_btn).to_be_visible(timeout=5000)
-    more_btn.click()
+    """Кликает по кнопке '...' (три точки) в шапке сайдбара задачи/майлстоуна."""
+    header_menu = page.locator('[class*="TaskEditorHeaderSlot-module_Menu"], [class*="TaskSidebarHeader-module"]')
+    more_btn = header_menu.locator('[class*="IconButton-module_Root"]:has(path[d^="M3.5 10"]), [class*="IconButton-module_Root"]:has(path[d^="M7.25 12"])')
+    expect(more_btn.first).to_be_visible(timeout=5000)
+    more_btn.first.click()
 
 
 def open_as_page(page: Page, card_name: str):
