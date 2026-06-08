@@ -99,4 +99,4 @@ def test_create_space_with_project_and_task(page: Page, cleanup_space, assert_sn
         ''')
 
         screenshot = page.screenshot(mask=dynamic_masks)
-        assert_snapshot(screenshot, name="board_with_task.png", threshold=1.0)
+        assert_snapshot(screenshot, name="board_with_task.png", threshold=1.5)

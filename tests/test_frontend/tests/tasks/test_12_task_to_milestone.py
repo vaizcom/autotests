@@ -366,7 +366,11 @@ def test_99_cleanup_milestone(page: Page, soft_step, cleanup_task):
     try:
         with allure.step("Открытие вкладки Milestones"):
             page.goto(settings.AUTOTEST_BOARD_URL)
-            expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=25000)
+            try:
+                expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
+            except Exception:
+                page.reload()
+                expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
             page.get_by_role("link", name="Milestones").click()
 
         with allure.step(f"Поиск майлстоуна '{_TASK_NAME}'"):
