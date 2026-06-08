@@ -103,10 +103,10 @@ def test_01_create_task_for_conversion(page: Page, soft_step):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("02. Заполнить все поля Task перед конвертацией")
+@allure.title("02. Заполнить все поля Task (+subtask и sub_subtask) перед конвертацией")
 def test_02_fill_task_fields(page: Page, soft_step, sidebar):
-    """Заполняет все поля задачи перед конвертацией.
-    Переносятся: название, описание, дата, подзадача, комментарий.
+    """Заполняет все поля задачи перед конвертацией в том числе с subtask и sub_subtask.
+    Переносятся: название, описание, дата, подзадача (вложенная подзадача), комментарий.
     Теряются: приоритет, исполнитель, тип, майлстоун."""
     open_card(page, soft_step, _TASK_NAME)
 
@@ -336,7 +336,7 @@ def test_04_verify_milestone_fields(page: Page, soft_step, sidebar):
 @allure.parent_suite("Frontend")
 @allure.suite("Tasks")
 @allure.sub_suite("Convert to Milestone")
-@allure.title("05. Subtasks сохранились после конвертации")
+@allure.title("05. Subtasks и Sub_Subtasks сохранились после конвертации")
 def test_05_verify_subtasks_kept(page: Page, soft_step, sidebar):
     """Проверяет что подзадача с вложенной подподзадачей сохранились после конвертации."""
     from tests.test_frontend.tests.milestones.conftest import open_milestone
