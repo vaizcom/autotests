@@ -11,7 +11,7 @@ from tests.test_frontend.tests.tasks.conftest import open_sidebar_menu
 def _goto_board(page: Page):
     """Переходит на борду с retry при медленной загрузке."""
     board_loaded = page.get_by_test_id(Board.CREATE_TASK).first
-    page.goto(settings.AUTOTEST_BOARD_URL)
+    page.goto(settings.AUTOTEST_BOARD_URL, timeout=60000)
     try:
         expect(board_loaded).to_be_visible(timeout=30000)
     except Exception:

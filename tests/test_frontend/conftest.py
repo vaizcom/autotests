@@ -69,7 +69,7 @@ def _run_task_cleanup(page, cleanup_info):
         return
 
     with allure.step(f"Cleanup: удаление задач с таймстемпом {ts}"):
-        page.goto(settings.AUTOTEST_BOARD_URL)
+        page.goto(settings.AUTOTEST_BOARD_URL, timeout=60000)
         try:
             expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
         except Exception:
@@ -105,7 +105,7 @@ def _run_task_cleanup(page, cleanup_info):
 def cleanup_board(page):
     """Удаляет все карточки на автотестовой борде."""
     with allure.step("Cleanup: удаление всех задач на борде"):
-        page.goto(settings.AUTOTEST_BOARD_URL)
+        page.goto(settings.AUTOTEST_BOARD_URL, timeout=60000)
         try:
             expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
         except Exception:

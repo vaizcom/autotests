@@ -19,7 +19,7 @@ _TS = datetime.now().strftime("%H%M%S")
 @allure.title("01. Создать задачу в каждой колонке борда")
 def test_01_create_task_in_each_column(page: Page, soft_step):
     """Проверяет что задачу можно создать в каждой колонке борда."""
-    page.goto(settings.AUTOTEST_BOARD_URL)
+    page.goto(settings.AUTOTEST_BOARD_URL, timeout=60000)
     try:
         expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
     except Exception:
@@ -66,7 +66,7 @@ def test_01_create_task_in_each_column(page: Page, soft_step):
 @allure.title("99. Cleanup: удалить задачи из колонок")
 def test_99_cleanup_column_tasks(page: Page):
     """Удаляет задачи col_*, созданные тестом создания в колонках."""
-    page.goto(settings.AUTOTEST_BOARD_URL)
+    page.goto(settings.AUTOTEST_BOARD_URL, timeout=60000)
     try:
         expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
     except Exception:

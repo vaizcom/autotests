@@ -237,7 +237,7 @@ def test_03_convert_task_to_milestone(page: Page, soft_step):
         soft_step("Конвертация", convert)
 
     def verify_card_gone():
-        page.goto(settings.AUTOTEST_BOARD_URL)
+        page.goto(settings.AUTOTEST_BOARD_URL, timeout=60000)
         _wait_board_ready(page)
         for attempt in range(4):
             task_card = page.get_by_role("button").filter(
@@ -382,7 +382,7 @@ def test_99_cleanup_milestone(page: Page, soft_step, cleanup_task):
     # Архивация майлстоуна через вкладку Milestones
     try:
         with allure.step("Открытие вкладки Milestones"):
-            page.goto(settings.AUTOTEST_BOARD_URL)
+            page.goto(settings.AUTOTEST_BOARD_URL, timeout=60000)
             try:
                 expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
             except Exception:

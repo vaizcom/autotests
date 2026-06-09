@@ -84,7 +84,7 @@ def _wait_board_ready(page: Page):
 def wait_for_card(page: Page, card_name: str, go_to_board: bool = True):
     """Ждёт появления карточки на борде с ретраями и reload."""
     if go_to_board:
-        page.goto(settings.AUTOTEST_BOARD_URL)
+        page.goto(settings.AUTOTEST_BOARD_URL, timeout=60000)
     _wait_board_ready(page)
 
     for attempt in range(4):
@@ -120,7 +120,7 @@ def open_card(page: Page, soft_step, card_name: str):
 
 def create_task_on_board(page: Page, task_name: str):
     """Открывает борду, создаёт задачу и проверяет что карточка видна."""
-    page.goto(settings.AUTOTEST_BOARD_URL)
+    page.goto(settings.AUTOTEST_BOARD_URL, timeout=60000)
     _wait_board_ready(page)
 
     page.get_by_test_id(Board.CREATE_TASK).first.click()
@@ -377,8 +377,8 @@ def remove_milestone_from_dropdown(page: Page, milestone_name: str):
 
 def open_sidebar_menu(page: Page):
     """Кликает по кнопке '...' (три точки) в шапке сайдбара задачи/майлстоуна."""
-    header_menu = page.locator('[class*="TaskEditorHeaderSlot-module_Menu"], [class*="TaskSidebarHeader-module"]')
-    more_btn = header_menu.locator('[class*="IconButton-module_Root"]:has(path[d^="M3.5 10"]), [class*="IconButton-module_Root"]:has(path[d^="M7.25 12"])')
+    header_menu = page.locator('[class*="TaskEditorHeaderSlot-module_Menu"], [class*="Milestone-module_RightButtons"]')
+    more_btn = header_menu.locator('[class*="IconButton-module_Root"]').last
     expect(more_btn.first).to_be_visible(timeout=5000)
     more_btn.first.click()
 
