@@ -1,0 +1,9 @@
+tests/test_frontend/tests/milestones/test_milestone_fields.py:132: in test_04_set_description
+    open_milestone(page, _MILESTONE_NAME)
+tests/test_frontend/tests/milestones/conftest.py:41: in open_milestone
+    expect(milestone).to_be_visible(timeout=5000)
+E   AssertionError: Locator expected to be visible
+E   Actual value: <element(s) not found> 
+E   Call log:
+E     - LocatorAssertions.to_be_visible with timeout 5000ms
+E     -   - waiting for get_by_text("autotest_ms_050132").first

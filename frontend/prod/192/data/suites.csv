@@ -1,0 +1,8 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"Создаёт майлстоун через вкладку Milestones на борде.","15196","01. Create milestone on board","Frontend","Tue Jun 09 05:02:17 UTC 2026","failed","Tue Jun 09 05:02:32 UTC 2026","Fields","Milestones","",""
+"","14233","Logout","Frontend","Tue Jun 09 05:01:48 UTC 2026","passed","Tue Jun 09 05:02:02 UTC 2026","","Auth","",""
+"Устанавливает и проверяет даты майлстоуна.","8480","05. Set and verify dates","Frontend","Tue Jun 09 05:02:59 UTC 2026","failed","Tue Jun 09 05:03:08 UTC 2026","Fields","Milestones","",""
+"Проверяет что название майлстоуна отображается корректно.","8471","02. Verify milestone name","Frontend","Tue Jun 09 05:02:33 UTC 2026","failed","Tue Jun 09 05:02:41 UTC 2026","Fields","Milestones","",""
+"Заполняет и проверяет описание майлстоуна (tiptap-редактор после секции задач).","8538","04. Set and verify description","Frontend","Tue Jun 09 05:02:50 UTC 2026","failed","Tue Jun 09 05:02:59 UTC 2026","Fields","Milestones","",""
+"","15022","Sign in with email","Frontend","Tue Jun 09 05:02:02 UTC 2026","passed","Tue Jun 09 05:02:17 UTC 2026","","Auth","",""
+"Заполняет и проверяет короткое описание майлстоуна.","8464","03. Set short description","Frontend","Tue Jun 09 05:02:42 UTC 2026","failed","Tue Jun 09 05:02:50 UTC 2026","Fields","Milestones","",""

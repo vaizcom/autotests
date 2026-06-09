@@ -1,0 +1,26 @@
+tests/test_frontend/tests/milestones/test_milestone_fields.py:76: in <lambda>
+    soft_step("Создание майлстоуна", lambda: create_milestone_on_board(page, _MILESTONE_NAME))
+tests/test_frontend/tests/milestones/conftest.py:24: in create_milestone_on_board
+    _goto_board(page)
+tests/test_frontend/tests/milestones/conftest.py:14: in _goto_board
+    page.goto(settings.AUTOTEST_BOARD_URL)
+/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/playwright/sync_api/_generated.py:9020: in goto
+    self._sync(
+/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/playwright/_impl/_page.py:552: in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/playwright/_impl/_frame.py:145: in goto
+    await self._channel.send("goto", locals_to_params(locals()))
+/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/playwright/_impl/_connection.py:61: in send
+    return await self._connection.wrap_api_call(
+/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/playwright/_impl/_connection.py:528: in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+E   playwright._impl._errors.TimeoutError: Page.goto: Timeout 15000ms exceeded.
+E   Call log:
+E     - navigating to "https://app.vaiz.com/687655d8e38db1f0877954fa/p/69f1d23f309d2c55d510eddf/b/69f1d25b309d2c55d510f174", waiting until "load"
+
+The above exception was the direct cause of the following exception:
+tests/test_frontend/tests/milestones/test_milestone_fields.py:76: in test_01_create_milestone
+    soft_step("Создание майлстоуна", lambda: create_milestone_on_board(page, _MILESTONE_NAME))
+tests/test_frontend/conftest.py:389: in _soft_step
+    raise AssertionError(f"[{name}] {hint}") from e
+E   AssertionError: [Создание майлстоуна] Непредвиденная ошибка
