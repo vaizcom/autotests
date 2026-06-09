@@ -6,7 +6,7 @@ import allure
 import pytest
 from playwright.sync_api import expect, Page
 
-from tests.test_frontend.conftest import cleanup_board
+from tests.test_frontend.conftest import cleanup_board, cleanup_cards_by_pattern
 from tests.test_frontend.tests.milestones.conftest import (
     create_milestone_on_board,
     open_milestone,
@@ -72,6 +72,11 @@ _debug_extra_setup = {
 @allure.title("01. Create milestone on board")
 def test_01_create_milestone(page: Page, soft_step):
     """Создаёт майлстоун через вкладку Milestones на борде."""
+    # Cleanup артефактов от предыдущих прерванных прогонов
+    with allure.step("Cleanup: удаление артефактов предыдущих прогонов"):
+        cleanup_cards_by_pattern(page, "MS task")
+        cleanup_milestones(page, keep_names=["Test milestone"])
+
     with allure.step(f"Создание майлстоуна: {_MILESTONE_NAME}"):
         soft_step("Создание майлстоуна", lambda: create_milestone_on_board(page, _MILESTONE_NAME))
 

@@ -102,6 +102,42 @@ def _run_task_cleanup(page, cleanup_info):
                       attachment_type=allure.attachment_type.TEXT)
 
 
+def cleanup_cards_by_pattern(page, pattern: str):
+    """Удаляет с борды карточки, содержащие pattern в названии. Best effort."""
+    with allure.step(f"Cleanup: удаление карточек по паттерну '{pattern}'"):
+        page.goto(settings.AUTOTEST_BOARD_URL, timeout=60000)
+        try:
+            expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=30000)
+        except Exception:
+            page.reload()
+            expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=30000)
+
+        deleted = 0
+        for _ in range(10):
+            card = page.get_by_role("button").filter(has_text=pattern).first
+            try:
+                expect(card).to_be_visible(timeout=3000)
+            except Exception:
+                break
+
+            card.hover()
+            card.get_by_test_id(TaskCard.MENU).click()
+
+            delete_with_sub = page.get_by_text("Delete with subtasks")
+            if delete_with_sub.is_visible():
+                delete_with_sub.click()
+            else:
+                page.get_by_text("Delete task").click()
+
+            page.get_by_role("button", name="Proceed").click()
+            page.wait_for_timeout(2000)
+            deleted += 1
+
+        if deleted:
+            allure.attach(f"Удалено карточек: {deleted}", name=f"cleanup '{pattern}'",
+                          attachment_type=allure.attachment_type.TEXT)
+
+
 def cleanup_board(page):
     """Удаляет все карточки на автотестовой борде."""
     with allure.step("Cleanup: удаление всех задач на борде"):

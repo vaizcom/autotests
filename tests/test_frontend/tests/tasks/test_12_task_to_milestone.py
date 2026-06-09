@@ -5,8 +5,10 @@ import allure
 import pytest
 from playwright.sync_api import expect, Page
 
+from tests.test_frontend.conftest import cleanup_cards_by_pattern
 from tests.test_frontend.core import settings
 from tests.test_frontend.core.locators import Board
+from tests.test_frontend.tests.milestones.conftest import cleanup_milestones
 from tests.test_frontend.tests.tasks.conftest import (
     create_task_on_board, open_card, open_sidebar_menu, _wait_board_ready,
     add_comment, fill_description, find_subtask_row_by_name, _scroll_to_subtasks,
@@ -92,6 +94,12 @@ _debug_extra_setup = {
 @allure.title("01. Создать Task для конвертации")
 def test_01_create_task_for_conversion(page: Page, soft_step):
     """Создаёт задачу, которая будет конвертирована в майлстоун."""
+    # Cleanup артефактов от предыдущих прерванных прогонов
+    with allure.step("Cleanup: удаление артефактов предыдущих прогонов"):
+        cleanup_cards_by_pattern(page, "ConvTask")
+        cleanup_cards_by_pattern(page, "ConvSub")
+        cleanup_milestones(page, keep_names=["Test milestone"])
+
     with allure.step(f"Создание задачи: {_TASK_NAME}"):
         soft_step("Создание задачи", lambda: create_task_on_board(page, _TASK_NAME))
 
