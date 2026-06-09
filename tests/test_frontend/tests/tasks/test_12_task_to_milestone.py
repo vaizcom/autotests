@@ -96,8 +96,9 @@ def test_01_create_task_for_conversion(page: Page, soft_step):
     """Создаёт задачу, которая будет конвертирована в майлстоун."""
     # Cleanup артефактов от предыдущих прерванных прогонов
     with allure.step("Cleanup: удаление артефактов предыдущих прогонов"):
-        cleanup_cards_by_pattern(page, "ConvTask")
+        cleanup_cards_by_pattern(page, "ConvSubSub")
         cleanup_cards_by_pattern(page, "ConvSub")
+        cleanup_cards_by_pattern(page, "ConvTask")
         cleanup_milestones(page, keep_names=["Test milestone"])
 
     with allure.step(f"Создание задачи: {_TASK_NAME}"):
