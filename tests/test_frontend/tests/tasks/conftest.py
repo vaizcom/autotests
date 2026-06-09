@@ -378,9 +378,10 @@ def remove_milestone_from_dropdown(page: Page, milestone_name: str):
 def open_sidebar_menu(page: Page):
     """Кликает по кнопке '...' (три точки) в шапке сайдбара задачи/майлстоуна."""
     header_menu = page.locator('[class*="TaskEditorHeaderSlot-module_Menu"], [class*="Milestone-module_RightButtons"]')
-    more_btn = header_menu.locator('[class*="IconButton-module_Root"]').last
-    expect(more_btn.first).to_be_visible(timeout=5000)
-    more_btn.first.click()
+    # Шапка сайдбара: ☆ ⚑ 🔗 ··· ✕ — кнопка "..." всегда 4-я (index 3)
+    more_btn = header_menu.locator('[class*="IconButton-module_Root"]').nth(3)
+    expect(more_btn).to_be_visible(timeout=5000)
+    more_btn.click()
 
 
 def open_as_page(page: Page, card_name: str):
