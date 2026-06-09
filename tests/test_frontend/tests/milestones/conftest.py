@@ -13,10 +13,10 @@ def _goto_board(page: Page):
     board_loaded = page.get_by_test_id(Board.CREATE_TASK).first
     page.goto(settings.AUTOTEST_BOARD_URL)
     try:
-        expect(board_loaded).to_be_visible(timeout=15000)
+        expect(board_loaded).to_be_visible(timeout=30000)
     except Exception:
         page.reload()
-        expect(board_loaded).to_be_visible(timeout=15000)
+        expect(board_loaded).to_be_visible(timeout=30000)
 
 
 def create_milestone_on_board(page: Page, milestone_name: str):

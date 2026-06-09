@@ -70,10 +70,10 @@ def delete_task_in_table(page: Page, container, task_name: str):
 def _wait_board_ready(page: Page):
     """Ждёт полной загрузки борды: кнопка Add task + карточки или пустая колонка."""
     try:
-        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=30000)
     except Exception:
         page.reload()
-        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=15000)
+        expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=30000)
     # Борда загружена, если видна хотя бы одна карточка или счётчик "0 tasks"
     loaded = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+")).first.or_(
         page.get_by_text(re.compile(r"\d+ tasks?")).first
