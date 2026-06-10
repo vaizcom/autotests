@@ -1,4 +1,4 @@
-.PHONY: lint clean debug report report-backend report-frontend
+.PHONY: lint lint-frontend lint-backend clean debug report report-backend report-frontend
 
 # Отладка отдельного теста с автоматическим сетапом и клинапом.
 # Генерирует TS, запускает test_01 → целевой тест → test_99 в одном прогоне.
@@ -18,6 +18,14 @@ debug:
 lint:
 	@exec ruff tests --fix
 	@exec ruff format tests
+
+lint-frontend:
+	@exec ruff tests/test_frontend --fix
+	@exec ruff format tests/test_frontend
+
+lint-backend:
+	@exec ruff tests/test_backend --fix
+	@exec ruff format tests/test_backend
 
 clean:
 	rm -rf allure-results allure-results-backend allure-results-frontend
