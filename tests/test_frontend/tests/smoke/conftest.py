@@ -6,14 +6,14 @@ from tests.test_frontend.conftest import API_URL
 
 def _delete_space(token: str, space_id: str) -> None:
     requests.post(
-        f"{API_URL}/RemoveSpace",
+        f'{API_URL}/RemoveSpace',
         headers={
-            "Authorization": f"Bearer {token}",
-            "Cookie": f"_t={token}",
-            "Content-Type": "application/json",
-            "Current-Space-Id": space_id,
+            'Authorization': f'Bearer {token}',
+            'Cookie': f'_t={token}',
+            'Content-Type': 'application/json',
+            'Current-Space-Id': space_id,
         },
-        json={"spaceId": space_id},
+        json={'spaceId': space_id},
         timeout=30,
         verify=False,
     )
@@ -28,4 +28,4 @@ def cleanup_space(api_token):
         try:
             _delete_space(api_token, space_id)
         except Exception as e:
-            print(f"Cleanup: не удалось удалить Space {space_id}: {e}")
+            print(f'Cleanup: не удалось удалить Space {space_id}: {e}')

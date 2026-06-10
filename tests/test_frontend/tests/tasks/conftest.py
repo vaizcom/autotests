@@ -11,20 +11,21 @@ from tests.test_frontend.core.locators import Board
 
 # ── Shared constants ──────────────────────────────────────────────────
 
-_TS = os.environ.get("TEST_TS") or datetime.now().strftime("%H%M%S")
-TASK_NAME = f"autotest_{_TS}"
+_TS = os.environ.get('TEST_TS') or datetime.now().strftime('%H%M%S')
+TASK_NAME = f'autotest_{_TS}'
 
 
 # ── Session fixture: создание задачи + cleanup ────────────────────────
 
-@pytest.fixture(scope="session", autouse=True)
+
+@pytest.fixture(scope='session', autouse=True)
 def _shared_task_lifecycle(playwright, auth_state, _configure_test_id):
     """Создаёт autotest задачу перед первым тестом, cleanup в finalizer."""
     browser = playwright.chromium.launch()
     ctx = browser.new_context(
         storage_state=auth_state,
         ignore_https_errors=True,
-        viewport={"width": 1280, "height": 720},
+        viewport={'width': 1280, 'height': 720},
     )
     page = ctx.new_page()
     create_task_on_board(page, TASK_NAME)
@@ -41,11 +42,11 @@ def _shared_task_lifecycle(playwright, auth_state, _configure_test_id):
     ctx = browser.new_context(
         storage_state=auth_state,
         ignore_https_errors=True,
-        viewport={"width": 1280, "height": 720},
+        viewport={'width': 1280, 'height': 720},
     )
     page = ctx.new_page()
     cleanup_board(page)
-    cleanup_milestones(page, keep_names=["Test milestone"])
+    cleanup_milestones(page, keep_names=['Test milestone'])
     page.close()
     ctx.close()
     browser.close()
@@ -53,18 +54,16 @@ def _shared_task_lifecycle(playwright, auth_state, _configure_test_id):
 
 def find_subtask_row_by_name(container, name: str):
     """Строка в таблице подзадач с ID задачи (FRONT-XXX) и заданным именем."""
-    return container.get_by_role("button").filter(
-        has_text=re.compile(r"[A-Z]+-\d+")
-    ).filter(has_text=name)
+    return container.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=name)
 
 
 def delete_task_in_table(page: Page, container, task_name: str):
     """Удаляет задачу/подзадачу из таблицы по имени (подзадачи, майлстоуны)."""
     row = find_subtask_row_by_name(container, task_name)
     expect(row).to_be_visible(timeout=10000)
-    row.get_by_role("button").last.click()
-    page.get_by_text("Delete task").click()
-    page.get_by_role("button", name="Proceed").click()
+    row.get_by_role('button').last.click()
+    page.get_by_text('Delete task').click()
+    page.get_by_role('button', name='Proceed').click()
 
 
 def _wait_board_ready(page: Page):
@@ -75,9 +74,12 @@ def _wait_board_ready(page: Page):
         page.reload()
         expect(page.get_by_test_id(Board.CREATE_TASK).first).to_be_visible(timeout=30000)
     # Борда загружена, если видна хотя бы одна карточка или счётчик "0 tasks"
-    loaded = page.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+")).first.or_(
-        page.get_by_text(re.compile(r"\d+ tasks?")).first
-    ).first
+    loaded = (
+        page.get_by_role('button')
+        .filter(has_text=re.compile(r'[A-Z]+-\d+'))
+        .first.or_(page.get_by_text(re.compile(r'\d+ tasks?')).first)
+        .first
+    )
     expect(loaded).to_be_visible(timeout=15000)
 
 
@@ -88,9 +90,7 @@ def wait_for_card(page: Page, card_name: str, go_to_board: bool = True):
     _wait_board_ready(page)
 
     for attempt in range(4):
-        card = page.get_by_role("button").filter(
-            has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=card_name).first
+        card = page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=card_name).first
         if card.is_visible():
             return card
         if attempt < 3:
@@ -106,13 +106,13 @@ def open_card(page: Page, soft_step, card_name: str):
         wait_for_card(page, card_name)
 
     def _open_sidebar():
-        task_card = page.get_by_role("button").filter(
-            has_text=re.compile(r"[A-Z]+-\d+")
-        ).filter(has_text=card_name).first
+        task_card = (
+            page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=card_name).first
+        )
         expect(task_card).to_be_visible(timeout=15000)
         task_card.click()
         sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-        expect(sidebar.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
+        expect(sidebar.get_by_role('heading', name=card_name)).to_be_visible(timeout=10000)
 
     with allure.step(f"Открытие карточки '{card_name}' в сайдбаре"):
         soft_step(f"Открытие '{card_name}' в сайдбаре", _open_sidebar)
@@ -124,42 +124,38 @@ def create_task_on_board(page: Page, task_name: str):
     _wait_board_ready(page)
 
     page.get_by_test_id(Board.CREATE_TASK).first.click()
-    expect(page.get_by_role("textbox", name="Task name...")).to_be_visible(timeout=5000)
-    page.get_by_role("textbox", name="Task name...").fill(task_name)
-    page.locator("#board-card-create").get_by_role("button", name="Add task").click()
+    expect(page.get_by_role('textbox', name='Task name...')).to_be_visible(timeout=5000)
+    page.get_by_role('textbox', name='Task name...').fill(task_name)
+    page.locator('#board-card-create').get_by_role('button', name='Add task').click()
 
-    task_card = page.get_by_role("button").filter(
-        has_text=re.compile(r"[A-Z]+-\d+")
-    ).filter(has_text=task_name)
+    task_card = page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=task_name)
     expect(task_card).to_be_visible(timeout=10000)
 
 
 def add_subtask(page: Page, subtask_name: str):
     """Добавляет подзадачу в открытом сайдбаре задачи."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    textbox = sidebar.get_by_role("textbox", name="Enter subtask name")
+    textbox = sidebar.get_by_role('textbox', name='Enter subtask name')
     expect(textbox).to_be_visible(timeout=5000)
     textbox.fill(subtask_name)
-    page.keyboard.press("Enter")
+    page.keyboard.press('Enter')
     expect(find_subtask_row_by_name(sidebar, subtask_name)).to_be_visible(timeout=10000)
 
 
 def create_subtasks(page: Page, card_name: str, subtask_names: list[str]):
     """Открывает карточку на борде и создаёт подзадачи."""
-    card = page.get_by_role("button").filter(
-        has_text=re.compile(r"[A-Z]+-\d+")
-    ).filter(has_text=card_name)
+    card = page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=card_name)
     expect(card).to_be_visible(timeout=10000)
     card.click()
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    expect(sidebar.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
+    expect(sidebar.get_by_role('heading', name=card_name)).to_be_visible(timeout=10000)
     for name in subtask_names:
         add_subtask(page, name)
 
 
 def _subtask_heading(container):
     """Возвращает первый heading секции подзадач."""
-    return container.get_by_role("heading", name=re.compile(r"\d+ subtasks?")).first
+    return container.get_by_role('heading', name=re.compile(r'\d+ subtasks?')).first
 
 
 def _scroll_to_subtasks(container):
@@ -171,20 +167,18 @@ def _scroll_to_subtasks(container):
 
 def _is_subtask_section_collapsed(container):
     """Проверяет, свёрнута ли секция подзадач (инпут добавления не виден)."""
-    return not container.get_by_role("textbox", name="Enter subtask name").first.is_visible(timeout=2000)
+    return not container.get_by_role('textbox', name='Enter subtask name').first.is_visible(timeout=2000)
 
 
 def _ensure_sidebar_open(page: Page, container, card_name: str):
     """Проверяет что сайдбар открыт с нужной карточкой, переоткрывает при необходимости."""
-    task_heading = container.get_by_role("heading", name=card_name)
+    task_heading = container.get_by_role('heading', name=card_name)
     if task_heading.is_visible(timeout=3000):
         return
     # Сайдбар закрыт — открываем карточку
-    card = page.get_by_role("button").filter(
-        has_text=re.compile(r"[A-Z]+-\d+")
-    ).filter(has_text=card_name).first
+    card = page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=card_name).first
     expect(card).to_be_visible(timeout=10000)
-    for click_attempt in range(3):
+    for _click_attempt in range(3):
         card.click()
         if task_heading.is_visible(timeout=5000):
             return
@@ -219,7 +213,7 @@ def wait_for_subtask_rows(page: Page, card_name: str, subtask_name: str, *, full
         if attempt < 3:
             page.reload()
             if full_page:
-                expect(page.get_by_role("heading", name=card_name).first).to_be_visible(timeout=15000)
+                expect(page.get_by_role('heading', name=card_name).first).to_be_visible(timeout=15000)
             else:
                 _wait_board_ready(page)
                 _ensure_sidebar_open(page, container, card_name)
@@ -229,7 +223,7 @@ def wait_for_subtask_rows(page: Page, card_name: str, subtask_name: str, *, full
 def toggle_subtask_complete(page: Page, subtask_name: str, *, full_page: bool = False):
     """Кликает чекбокс подзадачи по имени. Работает независимо от DOM-структуры."""
     container = page if full_page else page.locator('[class*="RightSidebar-module_Root"]')
-    btn = container.get_by_role("button").filter(has_text=subtask_name)
+    btn = container.get_by_role('button').filter(has_text=subtask_name)
     expect(btn).to_be_visible(timeout=15000)
     btn.evaluate("el => el.scrollIntoView({block: 'center'})")
 
@@ -237,7 +231,7 @@ def toggle_subtask_complete(page: Page, subtask_name: str, *, full_page: bool = 
     # Чекбокс внутри кнопки
     cb = btn.locator('label[role="checkbox"]')
     if cb.count() > 0:
-        cb.evaluate("el => el.click()")
+        cb.evaluate('el => el.click()')
         return
 
     # Чекбокс в соседней ячейке — ищем ближайший контейнер с чекбоксами
@@ -245,14 +239,14 @@ def toggle_subtask_complete(page: Page, subtask_name: str, *, full_page: bool = 
     checkboxes = ancestor.locator('label[role="checkbox"]')
 
     if checkboxes.count() == 1:
-        checkboxes.evaluate("el => el.click()")
+        checkboxes.evaluate('el => el.click()')
         return
 
     # Несколько чекбоксов — совпадение по индексу с кнопками
-    buttons = ancestor.get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+"))
+    buttons = ancestor.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+'))
     for i in range(buttons.count()):
         if subtask_name in buttons.nth(i).inner_text():
-            checkboxes.nth(i).evaluate("el => el.click()")
+            checkboxes.nth(i).evaluate('el => el.click()')
             return
 
     raise AssertionError(f"Чекбокс для подзадачи '{subtask_name}' не найден")
@@ -266,54 +260,64 @@ def expect_subtask_counter(page: Page, card_name: str, text: str, *, full_page: 
     except (AssertionError, Exception):
         page.reload()
         if full_page:
-            expect(page.get_by_role("heading", name=card_name).first).to_be_visible(timeout=15000)
+            expect(page.get_by_role('heading', name=card_name).first).to_be_visible(timeout=15000)
         else:
             _wait_board_ready(page)
-            card = page.get_by_role("button").filter(
-                has_text=re.compile(r"[A-Z]+-\d+")
-            ).filter(has_text=card_name).first
+            card = (
+                page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=card_name).first
+            )
             expect(card).to_be_visible(timeout=10000)
             card.click()
-            expect(container.get_by_role("heading", name=card_name)).to_be_visible(timeout=10000)
+            expect(container.get_by_role('heading', name=card_name)).to_be_visible(timeout=10000)
         expect(container.get_by_text(text)).to_be_visible(timeout=10000)
 
 
 def future_date(days_ahead: int = 90) -> str:
     """Возвращает дату через days_ahead дней в формате dd.mm.yyyy."""
     d = datetime.now() + timedelta(days=days_ahead)
-    return d.strftime("%d.%m.%Y")
+    return d.strftime('%d.%m.%Y')
 
 
 def set_date(page: Page, date: str):
     """Устанавливает дату (due) в открытом сайдбаре задачи/майлстоуна."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    dates_btn = sidebar.get_by_text("No dates set")
+    dates_btn = sidebar.get_by_text('No dates set')
     expect(dates_btn).to_be_visible(timeout=10000)
     dates_btn.scroll_into_view_if_needed()
     dates_btn.click(force=True)
-    date_input = page.get_by_placeholder(re.compile(r"\d{2}\.\d{2}\.\d{4}")).first
+    date_input = page.get_by_placeholder(re.compile(r'\d{2}\.\d{2}\.\d{4}')).first
     expect(date_input).to_be_visible(timeout=5000)
-    _MONTHS = ["January", "February", "March", "April", "May", "June",
-               "July", "August", "September", "October", "November", "December"]
-    parts = date.split(".")
+    _MONTHS = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+    ]
+    parts = date.split('.')
     day = str(int(parts[0]))
-    expected_header = f"{_MONTHS[int(parts[1]) - 1]} {parts[2]}"
+    expected_header = f'{_MONTHS[int(parts[1]) - 1]} {parts[2]}'
     datepicker = page.locator('[class*="Datepicker2-module_Root"]')
     expect(datepicker).to_be_visible(timeout=5000)
     # Навигируем стрелкой > до нужного месяца
     next_btn = datepicker.locator('button[name="next-month"]')
     for _ in range(100):
-        header = datepicker.locator(".rdp-caption_label").inner_text()
+        header = datepicker.locator('.rdp-caption_label').inner_text()
         if header.strip() == expected_header:
             break
         next_btn.click()
         page.wait_for_timeout(50)
     # Кликаем по дню
-    day_btn = datepicker.locator("button.rdp-day:not(.rdp-day_outside)").filter(
-        has_text=re.compile(f"^{day}$")
-    ).first
+    day_btn = datepicker.locator('button.rdp-day:not(.rdp-day_outside)').filter(has_text=re.compile(f'^{day}$')).first
     day_btn.click()
-    apply_btn = page.get_by_role("button", name="Apply")
+    apply_btn = page.get_by_role('button', name='Apply')
     expect(apply_btn).to_be_enabled(timeout=10000)
     apply_btn.click()
 
@@ -322,13 +326,11 @@ def fill_description(page: Page, text: str):
     """Заполняет описание в tiptap-редакторе открытого сайдбара."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
     # Описание — .tiptap вне секции комментариев (работает на задачах и майлстоунах)
-    editor = sidebar.locator(
-        '//*[contains(@class, "tiptap") and not(ancestor::*[contains(@class, "Comment")])]'
-    ).first
+    editor = sidebar.locator('//*[contains(@class, "tiptap") and not(ancestor::*[contains(@class, "Comment")])]').first
     expect(editor).to_be_visible(timeout=10000)
     editor.scroll_into_view_if_needed()
     editor.click()
-    expect(editor).to_have_attribute("contenteditable", "true", timeout=5000)
+    expect(editor).to_have_attribute('contenteditable', 'true', timeout=5000)
     editor.fill(text)
     expect(editor).to_contain_text(text, timeout=5000)
 
@@ -339,11 +341,11 @@ def add_comment(page: Page, comment_text: str):
     toolbar = sidebar.locator('[class*="CommentToolbar-module"]').first
     expect(toolbar).to_be_visible(timeout=5000)
     toolbar.scroll_into_view_if_needed()
-    comment_editor = toolbar.locator('xpath=ancestor::div[contains(@class, "Comment")]').locator(".tiptap")
+    comment_editor = toolbar.locator('xpath=ancestor::div[contains(@class, "Comment")]').locator('.tiptap')
     expect(comment_editor).to_be_visible(timeout=5000)
     comment_editor.click()
     comment_editor.fill(comment_text)
-    send_btn = sidebar.locator('[class*="CommentToolbar-module_Right"]').get_by_role("button").last
+    send_btn = sidebar.locator('[class*="CommentToolbar-module_Right"]').get_by_role('button').last
     expect(send_btn).to_be_enabled(timeout=5000)
     send_btn.click()
 
@@ -351,26 +353,26 @@ def add_comment(page: Page, comment_text: str):
 def create_milestone_from_dropdown(page: Page, milestone_name: str):
     """Создаёт майлстоун из dropdown поля Milestones в открытом сайдбаре."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    milestones_btn = sidebar.get_by_role("button", name=re.compile(r"^Milestones"))
+    milestones_btn = sidebar.get_by_role('button', name=re.compile(r'^Milestones'))
     expect(milestones_btn).to_be_visible(timeout=5000)
     milestones_btn.click()
-    create_item = page.get_by_role("menuitem", name="Create milestone")
+    create_item = page.get_by_role('menuitem', name='Create milestone')
     expect(create_item).to_be_visible(timeout=5000)
-    create_item.locator("div").first.click()
-    name_input = page.get_by_role("textbox", name="Type name")
+    create_item.locator('div').first.click()
+    name_input = page.get_by_role('textbox', name='Type name')
     expect(name_input).to_be_visible(timeout=5000)
     name_input.fill(milestone_name)
-    page.get_by_role("button", name="Add", exact=True).click()
+    page.get_by_role('button', name='Add', exact=True).click()
     expect(milestones_btn.filter(has_text=milestone_name)).to_be_visible(timeout=5000)
 
 
 def remove_milestone_from_dropdown(page: Page, milestone_name: str):
     """Снимает майлстоун в dropdown поля Milestones в открытом сайдбаре."""
     sidebar = page.locator('[class*="RightSidebar-module_Root"]')
-    milestones_btn = sidebar.get_by_role("button", name=re.compile(r"^Milestones"))
+    milestones_btn = sidebar.get_by_role('button', name=re.compile(r'^Milestones'))
     expect(milestones_btn).to_be_visible(timeout=5000)
     milestones_btn.click()
-    item = page.get_by_role("menuitem", name=milestone_name)
+    item = page.get_by_role('menuitem', name=milestone_name)
     expect(item).to_be_visible(timeout=5000)
     item.click()
 
@@ -387,9 +389,9 @@ def open_sidebar_menu(page: Page):
 def open_as_page(page: Page, card_name: str):
     """Открывает задачу/майлстоун на полную страницу через меню '...' → 'Open as page'."""
     open_sidebar_menu(page)
-    page.get_by_text("Open as page").click()
+    page.get_by_text('Open as page').click()
     expect(page.locator('[class*="RightSidebar-module_Root"]')).not_to_be_visible(timeout=5000)
-    expect(page.get_by_role("heading", name=card_name).first).to_be_visible(timeout=15000)
+    expect(page.get_by_role('heading', name=card_name).first).to_be_visible(timeout=15000)
 
 
 @pytest.fixture()
