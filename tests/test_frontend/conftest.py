@@ -89,7 +89,7 @@ def _run_task_cleanup(page, cleanup_info):
             card.get_by_test_id(TaskCard.MENU).click()
 
             delete_with_sub = page.get_by_text("Delete with subtasks")
-            if delete_with_sub.is_visible():
+            if delete_with_sub.is_visible(timeout=1000):
                 delete_with_sub.click()
             else:
                 page.get_by_text("Delete task").click()
@@ -124,7 +124,7 @@ def cleanup_cards_by_pattern(page, pattern: str):
             card.get_by_test_id(TaskCard.MENU).click()
 
             delete_with_sub = page.get_by_text("Delete with subtasks")
-            if delete_with_sub.is_visible():
+            if delete_with_sub.is_visible(timeout=1000):
                 delete_with_sub.click()
             else:
                 page.get_by_text("Delete task").click()
@@ -161,7 +161,7 @@ def cleanup_board(page):
             cards.first.get_by_test_id(TaskCard.MENU).click()
 
             delete_with_sub = page.get_by_text("Delete with subtasks")
-            if delete_with_sub.is_visible():
+            if delete_with_sub.is_visible(timeout=1000):
                 delete_with_sub.click()
             else:
                 page.get_by_text("Delete task").click()
