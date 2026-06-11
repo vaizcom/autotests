@@ -231,46 +231,92 @@ def test_06_add_tasks_to_milestone(page: Page, soft_step, sidebar):
 @allure.sub_suite('Fields')
 @allure.title('07. Verify task completion counters')
 def test_07_complete_milestone_tasks(page: Page, soft_step, sidebar):
-    """Завершает и снимает завершение задач, проверяет счётчики."""
+    """Завершает и снимает завершение задач, проверяет счётчики и прогресс-круги."""
     open_milestone(page, _MILESTONE_NAME)
 
     wait_for_task_rows(page, _MILESTONE_NAME)
+
+    progress_bars = sidebar.locator('[data-test-id="CircularProgressbar"]')
+    progress_title = progress_bars.first
+    progress_counter = progress_bars.nth(1)
+
+    def _get_offset(progress_bar):
+        """Возвращает stroke-dashoffset прогресс-пути (0 = 100%, ~289 = 0%)."""
+        path = progress_bar.locator('.CircularProgressbar-path')
+        style = path.get_attribute('style')
+        match = re.search(r'stroke-dashoffset:\s*([\d.]+)px', style)
+        return float(match.group(1)) if match else None
+
+    def _offset_in_range(bar, expected_pct):
+        offset = _get_offset(bar)
+        if offset is None:
+            return False
+        if expected_pct == 0:
+            return offset > 200
+        elif expected_pct == 50:
+            return 50 < offset < 200
+        elif expected_pct == 100:
+            return offset < 1
+        return False
+
+    def _check_progress(label, expected_pct):
+        """Проверяет что оба прогресс-круга заполнены на expected_pct (0, 50, 100).
+        Polling с ожиданием до 5 секунд — SVG обновляется с задержкой (бродкаст)."""
+        for name, bar in [('у заголовка', progress_title), ('у счётчика', progress_counter)]:
+            for _ in range(20):
+                if _offset_in_range(bar, expected_pct):
+                    break
+                page.wait_for_timeout(500)
+            else:
+                offset = _get_offset(bar)
+                raise AssertionError(f'Прогресс-круг {name}: ожидался {expected_pct}%, offset={offset}')
 
     def toggle_complete(task_name):
         task_row = sidebar.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=task_name)
         task_row.locator('label[role="checkbox"]').click()
 
-    # ── Complete задачи 1 → "1 completed of 2" ──
+    # ── Прогресс-круги видны, 0% ──
+
+    with allure.step('Проверка: оба прогресс-круга видны, 0%'):
+        soft_step('Прогресс-круг у заголовка', lambda: expect(progress_title).to_be_visible(timeout=5000))
+        soft_step('Прогресс-круг у счётчика', lambda: expect(progress_counter).to_be_visible(timeout=5000))
+        soft_step('Прогресс 0%', lambda: _check_progress('0 completed', 0))
+
+    # ── Complete задачи 1 → "1 completed of 2", ~50% ──
 
     with allure.step(f'Завершение задачи: {_TASK_NAME}'):
         soft_step('Завершение задачи 1', lambda: toggle_complete(_TASK_NAME))
 
-    with allure.step('Проверка: 1 completed of 2'):
+    with allure.step('Проверка: 1 completed of 2, ~50%'):
         expect(sidebar.get_by_text('1 completed of 2')).to_be_visible(timeout=10000)
+        soft_step('Прогресс ~50%', lambda: _check_progress('1 of 2', 50))
 
-    # ── Complete задачи 2 → "All 2 completed" ──
+    # ── Complete задачи 2 → "All 2 completed", 100% ──
 
     with allure.step(f'Завершение задачи: {_TASK_NAME_2}'):
         soft_step('Завершение задачи 2', lambda: toggle_complete(_TASK_NAME_2))
 
-    with allure.step('Проверка: All 2 completed'):
+    with allure.step('Проверка: All 2 completed, 100%'):
         expect(sidebar.get_by_text('All 2 completed')).to_be_visible(timeout=10000)
+        soft_step('Прогресс 100%', lambda: _check_progress('All completed', 100))
 
-    # ── Uncomplete задачи 1 → "1 completed of 2" ──
+    # ── Uncomplete задачи 1 → "1 completed of 2", ~50% ──
 
     with allure.step(f'Снятие завершения: {_TASK_NAME}'):
         soft_step('Снятие завершения задачи 1', lambda: toggle_complete(_TASK_NAME))
 
-    with allure.step('Проверка: 1 completed of 2 (после снятия)'):
+    with allure.step('Проверка: 1 completed of 2 (после снятия), ~50%'):
         expect(sidebar.get_by_text('1 completed of 2')).to_be_visible(timeout=10000)
+        soft_step('Прогресс ~50%', lambda: _check_progress('1 of 2 after uncomplete', 50))
 
-    # ── Uncomplete задачи 2 → "0 completed of 2" ──
+    # ── Uncomplete задачи 2 → "0 completed of 2", 0% ──
 
     with allure.step(f'Снятие завершения: {_TASK_NAME_2}'):
         soft_step('Снятие завершения задачи 2', lambda: toggle_complete(_TASK_NAME_2))
 
-    with allure.step('Проверка: 0 completed of 2'):
+    with allure.step('Проверка: 0 completed of 2, 0%'):
         expect(sidebar.get_by_text('0 completed of 2')).to_be_visible(timeout=10000)
+        soft_step('Прогресс 0%', lambda: _check_progress('0 of 2 after uncomplete', 0))
 
 
 # ── 08. Удаление задач + счётчики ──────────────────────────────────
@@ -347,6 +393,7 @@ def test_10_verify_activities_tab(page: Page, soft_step, sidebar):
             'Вкладка Activities',
             lambda: expect(sidebar.get_by_role('button', name='Activities')).to_be_visible(timeout=5000),
         )
+
 
 
 # ── 99. Cleanup ─────────────────────────────────────────────────────
