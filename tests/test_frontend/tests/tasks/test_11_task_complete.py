@@ -55,7 +55,7 @@ def test_01_complete_task(page: Page, soft_step, sidebar):
 @allure.parent_suite('Frontend')
 @allure.suite('Tasks')
 @allure.sub_suite('Complete')
-@allure.title('02. Complete через чекбокс на карточке борда')
+@allure.title('02. Complete через чекбокс на карточке борды')
 def test_02_complete_from_board(page: Page, soft_step, sidebar):
     """Завершает задачу кликом по чекбоксу на карточке борда (без открытия сайдбара)."""
     wait_for_card(page, TASK_NAME)
