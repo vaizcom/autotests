@@ -19,28 +19,29 @@ def test_01_complete_task(page: Page, soft_step, sidebar):
     Проверяет чекбокс и в сайдбаре, и на карточке борды."""
     open_card(page, soft_step, TASK_NAME)
 
-    sidebar_checkbox = sidebar.locator('label[role="checkbox"]').first
+    sidebar_label = sidebar.locator('label[role="checkbox"]').first
+    sidebar_complete = sidebar_label.locator('input')
     board_card = get_board_card(page, TASK_NAME)
-    board_toggle = board_card.locator('input[data-test-id*="complete-toggle"]')
+    board_complete = board_card.locator('input[data-test-id*="complete-toggle"]')
 
     # Нормализуем состояние — задача должна быть незавершённой
-    if sidebar_checkbox.locator('input').is_checked():
-        sidebar_checkbox.click()
-        expect(sidebar_checkbox.locator('input')).not_to_be_checked(timeout=5000)
+    if sidebar_complete.is_checked():
+        sidebar_label.click()
+        expect(sidebar_complete).not_to_be_checked(timeout=5000)
 
     def complete_task():
-        sidebar_checkbox.click()
-        expect(sidebar_checkbox.locator('input')).to_be_checked(timeout=5000)
+        sidebar_label.click()
+        expect(sidebar_complete).to_be_checked(timeout=5000)
 
     def check_board_complete():
-        expect(board_toggle).to_be_checked(timeout=10000)
+        expect(board_complete).to_be_checked(timeout=10000)
 
     def uncomplete_task():
-        sidebar_checkbox.click()
-        expect(sidebar_checkbox.locator('input')).not_to_be_checked(timeout=5000)
+        sidebar_label.click()
+        expect(sidebar_complete).not_to_be_checked(timeout=5000)
 
     def check_board_uncomplete():
-        expect(board_toggle).not_to_be_checked(timeout=10000)
+        expect(board_complete).not_to_be_checked(timeout=10000)
 
     with allure.step('Complete'):
         soft_step('Complete в сайдбаре', complete_task)
@@ -61,28 +62,28 @@ def test_02_complete_from_board(page: Page, soft_step, sidebar):
 
     board_card = get_board_card(page, TASK_NAME)
     board_label = board_card.locator('label[role="checkbox"]')
-    board_input = board_card.locator('input[data-test-id*="complete-toggle"]')
+    board_complete = board_card.locator('input[data-test-id*="complete-toggle"]')
 
     # Нормализуем состояние — задача должна быть незавершённой
-    if board_input.is_checked():
+    if board_complete.is_checked():
         board_label.click()
-        expect(board_input).not_to_be_checked(timeout=5000)
+        expect(board_complete).not_to_be_checked(timeout=5000)
 
     def complete_from_board():
         board_label.click()
-        expect(board_input).to_be_checked(timeout=5000)
+        expect(board_complete).to_be_checked(timeout=5000)
 
     def uncomplete_from_board():
         board_label.click()
-        expect(board_input).not_to_be_checked(timeout=5000)
+        expect(board_complete).not_to_be_checked(timeout=5000)
 
     def open_and_check_sidebar(expected_checked):
         board_card.click()
-        sidebar_checkbox = sidebar.locator('label[role="checkbox"]').first
+        sidebar_complete = sidebar.locator('label[role="checkbox"]').first.locator('input')
         if expected_checked:
-            expect(sidebar_checkbox.locator('input')).to_be_checked(timeout=5000)
+            expect(sidebar_complete).to_be_checked(timeout=5000)
         else:
-            expect(sidebar_checkbox.locator('input')).not_to_be_checked(timeout=5000)
+            expect(sidebar_complete).not_to_be_checked(timeout=5000)
         page.keyboard.press('Escape')
 
     with allure.step('Complete на борде'):
@@ -103,12 +104,12 @@ def test_03_complete_from_card_menu(page: Page, soft_step, sidebar):
     wait_for_card(page, TASK_NAME)
 
     board_card = get_board_card(page, TASK_NAME)
-    board_input = board_card.locator('input[data-test-id*="complete-toggle"]')
+    board_complete = board_card.locator('input[data-test-id*="complete-toggle"]')
 
     # Нормализуем состояние — задача должна быть незавершённой
-    if board_input.is_checked():
+    if board_complete.is_checked():
         board_card.locator('label[role="checkbox"]').click()
-        expect(board_input).not_to_be_checked(timeout=5000)
+        expect(board_complete).not_to_be_checked(timeout=5000)
 
     def click_card_menu_completed():
         board_card.hover()
@@ -119,11 +120,11 @@ def test_03_complete_from_card_menu(page: Page, soft_step, sidebar):
 
     def complete_via_menu():
         click_card_menu_completed()
-        expect(board_input).to_be_checked(timeout=5000)
+        expect(board_complete).to_be_checked(timeout=5000)
 
     def uncomplete_via_menu():
         click_card_menu_completed()
-        expect(board_input).not_to_be_checked(timeout=5000)
+        expect(board_complete).not_to_be_checked(timeout=5000)
 
     with allure.step('Complete через меню карточки'):
         soft_step('Complete', complete_via_menu)
@@ -140,13 +141,13 @@ def test_04_complete_from_sidebar_menu(page: Page, soft_step, sidebar):
     """Завершает задачу через меню '...' в сайдбаре."""
     open_card(page, soft_step, TASK_NAME)
 
-    sidebar_checkbox = sidebar.locator('label[role="checkbox"]').first
-    cb_input = sidebar_checkbox.locator('input')
+    sidebar_label = sidebar.locator('label[role="checkbox"]').first
+    sidebar_complete = sidebar_label.locator('input')
 
     # Нормализуем состояние — задача должна быть незавершённой
-    if cb_input.is_checked():
-        sidebar_checkbox.click()
-        expect(cb_input).not_to_be_checked(timeout=5000)
+    if sidebar_complete.is_checked():
+        sidebar_label.click()
+        expect(sidebar_complete).not_to_be_checked(timeout=5000)
 
     def click_sidebar_menu_completed():
         open_sidebar_menu(page)
@@ -156,13 +157,11 @@ def test_04_complete_from_sidebar_menu(page: Page, soft_step, sidebar):
 
     def complete_via_sidebar_menu():
         click_sidebar_menu_completed()
-        cb = sidebar.locator('label[role="checkbox"]').first
-        expect(cb.locator('input')).to_be_checked(timeout=10000)
+        expect(sidebar_complete).to_be_checked(timeout=10000)
 
     def uncomplete_via_sidebar_menu():
         click_sidebar_menu_completed()
-        cb = sidebar.locator('label[role="checkbox"]').first
-        expect(cb.locator('input')).not_to_be_checked(timeout=10000)
+        expect(sidebar_complete).not_to_be_checked(timeout=10000)
 
     with allure.step('Complete через меню сайдбара'):
         soft_step('Complete', complete_via_sidebar_menu)
