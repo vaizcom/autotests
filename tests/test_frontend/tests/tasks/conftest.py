@@ -109,6 +109,11 @@ def wait_for_card(page: Page, card_name: str, go_to_board: bool = True):
     raise AssertionError(f"Карточка '{card_name}' не найдена на борде после 4 попыток")
 
 
+def get_board_card(page: Page, card_name: str):
+    """Возвращает локатор карточки на борде по имени (без ожидания/reload)."""
+    return page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=card_name).first
+
+
 def open_card(page: Page, soft_step, card_name: str):
     """Открывает борду и кликает по карточке с заданным именем, открывая сайдбар."""
     with allure.step(f"Открытие борды и поиск карточки '{card_name}'"):

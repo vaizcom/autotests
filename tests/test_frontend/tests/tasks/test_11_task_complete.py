@@ -1,11 +1,11 @@
-import re
-
 import allure
 import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core.locators import TaskCard
-from tests.test_frontend.tests.tasks.conftest import TASK_NAME, open_card, open_sidebar_menu, wait_for_card
+from tests.test_frontend.tests.tasks.conftest import (
+    TASK_NAME, get_board_card, open_card, open_sidebar_menu, wait_for_card,
+)
 
 pytestmark = [pytest.mark.frontend]
 
@@ -20,7 +20,7 @@ def test_01_complete_task(page: Page, soft_step, sidebar):
     open_card(page, soft_step, TASK_NAME)
 
     sidebar_checkbox = sidebar.locator('label[role="checkbox"]').first
-    board_card = page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=TASK_NAME).first
+    board_card = get_board_card(page, TASK_NAME)
     board_toggle = board_card.locator('input[data-test-id*="complete-toggle"]')
 
     # Нормализуем состояние — задача должна быть незавершённой
@@ -59,7 +59,7 @@ def test_02_complete_from_board(page: Page, soft_step, sidebar):
     """Завершает задачу кликом по чекбоксу на карточке борда (без открытия сайдбара)."""
     wait_for_card(page, TASK_NAME)
 
-    board_card = page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=TASK_NAME).first
+    board_card = get_board_card(page, TASK_NAME)
     board_label = board_card.locator('label[role="checkbox"]')
     board_input = board_card.locator('input[data-test-id*="complete-toggle"]')
 
@@ -102,7 +102,7 @@ def test_03_complete_from_card_menu(page: Page, soft_step, sidebar):
     """Завершает задачу через контекстное меню карточки на борде."""
     wait_for_card(page, TASK_NAME)
 
-    board_card = page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=TASK_NAME).first
+    board_card = get_board_card(page, TASK_NAME)
     board_input = board_card.locator('input[data-test-id*="complete-toggle"]')
 
     # Нормализуем состояние — задача должна быть незавершённой
