@@ -135,9 +135,9 @@ jobs:
           RAW="${{ github.event.inputs.test_filter }}"
           TARGET=$(echo "$RAW" | sed 's/[[:space:]]*,[[:space:]]*/  or /g')
           if [ -z "$TARGET" ]; then
-            pytest tests/test_frontend/ -m frontend --alluredir=allure-results --slowmo 100 --reruns 1 --reruns-delay 5 --maxfail=5
+            pytest tests/test_frontend/ -m frontend --alluredir=allure-results --slowmo 100 --reruns 1 --reruns-delay 5 --maxfail=15
           else
-            pytest tests/test_frontend/ -m frontend -k "$TARGET" --alluredir=allure-results --slowmo 100 --reruns 1 --reruns-delay 5 --maxfail=5
+            pytest tests/test_frontend/ -m frontend -k "$TARGET" --alluredir=allure-results --slowmo 100 --reruns 1 --reruns-delay 5 --maxfail=15
           fi
 
 
