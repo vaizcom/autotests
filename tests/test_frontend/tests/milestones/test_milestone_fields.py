@@ -30,7 +30,16 @@ pytestmark = [pytest.mark.frontend]
 _DEP_CREATE = 'test_01_create_milestone'
 _DEP_TASK_LIST = 'test_06_add_tasks_to_milestone'
 
-_TS = os.environ.get('TEST_TS') or datetime.now().strftime('%H%M%S')
+_MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+           'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+
+
+def _make_ts():
+    now = datetime.now()
+    return f'{now.day} {_MONTHS[now.month - 1]}, {now.strftime("%H:%M")}'
+
+
+_TS = os.environ.get('TEST_TS') or _make_ts()
 _MILESTONE_NAME = f'autotest_ms_{_TS}'
 _SHORT_DESC = f'Short desc {_TS}'
 _DESCRIPTION = f'Milestone description {_TS}'
