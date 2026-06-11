@@ -113,9 +113,9 @@ def test_03_complete_from_card_menu(page: Page, soft_step, sidebar):
     def click_card_menu_completed():
         board_card.hover()
         board_card.get_by_test_id(TaskCard.MENU).click()
-        menu = page.locator('[class*="szh-menu"]').filter(has_text='Completed')
-        expect(menu.first).to_be_visible(timeout=5000)
-        menu.first.get_by_text('Completed').click()
+        completed_item = page.get_by_role('menuitem', name='Completed')
+        expect(completed_item).to_be_visible(timeout=5000)
+        completed_item.click()
 
     def complete_via_menu():
         click_card_menu_completed()
@@ -150,9 +150,9 @@ def test_04_complete_from_sidebar_menu(page: Page, soft_step, sidebar):
 
     def click_sidebar_menu_completed():
         open_sidebar_menu(page)
-        menu = page.locator('[class*="szh-menu"]').filter(has_text='Completed')
-        expect(menu.first).to_be_visible(timeout=5000)
-        menu.first.get_by_text('Completed').click()
+        completed_item = page.get_by_role('menuitem', name='Completed')
+        expect(completed_item).to_be_visible(timeout=5000)
+        completed_item.click()
 
     def complete_via_sidebar_menu():
         click_sidebar_menu_completed()
