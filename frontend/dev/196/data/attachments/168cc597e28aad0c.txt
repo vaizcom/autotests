@@ -1,0 +1,7 @@
+tests/test_frontend/tests/tasks/test_03_task_type.py:128: in test_04_remove_one_task_type
+    open_card(page, soft_step, TASK_NAME)
+tests/test_frontend/tests/tasks/conftest.py:115: in open_card
+    wait_for_card(page, card_name)
+tests/test_frontend/tests/tasks/conftest.py:109: in wait_for_card
+    raise AssertionError(f"Карточка '{card_name}' не найдена на борде после 4 попыток")
+E   AssertionError: Карточка 'autotest_11 июня, 11:44' не найдена на борде после 4 попыток
