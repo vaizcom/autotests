@@ -23,6 +23,11 @@ def test_01_complete_task(page: Page, soft_step, sidebar):
     board_card = page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=TASK_NAME).first
     board_toggle = board_card.locator('input[data-test-id*="complete-toggle"]')
 
+    # Нормализуем состояние — задача должна быть незавершённой
+    if sidebar_checkbox.locator('input').is_checked():
+        sidebar_checkbox.click()
+        expect(sidebar_checkbox.locator('input')).not_to_be_checked(timeout=5000)
+
     def complete_task():
         sidebar_checkbox.click()
         expect(sidebar_checkbox.locator('input')).to_be_checked(timeout=5000)
@@ -57,6 +62,11 @@ def test_02_complete_from_board(page: Page, soft_step, sidebar):
     board_card = page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=TASK_NAME).first
     board_label = board_card.locator('label[role="checkbox"]')
     board_input = board_card.locator('input[data-test-id*="complete-toggle"]')
+
+    # Нормализуем состояние — задача должна быть незавершённой
+    if board_input.is_checked():
+        board_label.click()
+        expect(board_input).not_to_be_checked(timeout=5000)
 
     def complete_from_board():
         board_label.click()
