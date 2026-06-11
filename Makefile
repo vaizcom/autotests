@@ -10,7 +10,7 @@
 # Для тестов с доп. сетапом (подзадачи):
 #   make debug FILE=tests/.../test_task_fields.py TEST="test_11 or test_12"
 debug:
-	@TS=$$(python3 -c "from datetime import datetime; m=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']; n=datetime.now(); print(f'{n.day} {m[n.month-1]}, {n.strftime(\"%H:%M\")}')"); \
+	@TS=$$(python3 -c "from datetime import datetime; m=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']; n=datetime.now(); print(f'{n.day} {m[n.month-1]}, {n.strftime(\"%H:%M:%S\")}')"); \
 	echo "⏱  TS=$$TS"; \
 	echo "📋 test_01 → $(TEST) → test_99"; \
 	TEST_TS=$$TS pytest -k "test_01 or $(TEST) or test_99" $(FILE)

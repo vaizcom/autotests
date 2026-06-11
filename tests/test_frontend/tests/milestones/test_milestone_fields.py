@@ -36,7 +36,7 @@ _MONTHS = ['января', 'февраля', 'марта', 'апреля', 'ма
 
 def _make_ts():
     now = datetime.now()
-    return f'{now.day} {_MONTHS[now.month - 1]}, {now.strftime("%H:%M")}'
+    return f'{now.day} {_MONTHS[now.month - 1]}, {now.strftime("%H:%M:%S")}'
 
 
 _TS = os.environ.get('TEST_TS') or _make_ts()

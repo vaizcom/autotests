@@ -17,7 +17,7 @@ _MONTHS = ['января', 'февраля', 'марта', 'апреля', 'ма
 
 def _make_ts():
     now = datetime.now()
-    return f'{now.day} {_MONTHS[now.month - 1]}, {now.strftime("%H:%M")}'
+    return f'{now.day} {_MONTHS[now.month - 1]}, {now.strftime("%H:%M:%S")}'
 
 
 _TS = os.environ.get('TEST_TS') or _make_ts()
@@ -100,7 +100,8 @@ def wait_for_card(page: Page, card_name: str, go_to_board: bool = True):
 
     for attempt in range(4):
         card = page.get_by_role('button').filter(has_text=re.compile(r'[A-Z]+-\d+')).filter(has_text=card_name).first
-        if card.is_visible():
+        if card.count() > 0:
+            card.scroll_into_view_if_needed()
             return card
         if attempt < 3:
             page.wait_for_timeout(2000)
