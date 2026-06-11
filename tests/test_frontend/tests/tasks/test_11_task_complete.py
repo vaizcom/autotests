@@ -15,10 +15,18 @@ def test_01_complete_task(page: Page, soft_step, sidebar):
     """Отмечает задачу как выполненную (Complete)."""
     open_card(page, soft_step, TASK_NAME)
 
+    checkbox = sidebar.locator('label[role="checkbox"]').first
+
     def complete_task():
-        checkbox = sidebar.locator('label[role="checkbox"]').first
         checkbox.click()
         expect(checkbox.locator('input')).to_be_checked(timeout=5000)
 
-    with allure.step('Клик по чекбоксу Complete'):
+    def uncomplete_task():
+        checkbox.click()
+        expect(checkbox.locator('input')).not_to_be_checked(timeout=5000)
+
+    with allure.step('Complete'):
         soft_step('Complete', complete_task)
+
+    with allure.step('Uncomplete'):
+        soft_step('Uncomplete', uncomplete_task)
