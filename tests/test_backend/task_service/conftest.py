@@ -108,41 +108,6 @@ def create_30_tasks(owner_client, main_space, main_board):
                 pass
 
 
-@pytest.fixture
-def make_task_in_main(owner_client, main_space, main_board):
-    """
-    Фикстура-конструктор задачи.
-    Возвращает функцию create -> dict с данными созданной задачи.
-    В body передаются только необходимые для теста поля. После использования задача удаляется.
-    """
-    created_ids = []
-
-    def _create_task(body_overrides: dict):
-        body = {
-            "space_id": main_space,
-            "board": main_board
-        }
-        # объединим остальные поля в create_task_endpoint через kwargs
-        resp = owner_client.post(**create_task_endpoint(**body, **body_overrides))
-        assert resp.status_code == 200, resp.text
-        task = resp.json()["payload"]["task"]
-        created_ids.append(task["_id"])
-        return task
-
-    yield _create_task
-
-    # Teardown: удаление созданных задач
-    if created_ids:
-        for tid in created_ids:
-            try:
-                resp = owner_client.post(**delete_task_endpoint(task_id=tid, space_id=main_space))
-                # допускаем 2xx/404 (если задача уже удалена в тесте)
-                if resp.status_code >= 400 and resp.status_code != 404:
-                    pass
-            except Exception:
-                pass
-
-
 def _update_custom_field(client, space_id, task_id, field_id, value):
     """
     Вспомогательная функция для обновления значения кастомного поля.

@@ -396,6 +396,39 @@ def temp_board(main_client, temp_project, temp_space):
     yield response.json()['payload']['board']['_id']
 
 @pytest.fixture
+def make_task_in_main(owner_client, main_space, main_board):
+    """
+    Фикстура-конструктор задачи.
+    Возвращает функцию create -> dict с данными созданной задачи.
+    В body передаются только необходимые для теста поля. После использования задача удаляется.
+    """
+    created_ids = []
+
+    def _create_task(body_overrides: dict):
+        body = {
+            "space_id": main_space,
+            "board": main_board
+        }
+        resp = owner_client.post(**create_task_endpoint(**body, **body_overrides))
+        assert resp.status_code == 200, resp.text
+        task = resp.json()["payload"]["task"]
+        created_ids.append(task["_id"])
+        return task
+
+    yield _create_task
+
+    # Teardown: удаление созданных задач
+    if created_ids:
+        for tid in created_ids:
+            try:
+                resp = owner_client.post(**delete_task_endpoint(task_id=tid, space_id=main_space))
+                if resp.status_code >= 400 and resp.status_code != 404:
+                    pass
+            except Exception:
+                pass
+
+
+@pytest.fixture
 def temp_task(main_client, temp_space, temp_board):
     """
     Фикстура для создания временной задачи перед тестом и её удаления после теста.
