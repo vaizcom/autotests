@@ -188,7 +188,7 @@ def temp_client(db):
     doc = db.confirmtokens.find_one({'_id': ObjectId(token_payload['id'])})
     assert doc, f"Запись confirmtokens с _id={token_payload['id']} не найдена"
     otp_code = doc.get('payload', {}).get('otpCode')
-    assert otp_code, f"otpCode отсутствует в confirmtokens"
+    assert otp_code, "otpCode отсутствует в confirmtokens"
 
     # 3. VerifyOtp — получаем authToken
     ep = verify_otp_endpoint(temp_token=temp_token, otp=otp_code)

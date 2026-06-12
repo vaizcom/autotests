@@ -30,8 +30,20 @@ pytestmark = [pytest.mark.frontend]
 _DEP_CREATE = 'test_01_create_milestone'
 _DEP_TASK_LIST = 'test_06_add_tasks_to_milestone'
 
-_MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-           'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+_MONTHS = [
+    'января',
+    'февраля',
+    'марта',
+    'апреля',
+    'мая',
+    'июня',
+    'июля',
+    'августа',
+    'сентября',
+    'октября',
+    'ноября',
+    'декабря',
+]
 
 
 def _make_ts():
@@ -402,7 +414,6 @@ def test_10_verify_activities_tab(page: Page, soft_step, sidebar):
             'Вкладка Activities',
             lambda: expect(sidebar.get_by_role('button', name='Activities')).to_be_visible(timeout=5000),
         )
-
 
 
 # ── 99. Cleanup ─────────────────────────────────────────────────────

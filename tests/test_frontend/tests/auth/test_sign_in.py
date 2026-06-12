@@ -1,9 +1,8 @@
 import allure
 import pytest
-from playwright.sync_api import expect, Page
+from playwright.sync_api import Page
 
-from tests.test_frontend.core import settings
-from tests.test_frontend.core.locators import Auth, Sidebar
+from tests.test_frontend.core.locators import Sidebar
 from tests.test_frontend.tests.auth.conftest import sign_in_and_go_to_space, home_screenshot_with_masks
 
 pytestmark = [pytest.mark.frontend]

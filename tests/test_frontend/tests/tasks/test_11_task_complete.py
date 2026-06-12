@@ -4,7 +4,11 @@ from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core.locators import TaskCard
 from tests.test_frontend.tests.tasks.conftest import (
-    TASK_NAME, get_board_card, open_card, open_sidebar_menu, wait_for_card,
+    TASK_NAME,
+    get_board_card,
+    open_card,
+    open_sidebar_menu,
+    wait_for_card,
 )
 
 pytestmark = [pytest.mark.frontend]

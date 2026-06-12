@@ -34,9 +34,7 @@ def _submit_email_and_get_temp_token(page) -> str:
 
     assert captured, 'Ответ AuthWithEmail не перехвачен'
     payload = captured['data']['payload']
-    assert payload.get('needOTP') is True, (
-        f'Ожидался needOTP=true для нового email, получено: {payload}'
-    )
+    assert payload.get('needOTP') is True, f'Ожидался needOTP=true для нового email, получено: {payload}'
     return payload['tempToken']
 
 
