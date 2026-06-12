@@ -9,15 +9,10 @@ from bson import ObjectId
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
-from tests.test_frontend.core.locators import Auth, Header, Sidebar
+from tests.test_frontend.core.locators import Auth, Sidebar
+from tests.test_frontend.tests.auth.conftest import home_screenshot_with_masks
 
 pytestmark = [pytest.mark.frontend]
-
-
-@pytest.fixture()
-def browser_context_args(browser_context_args):
-    """Убираем storage_state — тест проверяет регистрацию самостоятельно."""
-    return {k: v for k, v in browser_context_args.items() if k != 'storage_state'}
 
 
 def _submit_email_and_get_temp_token(page) -> str:
@@ -116,36 +111,5 @@ def test_sign_up_with_email(page: Page, db, assert_snapshot):
         expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
 
     with allure.step('Сравнение скриншота'):
-        page.get_by_test_id(Sidebar.HOME).click()
-        page.get_by_test_id(Sidebar.ARCHIVE).wait_for(state='visible', timeout=10000)
-        page.mouse.move(640, 400)
-
-        dynamic_masks = [
-            page.locator('[class*="AsideNotificationsMenuItem-module_UnreadDot"]'),
-            page.locator('[class*="NotificationsToggleButton-module_UnreadDot"]'),
-            page.locator('[class*="MemberAvatar-module_Root"]'),
-            page.locator('[class*="HomeScreen-module_Avatar"]'),
-            page.locator('[class*="HomeScreen-module_Title"]'),
-            page.locator('[class*="HomeScreen-module_TimeBlock"]'),
-            page.get_by_test_id(Header.SPACE_SELECTOR),
-            page.locator('[class*="HomeScreenCard-module_Root"]'),
-            page.locator('[class*="HomeScreenTipCard-module_Tips"]'),
-            page.locator('[class*="HomeScreenStuff-module_Root"]'),
-            page.locator('[class*="TourBanner-module_Root"]'),
-            page.locator('[class*="AffiliateBanner-module_Root"]'),
-            page.locator('[class*="AsideMenu-module_Footer"]'),
-        ]
-
-        page.add_style_tag(
-            content="""
-            span[class*="AppVersion"] {
-                background-color: #FF00FF !important;
-                color: transparent !important;
-                display: inline-block !important;
-                min-height: 14px !important;
-            }
-        """
-        )
-
-        screenshot = page.screenshot(mask=dynamic_masks)
+        screenshot = home_screenshot_with_masks(page)
         assert_snapshot(screenshot, name='sign_up_home.png', threshold=5.0)
