@@ -20,6 +20,31 @@ def browser_context_args(browser_context_args):
     return {k: v for k, v in browser_context_args.items() if k != 'storage_state'}
 
 
+def _submit_email_and_get_temp_token(page) -> str:
+    """Кликает Submit на email-шаге, перехватывает ответ AuthWithEmail и возвращает tempToken."""
+    captured = {}
+
+    def _capture(response):
+        try:
+            body = response.json()
+            if isinstance(body, dict) and body.get('type') == 'AuthWithEmail':
+                captured['data'] = body
+        except Exception:
+            pass
+
+    page.on('response', _capture)
+    page.get_by_test_id(Auth.EMAIL_SUBMIT).click()
+    page.get_by_test_id(Auth.OTP_INPUT).wait_for(state='visible', timeout=15000)
+    page.remove_listener('response', _capture)
+
+    assert captured, 'Ответ AuthWithEmail не перехвачен'
+    payload = captured['data']['payload']
+    assert payload.get('needOTP') is True, (
+        f'Ожидался needOTP=true для нового email, получено: {payload}'
+    )
+    return payload['tempToken']
+
+
 def _get_otp_from_mongo(db, temp_token: str) -> str:
     """Декодирует tempToken JWT, достаёт id и находит OTP в confirmtokens."""
     payload_part = temp_token.split('.')[1]
@@ -50,27 +75,7 @@ def test_sign_up_with_email(page: Page, db, assert_snapshot):
         page.get_by_test_id(Auth.EMAIL_INPUT).fill(new_email)
 
     with allure.step('Отправка email и перехват tempToken'):
-        captured = {}
-
-        def _capture(response):
-            try:
-                body = response.json()
-                if isinstance(body, dict) and body.get('type') == 'AuthWithEmail':
-                    captured['data'] = body
-            except Exception:
-                pass
-
-        page.on('response', _capture)
-        page.get_by_test_id(Auth.EMAIL_SUBMIT).click()
-        page.get_by_test_id(Auth.OTP_INPUT).wait_for(state='visible', timeout=15000)
-        page.remove_listener('response', _capture)
-
-        assert captured, 'Ответ AuthWithEmail не перехвачен'
-        resp_json = captured['data']
-        temp_token = resp_json['payload']['tempToken']
-        assert (
-            resp_json['payload'].get('needOTP') is True
-        ), f'Ожидался needOTP=true для нового email, получено: {resp_json["payload"]}'
+        temp_token = _submit_email_and_get_temp_token(page)
 
     with allure.step('Получение OTP из MongoDB'):
         otp_code = _get_otp_from_mongo(db, temp_token)
