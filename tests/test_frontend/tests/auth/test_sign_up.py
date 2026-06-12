@@ -60,7 +60,8 @@ def _get_otp_from_mongo(db, temp_token: str) -> str:
 @allure.suite('Auth')
 @allure.title('Sign up with email (OTP)')
 def test_sign_up_with_email(page: Page, db, assert_snapshot):
-    new_email = f'autotest_{int(time.time())}@gmail.com'
+    ts = int(time.time())
+    new_email = f'autotest_{ts}@gmail.com'
 
     with allure.step('Открытие страницы входа'):
         page.goto(f'{settings.BASE_URL}/auth/sign-in')
@@ -91,7 +92,7 @@ def test_sign_up_with_email(page: Page, db, assert_snapshot):
         page.locator('input[name="fullName"]').fill(new_email.split('@')[0])
         next_btn.click()
 
-    with allure.step('Онбординг: название Workspace'):
+    with allure.step('Онбординг: название Workspace (пропуск)'):
         page.get_by_text('Name your Workspace').wait_for(state='visible', timeout=10000)
         next_btn.click()
 
@@ -99,7 +100,7 @@ def test_sign_up_with_email(page: Page, db, assert_snapshot):
         page.get_by_text('Invite people to your Workspace').wait_for(state='visible', timeout=10000)
         next_btn.click()
 
-    with allure.step('Онбординг: помощь Book a call(пропуск)'):
+    with allure.step('Онбординг: помощь Book a call (пропуск)'):
         page.get_by_text('Need help getting started?').wait_for(state='visible', timeout=10000)
         next_btn.click()
 
