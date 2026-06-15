@@ -96,7 +96,7 @@ def submit_email_and_get_temp_token(page) -> str:
 
 def get_otp_from_mailinator(inbox_name: str, since_ts: int = 0,
                             timeout: int = 30, poll_interval: int = 3) -> str:
-    """Поллит Mailinator API и возвращает OTP из темы письма от Vaiz.
+    """Поллит Mailinator API и возвращает OTP код из темы письма от Vaiz.
 
     Args:
         inbox_name: имя ящика (часть до @mailinator.com)
