@@ -44,24 +44,65 @@ def _submit_email_and_get_temp_token(page) -> str:
 
 
 def _get_otp_from_mailinator(inbox_name: str, timeout: int = 30, poll_interval: int = 3) -> str:
-    """Поллит Mailinator API и возвращает OTP из темы письма от Vaiz."""
+    """Поллит Mailinator API и возвращает OTP из темы письма от Vaiz.
+
+    Ручная проверка в Postman:
+    1. POST https://api.vaiz.dev/v4/AuthWithEmail
+       Body: {"email": "TST_test1@mailinator.com"}
+       → скопировать payload.tempToken
+
+    2. GET https://api.mailinator.com/api/v2/domains/public/inboxes/TST_test1
+       → в msgs найти письмо от vaiz, взять 6 цифр из subject после "|"
+       (OTP в теме содержит невидимый символ — вводить вручную, не копировать)
+
+    3. POST https://api.vaiz.dev/v4/VerifyOtp
+       Body: {"tempToken": "<из шага 1>", "otp": "<из шага 2>"}
+       → payload.authToken
+    """
     encoded = urllib.parse.quote(inbox_name)
     url = f'{MAILINATOR_API}/{encoded}'
     deadline = time.time() + timeout
+    last_status = None
 
     while time.time() < deadline:
-        resp = requests.get(url, timeout=10)
+        try:
+            resp = requests.get(url, timeout=10)
+        except requests.exceptions.ConnectionError:
+            raise AssertionError(
+                f'Mailinator API недоступен (ConnectionError). '
+                f'Проверить: 1) интернет 2) https://www.mailinator.com открывается в браузере'
+            )
+        except requests.exceptions.Timeout:
+            raise AssertionError(
+                f'Mailinator API не отвечает (Timeout). '
+                f'Проверить: https://www.mailinator.com открывается в браузере'
+            )
+
+        last_status = resp.status_code
         if resp.status_code == 200:
             msgs = [m for m in resp.json().get('msgs', [])
                     if 'vaiz' in m.get('fromfull', '').lower()]
             if msgs:
                 subject = msgs[-1]['subject']
-                otp = subject.split('|')[1].strip()
-                assert re.match(r'^\d{6}', otp), f'OTP не найден в теме письма: {subject}'
+                parts = subject.split('|')
+                assert len(parts) >= 2, (
+                    f'Формат темы письма изменился, нет разделителя "|": {subject}'
+                )
+                otp = parts[1].strip()
+                assert re.match(r'^\d{6}', otp), (
+                    f'OTP не найден в теме письма (ожидались 6 цифр после "|"): {subject}'
+                )
                 return otp[:6]
         time.sleep(poll_interval)
 
-    raise AssertionError(f'Письмо от Vaiz не пришло в ящик {inbox_name} за {timeout} сек')
+    hints = []
+    if last_status and last_status != 200:
+        hints.append(f'API вернул статус {last_status} — возможно сменилась версия API или endpoint')
+    hints.append('Проверить: 1) https://www.mailinator.com доступен 2) Vaiz отправляет письма на @mailinator.com')
+    raise AssertionError(
+        f'Письмо от Vaiz не пришло в ящик {inbox_name} за {timeout} сек. '
+        + ' '.join(hints)
+    )
 
 
 def _get_otp_from_mongo(db, temp_token: str) -> str:
