@@ -2,17 +2,22 @@ import base64
 import json
 import re
 import time
+import urllib.parse
 
 import allure
 import pytest
+import requests
 from bson import ObjectId
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
 from tests.test_frontend.core.locators import Auth, Sidebar
+from tests.test_frontend.core.settings import FRONTEND_STAND
 from tests.test_frontend.tests.auth.conftest import home_screenshot_with_masks
 
 pytestmark = [pytest.mark.frontend]
+
+MAILINATOR_API = 'https://api.mailinator.com/api/v2/domains/public/inboxes'
 
 
 def _submit_email_and_get_temp_token(page) -> str:
@@ -38,6 +43,27 @@ def _submit_email_and_get_temp_token(page) -> str:
     return payload['tempToken']
 
 
+def _get_otp_from_mailinator(inbox_name: str, timeout: int = 30, poll_interval: int = 3) -> str:
+    """Поллит Mailinator API и возвращает OTP из темы письма от Vaiz."""
+    encoded = urllib.parse.quote(inbox_name)
+    url = f'{MAILINATOR_API}/{encoded}'
+    deadline = time.time() + timeout
+
+    while time.time() < deadline:
+        resp = requests.get(url, timeout=10)
+        if resp.status_code == 200:
+            msgs = [m for m in resp.json().get('msgs', [])
+                    if 'vaiz' in m.get('fromfull', '').lower()]
+            if msgs:
+                subject = msgs[-1]['subject']
+                otp = subject.split('|')[1].strip()
+                assert re.match(r'^\d{6}', otp), f'OTP не найден в теме письма: {subject}'
+                return otp[:6]
+        time.sleep(poll_interval)
+
+    raise AssertionError(f'Письмо от Vaiz не пришло в ящик {inbox_name} за {timeout} сек')
+
+
 def _get_otp_from_mongo(db, temp_token: str) -> str:
     """Декодирует tempToken JWT, достаёт id и находит OTP в confirmtokens."""
     payload_part = temp_token.split('.')[1]
@@ -54,12 +80,25 @@ def _get_otp_from_mongo(db, temp_token: str) -> str:
     return otp_code
 
 
+def _get_otp(inbox_name: str, db=None, temp_token: str = None) -> str:
+    """Получает OTP: Mailinator на всех стендах, MongoDB-fallback на dev."""
+    if FRONTEND_STAND == 'prod':
+        return _get_otp_from_mailinator(inbox_name)
+
+    # Dev: пробуем Mailinator, при неудаче — MongoDB
+    try:
+        return _get_otp_from_mailinator(inbox_name)
+    except Exception:
+        assert db and temp_token, 'Mailinator недоступен, а MongoDB-параметры не переданы'
+        return _get_otp_from_mongo(db, temp_token)
+
+
 @allure.parent_suite('Frontend')
 @allure.suite('Auth')
 @allure.title('Sign up with email (OTP)')
 def test_sign_up_with_email(page: Page, db, assert_snapshot):
     ts = int(time.time())
-    new_email = f'autotest_{ts}@gmail.com'
+    new_email = f'TST_autotest_{ts}@mailinator.com'
 
     with allure.step('Открытие страницы входа'):
         page.goto(f'{settings.BASE_URL}/auth/sign-in')
@@ -71,8 +110,9 @@ def test_sign_up_with_email(page: Page, db, assert_snapshot):
     with allure.step('Отправка email и перехват tempToken'):
         temp_token = _submit_email_and_get_temp_token(page)
 
-    with allure.step('Получение OTP из MongoDB'):
-        otp_code = _get_otp_from_mongo(db, temp_token)
+    with allure.step('Получение OTP'):
+        inbox_name = new_email.split('@')[0]
+        otp_code = _get_otp(inbox_name, db=db, temp_token=temp_token)
 
     with allure.step(f'Ввод OTP: {otp_code}'):
         page.get_by_test_id(Auth.OTP_INPUT).wait_for(state='visible', timeout=10000)
@@ -89,7 +129,7 @@ def test_sign_up_with_email(page: Page, db, assert_snapshot):
         expect(page.get_by_text('What is your name?'),
                'Шаг «What is your name?» не появился — онбординг изменён или убран'
                ).to_be_visible(timeout=15000)
-        page.locator('input[name="fullName"]').fill(new_email.split('@')[0])
+        page.locator('input[name="fullName"]').fill(f'{{TST}}_autotest_{ts}')
         next_btn.click()
 
     with allure.step('Онбординг: название Workspace (пропуск)'):
