@@ -86,24 +86,34 @@ def test_sign_up_with_email(page: Page, db, assert_snapshot):
     next_btn = page.get_by_role('button', name='Next')
 
     with allure.step('Онбординг: ввод имени'):
-        page.get_by_text('What is your name?').wait_for(state='visible', timeout=15000)
+        expect(page.get_by_text('What is your name?'),
+               'Шаг «What is your name?» не появился — онбординг изменён или убран'
+               ).to_be_visible(timeout=15000)
         page.locator('input[name="fullName"]').fill(new_email.split('@')[0])
         next_btn.click()
 
     with allure.step('Онбординг: название Workspace (пропуск)'):
-        page.get_by_text('Name your Workspace').wait_for(state='visible', timeout=10000)
+        expect(page.get_by_text('Name your Workspace'),
+               'Шаг «Name your Workspace» не появился — порядок онбординга изменён'
+               ).to_be_visible(timeout=10000)
         next_btn.click()
 
     with allure.step('Онбординг: приглашение Invite people (пропуск)'):
-        page.get_by_text('Invite people to your Workspace').wait_for(state='visible', timeout=10000)
+        expect(page.get_by_text('Invite people to your Workspace'),
+               'Шаг «Invite people» не появился — порядок онбординга изменён'
+               ).to_be_visible(timeout=10000)
         next_btn.click()
 
     with allure.step('Онбординг: помощь Book a call (пропуск)'):
-        page.get_by_text('Need help getting started?').wait_for(state='visible', timeout=10000)
+        expect(page.get_by_text('Need help getting started?'),
+               'Шаг «Need help getting started?» не появился — порядок онбординга изменён'
+               ).to_be_visible(timeout=10000)
         next_btn.click()
 
     with allure.step('Онбординг: завершение'):
-        page.get_by_text('The workspace setup is complete!').wait_for(state='visible', timeout=10000)
+        expect(page.get_by_text('The workspace setup is complete!'),
+               'Финальный шаг онбординга не появился — флоу изменён'
+               ).to_be_visible(timeout=10000)
         page.get_by_role('button', name='Finish').click()
 
     with allure.step('Проверка: пользователь на Home'):
