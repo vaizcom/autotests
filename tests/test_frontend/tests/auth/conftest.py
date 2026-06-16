@@ -108,7 +108,7 @@ def get_otp_from_mailinator(inbox_name: str, since_ts: int = 0,
        Body: {"email": "TST_test1@mailinator.com"}
        → скопировать payload.tempToken
 
-    2. GET https://api.mailinator.com/api/v2/domains/public/inboxes/TST_test1
+    2. GET https://api.mailinator.com/api/v2/domains/public/inboxes/{inbox_name}
        → в msgs найти письмо от vaiz, взять 6 цифр из subject после "|"
        (OTP в теме содержит невидимый символ — вводить вручную, не копировать)
 
