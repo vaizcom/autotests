@@ -128,7 +128,7 @@ jobs:
           git diff --cached --quiet || git commit -m "chore: update VRT baselines on CI"
           git push origin "$BRANCH"
 
-      - name: Run frontend tests
+      - name: ✅ Run frontend tests
         if: github.event.inputs.update_snapshots != 'true'
         continue-on-error: true
         run: |
