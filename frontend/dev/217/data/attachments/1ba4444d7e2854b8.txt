@@ -1,0 +1,20 @@
+tests/test_frontend/tests/milestones/conftest.py:16: in _goto_board
+    expect(board_loaded).to_be_visible(timeout=30000)
+E   AssertionError: Locator expected to be visible
+E   Actual value: <element(s) not found> 
+E   Call log:
+E     - LocatorAssertions.to_be_visible with timeout 30000ms
+E     -   - waiting for get_by_test_id("kanban-board.column.molecules.create-task-button.button").first
+
+During handling of the above exception, another exception occurred:
+tests/test_frontend/tests/milestones/test_milestone_fields.py:410: in test_10_verify_activities_tab
+    open_milestone(page, _MILESTONE_NAME)
+tests/test_frontend/tests/milestones/conftest.py:37: in open_milestone
+    _goto_board(page)
+tests/test_frontend/tests/milestones/conftest.py:19: in _goto_board
+    expect(board_loaded).to_be_visible(timeout=30000)
+E   AssertionError: Locator expected to be visible
+E   Actual value: <element(s) not found> 
+E   Call log:
+E     - LocatorAssertions.to_be_visible with timeout 30000ms
+E     -   - waiting for get_by_test_id("kanban-board.column.molecules.create-task-button.button").first
