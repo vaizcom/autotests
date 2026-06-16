@@ -12,14 +12,13 @@ _PROJECT_NAME = 'Your first project'
 _TASK_NAME = 'New Task'
 
 
-@pytest.mark.skipif(settings.FRONTEND_STAND == 'prod', reason='Создание сущностей тестируется только на dev')
 @allure.parent_suite('Frontend')
 @allure.suite('Smoke')
 @allure.title('Create space → project → task')
-def test_create_space_with_project_and_task(page: Page, cleanup_space, assert_snapshot):
+def test_create_space_with_project_and_task(page: Page, assert_snapshot):
     """
-    Smoke-тест: создание Space → открытие дефолтного Project → Task.
-    Space удаляется через API в teardown.
+    Smoke-тест: регистрирует новый аккаунт (через smoke_auth_state),
+    создаёт Space → открывает дефолтный Project → создаёт Task.
     """
     # === SPACE ===
     with allure.step('Открытие приложения'):
@@ -42,9 +41,6 @@ def test_create_space_with_project_and_task(page: Page, cleanup_space, assert_sn
         expect(page.get_by_role('button', name='Switch to Space')).to_be_visible(timeout=15000)
         page.get_by_role('button', name='Switch to Space').click()
         page.wait_for_url(lambda url: url != f'{settings.BASE_URL}/', timeout=10000)
-        path = page.url.replace(settings.BASE_URL, '').strip('/')
-        space_id = path.split('/')[0]
-        cleanup_space.append(space_id)
 
     with allure.step('Wizard: пропуск приглашения пользователей (invite users)'):
         expect(page.get_by_role('button', name='Next')).to_be_visible(timeout=10000)
