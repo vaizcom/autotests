@@ -5,7 +5,6 @@ from test_backend.data.endpoints.Comment.comment_endpoints import create_comment
 from test_backend.data.endpoints.Comment.assert_comment_payload import assert_comment_payload
 from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
 from test_backend.task_service.utils import get_random_group_id
-from tests.test_backend.task_service.conftest import make_task_in_main
 
 pytestmark = [pytest.mark.backend]
 

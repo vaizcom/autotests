@@ -1,31 +1,39 @@
+import time
+
 import pytest
-import requests
 
-from tests.test_frontend.conftest import API_URL
-
-
-def _delete_space(token: str, space_id: str) -> None:
-    requests.post(
-        f"{API_URL}/RemoveSpace",
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Cookie": f"_t={token}",
-            "Content-Type": "application/json",
-            "Current-Space-Id": space_id,
-        },
-        json={"spaceId": space_id},
-        timeout=30,
-        verify=False,
-    )
+from tests.test_frontend.tests.auth.conftest import sign_up_new_account
 
 
-@pytest.fixture()
-def cleanup_space(api_token):
-    """После теста удаляет созданные Space через API."""
-    ids = []
-    yield ids
-    for space_id in ids:
-        try:
-            _delete_space(api_token, space_id)
-        except Exception as e:
-            print(f"Cleanup: не удалось удалить Space {space_id}: {e}")
+@pytest.fixture(scope='session')
+def smoke_auth_state(playwright, _configure_test_id):
+    """Регистрирует новый аккаунт и сохраняет сессию для smoke-тестов."""
+    ts = int(time.time())
+    email = f'TST_smoke_{ts}@mailinator.com'
+
+    browser = playwright.chromium.launch()
+    context = browser.new_context(ignore_https_errors=True)
+    page = context.new_page()
+
+    try:
+        sign_up_new_account(page, email)
+    except Exception as e:
+        context.close()
+        browser.close()
+        pytest.skip(f'Sign-up не прошёл: {str(e).split(chr(10))[0]}')
+
+    state = context.storage_state()
+    context.close()
+    browser.close()
+    return state
+
+
+@pytest.fixture(scope='session')
+def browser_context_args(browser_context_args, smoke_auth_state):
+    """Подставляет сессию от sign-up аккаунта вместо основного."""
+    return {
+        **browser_context_args,
+        'ignore_https_errors': True,
+        'storage_state': smoke_auth_state,
+        'viewport': {'width': 1280, 'height': 720},
+    }

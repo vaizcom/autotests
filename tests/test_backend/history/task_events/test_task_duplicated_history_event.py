@@ -1,7 +1,6 @@
 import allure
 import pytest
 
-from conftest import board_with_tasks
 from test_backend.data.endpoints.Task.task_endpoints import duplicate_task_endpoint, delete_task_endpoint
 from tests.test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 

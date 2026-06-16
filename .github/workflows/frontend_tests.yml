@@ -19,11 +19,11 @@ on:
           - https://app.vaiz.dev
           - https://app.vaiz.com
       update_snapshots:
-        description: 'Update baseline snapshots'
+        description: 'Update VRT snapshots'
         default: false
         type: boolean
       test_filter:
-        description: 'One or more test names separated by comma (e.g. test_a, test_b). Leave empty to run all.'
+        description: 'Leave empty to run all.'
         default: ''
         type: string
 
@@ -117,7 +117,7 @@ jobs:
           RAW="${{ github.event.inputs.test_filter }}"
           TARGET=$(echo "$RAW" | sed 's/[[:space:]]*,[[:space:]]*/  or /g')
           if [ -z "$TARGET" ]; then
-            TARGET="test_sign_in_with_email or test_logout or test_create_space_with_project_and_task"
+            TARGET="test_sign_in_with_email_password or test_sign_in_with_email_otp or test_sign_up_with_email or test_logout or test_create_space_with_project_and_task"
           fi
           pytest tests/test_frontend/ -m frontend -k "$TARGET" --update-snapshots
           BRANCH="${{ github.head_ref || github.ref_name }}"
@@ -128,22 +128,22 @@ jobs:
           git diff --cached --quiet || git commit -m "chore: update VRT baselines on CI"
           git push origin "$BRANCH"
 
-      - name: Run frontend tests
+      - name: ✅ Run frontend tests
         if: github.event.inputs.update_snapshots != 'true'
         continue-on-error: true
         run: |
           RAW="${{ github.event.inputs.test_filter }}"
           TARGET=$(echo "$RAW" | sed 's/[[:space:]]*,[[:space:]]*/  or /g')
           if [ -z "$TARGET" ]; then
-            pytest tests/test_frontend/ -m frontend --alluredir=allure-results --slowmo 100 --reruns 1 --reruns-delay 5 --maxfail=5
+            pytest tests/test_frontend/ -m frontend --alluredir=allure-results --slowmo 100 --reruns 1 --reruns-delay 5 --maxfail=10
           else
-            pytest tests/test_frontend/ -m frontend -k "$TARGET" --alluredir=allure-results --slowmo 100 --reruns 1 --reruns-delay 5 --maxfail=5
+            pytest tests/test_frontend/ -m frontend -k "$TARGET" --alluredir=allure-results --slowmo 100 --reruns 1 --reruns-delay 5 --maxfail=10
           fi
 
 
       - name: Get Allure history
         uses: actions/checkout@v4
-        if: always()
+        if: ${{ !cancelled() && github.event.inputs.update_snapshots != 'true' }}
         continue-on-error: true
         with:
           ref: gh-pages
@@ -151,7 +151,7 @@ jobs:
 
       - name: Generate Allure Report
         uses: simple-elf/allure-report-action@v1.13
-        if: always()
+        if: ${{ !cancelled() && github.event.inputs.update_snapshots != 'true' }}
         with:
           allure_results: allure-results
           allure_report: allure-report
@@ -162,11 +162,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fix Allure redirect for subdirectory
-        if: always()
+        if: ${{ !cancelled() && github.event.inputs.update_snapshots != 'true' }}
         run: sudo sed -i "s|URL=https://vaizcom.github.io/autotests/|URL=https://vaizcom.github.io/autotests/frontend/${{ env.FRONTEND_STAND }}/|" allure-history/index.html
 
       - name: Prepare deploy directory
-        if: always()
+        if: ${{ !cancelled() && github.event.inputs.update_snapshots != 'true' }}
         run: |
           mkdir -p deploy/frontend/${{ env.FRONTEND_STAND }}
           cp -r allure-history/* deploy/frontend/${{ env.FRONTEND_STAND }}/
@@ -194,7 +194,7 @@ jobs:
 
       - name: Publish to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
-        if: always()
+        if: ${{ !cancelled() && github.event.inputs.update_snapshots != 'true' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./deploy
@@ -202,7 +202,7 @@ jobs:
           full_commit_message: "deploy: frontend ${{ env.FRONTEND_STAND }} allure report"
 
       - name: Add Allure link to summary
-        if: always()
+        if: ${{ !cancelled() && github.event.inputs.update_snapshots != 'true' }}
         run: |
           REPORT_NUM=$(ls -d allure-history/[0-9]* 2>/dev/null | sort -n | tail -1 | xargs basename)
           echo "" >> $GITHUB_STEP_SUMMARY

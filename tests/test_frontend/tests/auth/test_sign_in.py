@@ -1,52 +1,32 @@
+import re
+import time
+
 import allure
 import pytest
 from playwright.sync_api import expect, Page
 
 from tests.test_frontend.core import settings
-from tests.test_frontend.core.locators import Auth, Header, Sidebar, SpaceSelector
+from tests.test_frontend.core.locators import Auth, Sidebar
+from tests.test_frontend.tests.auth.conftest import (
+    sign_in_and_go_to_space,
+    home_screenshot_with_masks,
+    submit_email_and_get_temp_token,
+    get_otp,
+)
 
 pytestmark = [pytest.mark.frontend]
 
-
-@pytest.fixture()
-def browser_context_args(browser_context_args):
-    """Убираем storage_state — тест проверяет логин самостоятельно."""
-    return {k: v for k, v in browser_context_args.items() if k != "storage_state"}
+OTP_SIGN_IN_EMAIL = 'TST_signin_otp@mailinator.com'
 
 
-@allure.parent_suite("Frontend")
-@allure.suite("Auth")
-@allure.title("Sign in with email")
-def test_sign_in_with_email(page: Page, assert_snapshot):
-    with allure.step("Открытие страницы входа"):
-        page.goto(f"{settings.BASE_URL}/auth/sign-in")
+@allure.parent_suite('Frontend')
+@allure.suite('Auth')
+@allure.title('Sign in via email (password)')
+def test_sign_in_with_email_password(page: Page, assert_snapshot):
+    with allure.step('Вход и переход в autotest space'):
+        sign_in_and_go_to_space(page)
 
-    with allure.step("Ввод email"):
-        page.get_by_test_id(Auth.EMAIL_INPUT).fill(settings.FRONTEND_EMAIL)
-        page.get_by_test_id(Auth.EMAIL_SUBMIT).click()
-
-    with allure.step("Ввод пароля"):
-        page.get_by_test_id(Auth.PASSWORD_INPUT).wait_for(state="visible", timeout=10000)
-        page.get_by_test_id(Auth.PASSWORD_INPUT).fill(settings.FRONTEND_PASSWORD)
-        page.get_by_test_id(Auth.PASSWORD_SUBMIT).click()
-
-    with allure.step("Проверка успешного входа"):
-        expect(page).not_to_have_url(f"{settings.BASE_URL}/auth/sign-in", timeout=15000)
-        expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
-
-    with allure.step("Переход в autotest space"):
-        page.get_by_test_id(Header.SPACE_SELECTOR).click()
-        page.get_by_test_id(SpaceSelector.space(settings.AUTOTEST_SPACE_ID)).click()
-        page.get_by_test_id(Sidebar.HOME).wait_for(state="visible", timeout=10000)
-
-    with allure.step("Сравнение скриншота"):
-        page.get_by_test_id(Sidebar.ARCHIVE).wait_for(state="visible")
-
-        # Фиксируем известный раздел → Home всегда активен в сайдбаре
-        page.get_by_test_id(Sidebar.HOME).click()
-        page.get_by_test_id(Sidebar.ARCHIVE).wait_for(state="visible")
-        page.mouse.move(640, 400)  # убираем hover с Home
-
+    with allure.step('Сравнение скриншота'):
         # Сворачиваем раскрытые секции сайдбара → фиксируем известное состояние
         # ADD_DOC один test-id на обе секции (Space Docs / Personal Docs) → .first/.last
         collapsible = [
@@ -59,36 +39,49 @@ def test_sign_in_with_email(page: Page, assert_snapshot):
                 page.get_by_test_id(section_id).click()
                 page.wait_for_timeout(500)
 
-        page.mouse.move(640, 400)  # убираем hover после сворачивания
+        page.mouse.move(640, 400)
         page.wait_for_timeout(200)
 
-        # Маски для динамических элементов которые меняются между запусками.
-        # Если тест станет флакать — добавь сюда новые локаторы.
-        dynamic_masks = [
-            page.locator('[class*="AsideNotificationsMenuItem-module_UnreadDot"]'),  # точка уведомлений в сайдбаре
-            page.locator('[class*="NotificationsToggleButton-module_UnreadDot"]'),   # точка уведомлений в хедере
-            page.locator('[class*="MemberAvatar-module_Root"]'),          # аватар пользователя в хедере
-            page.locator('[class*="HomeScreen-module_Avatar"]'),          # аватар/обложка на главной
-            page.locator('[class*="HomeScreen-module_Title"]'),           # приветствие "Hello, auto!"
-            page.locator('[class*="HomeScreen-module_TimeBlock"]'),       # время и дата
-            page.get_by_test_id(Header.SPACE_SELECTOR),                      # селектор Space в хедере
-            page.locator('[class*="HomeScreenCard-module_Root"]'),        # карточки (задачи, документы, избранное)
-            page.locator('[class*="HomeScreenTipCard-module_Tips"]'),     # совет недели
-            page.locator('[class*="HomeScreenStuff-module_Root"]'),       # блок Spaces
-            page.locator('[class*="TourBanner-module_Root"]'),            # баннер онбординга
-            page.locator('[class*="AffiliateBanner-module_Root"]'),       # баннер "Invite people"
-            page.locator('[class*="AsideMenu-module_Footer"]'),           # футер сайдбара
-        ]
+        screenshot = home_screenshot_with_masks(page)
+        assert_snapshot(screenshot, name='sign_in_success.png', threshold=5.0)
 
-        # Версия приложения имеет высоту 0 — маска не работает, красим через CSS как Playwright mask
-        page.add_style_tag(content='''
-            span[class*="AppVersion"] {
-                background-color: #FF00FF !important;
-                color: transparent !important;
-                display: inline-block !important;
-                min-height: 14px !important;
-            }
-        ''')
 
-        screenshot = page.screenshot(mask=dynamic_masks)
-        assert_snapshot(screenshot, name="sign_in_success.png", threshold=5.0)
+@allure.parent_suite('Frontend')
+@allure.suite('Auth')
+@allure.title('Sign in via email (OTP)')
+def test_sign_in_with_email_otp(page: Page, db, assert_snapshot):
+    since_ts = time.time()
+
+    with allure.step('Открытие страницы входа'):
+        page.goto(f'{settings.BASE_URL}/auth/sign-in')
+        page.get_by_test_id(Auth.EMAIL_INPUT).wait_for(state='visible', timeout=15000)
+
+    with allure.step(f'Ввод email: {OTP_SIGN_IN_EMAIL}'):
+        page.get_by_test_id(Auth.EMAIL_INPUT).fill(OTP_SIGN_IN_EMAIL)
+
+    with allure.step('Отправка email и перехват tempToken'):
+        payload = submit_email_and_get_temp_token(page)
+        assert payload.get('needOTP') is True, (
+            f'Ожидался needOTP=true (аккаунт без пароля), получено: {payload}. '
+            f'Возможно на аккаунт {OTP_SIGN_IN_EMAIL} установлен пароль.'
+        )
+        temp_token = payload['tempToken']
+
+    with allure.step('Получение OTP'):
+        inbox_name = OTP_SIGN_IN_EMAIL.split('@')[0]
+        otp_code = get_otp(inbox_name, since_ts=since_ts, db=db, temp_token=temp_token)
+
+    with allure.step(f'Ввод OTP: {otp_code}'):
+        page.get_by_test_id(Auth.OTP_INPUT).wait_for(state='visible', timeout=10000)
+        page.get_by_test_id(Auth.OTP_INPUT).fill(otp_code)
+        page.get_by_test_id(Auth.OTP_SUBMIT).click()
+
+    with allure.step('Ожидание перехода с auth-страницы'):
+        expect(page).not_to_have_url(re.compile(r'.*/auth/'), timeout=30000)
+
+    with allure.step('Проверка: пользователь на Home'):
+        expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
+
+    with allure.step('Сравнение скриншота'):
+        screenshot = home_screenshot_with_masks(page)
+        assert_snapshot(screenshot, name='sign_in_otp_home.png', threshold=5.0)

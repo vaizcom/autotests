@@ -1,7 +1,6 @@
 import allure
 import pytest
 
-from conftest import  main_client
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, edit_task_endpoint, \
     delete_task_endpoint
 from tests.test_backend.data.endpoints.History.history_utils import assert_history_event_exists

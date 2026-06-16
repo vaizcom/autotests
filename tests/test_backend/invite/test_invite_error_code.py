@@ -2,7 +2,6 @@ import allure
 import pytest
 
 from config import settings
-from conftest import main_client, owner_client
 from test_backend.data.endpoints.invite.invite_endpoint import (
     invite_to_space_endpoint, deactivate_member_endpoint
 )

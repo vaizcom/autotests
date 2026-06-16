@@ -17,7 +17,6 @@ from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, create_task_endpoint, \
     delete_task_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
-from test_backend.data.endpoints.User.register_endpoint import register_endpoint
 from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
 from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint
@@ -160,36 +159,54 @@ def foreign_client():
     return APIClient(base_url=API_URL, token=get_token('foreign_client'))
 
 @pytest.fixture(scope="session")
-def temp_client():
+def temp_client(db):
     """
-    Регистрирует нового пользователя, авторизует его и
-    возвращает готовый APIClient и ID спейса для тестов(на лимиты).
+    Регистрирует нового пользователя через AuthWithEmail → VerifyOtp,
+    возвращает готовый APIClient и ID спейса для тестов.
     """
+    import base64
+    import json as _json
+    from bson import ObjectId
+    from test_backend.data.endpoints.Auth.auth_with_email_endpoint import auth_with_email_endpoint
+    from test_backend.data.endpoints.Auth.verify_otp_endpoint import verify_otp_endpoint
+
     base_url = API_URL
     timestamp = int(time.time())
     email = f"space_{timestamp}@autotest.com"
-    password = "123456"
-    name = f"Rate Limit {timestamp}"
 
-    # 1. Регистрация пользователя
-    reg_data = register_endpoint(
-        email=email,
-        password=password,
-        full_name=name,
-        terms_accepted=True
-    )
-    reg_url = f"{base_url.rstrip('/')}{reg_data['path']}"
-    reg_resp = requests.post(reg_url, json=reg_data['json'], headers=reg_data['headers'])
-    assert reg_resp.status_code == 200, f"Ошибка регистрации: {reg_resp.text}"
+    # 1. AuthWithEmail — получаем tempToken
+    ep = auth_with_email_endpoint(email=email)
+    resp = requests.post(f"{base_url.rstrip('/')}{ep['path']}", json=ep['json'], headers=ep['headers'])
+    assert resp.status_code == 200, f"AuthWithEmail вернул {resp.status_code}: {resp.text}"
 
-    login_json = reg_resp.json()
-    token = login_json.get("payload", {}).get("token")
-    space_id = reg_resp.json().get("payload", {}).get("space", {}).get("_id")
+    payload = resp.json().get("payload", {})
+    assert payload.get("needOTP") is True, f"Ожидался needOTP=true, получено: {payload}"
+    temp_token = payload["tempToken"]
 
-    assert token and space_id, "Не удалось получить token или space_id"
+    # 2. Получаем OTP из MongoDB
+    token_payload = _json.loads(base64.urlsafe_b64decode(temp_token.split('.')[1] + '=='))
+    doc = db.confirmtokens.find_one({'_id': ObjectId(token_payload['id'])})
+    assert doc, f"Запись confirmtokens с _id={token_payload['id']} не найдена"
+    otp_code = doc.get('payload', {}).get('otpCode')
+    assert otp_code, "otpCode отсутствует в confirmtokens"
 
-    # Возвращаем стандартный клиент вашего фреймворка и space_id
-    client = APIClient(base_url=base_url, token=token)
+    # 3. VerifyOtp — получаем authToken
+    ep = verify_otp_endpoint(temp_token=temp_token, otp=otp_code)
+    resp = requests.post(f"{base_url.rstrip('/')}{ep['path']}", json=ep['json'], headers=ep['headers'])
+    assert resp.status_code == 200, f"VerifyOtp вернул {resp.status_code}: {resp.text}"
+
+    auth_token = resp.json().get("payload", {}).get("authToken")
+    assert auth_token, "authToken отсутствует в ответе VerifyOtp"
+
+    # 4. Получаем space_id из GetSpaces
+    client = APIClient(base_url=base_url, token=auth_token)
+    from test_backend.data.endpoints.Space.space_endpoints import get_spaces_endpoint
+    spaces_resp = client.post(**get_spaces_endpoint())
+    assert spaces_resp.status_code == 200, f"GetSpaces вернул {spaces_resp.status_code}: {spaces_resp.text}"
+    spaces = spaces_resp.json().get("payload", {}).get("spaces", [])
+    assert spaces, "У нового пользователя нет спейсов"
+    space_id = spaces[0]["_id"]
+
     return client, space_id
 
 
@@ -377,6 +394,39 @@ def temp_board(main_client, temp_project, temp_space):
     assert response.status_code == 200
 
     yield response.json()['payload']['board']['_id']
+
+@pytest.fixture
+def make_task_in_main(owner_client, main_space, main_board):
+    """
+    Фикстура-конструктор задачи.
+    Возвращает функцию create -> dict с данными созданной задачи.
+    В body передаются только необходимые для теста поля. После использования задача удаляется.
+    """
+    created_ids = []
+
+    def _create_task(body_overrides: dict):
+        body = {
+            "space_id": main_space,
+            "board": main_board
+        }
+        resp = owner_client.post(**create_task_endpoint(**body, **body_overrides))
+        assert resp.status_code == 200, resp.text
+        task = resp.json()["payload"]["task"]
+        created_ids.append(task["_id"])
+        return task
+
+    yield _create_task
+
+    # Teardown: удаление созданных задач
+    if created_ids:
+        for tid in created_ids:
+            try:
+                resp = owner_client.post(**delete_task_endpoint(task_id=tid, space_id=main_space))
+                if resp.status_code >= 400 and resp.status_code != 404:
+                    pass
+            except Exception:
+                pass
+
 
 @pytest.fixture
 def temp_task(main_client, temp_space, temp_board):
