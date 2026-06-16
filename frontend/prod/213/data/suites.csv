@@ -1,0 +1,16 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"Проверяет что название майлстоуна отображается корректно.","3500","02. Verify milestone name","Frontend","Tue Jun 16 11:19:36 UTC 2026","passed","Tue Jun 16 11:19:40 UTC 2026","Fields","Milestones","",""
+"Добавляет две задачи в майлстоун, проверяет счётчик на каждом шаге.
+
+    Обратную связь (МС виден в карточке задачи) проверяет API-тест
+    test_tasks_visibility_in_correct_milestones — кросс-навигация на E2E не нужна.
+    ","8765","06. Add tasks and verify counters","Frontend","Tue Jun 16 11:19:54 UTC 2026","passed","Tue Jun 16 11:20:03 UTC 2026","Fields","Milestones","",""
+"Завершает и снимает завершение задач, проверяет счётчики и прогресс-круги.","30482","07. Verify task completion counters","Frontend","Tue Jun 16 11:20:03 UTC 2026","passed","Tue Jun 16 11:20:34 UTC 2026","Fields","Milestones","",""
+"Заполняет и проверяет описание майлстоуна (tiptap-редактор после секции задач).","4961","04. Set and verify description","Frontend","Tue Jun 16 11:19:44 UTC 2026","passed","Tue Jun 16 11:19:49 UTC 2026","Fields","Milestones","",""
+"Создаёт майлстоун через вкладку Milestones на борде.","14962","01. Create milestone on board","Frontend","Tue Jun 16 11:19:21 UTC 2026","passed","Tue Jun 16 11:19:36 UTC 2026","Fields","Milestones","",""
+"","13504","Sign in via email (OTP)","Frontend","Tue Jun 16 11:18:50 UTC 2026","passed","Tue Jun 16 11:19:04 UTC 2026","","Auth","",""
+"","17115","Sign up with email (OTP)","Frontend","Tue Jun 16 11:19:04 UTC 2026","passed","Tue Jun 16 11:19:21 UTC 2026","","Auth","",""
+"","15168","Sign in via email (password)","Frontend","Tue Jun 16 11:18:34 UTC 2026","passed","Tue Jun 16 11:18:50 UTC 2026","","Auth","",""
+"Заполняет и проверяет короткое описание майлстоуна.","4137","03. Set short description","Frontend","Tue Jun 16 11:19:40 UTC 2026","passed","Tue Jun 16 11:19:44 UTC 2026","Fields","Milestones","",""
+"","17363","Logout","Frontend","Tue Jun 16 11:18:17 UTC 2026","passed","Tue Jun 16 11:18:34 UTC 2026","","Auth","",""
+"Устанавливает и проверяет даты майлстоуна.","5195","05. Set and verify dates","Frontend","Tue Jun 16 11:19:49 UTC 2026","passed","Tue Jun 16 11:19:54 UTC 2026","Fields","Milestones","",""
