@@ -127,13 +127,13 @@ def get_otp_from_mailinator(inbox_name: str, since_ts: int = 0,
             resp = requests.get(url, timeout=10)
         except requests.exceptions.ConnectionError:
             raise AssertionError(
-                f'Mailinator API недоступен (ConnectionError). '
-                f'Проверить: 1) интернет 2) https://www.mailinator.com открывается в браузере'
+                'Mailinator API недоступен (ConnectionError). '
+                'Проверить: 1) интернет 2) https://www.mailinator.com открывается в браузере'
             )
         except requests.exceptions.Timeout:
             raise AssertionError(
-                f'Mailinator API не отвечает (Timeout). '
-                f'Проверить: https://www.mailinator.com открывается в браузере'
+                'Mailinator API не отвечает (Timeout). '
+                'Проверить: https://www.mailinator.com открывается в браузере'
             )
 
         last_status = resp.status_code

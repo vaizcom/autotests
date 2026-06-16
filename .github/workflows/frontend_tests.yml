@@ -19,11 +19,11 @@ on:
           - https://app.vaiz.dev
           - https://app.vaiz.com
       update_snapshots:
-        description: 'Update baseline snapshots'
+        description: 'Update VRT snapshots'
         default: false
         type: boolean
       test_filter:
-        description: 'One or more test names separated by comma (e.g. test_a, test_b). Leave empty to run all.'
+        description: 'Leave empty to run all.'
         default: ''
         type: string
 
