@@ -25,17 +25,26 @@ def browser_context_args(browser_context_args):
 
 def sign_in_and_go_to_space(page: Page):
     """Логинится и переходит в autotest space. Используется как setup в logout."""
-    page.goto(f'{settings.BASE_URL}/auth/sign-in')
-    page.get_by_test_id(Auth.EMAIL_INPUT).fill(settings.FRONTEND_EMAIL)
-    page.get_by_test_id(Auth.EMAIL_SUBMIT).click()
-    page.get_by_test_id(Auth.PASSWORD_INPUT).wait_for(state='visible', timeout=10000)
-    page.get_by_test_id(Auth.PASSWORD_INPUT).fill(settings.FRONTEND_PASSWORD)
-    page.get_by_test_id(Auth.PASSWORD_SUBMIT).click()
-    expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
+    with allure.step('Открытие страницы входа'):
+        page.goto(f'{settings.BASE_URL}/auth/sign-in')
+        page.get_by_test_id(Auth.EMAIL_INPUT).wait_for(state='visible', timeout=15000)
 
-    page.get_by_test_id(Header.SPACE_SELECTOR).click()
-    page.get_by_test_id(SpaceSelector.space(settings.AUTOTEST_SPACE_ID)).click()
-    page.get_by_test_id(Sidebar.HOME).wait_for(state='visible', timeout=10000)
+    with allure.step(f'Ввод email: {settings.FRONTEND_EMAIL}'):
+        page.get_by_test_id(Auth.EMAIL_INPUT).fill(settings.FRONTEND_EMAIL)
+        page.get_by_test_id(Auth.EMAIL_SUBMIT).click()
+
+    with allure.step('Ввод пароля'):
+        page.get_by_test_id(Auth.PASSWORD_INPUT).wait_for(state='visible', timeout=10000)
+        page.get_by_test_id(Auth.PASSWORD_INPUT).fill(settings.FRONTEND_PASSWORD)
+        page.get_by_test_id(Auth.PASSWORD_SUBMIT).click()
+
+    with allure.step('Проверка: пользователь на Home'):
+        expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
+
+    with allure.step('Переход в autotest space'):
+        page.get_by_test_id(Header.SPACE_SELECTOR).click()
+        page.get_by_test_id(SpaceSelector.space(settings.AUTOTEST_SPACE_ID)).click()
+        page.get_by_test_id(Sidebar.HOME).wait_for(state='visible', timeout=10000)
 
 
 def sign_up_new_account(page: Page, email: str, db=None):
