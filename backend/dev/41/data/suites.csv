@@ -1,0 +1,137 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"
+    Новый флоу регистрации: AuthWithEmail → OTP из Mongo → VerifyOtp.
+    ","2859","Register (AuthWithEmail): Успешная регистрация нового пользователя","Auth Service","Tue Jun 16 11:13:20 UTC 2026","passed","Tue Jun 16 11:13:23 UTC 2026","AuthWithEmail + VerifyOtp","New_Registration","",""
+"
+    Негативный тест: tempToken нельзя использовать повторно после успешной регистрации.
+    ","4481","VerifyOtp: отказ — повторное использование tempToken","Auth Service","Tue Jun 16 11:13:25 UTC 2026","passed","Tue Jun 16 11:13:30 UTC 2026","VerifyOtp — повторное использование tempToken","New_Registration","",""
+"
+    Тест валидации граничных значений длины пароля.
+    ","3200","Register: Валидация длины пароля (Пароль длиннее максимума (65 симв.))","Auth Service","Tue Jun 16 11:14:34 UTC 2026","passed","Tue Jun 16 11:14:37 UTC 2026","Password Validation","Registration Validation","",""
+"
+    Негативный тест: authToken от успешного логина не подходит как tempToken.
+    ","1062","VerifyPassword: отказ — authToken вместо tempToken","Auth Service","Tue Jun 16 11:13:17 UTC 2026","passed","Tue Jun 16 11:13:18 UTC 2026","VerifyPassword — невалидный tempToken","New_Login","",""
+"
+    Позитивный тест регистрации с различными вариантами полного имени.
+    ","4573","Register: Успешная регистрация с именем 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'","Auth Service","Tue Jun 16 11:13:36 UTC 2026","passed","Tue Jun 16 11:13:41 UTC 2026","Fullname Validation","Registration Validation","",""
+"
+    Универсальный тест на проверку обязательности полей при регистрации.
+    Удаляет указанное поле из валидного запроса и ожидает ошибку 400.
+    ","3433","Register: Отказ при отсутствии поля 'password'","Auth Service","Tue Jun 16 11:15:12 UTC 2026","passed","Tue Jun 16 11:15:15 UTC 2026","Missing field","Registration","",""
+"
+    Негативный тест: VerifyPassword с неверным/пустым паролем.
+    ","843","VerifyPassword: отказ — неверный пароль","Auth Service","Tue Jun 16 11:13:16 UTC 2026","passed","Tue Jun 16 11:13:16 UTC 2026","VerifyPassword — негативные","New_Login","",""
+"
+    Тест валидации граничных значений длины пароля.
+    ","1266","Register: Валидация длины пароля (Пароль короче минимума (5 симв.))","Auth Service","Tue Jun 16 11:14:33 UTC 2026","passed","Tue Jun 16 11:14:34 UTC 2026","Password Validation","Registration Validation","",""
+"
+    Негативный тест регистрации с некорректным форматом email.
+    ","1456","Register: Отказ при валидации email (Пустое значение)","Auth Service","Tue Jun 16 11:13:35 UTC 2026","passed","Tue Jun 16 11:13:36 UTC 2026","Email Validation","Registration Validation","",""
+"
+    Кросс-степ: tempToken от needPassword (логин) нельзя использовать в VerifyOtp.
+    ","517","Межшаговая подмена: password-токен → VerifyOtp","Auth Service","Tue Jun 16 11:13:25 UTC 2026","passed","Tue Jun 16 11:13:25 UTC 2026","VerifyOtp — невалидный tempToken","New_Registration","",""
+"
+    Тест регистрации и входа с нестандартными паролями (спецсимволы, юникод, пробелы).
+    Проверяет отсутствие проблем с кодировкой и скрытого изменения пароля (trimming).
+    ","14255","Register & Login: Пароль   Pass🔑word!@#пароль123  ","Auth Service","Tue Jun 16 11:14:17 UTC 2026","passed","Tue Jun 16 11:14:32 UTC 2026","Password Validation","Registration Validation","",""
+"
+    Параметризованный тест регистрации пользователя (разные регистры email).
+    ","9625","Register: Успешная регистрация (обычный email)","Auth Service","Tue Jun 16 11:14:37 UTC 2026","passed","Tue Jun 16 11:14:47 UTC 2026","Positive registration","Registration","",""
+"
+    Параметризованный тест login пользователя (разные регистры email).
+    ","903","Login: Успешный Login (обычный email)","Auth Service","Tue Jun 16 11:13:30 UTC 2026","passed","Tue Jun 16 11:13:31 UTC 2026","","Login","",""
+"
+    Негативный тест: AuthWithEmail с некорректным email.
+    ","517","AuthWithEmail: отказ — без @","Auth Service","Tue Jun 16 11:13:12 UTC 2026","passed","Tue Jun 16 11:13:13 UTC 2026","AuthWithEmail — невалидный email","New_Login","",""
+"
+    Негативный тест: VerifyOtp с неверным/пустым OTP-кодом.
+    ","581","VerifyOtp: отказ — пустой OTP","Auth Service","Tue Jun 16 11:13:24 UTC 2026","passed","Tue Jun 16 11:13:24 UTC 2026","VerifyOtp — негативные","New_Registration","",""
+"
+    Новый флоу логина: AuthWithEmail → VerifyPassword.
+    Проверяет двухшаговую авторизацию для существующего пользователя.
+    ","1379","Login (AuthWithEmail): Успешный логин (обычный email)","Auth Service","Tue Jun 16 11:13:13 UTC 2026","passed","Tue Jun 16 11:13:15 UTC 2026","AuthWithEmail + VerifyPassword","New_Login","",""
+"
+    Универсальный тест на проверку обязательности полей при регистрации.
+    Удаляет указанное поле из валидного запроса и ожидает ошибку 400.
+    ","4709","Register: Отказ при отсутствии поля 'fullName'","Auth Service","Tue Jun 16 11:15:15 UTC 2026","passed","Tue Jun 16 11:15:20 UTC 2026","Missing field","Registration","",""
+"
+    Тест валидации граничных значений длины полного имени.
+    ","3056","Register: Валидация длины имени (Имя длиннее максимума (31 симв.))","Auth Service","Tue Jun 16 11:13:56 UTC 2026","passed","Tue Jun 16 11:13:59 UTC 2026","Fullname Validation","Registration Validation","",""
+"
+    Позитивный тест регистрации с различными вариантами полного имени.
+    ","9064","Register: Успешная регистрация с именем 'O'Connor-Björn 陈 Иван'","Auth Service","Tue Jun 16 11:13:41 UTC 2026","passed","Tue Jun 16 11:13:50 UTC 2026","Fullname Validation","Registration Validation","",""
+"
+    Тест валидации граничных значений длины полного имени.
+    ","3444","Register: Валидация длины имени (Пробел вместо имени)","Auth Service","Tue Jun 16 11:14:03 UTC 2026","passed","Tue Jun 16 11:14:06 UTC 2026","Fullname Validation","Registration Validation","",""
+"
+    Негативный тест: VerifyPassword без прохождения AuthWithEmail.
+    ","202","VerifyPassword: отказ — мусорный токен","Auth Service","Tue Jun 16 11:13:17 UTC 2026","passed","Tue Jun 16 11:13:17 UTC 2026","VerifyPassword — невалидный tempToken","New_Login","",""
+"
+    Тест регистрации и входа с нестандартными паролями (спецсимволы, юникод, пробелы).
+    Проверяет отсутствие проблем с кодировкой и скрытого изменения пароля (trimming).
+    ","11154","Register & Login: Пароль       1","Auth Service","Tue Jun 16 11:14:06 UTC 2026","passed","Tue Jun 16 11:14:17 UTC 2026","Password Validation","Registration Validation","",""
+"
+    Негативный тест: AuthWithEmail с некорректным email.
+    ","224","AuthWithEmail: отказ — пустой email","Auth Service","Tue Jun 16 11:13:13 UTC 2026","passed","Tue Jun 16 11:13:13 UTC 2026","AuthWithEmail — невалидный email","New_Login","",""
+"
+    Негативный тест: AuthWithEmail с некорректным email.
+    ","199","AuthWithEmail: отказ — без зоны домена","Auth Service","Tue Jun 16 11:13:13 UTC 2026","passed","Tue Jun 16 11:13:13 UTC 2026","AuthWithEmail — невалидный email","New_Login","",""
+"
+    Негативный тест: VerifyPassword без прохождения AuthWithEmail.
+    ","205","VerifyPassword: отказ — пустой токен","Auth Service","Tue Jun 16 11:13:17 UTC 2026","passed","Tue Jun 16 11:13:17 UTC 2026","VerifyPassword — невалидный tempToken","New_Login","",""
+"
+    Тест валидации граничных значений длины пароля.
+    ","1190","Register: Валидация длины пароля (Пустой пароль)","Auth Service","Tue Jun 16 11:14:32 UTC 2026","passed","Tue Jun 16 11:14:33 UTC 2026","Password Validation","Registration Validation","",""
+"
+    Кросс-степ: tempToken от needOTP (регистрация) нельзя использовать в VerifyPassword.
+    ","895","Межшаговая подмена: otp-токен → VerifyPassword","Auth Service","Tue Jun 16 11:13:18 UTC 2026","passed","Tue Jun 16 11:13:19 UTC 2026","VerifyPassword — невалидный tempToken","New_Login","",""
+"
+    Негативный тест: VerifyPassword с неверным/пустым паролем.
+    ","451","VerifyPassword: отказ — пустой пароль","Auth Service","Tue Jun 16 11:13:16 UTC 2026","passed","Tue Jun 16 11:13:17 UTC 2026","VerifyPassword — негативные","New_Login","",""
+"
+    Тест на невозможность регистрации двух пользователей с одинаковым email.
+    ","14184","Register: Ошибка при регистрации существующего email","Auth Service","Tue Jun 16 11:14:55 UTC 2026","passed","Tue Jun 16 11:15:09 UTC 2026","Duplicate email","Registration","",""
+"
+    Негативный тест регистрации с некорректным форматом email.
+    ","872","Register: Отказ при валидации email (Пробелы в адресе)","Auth Service","Tue Jun 16 11:13:33 UTC 2026","passed","Tue Jun 16 11:13:34 UTC 2026","Email Validation","Registration Validation","",""
+"
+    Негативный тест: tempToken нельзя использовать повторно после успешного логина.
+    ","835","VerifyPassword: отказ — повторное использование tempToken","Auth Service","Tue Jun 16 11:13:19 UTC 2026","passed","Tue Jun 16 11:13:20 UTC 2026","VerifyPassword — повторное использование tempToken","New_Login","",""
+"
+    Позитивный тест регистрации с различными вариантами полного имени.
+    ","6348","Register: Успешная регистрация с именем '  User Name'","Auth Service","Tue Jun 16 11:13:50 UTC 2026","passed","Tue Jun 16 11:13:56 UTC 2026","Fullname Validation","Registration Validation","",""
+"
+    Негативный тест: VerifyOtp с невалидным tempToken.
+    ","202","VerifyOtp: отказ — пустой токен","Auth Service","Tue Jun 16 11:13:25 UTC 2026","passed","Tue Jun 16 11:13:25 UTC 2026","VerifyOtp — невалидный tempToken","New_Registration","",""
+"
+    Негативный тест регистрации с некорректным форматом email.
+    ","479","Register: Отказ при валидации email (Неверный формат (без @))","Auth Service","Tue Jun 16 11:13:32 UTC 2026","passed","Tue Jun 16 11:13:33 UTC 2026","Email Validation","Registration Validation","",""
+"
+    Параметризованный тест login пользователя (разные регистры email).
+    ","1500","Login: Успешный Login (email в верхнем регистре)","Auth Service","Tue Jun 16 11:13:31 UTC 2026","passed","Tue Jun 16 11:13:32 UTC 2026","","Login","",""
+"
+    Негативный тест: AuthWithEmail с некорректным email.
+    ","210","AuthWithEmail: отказ — пробелы в адресе","Auth Service","Tue Jun 16 11:13:13 UTC 2026","passed","Tue Jun 16 11:13:13 UTC 2026","AuthWithEmail — невалидный email","New_Login","",""
+"
+    Новый флоу логина: AuthWithEmail → VerifyPassword.
+    Проверяет двухшаговую авторизацию для существующего пользователя.
+    ","939","Login (AuthWithEmail): Успешный логин (email в верхнем регистре)","Auth Service","Tue Jun 16 11:13:15 UTC 2026","passed","Tue Jun 16 11:13:16 UTC 2026","AuthWithEmail + VerifyPassword","New_Login","",""
+"
+    Параметризованный тест регистрации пользователя (разные регистры email).
+    ","8068","Register: Успешная регистрация (email в верхнем регистре)","Auth Service","Tue Jun 16 11:14:47 UTC 2026","passed","Tue Jun 16 11:14:55 UTC 2026","Positive registration","Registration","",""
+"
+    Универсальный тест на проверку обязательности полей при регистрации.
+    Удаляет указанное поле из валидного запроса и ожидает ошибку 400.
+    ","2831","Register: Отказ при отсутствии поля 'email'","Auth Service","Tue Jun 16 11:15:09 UTC 2026","passed","Tue Jun 16 11:15:12 UTC 2026","Missing field","Registration","",""
+"
+    Негативный тест: VerifyOtp с неверным/пустым OTP-кодом.
+    ","751","VerifyOtp: отказ — неверный OTP","Auth Service","Tue Jun 16 11:13:23 UTC 2026","passed","Tue Jun 16 11:13:24 UTC 2026","VerifyOtp — негативные","New_Registration","",""
+"
+    Негативный тест регистрации с некорректным форматом email.
+    ","1297","Register: Отказ при валидации email (Отсутствует зона домена (.com))","Auth Service","Tue Jun 16 11:13:34 UTC 2026","passed","Tue Jun 16 11:13:35 UTC 2026","Email Validation","Registration Validation","",""
+"
+    Негативный тест: VerifyOtp с невалидным tempToken.
+    ","209","VerifyOtp: отказ — мусорный токен","Auth Service","Tue Jun 16 11:13:24 UTC 2026","passed","Tue Jun 16 11:13:25 UTC 2026","VerifyOtp — невалидный tempToken","New_Registration","",""
+"
+    Тест валидации граничных значений длины полного имени.
+    ","3251","Register: Валидация длины имени (Пустое имя)","Auth Service","Tue Jun 16 11:13:59 UTC 2026","passed","Tue Jun 16 11:14:03 UTC 2026","Fullname Validation","Registration Validation","",""
