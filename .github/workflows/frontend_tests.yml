@@ -117,7 +117,7 @@ jobs:
           RAW="${{ github.event.inputs.test_filter }}"
           TARGET=$(echo "$RAW" | sed 's/[[:space:]]*,[[:space:]]*/  or /g')
           if [ -z "$TARGET" ]; then
-            TARGET="test_sign_in_with_email or test_logout or test_create_space_with_project_and_task"
+            TARGET="test_sign_in_with_email_password or test_sign_in_with_email_otp or test_sign_up_with_email or test_logout or test_create_space_with_project_and_task"
           fi
           pytest tests/test_frontend/ -m frontend -k "$TARGET" --update-snapshots
           BRANCH="${{ github.head_ref || github.ref_name }}"
