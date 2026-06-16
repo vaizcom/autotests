@@ -1,0 +1,71 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"Добавляет комментарий к майлстоуну и проверяет.","4397","09. Add comment and verify","Frontend","Tue Jun 16 12:54:14 UTC 2026","passed","Tue Jun 16 12:54:18 UTC 2026","Fields","Milestones","",""
+"Заполняет и проверяет описание майлстоуна (tiptap-редактор после секции задач).","6756","04. Set and verify description","Frontend","Tue Jun 16 12:53:26 UTC 2026","passed","Tue Jun 16 12:53:32 UTC 2026","Fields","Milestones","",""
+"Клик по FirstMember без ⌘ — заменяет SecondMember на FirstMember.","5722","04. Замена без ⌘","Frontend","Tue Jun 16 12:56:34 UTC 2026","passed","Tue Jun 16 12:56:39 UTC 2026","Assignee","Tasks","",""
+"Заполняет и проверяет короткое описание майлстоуна.","3765","03. Set short description","Frontend","Tue Jun 16 12:53:22 UTC 2026","passed","Tue Jun 16 12:53:25 UTC 2026","Fields","Milestones","",""
+"Заполняет описание задачи.","4430","01. Заполнить Description","Frontend","Tue Jun 16 12:57:22 UTC 2026","passed","Tue Jun 16 12:57:26 UTC 2026","Description","Tasks","",""
+"Создаёт майлстоуны из dropdown задачи, проверяет мульти-назначение и удаление.","7538","01. Создать, выбрать и удалить Milestones","Frontend","Tue Jun 16 12:57:27 UTC 2026","passed","Tue Jun 16 12:57:34 UTC 2026","Milestones","Tasks","",""
+"Клик по назначенному пользователю без ⌘ снимает его.","5793","05. Снять Assignee","Frontend","Tue Jun 16 12:56:40 UTC 2026","passed","Tue Jun 16 12:56:45 UTC 2026","Assignee","Tasks","",""
+"Добавляет блокер и блокинг задачу.","5976","01. Добавить Blocker и Blocking","Frontend","Tue Jun 16 12:57:39 UTC 2026","passed","Tue Jun 16 12:57:45 UTC 2026","Blockers","Tasks","",""
+"Открывает дропдаун, проверяет отображение элементов, выбирает Green.","4111","01. Установить Type Green","Frontend","Tue Jun 16 12:56:45 UTC 2026","passed","Tue Jun 16 12:56:50 UTC 2026","Type","Tasks","",""
+"Устанавливает дату задачи.","4969","01. Установить Date","Frontend","Tue Jun 16 12:57:34 UTC 2026","passed","Tue Jun 16 12:57:39 UTC 2026","Date","Tasks","",""
+"Заполняет все поля задачи перед конвертацией в том числе с subtask и sub_subtask.
+    Переносятся: название, описание, дата, подзадача (вложенная подзадача), комментарий.
+    Майлстоун: закомментирован — ConvertTaskToMilestone не чистит search index, баг заведен APP-5414
+    Теряются: приоритет, исполнитель, тип, майлстоун.","26362","02. Заполнить все поля Task (+subtask и sub_subtask) перед конвертацией","Frontend","Tue Jun 16 12:59:59 UTC 2026","passed","Tue Jun 16 13:00:26 UTC 2026","Convert to Milestone","Tasks","",""
+"Добавляет две подзадачи, проверяет счётчик на каждом шаге.","5301","01. Добавить Subtasks и проверить счётчики","Frontend","Tue Jun 16 12:57:57 UTC 2026","passed","Tue Jun 16 12:58:02 UTC 2026","Subtasks","Tasks","",""
+"Проверяет что задачу можно создать в каждой колонке борда.","6486","01. Создать задачу в каждой колонке борда","Frontend","Tue Jun 16 12:55:47 UTC 2026","passed","Tue Jun 16 12:55:54 UTC 2026","Create in Columns","Tasks","",""
+"Создаёт задачу, которая будет конвертирована в майлстоун.","85384","01. Создать Task для конвертации","Frontend","Tue Jun 16 12:58:34 UTC 2026","passed","Tue Jun 16 12:59:59 UTC 2026","Convert to Milestone","Tasks","",""
+"Назначает FirstMember исполнителем.","4513","01. Назначить Assignee","Frontend","Tue Jun 16 12:56:13 UTC 2026","passed","Tue Jun 16 12:56:17 UTC 2026","Assignee","Tasks","",""
+"Проверяет что подзадача с вложенной подподзадачей сохранились после конвертации.","5210","05. Subtasks и Sub_Subtasks сохранились после конвертации","Frontend","Tue Jun 16 13:00:39 UTC 2026","passed","Tue Jun 16 13:00:44 UTC 2026","Convert to Milestone","Tasks","",""
+"Устанавливает приоритет задачи Medium.","4248","01. Установить Medium","Frontend","Tue Jun 16 12:56:00 UTC 2026","passed","Tue Jun 16 12:56:04 UTC 2026","Priority","Tasks","",""
+"Создаёт майлстоун через вкладку Milestones на борде.","13640","01. Create milestone on board","Frontend","Tue Jun 16 12:53:04 UTC 2026","passed","Tue Jun 16 12:53:18 UTC 2026","Fields","Milestones","",""
+"Завершает и снимает завершение подзадач, проверяет счётчики.
+
+    Открывается на полную страницу — подзадачи рендерятся сразу,
+    без проблем с загрузкой и скроллом сайдбара.
+    ","6085","02. Завершить Subtask и проверить счётчики","Frontend","Tue Jun 16 12:58:02 UTC 2026","passed","Tue Jun 16 12:58:08 UTC 2026","Subtasks","Tasks","",""
+"Устанавливает Green+Blue, клик по Pink без ⌘ — заменяет все на Pink.","5641","05. Замена Types без ⌘","Frontend","Tue Jun 16 12:57:06 UTC 2026","passed","Tue Jun 16 12:57:11 UTC 2026","Type","Tasks","",""
+"","13424","Logout","Frontend","Tue Jun 16 12:52:01 UTC 2026","passed","Tue Jun 16 12:52:15 UTC 2026","","Auth","",""
+"Снимает приоритет задачи.","3993","03. Сбросить Priority","Frontend","Tue Jun 16 12:56:08 UTC 2026","passed","Tue Jun 16 12:56:12 UTC 2026","Priority","Tasks","",""
+"Удаляет все карточки с борды и архивирует созданные майлстоуны.","16607","99. Очистка","Frontend","Tue Jun 16 13:01:47 UTC 2026","passed","Tue Jun 16 13:02:03 UTC 2026","Lifecycle","Tasks","",""
+"Отмечает задачу как выполненную (Complete) и снимает отметку(UnComplete).
+    Проверяет чекбокс и в сайдбаре, и на карточке борды.","4159","01. Complete через чекбокс в сайдбаре","Frontend","Tue Jun 16 12:58:14 UTC 2026","passed","Tue Jun 16 12:58:19 UTC 2026","Complete","Tasks","",""
+"","13632","Sign in via email (OTP)","Frontend","Tue Jun 16 12:52:32 UTC 2026","passed","Tue Jun 16 12:52:45 UTC 2026","","Auth","",""
+"Удаляет сабтаски с борды, затем архивирует майлстоуны.","61493","99. Очистка: удалить Subtask и архивировать Milestone","Frontend","Tue Jun 16 13:00:44 UTC 2026","passed","Tue Jun 16 13:01:45 UTC 2026","Convert to Milestone","Tasks","",""
+"Добавляет SecondMember через ⌘+клик, оба назначены.","6623","02. Мультиселект (⌘ + клик)","Frontend","Tue Jun 16 12:56:17 UTC 2026","passed","Tue Jun 16 12:56:24 UTC 2026","Assignee","Tasks","",""
+"Завершает задачу через контекстное меню карточки на борде.","4266","03. Complete через меню карточки на борде","Frontend","Tue Jun 16 12:58:24 UTC 2026","passed","Tue Jun 16 12:58:29 UTC 2026","Complete","Tasks","",""
+"Удаляет задачи из таблицы майлстоуна, проверяет уменьшение счётчика.","11475","08. Delete tasks and verify counters","Frontend","Tue Jun 16 12:54:02 UTC 2026","passed","Tue Jun 16 12:54:14 UTC 2026","Fields","Milestones","",""
+"Проверяет что название майлстоуна отображается корректно.","3564","02. Verify milestone name","Frontend","Tue Jun 16 12:53:18 UTC 2026","passed","Tue Jun 16 12:53:21 UTC 2026","Fields","Milestones","",""
+"Архивирует тестовый майлстоун и подчищает все остальные кроме 'Test milestone'.","38548","99. Cleanup: archive milestone","Frontend","Tue Jun 16 12:54:22 UTC 2026","passed","Tue Jun 16 12:55:01 UTC 2026","Fields","Milestones","",""
+"Удаляет подзадачи из таблицы задачи, проверяет уменьшение счётчика.","6117","03. Удалить Subtask и проверить счётчики","Frontend","Tue Jun 16 12:58:08 UTC 2026","passed","Tue Jun 16 12:58:14 UTC 2026","Subtasks","Tasks","",""
+"Конвертирует задачу в майлстоун через меню сайдбара.","6984","03. Конвертировать Task в Milestone","Frontend","Tue Jun 16 13:00:26 UTC 2026","passed","Tue Jun 16 13:00:33 UTC 2026","Convert to Milestone","Tasks","",""
+"Устанавливает Green+Blue, снимает Green через ⌘+клик, остаётся Blue.","6428","04. Убрать один Type (⌘ + клик)","Frontend","Tue Jun 16 12:56:59 UTC 2026","passed","Tue Jun 16 12:57:06 UTC 2026","Type","Tasks","",""
+"","16256","Sign in via email (password)","Frontend","Tue Jun 16 12:52:15 UTC 2026","passed","Tue Jun 16 12:52:31 UTC 2026","","Auth","",""
+"Добавляет комментарий к задаче.","6614","01. Добавить Comment","Frontend","Tue Jun 16 12:57:50 UTC 2026","passed","Tue Jun 16 12:57:56 UTC 2026","Comments","Tasks","",""
+"Проверяет фильтрацию по поиску в дропдауне Types.","4263","02. Search в дропдауне","Frontend","Tue Jun 16 12:56:50 UTC 2026","passed","Tue Jun 16 12:56:54 UTC 2026","Type","Tasks","",""
+"Проверяет форму создания нового типа: инпут, кнопка Add, цвета и иконки.","5364","07. New type: форма создания типа","Frontend","Tue Jun 16 12:57:16 UTC 2026","passed","Tue Jun 16 12:57:22 UTC 2026","Type","Tasks","",""
+"Открывает сабтаску на борде, проверяет milestone field,
+    переходит на майлстоун по бейджу и проверяет перенос полей.","5608","04. Проверить поля Milestone через Subtask","Frontend","Tue Jun 16 13:00:33 UTC 2026","passed","Tue Jun 16 13:00:38 UTC 2026","Convert to Milestone","Tasks","",""
+"Устанавливает и проверяет даты майлстоуна.","4922","05. Set and verify dates","Frontend","Tue Jun 16 12:53:32 UTC 2026","passed","Tue Jun 16 12:53:37 UTC 2026","Fields","Milestones","",""
+"Завершает задачу кликом по чекбоксу на карточке борда (без открытия сайдбара).","5403","02. Complete через чекбокс на карточке борды","Frontend","Tue Jun 16 12:58:19 UTC 2026","passed","Tue Jun 16 12:58:24 UTC 2026","Complete","Tasks","",""
+"Проверяет навигацию: выбор спейса, видимость проекта, открытие проекта.","7224","Space and project navigation","Frontend","Tue Jun 16 12:55:36 UTC 2026","passed","Tue Jun 16 12:55:43 UTC 2026","","Spaces","",""
+"Проверяет что вкладка Activities отображается.","3498","10. Verify Activities tab","Frontend","Tue Jun 16 12:54:18 UTC 2026","passed","Tue Jun 16 12:54:22 UTC 2026","Fields","Milestones","",""
+"Снимает FirstMember через ⌘+клик, остаётся SecondMember.","9455","03. Убрать одного (⌘ + клик)","Frontend","Tue Jun 16 12:56:24 UTC 2026","passed","Tue Jun 16 12:56:33 UTC 2026","Assignee","Tasks","",""
+"Завершает и снимает завершение задач, проверяет счётчики и прогресс-круги.","15541","07. Verify task completion counters","Frontend","Tue Jun 16 12:53:47 UTC 2026","passed","Tue Jun 16 12:54:02 UTC 2026","Fields","Milestones","",""
+"Удаляет задачи col_*, созданные тестом создания в колонках.","5908","99. Cleanup: удалить задачи из колонок","Frontend","Tue Jun 16 12:55:54 UTC 2026","passed","Tue Jun 16 12:56:00 UTC 2026","Create in Columns","Tasks","",""
+"Добавляет две задачи в майлстоун, проверяет счётчик на каждом шаге.
+
+    Обратную связь (МС виден в карточке задачи) проверяет API-тест
+    test_tasks_visibility_in_correct_milestones — кросс-навигация на E2E не нужна.
+    ","8979","06. Add tasks and verify counters","Frontend","Tue Jun 16 12:53:38 UTC 2026","passed","Tue Jun 16 12:53:46 UTC 2026","Fields","Milestones","",""
+"Устанавливает тип, сбрасывает через Clear type.","4842","06. Clear type","Frontend","Tue Jun 16 12:57:11 UTC 2026","passed","Tue Jun 16 12:57:16 UTC 2026","Type","Tasks","",""
+"","18534","Sign up with email (OTP)","Frontend","Tue Jun 16 12:52:45 UTC 2026","passed","Tue Jun 16 12:53:04 UTC 2026","","Auth","",""
+"Устанавливает Green, добавляет Blue через ⌘+клик, проверяет что оба видны.","4892","03. Мультиселект Types (⌘ + клик)","Frontend","Tue Jun 16 12:56:54 UTC 2026","passed","Tue Jun 16 12:56:59 UTC 2026","Type","Tasks","",""
+"Меняет приоритет задачи с Medium на High.","4075","02. Изменить: Medium → High","Frontend","Tue Jun 16 12:56:04 UTC 2026","passed","Tue Jun 16 12:56:08 UTC 2026","Priority","Tasks","",""
+"Заполняет кастомное текстовое поле задачи.","4195","01. Заполнить Custom Field","Frontend","Tue Jun 16 12:57:45 UTC 2026","passed","Tue Jun 16 12:57:50 UTC 2026","Custom Fields","Tasks","",""
+"
+    Smoke-тест: регистрирует новый аккаунт (через smoke_auth_state),
+    создаёт Space → открывает дефолтный Project → создаёт Task.
+    ","14281","Create space → project → task","Frontend","Tue Jun 16 12:55:22 UTC 2026","passed","Tue Jun 16 12:55:36 UTC 2026","","Smoke","",""
+"Завершает задачу через меню '...' в сайдбаре.","4749","04. Complete через меню сайдбара","Frontend","Tue Jun 16 12:58:29 UTC 2026","passed","Tue Jun 16 12:58:33 UTC 2026","Complete","Tasks","",""
