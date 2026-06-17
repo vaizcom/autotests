@@ -1,10 +1,15 @@
 import requests
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 
 class APIClient:
     def __init__(self, base_url: str, token: str = None):
         self.base_url = base_url.rstrip('/')
         self.session = requests.Session()
+        retry = Retry(total=2, backoff_factor=2, status_forcelist=[502, 503, 504])
+        self.session.mount("https://", HTTPAdapter(max_retries=retry))
+        self.session.mount("http://", HTTPAdapter(max_retries=retry))
         self.token = token
         if token:
             self.set_auth_header(token)
