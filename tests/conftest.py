@@ -27,6 +27,7 @@ from tests.test_backend.data.endpoints.Document.document_endpoints import create
 from tests.test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from tests.core.client import APIClient
 from tests.core.auth import get_token
+from tests.core.response_utils import short_resp
 from tests.config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID
 from tests.test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
 from tests.test_backend.data.endpoints.Project.project_endpoints import (
@@ -177,7 +178,7 @@ def temp_client(db):
     # 1. AuthWithEmail — получаем tempToken
     ep = auth_with_email_endpoint(email=email)
     resp = requests.post(f"{base_url.rstrip('/')}{ep['path']}", json=ep['json'], headers=ep['headers'])
-    assert resp.status_code == 200, f"AuthWithEmail вернул {resp.status_code}: {resp.text}"
+    assert resp.status_code == 200, f"AuthWithEmail вернул {resp.status_code}: {short_resp(resp)}"
 
     payload = resp.json().get("payload", {})
     assert payload.get("needOTP") is True, f"Ожидался needOTP=true, получено: {payload}"
@@ -193,7 +194,7 @@ def temp_client(db):
     # 3. VerifyOtp — получаем authToken
     ep = verify_otp_endpoint(temp_token=temp_token, otp=otp_code)
     resp = requests.post(f"{base_url.rstrip('/')}{ep['path']}", json=ep['json'], headers=ep['headers'])
-    assert resp.status_code == 200, f"VerifyOtp вернул {resp.status_code}: {resp.text}"
+    assert resp.status_code == 200, f"VerifyOtp вернул {resp.status_code}: {short_resp(resp)}"
 
     auth_token = resp.json().get("payload", {}).get("authToken")
     assert auth_token, "authToken отсутствует в ответе VerifyOtp"
@@ -202,7 +203,7 @@ def temp_client(db):
     client = APIClient(base_url=base_url, token=auth_token)
     from test_backend.data.endpoints.Space.space_endpoints import get_spaces_endpoint
     spaces_resp = client.post(**get_spaces_endpoint())
-    assert spaces_resp.status_code == 200, f"GetSpaces вернул {spaces_resp.status_code}: {spaces_resp.text}"
+    assert spaces_resp.status_code == 200, f"GetSpaces вернул {spaces_resp.status_code}: {short_resp(spaces_resp)}"
     spaces = spaces_resp.json().get("payload", {}).get("spaces", [])
     assert spaces, "У нового пользователя нет спейсов"
     space_id = spaces[0]["_id"]
@@ -230,7 +231,7 @@ def main_space(main_client) -> str:
 
     assert MAIN_SPACE_ID, 'Не задана переменная окружения MAIN_SPACE_ID'
     resp = main_client.post(**get_space_endpoint(space_id=MAIN_SPACE_ID))
-    assert resp.status_code == 200, f'Space {MAIN_SPACE_ID} not found: {resp.text}'
+    assert resp.status_code == 200, f'Space {MAIN_SPACE_ID} not found: {short_resp(resp)}'
     return MAIN_SPACE_ID
 
 @pytest.fixture(scope='session')
@@ -240,14 +241,14 @@ def second_space(main_client) -> str:
     """
     assert SECOND_SPACE_ID, 'Не задана переменная окружения SECOND_SPACE_ID'
     resp = main_client.post(**get_space_endpoint(space_id=SECOND_SPACE_ID))
-    assert resp.status_code == 200, f'Space {SECOND_SPACE_ID} not found: {resp.text}'
+    assert resp.status_code == 200, f'Space {SECOND_SPACE_ID} not found: {short_resp(resp)}'
     return SECOND_SPACE_ID
 
 @pytest.fixture(scope='session')
 def main_project(main_client, main_space):
     assert MAIN_PROJECT_ID, 'Не задана переменная окружения MAIN_PROJECT_ID'
     resp = main_client.post(**get_project_endpoint(project_id=MAIN_PROJECT_ID, space_id=main_space))
-    assert resp.status_code == 200, f'Space {MAIN_PROJECT_ID} not found: {resp.text}'
+    assert resp.status_code == 200, f'Space {MAIN_PROJECT_ID} not found: {short_resp(resp)}'
     return MAIN_PROJECT_ID
 
 # Проект в котором есть пользователи с разными ролями, для разных сценариев (архивация, редактирования и пр)
@@ -255,14 +256,14 @@ def main_project(main_client, main_space):
 def main_project_2(main_client, main_space):
     assert MAIN_PROJECT_2_ID, 'Не задана переменная окружения MAIN_PROJECT_2_ID'
     resp = main_client.post(**get_project_endpoint(project_id=MAIN_PROJECT_2_ID, space_id=main_space))
-    assert resp.status_code == 200, f'Space {MAIN_PROJECT_2_ID} not found: {resp.text}'
+    assert resp.status_code == 200, f'Space {MAIN_PROJECT_2_ID} not found: {short_resp(resp)}'
     return MAIN_PROJECT_2_ID
 
 @pytest.fixture(scope='session')
 def second_project(main_client, second_space):
     assert SECOND_PROJECT_ID, 'Не задана переменная окружения MAIN_PROJECT_ID'
     resp = main_client.post(**get_project_endpoint(project_id=SECOND_PROJECT_ID, space_id=second_space))
-    assert resp.status_code == 200, f'Space {SECOND_PROJECT_ID} not found: {resp.text}'
+    assert resp.status_code == 200, f'Space {SECOND_PROJECT_ID} not found: {short_resp(resp)}'
     return SECOND_PROJECT_ID
 
 # Доска в которой проверяются доступы для разных ролей
@@ -270,14 +271,14 @@ def second_project(main_client, second_space):
 def main_board(main_client, main_space):
     assert MAIN_BOARD_ID, 'Не задана переменная окружения MAIN_BOARD_ID'
     resp = main_client.post(**get_board_endpoint(board_id=MAIN_BOARD_ID, space_id=main_space))
-    assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {resp.text}'
+    assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {short_resp(resp)}'
     return MAIN_BOARD_ID
 
 @pytest.fixture(scope='session')
 def second_board(main_client, second_space):
     assert SECOND_BOARD_ID,'Не задана переменная окружения SECOND_BOARD_ID'
     resp = main_client.post(**get_board_endpoint(board_id=SECOND_BOARD_ID, space_id=second_space))
-    assert resp.status_code == 200, f'Space {SECOND_BOARD_ID} not found: {resp.text}'
+    assert resp.status_code == 200, f'Space {SECOND_BOARD_ID} not found: {short_resp(resp)}'
     return SECOND_BOARD_ID
 
 # Доска с 10.000 тасок в main_space
@@ -285,7 +286,7 @@ def second_board(main_client, second_space):
 def board_with_10000_tasks(main_client, main_space):
     assert BOARD_WITH_TASKS, 'Не задана переменная окружения MAIN_BOARD_ID'
     resp = main_client.post(**get_board_endpoint(board_id=BOARD_WITH_TASKS, space_id=main_space))
-    assert resp.status_code == 200, f'Board {BOARD_WITH_TASKS} not found: {resp.text}'
+    assert resp.status_code == 200, f'Board {BOARD_WITH_TASKS} not found: {short_resp(resp)}'
     return BOARD_WITH_TASKS
 
 # Доска в которой заготовлены таски для разных сценариев
@@ -294,7 +295,7 @@ def board_with_10000_tasks(main_client, main_space):
 def board_with_tasks(main_client, main_space):
     assert BOARD_FOR_TEST, 'Не задана переменная окружения MAIN_BOARD_ID'
     resp = main_client.post(**get_board_endpoint(board_id=BOARD_FOR_TEST, space_id=main_space))
-    assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {resp.text}'
+    assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {short_resp(resp)}'
     return BOARD_FOR_TEST
 
 
@@ -410,7 +411,7 @@ def make_task_in_main(owner_client, main_space, main_board):
             "board": main_board
         }
         resp = owner_client.post(**create_task_endpoint(**body, **body_overrides))
-        assert resp.status_code == 200, resp.text
+        assert resp.status_code == 200, short_resp(resp)
         task = resp.json()["payload"]["task"]
         created_ids.append(task["_id"])
         return task
@@ -442,7 +443,7 @@ def temp_task(main_client, temp_space, temp_board):
             board=temp_board,
             name=task_name
         ))
-    assert create_resp.status_code == 200, f"Ошибка создания задачи в фикстуре: {create_resp.text}"
+    assert create_resp.status_code == 200, f"Ошибка создания задачи в фикстуре: {short_resp(create_resp)}"
     task_id = create_resp.json()['payload']['task']['_id']
 
     # Передаем ID задачи в сам тест
@@ -457,7 +458,7 @@ def temp_task(main_client, temp_space, temp_board):
         )
         # Вместо жесткого assert == 200, мы допускаем, что задача уже удалена или конвертирована
         if delete_resp.status_code not in (200, 400, 404):
-            pytest.fail(f"Ошибка при удалении задачи в фикстуре: {delete_resp.text}")
+            pytest.fail(f"Ошибка при удалении задачи в фикстуре: {short_resp(delete_resp)}")
 
 
 
@@ -475,7 +476,7 @@ def temp_task_on_board_with_tasks(main_client, main_space, board_with_tasks):
             board=board_with_tasks,
             name=task_name
         ))
-    assert create_resp.status_code == 200, f"Ошибка создания задачи в фикстуре: {create_resp.text}"
+    assert create_resp.status_code == 200, f"Ошибка создания задачи в фикстуре: {short_resp(create_resp)}"
     task_id = create_resp.json()['payload']['task']['_id']
 
     # Передаем ID задачи в сам тест
@@ -490,7 +491,7 @@ def temp_task_on_board_with_tasks(main_client, main_space, board_with_tasks):
         )
         # Вместо жесткого assert == 200, мы допускаем, что задача уже удалена или конвертирована
         if delete_resp.status_code not in (200, 400, 404):
-            pytest.fail(f"Ошибка при удалении задачи в фикстуре: {delete_resp.text}")
+            pytest.fail(f"Ошибка при удалении задачи в фикстуре: {short_resp(delete_resp)}")
 
 
 @pytest.fixture(scope='session')
@@ -506,7 +507,7 @@ def temp_access_group(main_client, temp_space):
         name=group_name,
         description=group_desc
     ))
-    assert response.status_code == 200, f"Ошибка создания группы: {response.text}"
+    assert response.status_code == 200, f"Ошибка создания группы: {short_resp(response)}"
 
     group_id = response.json().get("payload", {}).get("accessGroup", {}).get("_id")
     assert group_id, "В ответе не вернулся _id созданной группы доступа"
@@ -530,7 +531,7 @@ def temp_milestone_on_board_with_tasks(owner_client, main_space, board_with_task
                 project=main_project
             )
         )
-        assert create_resp.status_code == 200, f"Ошибка создания майлстоуна в фикстуре: {create_resp.text}"
+        assert create_resp.status_code == 200, f"Ошибка создания майлстоуна в фикстуре: {short_resp(create_resp)}"
         milestone_id = create_resp.json()['payload']['milestone']['_id']
 
     # Передаем ID майлстоуна в тест
@@ -545,7 +546,7 @@ def temp_milestone_on_board_with_tasks(owner_client, main_space, board_with_task
                 milestone_id=milestone_id
             )
         )
-        assert archive_resp.status_code == 200, f"Ошибка при архивации майлстоуна в фикстуре: {archive_resp.text}"
+        assert archive_resp.status_code == 200, f"Ошибка при архивации майлстоуна в фикстуре: {short_resp(archive_resp)}"
 
 
 @pytest.fixture(scope="session")
@@ -566,7 +567,7 @@ def get_invite_code(main_client):
         # Игнорируем ошибку, если пользователь уже приглашен/состоит в пространстве
         if invite_resp.status_code != 200:
             error_code = invite_resp.json().get("error", {}).get("code")
-            assert error_code in ["UserAlreadySpaceMember", "UserAlreadyInvited"], f"Ошибка инвайта: {invite_resp.text}"
+            assert error_code in ["UserAlreadySpaceMember", "UserAlreadyInvited"], f"Ошибка инвайта: {short_resp(invite_resp)}"
 
         # 2. Запрашиваем спейсы от лица приглашенного клиента
         spaces_resp = client_to_invite.post(**get_spaces_endpoint())
@@ -608,7 +609,7 @@ def space_with_members(
     with allure.step("Создание временного пространства (temp_space_with_members)"):
         name = generate_space_name()
         create_resp = main_client.post(**create_space_endpoint(name=name))
-        assert create_resp.status_code == 200, f"Ошибка при создании пространства: {create_resp.text}"
+        assert create_resp.status_code == 200, f"Ошибка при создании пространства: {short_resp(create_resp)}"
         space_id = create_resp.json()['payload']['space']['_id']
 
     # 2. main_client приглашает всех пользователей и они подтверждают инвайт
@@ -623,11 +624,11 @@ def space_with_members(
                 email=client_email,
                 space_access=role
             ))
-            assert invite_resp.status_code == 200, f"Не удалось пригласить {role}: {invite_resp.text}"
+            assert invite_resp.status_code == 200, f"Не удалось пригласить {role}: {short_resp(invite_resp)}"
 
             # Получение списка спейсов клиента для поиска inviteCode
             spaces_resp = client.post(**get_spaces_endpoint())
-            assert spaces_resp.status_code == 200, f"Не удалось получить список спейсов для {role}: {spaces_resp.text}"
+            assert spaces_resp.status_code == 200, f"Не удалось получить список спейсов для {role}: {short_resp(spaces_resp)}"
 
             spaces = spaces_resp.json().get('payload', {}).get('spaces', [])
             target_space = next((s for s in spaces if s.get('_id') == space_id), None)
@@ -643,7 +644,7 @@ def space_with_members(
                 password=client_password,
                 termsAccepted=True
             ))
-            assert confirm_resp.status_code == 200, f"Ошибка подтверждения инвайта для {role}: {confirm_resp.text}"
+            assert confirm_resp.status_code == 200, f"Ошибка подтверждения инвайта для {role}: {short_resp(confirm_resp)}"
 
     # Передаем управление тестам
     yield space_id
@@ -651,7 +652,7 @@ def space_with_members(
     # 3. Teardown: удаляем пространство
     with allure.step("Удаление временного пространства"):
         remove_resp = main_client.post(**remove_space_endpoint(space_id=space_id))
-        assert remove_resp.status_code == 200, f"Ошибка при удалении пространства: {remove_resp.text}"
+        assert remove_resp.status_code == 200, f"Ошибка при удалении пространства: {short_resp(remove_resp)}"
 
     # 4. Проверяем, что спейс пропал у всех приглашенных клиентов и у создателя
     all_clients = [main_client] + list(clients_to_invite.values())
@@ -661,7 +662,7 @@ def space_with_members(
             # Ожидаем, что пространство не будет найдено (статус код не 200, статус код == 400)
             assert check_resp.status_code != 200, (
                 f"Уязвимость! Пространство {space_id} всё ещё доступно для одного из клиентов "
-                f"после удаления. Ответ: {check_resp.text}"
+                f"после удаления. Ответ: {short_resp(check_resp)}"
             )
 
 
@@ -750,7 +751,7 @@ def group_in_module(main_client, space_id_module):
         name=group_name,
         description=group_desc
     ))
-    assert response.status_code == 200, f"Ошибка создания группы: {response.text}"
+    assert response.status_code == 200, f"Ошибка создания группы: {short_resp(response)}"
 
     group_id = response.json().get("payload", {}).get("accessGroup", {}).get("_id")
     assert group_id, "В ответе не вернулся _id созданной группы доступа"

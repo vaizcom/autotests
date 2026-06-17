@@ -3,6 +3,7 @@ import time
 
 from test_backend.data.endpoints.History.get_history_endpoint import get_history_endpoint
 from tests.test_backend.data.endpoints.History.assert_history_payload import assert_history_payload
+from tests.core.response_utils import short_resp
 
 def assert_history_event_exists(
         client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
@@ -25,7 +26,7 @@ def assert_history_event_exists(
                     limit=50
                 )
             )
-            assert resp.status_code == 200, f"Ошибка при получении истории: {resp.text}"
+            assert resp.status_code == 200, f"Ошибка при получении истории: {short_resp(resp)}"
 
             histories = resp.json().get('payload', {}).get('histories', [])
 
