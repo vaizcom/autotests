@@ -7,7 +7,7 @@ class APIClient:
     def __init__(self, base_url: str, token: str = None):
         self.base_url = base_url.rstrip('/')
         self.session = requests.Session()
-        retry = Retry(total=2, backoff_factor=2, status_forcelist=[502, 503, 504])
+        retry = Retry(total=2, backoff_factor=2, status_forcelist=[502, 503, 504], allowed_methods=["POST"])
         self.session.mount("https://", HTTPAdapter(max_retries=retry))
         self.session.mount("http://", HTTPAdapter(max_retries=retry))
         self.token = token
