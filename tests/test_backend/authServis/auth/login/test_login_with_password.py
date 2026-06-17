@@ -16,12 +16,12 @@ pytestmark = [pytest.mark.backend]
     (lambda s: s.lower(), "обычный email"),
     (lambda s: s.upper(), "email в верхнем регистре")
 ], ids=["lowercase", "uppercase"])
-def test_login_via_auth_with_email(email_case_func, title_suffix):
+def test_login_with_password(email_case_func, title_suffix):
     """
-    Новый флоу логина: AuthWithEmail → VerifyPassword.
-    Проверяет двухшаговую авторизацию для существующего пользователя.
+    Флоу логина через пароль: AuthWithEmail → VerifyPassword.
+    Проверяет двухшаговую авторизацию для пользователя с паролем.
     """
-    allure.dynamic.title(f"Login (AuthWithEmail): Успешный логин ({title_suffix})")
+    allure.dynamic.title(f"Login (Password): Успешный логин ({title_suffix})")
 
     base_url = API_URL
     raw_email = "mastretsovaone+main@gmail.com"
@@ -60,6 +60,9 @@ def test_login_via_auth_with_email(email_case_func, title_suffix):
             f"VerifyPassword вернул {resp.status_code}. Ответ: {resp.text}"
 
         resp_json = resp.json()
+        assert resp_json.get("type") == "VerifyPassword", \
+            f"Ожидался type='VerifyPassword', получено: {resp_json.get('type')}"
+
         payload = resp_json.get("payload", {})
 
         auth_token = payload.get("authToken")
