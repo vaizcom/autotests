@@ -1,0 +1,6 @@
+FAILURE: [VRT sign_in_otp_home.png] Скриншот отличается от baseline на 10.35% (допустимо 5.0%). Для обновления: pytest --update-snapshots / в CI: snapshot_test=test_sign_in_with_email_otp
+tests/test_frontend/tests/auth/test_sign_in.py:87 in test_sign_in_with_email_otp() -> assert_snapshot(screenshot, name='sign_in_otp_home.png', threshold=5.0)
+tests/test_frontend/conftest.py:659 in _assert() -> check.fail(
+
+------------------------------------------------------------
+Failed Checks: 1

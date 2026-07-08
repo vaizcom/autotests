@@ -1,0 +1,6 @@
+FAILURE: [VRT sign_up_home.png] Скриншот отличается от baseline на 6.89% (допустимо 5.0%). Для обновления: pytest --update-snapshots / в CI: snapshot_test=test_sign_up_with_email
+tests/test_frontend/tests/auth/test_sign_up.py:27 in test_sign_up_with_email() -> assert_snapshot(screenshot, name='sign_up_home.png', threshold=5.0)
+tests/test_frontend/conftest.py:659 in _assert() -> check.fail(
+
+------------------------------------------------------------
+Failed Checks: 1
