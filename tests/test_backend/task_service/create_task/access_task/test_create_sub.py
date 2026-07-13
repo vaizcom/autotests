@@ -2,7 +2,7 @@ import allure
 import pytest
 
 from test_backend.task_service.utils import get_client
-from tests.test_backend.data.endpoints.Task.task_endpoints import (
+from test_backend.data.endpoints.Task.task_endpoints import (
     delete_task_endpoint, create_task_endpoint,
 )
 

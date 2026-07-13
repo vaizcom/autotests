@@ -1,9 +1,9 @@
 import allure
 import pytest
 
-from tests.test_backend.data.endpoints.Task.assert_task_payload import assert_task_payload
-from tests.test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_field_endpoint, get_task_endpoint
-from tests.test_backend.task_service.utils import get_assignee
+from test_backend.data.endpoints.Task.assert_task_payload import assert_task_payload
+from test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_field_endpoint, get_task_endpoint
+from test_backend.task_service.utils import get_assignee
 
 pytestmark = [pytest.mark.backend]
 

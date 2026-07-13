@@ -3,7 +3,7 @@ import pytest
 
 from config.generators import generate_project_name, generate_slug
 from test_backend.data.endpoints.Project.assert_project_output_payload import assert_project_payload
-from tests.test_backend.data.endpoints.Project.project_endpoints import (
+from test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint
 )
 

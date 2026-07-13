@@ -9,7 +9,7 @@ from test_backend.data.endpoints.access_group.aaccess_group_endpoints import (
     update_access_group_rights_endpoint,
     remove_access_group_endpoint,
 )
-from tests.test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
 pytestmark = [pytest.mark.backend]
 

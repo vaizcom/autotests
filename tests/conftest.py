@@ -20,22 +20,22 @@ from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoi
 from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
 from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint
-from tests.config import settings
-from tests.config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
-from tests.test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
-from tests.test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
-from tests.test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
-from tests.core.client import APIClient
-from tests.core.auth import get_token
-from tests.core.response_utils import short_resp
-from tests.config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID
-from tests.test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
-from tests.test_backend.data.endpoints.Project.project_endpoints import (
+from config import settings
+from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
+from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
+from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
+from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
+from core.client import APIClient
+from core.auth import get_token
+from core.response_utils import short_resp
+from config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID
+from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
+from test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint,
     create_board_endpoint,
     get_project_endpoint,
 )
-from tests.test_backend.data.endpoints.Space.space_endpoints import (
+from test_backend.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
     remove_space_endpoint,
     get_space_endpoint, get_spaces_endpoint,
@@ -82,7 +82,7 @@ def mongo_client():
     mongo_uri = os.getenv("MONGO_URI")
 
     # Подключаемся
-    client = MongoClient(mongo_uri)
+    client = MongoClient(mongo_uri, serverSelectionTimeoutMS=10000)
 
     yield client
 
@@ -177,7 +177,7 @@ def temp_client(db):
 
     # 1. AuthWithEmail — получаем tempToken
     ep = auth_with_email_endpoint(email=email)
-    resp = requests.post(f"{base_url.rstrip('/')}{ep['path']}", json=ep['json'], headers=ep['headers'])
+    resp = requests.post(f"{base_url.rstrip('/')}{ep['path']}", json=ep['json'], headers=ep['headers'], timeout=10)
     assert resp.status_code == 200, f"AuthWithEmail вернул {resp.status_code}: {short_resp(resp)}"
 
     payload = resp.json().get("payload", {})
@@ -193,7 +193,7 @@ def temp_client(db):
 
     # 3. VerifyOtp — получаем authToken
     ep = verify_otp_endpoint(temp_token=temp_token, otp=otp_code)
-    resp = requests.post(f"{base_url.rstrip('/')}{ep['path']}", json=ep['json'], headers=ep['headers'])
+    resp = requests.post(f"{base_url.rstrip('/')}{ep['path']}", json=ep['json'], headers=ep['headers'], timeout=10)
     assert resp.status_code == 200, f"VerifyOtp вернул {resp.status_code}: {short_resp(resp)}"
 
     auth_token = resp.json().get("payload", {}).get("authToken")
@@ -538,7 +538,7 @@ def temp_milestone_on_board_with_tasks(owner_client, main_space, board_with_task
     yield milestone_id
 
     with allure.step("Teardown [Fixture]: Архивация временного майлстоуна"):
-        from tests.test_backend.data.endpoints.milestone.milestones_endpoints import archive_milestone_endpoint
+        from test_backend.data.endpoints.milestone.milestones_endpoints import archive_milestone_endpoint
 
         archive_resp = owner_client.post(
             **archive_milestone_endpoint(

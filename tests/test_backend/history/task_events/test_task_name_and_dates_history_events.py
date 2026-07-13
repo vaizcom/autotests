@@ -3,7 +3,7 @@ import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import edit_task_endpoint
 from test_backend.task_service.utils import get_current_timestamp, get_due_end
-from tests.test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
 pytestmark = [pytest.mark.backend]
 

@@ -2,7 +2,7 @@ import random
 import allure
 import pytest
 
-from tests.test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
 from test_backend.task_service.utils import delete_task_with_retry
 
 pytestmark = [pytest.mark.backend]

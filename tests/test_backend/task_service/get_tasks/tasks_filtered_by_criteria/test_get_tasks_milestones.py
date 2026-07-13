@@ -2,10 +2,10 @@ import pytest
 import allure
 
 from config.settings import MAIN_SPACE_ID, BOARD_WITH_TASKS, MILESTONE_2_ID, MILESTONE_1_ID
-from tests.test_backend.data.endpoints.milestone.milestones_endpoints import (
+from test_backend.data.endpoints.milestone.milestones_endpoints import (
     get_milestone_endpoint,
 )
-from tests.test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 

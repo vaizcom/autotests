@@ -5,7 +5,7 @@ import pytest
 from test_backend.data.endpoints.file.upload_avatar_endpoint import get_uploaded_avatar_url, upload_avatar_endpoint
 from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint
-from tests.test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
+from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 
 pytestmark = [pytest.mark.backend]
 

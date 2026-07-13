@@ -3,7 +3,7 @@ import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
 from test_backend.data.endpoints.Comment.comment_endpoints import create_comment_endpoint
-from tests.test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
 pytestmark = [pytest.mark.backend]
 
