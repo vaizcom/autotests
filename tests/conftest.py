@@ -760,7 +760,7 @@ def group_in_module(main_client, second_space_idmodule):
 
 
 @pytest.fixture(scope='module')
-def project_id_invite(second_main_client, second_space_id):
+def second_project_id(second_main_client, second_space_id):
     """Проект в second_space_id (owned by second_main_client) — для инвайт-тестов."""
     name = generate_project_name()
     slug = generate_slug()
@@ -773,11 +773,11 @@ def project_id_invite(second_main_client, second_space_id):
 
 
 @pytest.fixture(scope='module')
-def board_id_invite(second_main_client, project_id_invite, second_space_id):
+def second_board_id(second_main_client, second_project_id, second_space_id):
     """Борда в second_space_id (owned by second_main_client) — для инвайт-тестов."""
     board_name = generate_board_name()
     response = second_main_client.post(**create_board_endpoint(
-        name=board_name, temp_project=project_id_invite, space_id=second_space_id,
+        name=board_name, temp_project=second_project_id, space_id=second_space_id,
         groups=DEFAULT_BOARD_GROUPS, typesList=[], customFields=[]
     ))
     assert response.status_code == 200
@@ -785,7 +785,7 @@ def board_id_invite(second_main_client, project_id_invite, second_space_id):
 
 
 @pytest.fixture(scope='module')
-def group_in_invite(second_main_client, second_space_id):
+def second_group_id(second_main_client, second_space_id):
     """Группа доступа в second_space_id (owned by second_main_client) — для инвайт-тестов."""
     group_name = f"Test Group {uuid.uuid4().hex[:4]}"
     response = second_main_client.post(**create_access_group_endpoint(
