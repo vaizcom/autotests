@@ -47,7 +47,7 @@ def test_cant_deprive_access_yourself_error(owner_client, space_with_members):
 def test_cant_deprive_access_creator_error(main_client, owner_client, space_with_members):
     expected_status = 400
     expected_error_code = "CantDepriveAccessCreator"
-    member_name= 'main'
+    member_name = 'main'
     main_user_id = get_user_id(main_client, space_with_members, member_name)
 
     with allure.step("Owner пытается удалить создателя пространства"):

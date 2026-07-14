@@ -550,15 +550,15 @@ def temp_milestone_on_board_with_tasks(owner_client, main_space, board_with_task
 
 
 @pytest.fixture(scope="session")
-def get_invite_code(main_client):
+def get_invite_code(second_main_client):
     """
     Фабрика для получения кода приглашения.
     Принимает клиента, которого нужно пригласить, его email и ID пространства.
     """
 
     def _get_invite_code(client_to_invite, email_to_invite, space_id):
-        # 1. Отправляем инвайт от лица owner'a (main_client)
-        invite_resp = main_client.post(**invite_to_space_endpoint(
+        # 1. Отправляем инвайт от лица second_main_client (чтобы не упереться в рейт-лимит main)
+        invite_resp = second_main_client.post(**invite_to_space_endpoint(
             space_id=space_id,
             email=email_to_invite,
             space_access="Member"
@@ -757,6 +757,43 @@ def group_in_module(main_client, space_id_module):
     assert group_id, "В ответе не вернулся _id созданной группы доступа"
 
     yield group_id
+
+
+@pytest.fixture(scope='module')
+def project_id_invite(second_main_client, space_id_):
+    """Проект в space_id_ (owned by second_main_client) — для инвайт-тестов."""
+    name = generate_project_name()
+    slug = generate_slug()
+    response = second_main_client.post(**create_project_endpoint(
+        name=name, slug=slug, color='blue', icon='Dot',
+        description='invite test project', space_id=space_id_
+    ))
+    assert response.status_code == 200
+    yield response.json()['payload']['project']['_id']
+
+
+@pytest.fixture(scope='module')
+def board_id_invite(second_main_client, project_id_invite, space_id_):
+    """Борда в space_id_ (owned by second_main_client) — для инвайт-тестов."""
+    board_name = generate_board_name()
+    response = second_main_client.post(**create_board_endpoint(
+        name=board_name, temp_project=project_id_invite, space_id=space_id_,
+        groups=DEFAULT_BOARD_GROUPS, typesList=[], customFields=[]
+    ))
+    assert response.status_code == 200
+    yield response.json()['payload']['board']['_id']
+
+
+@pytest.fixture(scope='module')
+def group_in_invite(second_main_client, space_id_):
+    """Группа доступа в space_id_ (owned by second_main_client) — для инвайт-тестов."""
+    group_name = f"Test Group {uuid.uuid4().hex[:4]}"
+    response = second_main_client.post(**create_access_group_endpoint(
+        space_id=space_id_, name=group_name, description="Invite test group"
+    ))
+    assert response.status_code == 200, f"Ошибка создания группы: {short_resp(response)}"
+    yield response.json().get("payload", {}).get("accessGroup", {}).get("_id")
+
 
 @pytest.fixture(scope='module')
 def member_id_module(main_client, space_id_module):

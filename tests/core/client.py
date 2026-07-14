@@ -7,7 +7,7 @@ class APIClient:
     def __init__(self, base_url: str, token: str = None):
         self.base_url = base_url.rstrip('/')
         self.session = requests.Session()
-        retry = Retry(total=2, backoff_factor=2, status_forcelist=[502, 503, 504], allowed_methods=["POST"], connect=0, read=0)
+        retry = Retry(total=2, backoff_factor=2, status_forcelist=[502, 503, 504], allowed_methods=["POST"], connect=0, read=0, respect_retry_after_header=False)
         self.session.mount("https://", HTTPAdapter(max_retries=retry))
         self.session.mount("http://", HTTPAdapter(max_retries=retry))
         self.token = token
@@ -18,7 +18,7 @@ class APIClient:
         self.token = token
         self.session.headers.update({'Authorization': f'Bearer {token}', 'Cookie': f'_t={token}'})
 
-    def post(self, path: str, json: dict = None, headers: dict = None, timeout: int = 10, **kwargs):
+    def post(self, path: str, json: dict = None, headers: dict = None, timeout=(5, 10), **kwargs):
         url = f'{self.base_url}{path}'
         final_headers = self.session.headers.copy()
         if headers:
