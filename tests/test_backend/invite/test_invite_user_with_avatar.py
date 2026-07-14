@@ -28,7 +28,7 @@ DUMMY_WEBP = b'RIFF\x1a\x00\x00\x00WEBPVP8L\r\x00\x00\x00/\x00\x00\x00\x10\x07\x
     ],
     ids=["png", "jpg", "gif", "webp"]
 )
-def test_invite_user_with_avatar_positive(second_main_client, space_id_, file_ext, mime_type, file_content):
+def test_invite_user_with_avatar_positive(second_main_client, second_space_id, file_ext, mime_type, file_content):
     """
     Проверка позитивного сценария:
     1. Получение контекста пространства (заголовки).
@@ -38,13 +38,13 @@ def test_invite_user_with_avatar_positive(second_main_client, space_id_, file_ex
     allure.dynamic.title(f"(формат: {file_ext}) Приглашение пользователя с необязательными параметрами (Avatar)")
 
     with allure.step("Получение заголовков с ID пространства для обхода проверок безопасности"):
-        space_req = get_space_members_endpoint(space_id=space_id_)
+        space_req = get_space_members_endpoint(space_id=second_space_id)
         space_headers = space_req.get("headers", {})
 
     with allure.step(f"Загрузка картинки аватара ({file_ext}) через multipart/form-data"):
         avatar_url = get_uploaded_avatar_url(
             client=second_main_client,
-            kind_id=space_id_,
+            kind_id=second_space_id,
             kind="Space",
             file_content=file_content,
             headers=space_headers,
@@ -59,7 +59,7 @@ def test_invite_user_with_avatar_positive(second_main_client, space_id_, file_ex
         invite_email = f"new_user_{uuid.uuid4().hex[:8]}@example.com"
 
         invite_req = invite_to_space_endpoint(
-            space_id=space_id_,
+            space_id=second_space_id,
             email=invite_email,
             space_access="Member",
             avatar_url=avatar_url
@@ -90,7 +90,7 @@ def test_invite_user_with_avatar_positive(second_main_client, space_id_, file_ex
     with allure.step("Валидация тела ответа InviteToSpace"):
         assert_invite_payload(
             invite=payload,
-            space_id=space_id_,
+            space_id=second_space_id,
             email=invite_email
         )
 
@@ -117,19 +117,19 @@ def test_invite_user_with_avatar_positive(second_main_client, space_id_, file_ex
     , ids=["invalid_kind","invalid_file_format"]
 )
 
-def test_upload_avatar_negative(second_main_client, space_id_, scenario, kind, file_tuple, expected_status):
+def test_upload_avatar_negative(second_main_client, second_space_id, scenario, kind, file_tuple, expected_status):
     """
     Негативные сценарии эндпоинта UploadAvatar.
     Ожидаем, что сервер отклонит запрос со статусом 400 Bad Request.
     """
     with allure.step("Подготовка параметров запроса"):
-        space_req = get_space_members_endpoint(space_id=space_id_)
+        space_req = get_space_members_endpoint(space_id=second_space_id)
         headers = space_req.get("headers", {})
 
         req = upload_avatar_endpoint(
             file_tuple=file_tuple,
             kind=kind,
-            kind_id=space_id_,
+            kind_id=second_space_id,
         )
 
     with allure.step(f"Отправка запроса на загрузку аватара ({scenario})"):
@@ -150,7 +150,7 @@ def test_upload_avatar_negative(second_main_client, space_id_, scenario, kind, f
 @allure.parent_suite("Invite Service")
 @allure.suite("Space Invitations - Avatar (Negative)")
 @allure.title("Загрузка аватара, превышающего лимит размера (> 100 МБ)")
-def test_upload_avatar_too_large(second_main_client, space_id_):
+def test_upload_avatar_too_large(second_main_client, second_space_id):
     """
     Проверка лимита размера загружаемого файла (максимум 100 МБ).
     Генерируем "фейковый" файл размером 101 МБ в памяти и ожидаем ошибку EUploadErrorCode.FileSize.
@@ -164,14 +164,14 @@ def test_upload_avatar_too_large(second_main_client, space_id_):
         huge_file_content = b"0" * large_file_size
 
     with allure.step("Подготовка параметров запроса"):
-        space_req = get_space_members_endpoint(space_id=space_id_)
+        space_req = get_space_members_endpoint(space_id=second_space_id)
         headers = space_req.get("headers", {})
         headers.pop("Content-Type", None)
 
         req = upload_avatar_endpoint(
             file_tuple=("huge_avatar.png", huge_file_content, "image/png"),
             kind="Space",
-            kind_id=space_id_,
+            kind_id=second_space_id,
         )
 
     with allure.step("Отправка огромного файла на сервер (может занять несколько секунд)"):

@@ -13,7 +13,7 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Invite Service")
 @allure.suite("Space Invitations - Optional Params (Positive)")
 @allure.title("Приглашение пользователя с необязательными параметрами (projectAccesses, boardAccesses, fullName)")
-def test_invite_to_space_with_optional_params(second_main_client, space_id_, project_id_invite, board_id_invite):
+def test_invite_to_space_with_optional_params(second_main_client, second_space_id, project_id_invite, board_id_invite):
     """
     Проверка, что при отправке инвайта с дополнительными параметрами
     (права на проекты/доски, имя) они корректно сохраняются и возвращаются в accessGroups.
@@ -27,7 +27,7 @@ def test_invite_to_space_with_optional_params(second_main_client, space_id_, pro
 
     with allure.step("Отправка приглашения с дополнительными параметрами (микс прав)"):
         response = second_main_client.post(**invite_to_space_endpoint(
-            space_id=space_id_,
+            space_id=second_space_id,
             email=email,
             space_access="Member",
             project_accesses=project_accesses_payload,
@@ -44,14 +44,14 @@ def test_invite_to_space_with_optional_params(second_main_client, space_id_, pro
     with allure.step("Валидация тела ответа InviteToSpace"):
         assert_invite_payload(
             invite=payload,
-            space_id=space_id_,
+            space_id=second_space_id,
             email=email,
             expected_full_name=full_name
         )
 
     with allure.step("Ожидание появления пользователя в списке групп доступа"):
         def _check_group():
-            group_resp = second_main_client.post(**get_access_groups_endpoint(space_id=space_id_))
+            group_resp = second_main_client.post(**get_access_groups_endpoint(space_id=second_space_id))
             assert group_resp.status_code == 200, f"Ошибка GetAccessGroup: {group_resp.text}"
 
             groups = group_resp.json().get("payload", {}).get("accessGroups", [])
@@ -77,14 +77,14 @@ def test_invite_to_space_with_optional_params(second_main_client, space_id_, pro
             f"Права на доску не сохранились. Ожидалось: Guest, Текущие: {board_accesses.get(board_id_invite)}"
 
     with allure.step("Удаление инвайта"):
-        remove_resp = second_main_client.post(**remove_invite_endpoint(space_id=space_id_, member_id=member_id))
+        remove_resp = second_main_client.post(**remove_invite_endpoint(space_id=second_space_id, member_id=member_id))
         assert remove_resp.status_code == 200, f"Ошибка при удалении инвайта: {remove_resp.text}"
 
 
 @allure.parent_suite("Invite Service")
 @allure.suite("Space Invitations - Optional Params (Positive)")
 @allure.title("Приглашение пользователя с добавлением в указанную группу доступа (accessGroupId)")
-def test_invite_to_space_with_access_group(second_main_client, space_id_, group_in_invite):
+def test_invite_to_space_with_access_group(second_main_client, second_space_id, group_in_invite):
     """
     Проверка, что при отправке инвайта с параметром accessGroupId
     пользователь успешно добавляется в указанную кастомную группу доступа.
@@ -94,7 +94,7 @@ def test_invite_to_space_with_access_group(second_main_client, space_id_, group_
 
     with allure.step("Отправка приглашения с указанием группы доступа"):
         response = second_main_client.post(**invite_to_space_endpoint(
-            space_id=space_id_,
+            space_id=second_space_id,
             email=email,
             space_access="Member",
             access_group_id=group_in_invite,
@@ -109,14 +109,14 @@ def test_invite_to_space_with_access_group(second_main_client, space_id_, group_
     with allure.step("Валидация тела ответа InviteToSpace"):
         assert_invite_payload(
             invite=payload,
-            space_id=space_id_,
+            space_id=second_space_id,
             email=email,
             expected_full_name=full_name
         )
 
     with allure.step("Ожидание добавления пользователя в целевую группу доступа"):
         def _check_group():
-            group_resp = second_main_client.post(**get_access_groups_endpoint(space_id=space_id_))
+            group_resp = second_main_client.post(**get_access_groups_endpoint(space_id=second_space_id))
             assert group_resp.status_code == 200, f"Ошибка GetAccessGroup: {group_resp.text}"
 
             groups = group_resp.json().get("payload", {}).get("accessGroups", [])
@@ -145,7 +145,7 @@ def test_invite_to_space_with_access_group(second_main_client, space_id_, group_
             f"Пользователь {member_id} отсутствует в members группы {group_in_invite}"
 
     with allure.step("Удаление инвайта"):
-        remove_resp = second_main_client.post(**remove_invite_endpoint(space_id=space_id_, member_id=member_id))
+        remove_resp = second_main_client.post(**remove_invite_endpoint(space_id=second_space_id, member_id=member_id))
         assert remove_resp.status_code == 200, f"Ошибка при удалении инвайта: {remove_resp.text}"
 
 
@@ -186,7 +186,7 @@ def test_invite_to_space_with_access_group(second_main_client, space_id_, group_
     ]
 )
 def test_invite_optional_params_negative(
-        second_main_client, space_id_, project_id_invite, board_id_invite, scenario, overrides, expected_status
+        second_main_client, second_space_id, project_id_invite, board_id_invite, scenario, overrides, expected_status
 ):
     """
     Негативные сценарии для эндпоинта инвайта с дополнительными параметрами
@@ -211,7 +211,7 @@ def test_invite_optional_params_negative(
 
         # Базовые параметры, которые всегда валидны
         invite_kwargs = {
-            "space_id": space_id_,
+            "space_id": second_space_id,
             "email": email,
             "space_access": "Member"
         }

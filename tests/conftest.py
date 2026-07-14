@@ -681,7 +681,7 @@ def foreign_space(guest_client):
 
 
 @pytest.fixture(scope='module')
-def space_id_module(main_client):
+def second_space_idmodule(main_client):
     client = main_client
     name = generate_space_name()
     response = client.post(**create_space_endpoint(name=name))
@@ -694,7 +694,7 @@ def space_id_module(main_client):
 
 
 @pytest.fixture(scope='module')
-def space_id_(second_main_client):
+def second_space_id(second_main_client):
     """
     спейс созданный для тестирования инвайтов,
     т.к. есть ограничение и на количество инвайтов от пользователя (10/час),
@@ -711,10 +711,10 @@ def space_id_(second_main_client):
     client.post(**remove_space_endpoint(space_id=space_id))
 
 @pytest.fixture(scope='module')
-def project_id_module(main_client, space_id_module):
+def project_id_module(main_client, second_space_idmodule):
     name = generate_project_name()
     slug = generate_slug()
-    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': space_id_module}
+    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': second_space_idmodule}
     response = main_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
     assert response.status_code == 200
     project_id = response.json()['payload']['project']['_id']
@@ -722,12 +722,12 @@ def project_id_module(main_client, space_id_module):
     yield project_id
 
 @pytest.fixture(scope='module')
-def board_id_module(main_client, project_id_module, space_id_module):
+def board_id_module(main_client, project_id_module, second_space_idmodule):
     board_name = generate_board_name()
     payload = create_board_endpoint(
         name=board_name,
         temp_project=project_id_module,
-        space_id=space_id_module,
+        space_id=second_space_idmodule,
         groups=DEFAULT_BOARD_GROUPS,
         typesList=[],
         customFields=[],
@@ -739,15 +739,15 @@ def board_id_module(main_client, project_id_module, space_id_module):
 
 
 @pytest.fixture(scope='module')
-def group_in_module(main_client, space_id_module):
+def group_in_module(main_client, second_space_idmodule):
     """
-    Создает временную группу доступа в space_id_module.
+    Создает временную группу доступа в second_space_idmodule.
     """
     group_name = f"Test Group {uuid.uuid4().hex[:4]}"
     group_desc = "Temporary access group for testing"
 
     response = main_client.post(**create_access_group_endpoint(
-        space_id=space_id_module,
+        space_id=second_space_idmodule,
         name=group_name,
         description=group_desc
     ))
@@ -760,24 +760,24 @@ def group_in_module(main_client, space_id_module):
 
 
 @pytest.fixture(scope='module')
-def project_id_invite(second_main_client, space_id_):
-    """Проект в space_id_ (owned by second_main_client) — для инвайт-тестов."""
+def project_id_invite(second_main_client, second_space_id):
+    """Проект в second_space_id (owned by second_main_client) — для инвайт-тестов."""
     name = generate_project_name()
     slug = generate_slug()
     response = second_main_client.post(**create_project_endpoint(
         name=name, slug=slug, color='blue', icon='Dot',
-        description='invite test project', space_id=space_id_
+        description='invite test project', space_id=second_space_id
     ))
     assert response.status_code == 200
     yield response.json()['payload']['project']['_id']
 
 
 @pytest.fixture(scope='module')
-def board_id_invite(second_main_client, project_id_invite, space_id_):
-    """Борда в space_id_ (owned by second_main_client) — для инвайт-тестов."""
+def board_id_invite(second_main_client, project_id_invite, second_space_id):
+    """Борда в second_space_id (owned by second_main_client) — для инвайт-тестов."""
     board_name = generate_board_name()
     response = second_main_client.post(**create_board_endpoint(
-        name=board_name, temp_project=project_id_invite, space_id=space_id_,
+        name=board_name, temp_project=project_id_invite, space_id=second_space_id,
         groups=DEFAULT_BOARD_GROUPS, typesList=[], customFields=[]
     ))
     assert response.status_code == 200
@@ -785,19 +785,19 @@ def board_id_invite(second_main_client, project_id_invite, space_id_):
 
 
 @pytest.fixture(scope='module')
-def group_in_invite(second_main_client, space_id_):
-    """Группа доступа в space_id_ (owned by second_main_client) — для инвайт-тестов."""
+def group_in_invite(second_main_client, second_space_id):
+    """Группа доступа в second_space_id (owned by second_main_client) — для инвайт-тестов."""
     group_name = f"Test Group {uuid.uuid4().hex[:4]}"
     response = second_main_client.post(**create_access_group_endpoint(
-        space_id=space_id_, name=group_name, description="Invite test group"
+        space_id=second_space_id, name=group_name, description="Invite test group"
     ))
     assert response.status_code == 200, f"Ошибка создания группы: {short_resp(response)}"
     yield response.json().get("payload", {}).get("accessGroup", {}).get("_id")
 
 
 @pytest.fixture(scope='module')
-def member_id_module(main_client, space_id_module):
-    response = main_client.post(**get_space_members_endpoint(space_id=space_id_module))
+def member_id_module(main_client, second_space_idmodule):
+    response = main_client.post(**get_space_members_endpoint(space_id=second_space_idmodule))
     response.raise_for_status()
 
     data = response.json()['payload']
@@ -807,7 +807,7 @@ def member_id_module(main_client, space_id_module):
 
 
 @pytest.fixture(scope='function')
-def space_id_function(owner_client):
+def second_space_idfunction(owner_client):
     client = owner_client
     name = generate_space_name()
     response = client.post(**create_space_endpoint(name=name))
@@ -820,10 +820,10 @@ def space_id_function(owner_client):
 
 
 @pytest.fixture(scope='function')
-def project_id_function(owner_client, space_id_function):
+def project_id_function(owner_client, second_space_idfunction):
     name = generate_project_name()
     slug = generate_slug()
-    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': space_id_function}
+    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': second_space_idfunction}
     response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
     assert response.status_code == 200
     project_id = response.json()['payload']['project']['_id']
@@ -832,8 +832,8 @@ def project_id_function(owner_client, space_id_function):
 
 
 @pytest.fixture(scope='function')
-def member_id_function(owner_client, space_id_function):
-    response = owner_client.post(**get_space_members_endpoint(space_id=space_id_function))
+def member_id_function(owner_client, second_space_idfunction):
+    response = owner_client.post(**get_space_members_endpoint(space_id=second_space_idfunction))
     response.raise_for_status()
 
     data = response.json()['payload']

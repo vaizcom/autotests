@@ -13,7 +13,7 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Invite Service")
 @allure.suite("Confirm Space Invite")
 @allure.title("Успешное подтверждение инвайта новым пользователем")
-def test_confirm_space_invite_success(second_main_client, space_id_, member_client):
+def test_confirm_space_invite_success(second_main_client, second_space_id, member_client):
     """
     Проверка успешного подтверждения приглашения в пространство.
     """
@@ -24,7 +24,7 @@ def test_confirm_space_invite_success(second_main_client, space_id_, member_clie
 
     with allure.step("Owner приглашает member_client в пространство"):
         invite_resp = second_main_client.post(**invite_to_space_endpoint(
-            space_id=space_id_,
+            space_id=second_space_id,
             email=member_email,
             space_access="Member"
         ))
@@ -34,7 +34,7 @@ def test_confirm_space_invite_success(second_main_client, space_id_, member_clie
 
         with allure.step("Проверка статуса пользователя в списке участников (должен быть Invited)"):
             response = second_main_client.post(**get_space_members_endpoint(
-                space_id=space_id_
+                space_id=second_space_id
             ))
             assert response.status_code == 200
             resp = response.json().get('payload').get('members')
@@ -48,7 +48,7 @@ def test_confirm_space_invite_success(second_main_client, space_id_, member_clie
         assert spaces_resp.status_code == 200, f"Ошибка получения спейсов: {spaces_resp.text}"
 
         spaces = spaces_resp.json().get('payload', {}).get('spaces', [])
-        target_space = next((s for s in spaces if s.get('_id') == space_id_), None)
+        target_space = next((s for s in spaces if s.get('_id') == second_space_id), None)
         assert target_space, "Пространство не найдено в списке спейсов member_client"
 
         invite_code = target_space.get('inviteCode')
@@ -66,14 +66,14 @@ def test_confirm_space_invite_success(second_main_client, space_id_, member_clie
 
         payload = confirm_resp.json().get("payload", {})
         assert payload.get("alreadyAccepted") is False, "Флаг alreadyAccepted должен быть False"
-        assert payload.get("spaceId") == space_id_, "Неверный spaceId в ответе"
+        assert payload.get("spaceId") == second_space_id, "Неверный spaceId в ответе"
         assert payload.get("termsAccepted") is True, "Флаг termsAccepted должен быть True"
         assert "token" not in payload, "В ответе присутствует токен авторизации"
         assert payload.get("hasPassword") is True, "Флаг hasPassword должен быть True"
 
         with allure.step("Проверка статуса пользователя в списке участников (должен быть Active)"):
             response = second_main_client.post(**get_space_members_endpoint(
-                space_id=space_id_
+                space_id=second_space_id
             ))
             assert response.status_code == 200
             resp = response.json().get('payload').get('members')
@@ -82,12 +82,12 @@ def test_confirm_space_invite_success(second_main_client, space_id_, member_clie
             assert target_status.get('status') == "Active"
 
 # инвайт пользователя которого нет в базе. подтверждение через отправку кода = tokenHash, который нужно взять из монго бд: confirmtokens.({"payload.email": "test+1@test.com"})
-# также учесть инвайт в space_id_, потому что в space_id_ закончилось кол-во инвайтов на фри тарифе = 10
+# также учесть инвайт в second_space_id, потому что в second_space_id закончилось кол-во инвайтов на фри тарифе = 10
 
 @allure.parent_suite("Invite Service")
 @allure.suite("Confirm Space Invite")
 @allure.title("Успешное подтверждение инвайта пользователя, которого нет в базе")
-def test_confirm_space_invite_new_user(second_main_client, space_id_, db):
+def test_confirm_space_invite_new_user(second_main_client, second_space_id, db):
     """
     Проверка успешного приглашения и подтверждения для пользователя,
     которого еще нет в базе данных.
@@ -98,9 +98,9 @@ def test_confirm_space_invite_new_user(second_main_client, space_id_, db):
     new_user_password = "123456"
     full_name = "Brand New User"
 
-    with allure.step("Owner приглашает нового пользователя в пространство (space_id_)"):
+    with allure.step("Owner приглашает нового пользователя в пространство (second_space_id)"):
         invite_resp = second_main_client.post(**invite_to_space_endpoint(
-            space_id=space_id_,
+            space_id=second_space_id,
             email=new_user_email,
             space_access="Member"
         ))
@@ -133,11 +133,11 @@ def test_confirm_space_invite_new_user(second_main_client, space_id_, db):
 
         payload = confirm_resp.json().get("payload", {})
         assert payload.get("alreadyAccepted") is False, "Флаг alreadyAccepted должен быть False"
-        assert payload.get("spaceId") == space_id_, "Неверный spaceId в ответе"
+        assert payload.get("spaceId") == second_space_id, "Неверный spaceId в ответе"
 
     with allure.step("Проверка статуса пользователя в списке участников (должен быть Active)"):
         response = second_main_client.post(**get_space_members_endpoint(
-            space_id=space_id_
+            space_id=second_space_id
         ))
         assert response.status_code == 200
         members = response.json().get('payload').get('members')
