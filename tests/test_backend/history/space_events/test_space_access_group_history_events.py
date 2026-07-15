@@ -15,7 +15,7 @@ pytestmark = [pytest.mark.backend]
 
 
 def _create_group(client, space_id: str) -> str:
-    """Вспомогательная функция: создаёт группу доступа и возвращает её _id."""
+    """Вспомогательная функция: создаёт Groups (выставляет роль группе) и возвращает её _id."""
     name = f"test_group_{uuid.uuid4().hex[:6]}"
     resp = client.post(**create_access_group_endpoint(
         space_id=space_id,
