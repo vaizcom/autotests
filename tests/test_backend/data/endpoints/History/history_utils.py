@@ -7,7 +7,7 @@ from core.response_utils import short_resp
 
 def assert_history_event_exists(
         client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
-        expected_data: dict = None, timeout: int = 20, interval: float = 0.5
+        expected_data: dict = None, timeout: int = 20, interval: float = 1.0
 ) -> dict:
     """
     Вспомогательная функция: запрашивает историю с механизмом ожидания (поллингом).
