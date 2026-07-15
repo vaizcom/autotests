@@ -23,12 +23,12 @@ def assert_history_event_exists(
                     space_id=space_id,
                     kind=kind,
                     kind_id=kind_id,
-                    limit=50
+                    next_cursor=0,
                 )
             )
             assert resp.status_code == 200, f"Ошибка при получении истории: {short_resp(resp)}"
 
-            histories = resp.json().get('payload', {}).get('histories', [])
+            histories = resp.json().get('payload', {}).get('items', [])
 
             # Ищем подходящее событие
             for event in histories:
