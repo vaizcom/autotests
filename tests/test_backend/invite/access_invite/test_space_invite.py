@@ -2,8 +2,7 @@ import allure
 import pytest
 
 from config.generators import generate_email
-from core.waiters import wait_until
-from test_backend.data.endpoints.access_group.aaccess_group_endpoints import get_access_groups_endpoint
+from test_backend.data.endpoints.access_group.access_group_helpers import wait_for_member_access_group
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, remove_invite_endpoint
 
 pytestmark = [pytest.mark.backend]
@@ -78,20 +77,7 @@ def test_manager_cannot_invite_owner(manager_client, space_with_members):
 
     # 2. Ждем появления группы доступа
     with allure.step("Ожидание появления пользователя в списке групп доступа"):
-        def _check_group():
-            group_resp = manager_client.post(**get_access_groups_endpoint(space_id=space_with_members))
-            assert group_resp.status_code == 200, f"Ошибка GetAccessGroup: {group_resp.text}"
-            groups = group_resp.json().get("payload", {}).get("accessGroups", [])
-            return next((g for g in groups if g.get("members") == [_id]), None)
-
-        try:
-            target_group = wait_until(
-                condition_func=_check_group,
-                timeout=10,
-                error_msg=f"Группа с ID {_id} не появилась в списке accessGroups за 10 секунд."
-            )
-        except TimeoutError as e:
-            pytest.fail(str(e))
+        target_group = wait_for_member_access_group(manager_client, space_with_members, _id)
 
     # 3. Проверяем, что роль сбросилась
     with allure.step("Проверка, что роль в spaceAccesses сброшена до Guest"):

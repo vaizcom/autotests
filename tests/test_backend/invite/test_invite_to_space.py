@@ -1,8 +1,7 @@
 import pytest
 import allure
 
-from core.waiters import wait_until
-from test_backend.data.endpoints.access_group.aaccess_group_endpoints import get_access_groups_endpoint
+from test_backend.data.endpoints.access_group.access_group_helpers import wait_for_member_access_group
 from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint
 
@@ -47,24 +46,7 @@ def test_invite_to_space(second_main_client, second_space_id, role):
 
     # 3. Прямой запрос прав доступа по полученному ID с универсальным поллингом
     with allure.step("Ожидание появления пользователя в списке групп доступа"):
-
-        def _check_group():
-            """Локальная функция-условие для поллинга"""
-            group_resp = second_main_client.post(**get_access_groups_endpoint(space_id=second_space_id))
-            assert group_resp.status_code == 200, f"Ошибка GetAccessGroup: {group_resp.text}"
-
-            groups = group_resp.json().get("payload", {}).get("accessGroups", [])
-            # Возвращаем найденную группу или None
-            return next((g for g in groups if g.get("members") == [_id]), None)
-
-        try:
-            target_id = wait_until(
-                condition_func=_check_group,
-                timeout=10,
-                error_msg=f"Группа с ID {_id} не появилась в списке accessGroups за 10 секунд."
-            )
-        except TimeoutError as e:
-            pytest.fail(str(e))
+        target_id = wait_for_member_access_group(second_main_client, second_space_id, _id)
 
         # Базовые проверки структуры группы
     with allure.step("Базовые проверки структуры созданной группы"):

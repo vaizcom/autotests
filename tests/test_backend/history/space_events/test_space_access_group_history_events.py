@@ -3,7 +3,7 @@ import uuid
 import allure
 import pytest
 
-from test_backend.data.endpoints.access_group.aaccess_group_endpoints import (
+from test_backend.data.endpoints.access_group.access_group_endpoints import (
     create_access_group_endpoint,
     update_access_group_endpoint,
     update_access_group_rights_endpoint,

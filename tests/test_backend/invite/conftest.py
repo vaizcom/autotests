@@ -11,25 +11,35 @@ from test_backend.data.endpoints.Project.project_endpoints import create_project
 from test_backend.data.endpoints.Space.space_endpoints import (
     create_space_endpoint, remove_space_endpoint, get_space_endpoint, get_spaces_endpoint,
 )
-from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
+from test_backend.data.endpoints.access_group.access_group_endpoints import create_access_group_endpoint
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
 
 
-# ── Rate-limit warning ───────────────────────────────────────────────────────
+# ── Rate-limit: skip remaining invite tests on 429 ─────────────────────────
 
 RATE_LIMIT_HINT = (
-    "\n\n>>> 429 Too Many Requests — превышен лимит инвайтов (20/час на пользователя).\n"
-    ">>> При повторном прогоне в течение часа это ожидаемое поведение.\n"
+    "\n\n>>> 429 Too Many Requests — рейт-лимит: 20 инвайтов в час на пользователя.\n"
+    ">>> Оставшиеся инвайт-тесты будут пропущены.\n"
     ">>> Подождите ~1 час или используйте другого пользователя."
 )
+
+_rate_limited = False
 
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
+    global _rate_limited
     outcome = yield
     report = outcome.get_result()
-    if report.when == "call" and report.failed and "429" in str(report.longrepr):
+    if report.failed and "429" in str(report.longrepr):
+        _rate_limited = True
         report.longrepr = str(report.longrepr) + RATE_LIMIT_HINT
+
+
+@pytest.fixture(autouse=True)
+def _skip_if_rate_limited():
+    if _rate_limited:
+        pytest.skip("429 — рейт-лимит исчерпан (20 инвайтов в час на пользователя), инвайт-тесты пропущены")
 
 
 # ── Invite fixtures ──────────────────────────────────────────────────────────

@@ -17,7 +17,7 @@ from config.settings import BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID
 from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, create_task_endpoint, \
     delete_task_endpoint
 from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
-from test_backend.data.endpoints.access_group.aaccess_group_endpoints import create_access_group_endpoint
+from test_backend.data.endpoints.access_group.access_group_endpoints import create_access_group_endpoint
 from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint
 from config import settings
 from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
