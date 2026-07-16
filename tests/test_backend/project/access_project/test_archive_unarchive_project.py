@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from tests.test_backend.data.endpoints.Project.project_endpoints import (
+from test_backend.data.endpoints.Project.project_endpoints import (
     get_project_endpoint,
     archive_project_endpoint,
     unarchive_project_endpoint

@@ -1,8 +1,8 @@
 import allure
 import pytest
 import requests
-from tests.config.settings import API_URL, MAIN_SPACE_ID
-from tests.test_backend.data.endpoints.Space.space_endpoints import get_space_endpoint
+from config.settings import API_URL, MAIN_SPACE_ID
+from test_backend.data.endpoints.Space.space_endpoints import get_space_endpoint
 
 pytestmark = [pytest.mark.backend]
 

@@ -3,19 +3,19 @@ import uuid
 import allure
 import pytest
 
-from test_backend.data.endpoints.access_group.aaccess_group_endpoints import (
+from test_backend.data.endpoints.access_group.access_group_endpoints import (
     create_access_group_endpoint,
     update_access_group_endpoint,
     update_access_group_rights_endpoint,
     remove_access_group_endpoint,
 )
-from tests.test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
 pytestmark = [pytest.mark.backend]
 
 
 def _create_group(client, space_id: str) -> str:
-    """Вспомогательная функция: создаёт группу доступа и возвращает её _id."""
+    """Вспомогательная функция: создаёт Groups и возвращает её _id."""
     name = f"test_group_{uuid.uuid4().hex[:6]}"
     resp = client.post(**create_access_group_endpoint(
         space_id=space_id,

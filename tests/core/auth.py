@@ -1,5 +1,5 @@
 import requests
-from tests.config.settings import USERS, API_URL
+from config.settings import USERS, API_URL
 
 _token_cache = {}
 

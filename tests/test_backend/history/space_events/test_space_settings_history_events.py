@@ -4,7 +4,7 @@ import pytest
 from config.generators import generate_space_name
 from test_backend.data.endpoints.Space.space_endpoints import edit_space_endpoint
 from test_backend.data.endpoints.file.upload_avatar_endpoint import upload_avatar_endpoint, DUMMY_PNG_CONTENT
-from tests.test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
 pytestmark = [pytest.mark.backend]
 

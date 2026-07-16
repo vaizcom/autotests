@@ -2,8 +2,7 @@ import allure
 import pytest
 
 from config.generators import generate_email
-from core.waiters import wait_until
-from test_backend.data.endpoints.access_group.aaccess_group_endpoints import get_access_groups_endpoint
+from test_backend.data.endpoints.access_group.access_group_helpers import wait_for_member_access_group
 from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, remove_invite_endpoint
 
@@ -13,7 +12,7 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Invite Service")
 @allure.suite("Space Invitations - Optional Params (Positive)")
 @allure.title("Приглашение пользователя с необязательными параметрами (projectAccesses, boardAccesses, fullName)")
-def test_invite_to_space_with_optional_params(main_client, space_id_module, project_id_module, board_id_module):
+def test_invite_to_space_with_optional_params(second_main_client, second_space_id, second_project_id, second_board_id):
     """
     Проверка, что при отправке инвайта с дополнительными параметрами
     (права на проекты/доски, имя) они корректно сохраняются и возвращаются в accessGroups.
@@ -22,12 +21,12 @@ def test_invite_to_space_with_optional_params(main_client, space_id_module, proj
     email = generate_email()
     full_name = "Test User Optional"
 
-    project_accesses_payload = [{"id": project_id_module, "access": "Manager"}]
-    board_accesses_payload = [{"id": board_id_module, "access": "Owner"}]
+    project_accesses_payload = [{"id": second_project_id, "access": "Manager"}]
+    board_accesses_payload = [{"id": second_board_id, "access": "Owner"}]
 
     with allure.step("Отправка приглашения с дополнительными параметрами (микс прав)"):
-        response = main_client.post(**invite_to_space_endpoint(
-            space_id=space_id_module,
+        response = second_main_client.post(**invite_to_space_endpoint(
+            space_id=second_space_id,
             email=email,
             space_access="Member",
             project_accesses=project_accesses_payload,
@@ -44,47 +43,33 @@ def test_invite_to_space_with_optional_params(main_client, space_id_module, proj
     with allure.step("Валидация тела ответа InviteToSpace"):
         assert_invite_payload(
             invite=payload,
-            space_id=space_id_module,
+            space_id=second_space_id,
             email=email,
             expected_full_name=full_name
         )
 
     with allure.step("Ожидание появления пользователя в списке групп доступа"):
-        def _check_group():
-            group_resp = main_client.post(**get_access_groups_endpoint(space_id=space_id_module))
-            assert group_resp.status_code == 200, f"Ошибка GetAccessGroup: {group_resp.text}"
-
-            groups = group_resp.json().get("payload", {}).get("accessGroups", [])
-            return next((g for g in groups if g.get("members") == [member_id]), None)
-
-        try:
-            target_group = wait_until(
-                condition_func=_check_group,
-                timeout=10,
-                error_msg=f"Группа с ID {member_id} не появилась в списке accessGroups за 10 секунд."
-            )
-        except TimeoutError as e:
-            pytest.fail(str(e))
+        target_group = wait_for_member_access_group(second_main_client, second_space_id, member_id)
 
     with allure.step("Проверка сохранения необязательных параметров"):
         project_accesses = target_group.get("projectAccesses", {})
         board_accesses = target_group.get("boardAccesses", {})
 
-        assert project_accesses.get(project_id_module) == "Manager", \
-            f"Права на проект не сохранились. Ожидалось: Manager, Текущие: {project_accesses.get(project_id_module)}"
+        assert project_accesses.get(second_project_id) == "Manager", \
+            f"Права на проект не сохранились. Ожидалось: Manager, Текущие: {project_accesses.get(second_project_id)}"
 
-        assert board_accesses.get(board_id_module) == "Owner", \
-            f"Права на доску не сохранились. Ожидалось: Guest, Текущие: {board_accesses.get(board_id_module)}"
+        assert board_accesses.get(second_board_id) == "Owner", \
+            f"Права на доску не сохранились. Ожидалось: Guest, Текущие: {board_accesses.get(second_board_id)}"
 
     with allure.step("Удаление инвайта"):
-        remove_resp = main_client.post(**remove_invite_endpoint(space_id=space_id_module, member_id=member_id))
+        remove_resp = second_main_client.post(**remove_invite_endpoint(space_id=second_space_id, member_id=member_id))
         assert remove_resp.status_code == 200, f"Ошибка при удалении инвайта: {remove_resp.text}"
 
 
 @allure.parent_suite("Invite Service")
 @allure.suite("Space Invitations - Optional Params (Positive)")
 @allure.title("Приглашение пользователя с добавлением в указанную группу доступа (accessGroupId)")
-def test_invite_to_space_with_access_group(main_client, space_id_module, group_in_module):
+def test_invite_to_space_with_access_group(second_main_client, second_space_id, second_group_id):
     """
     Проверка, что при отправке инвайта с параметром accessGroupId
     пользователь успешно добавляется в указанную кастомную группу доступа.
@@ -93,11 +78,11 @@ def test_invite_to_space_with_access_group(main_client, space_id_module, group_i
     full_name = "Test User Access Group"
 
     with allure.step("Отправка приглашения с указанием группы доступа"):
-        response = main_client.post(**invite_to_space_endpoint(
-            space_id=space_id_module,
+        response = second_main_client.post(**invite_to_space_endpoint(
+            space_id=second_space_id,
             email=email,
             space_access="Member",
-            access_group_id=group_in_module,
+            access_group_id=second_group_id,
             full_name=full_name
         ))
         assert response.status_code == 200, f"Ошибка приглашения: {response.text}"
@@ -109,43 +94,18 @@ def test_invite_to_space_with_access_group(main_client, space_id_module, group_i
     with allure.step("Валидация тела ответа InviteToSpace"):
         assert_invite_payload(
             invite=payload,
-            space_id=space_id_module,
+            space_id=second_space_id,
             email=email,
             expected_full_name=full_name
         )
 
     with allure.step("Ожидание добавления пользователя в целевую группу доступа"):
-        def _check_group():
-            group_resp = main_client.post(**get_access_groups_endpoint(space_id=space_id_module))
-            assert group_resp.status_code == 200, f"Ошибка GetAccessGroup: {group_resp.text}"
-
-            groups = group_resp.json().get("payload", {}).get("accessGroups", [])
-
-            # Ищем нашу целевую группу (temp_access_group) и проверяем, есть ли там наш пользователь
-            target_custom_group = next(
-                (g for g in groups if g.get("_id") == group_in_module),
-                None
-            )
-
-            if target_custom_group and member_id in target_custom_group.get("members", []):
-                return target_custom_group
-            return None
-
-        try:
-            target_group = wait_until(
-                condition_func=_check_group,
-                timeout=10,
-                error_msg=f"Пользователь {member_id} не был добавлен в группу {group_in_module} за 10 секунд."
-            )
-        except TimeoutError as e:
-            pytest.fail(str(e))
-
-    with allure.step("Проверка добавления в группу"):
-        assert member_id in target_group.get("members", []), \
-            f"Пользователь {member_id} отсутствует в members группы {group_in_module}"
+        target_group = wait_for_member_access_group(
+            second_main_client, second_space_id, member_id, group_id=second_group_id
+        )
 
     with allure.step("Удаление инвайта"):
-        remove_resp = main_client.post(**remove_invite_endpoint(space_id=space_id_module, member_id=member_id))
+        remove_resp = second_main_client.post(**remove_invite_endpoint(space_id=second_space_id, member_id=member_id))
         assert remove_resp.status_code == 200, f"Ошибка при удалении инвайта: {remove_resp.text}"
 
 
@@ -186,7 +146,7 @@ def test_invite_to_space_with_access_group(main_client, space_id_module, group_i
     ]
 )
 def test_invite_optional_params_negative(
-        main_client, space_id_module, project_id_module, board_id_module, scenario, overrides, expected_status
+        second_main_client, second_space_id, second_project_id, second_board_id, scenario, overrides, expected_status
 ):
     """
     Негативные сценарии для эндпоинта инвайта с дополнительными параметрами
@@ -200,18 +160,18 @@ def test_invite_optional_params_negative(
         if "project_accesses" in overrides:
             for p in overrides["project_accesses"]:
                 if p["id"] == "VALID_PROJECT":
-                    p["id"] = project_id_module
+                    p["id"] = second_project_id
 
         if "board_accesses" in overrides:
             for b in overrides["board_accesses"]:
                 if b["id"] == "VALID_BOARD":
-                    b["id"] = board_id_module
+                    b["id"] = second_board_id
 
         email = generate_email()
 
         # Базовые параметры, которые всегда валидны
         invite_kwargs = {
-            "space_id": space_id_module,
+            "space_id": second_space_id,
             "email": email,
             "space_access": "Member"
         }
@@ -221,7 +181,7 @@ def test_invite_optional_params_negative(
     with allure.step(f"Отправка инвайта: {scenario}"):
         invite_req = invite_to_space_endpoint(**invite_kwargs)
 
-        response = main_client.post(
+        response = second_main_client.post(
             invite_req["path"],
             json=invite_req.get("json", {}),
             headers=invite_req.get("headers", {})

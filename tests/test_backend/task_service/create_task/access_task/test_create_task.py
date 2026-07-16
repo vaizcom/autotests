@@ -4,7 +4,7 @@ import random
 import allure
 import pytest
 
-from tests.test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
 from test_backend.task_service.utils import validate_hrid, get_client, get_member_profile, create_task, get_random_type_id, get_random_group_id, \
     get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone, assert_task_keys
 

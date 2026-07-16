@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from tests.test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 

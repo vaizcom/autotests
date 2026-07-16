@@ -2,12 +2,12 @@ import allure
 import time
 
 from test_backend.data.endpoints.History.get_history_endpoint import get_history_endpoint
-from tests.test_backend.data.endpoints.History.assert_history_payload import assert_history_payload
-from tests.core.response_utils import short_resp
+from test_backend.data.endpoints.History.assert_history_payload import assert_history_payload
+from core.response_utils import short_resp
 
 def assert_history_event_exists(
         client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
-        expected_data: dict = None, timeout: int = 20, interval: float = 0.5
+        expected_data: dict = None, timeout: int = 20, interval: float = 1.0
 ) -> dict:
     """
     Вспомогательная функция: запрашивает историю с механизмом ожидания (поллингом).
@@ -23,12 +23,12 @@ def assert_history_event_exists(
                     space_id=space_id,
                     kind=kind,
                     kind_id=kind_id,
-                    limit=50
+                    next_cursor=0,
                 )
             )
             assert resp.status_code == 200, f"Ошибка при получении истории: {short_resp(resp)}"
 
-            histories = resp.json().get('payload', {}).get('histories', [])
+            histories = resp.json().get('payload', {}).get('items', [])
 
             # Ищем подходящее событие
             for event in histories:

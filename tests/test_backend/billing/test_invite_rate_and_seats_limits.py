@@ -1,17 +1,15 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.invite.invite_endpoint import (
-    invite_to_space_endpoint,
-    remove_invite_endpoint,
-)
+from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, remove_invite_endpoint
 from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 
-pytestmark = [pytest.mark.backend]
+
+pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="TODO: продумать спейсы/пользователей для биллинг-тестов")]
 
 
-@allure.parent_suite("Invite Service")
-@allure.suite("Rate Limits & Seats Limits")
+@allure.parent_suite("Billing Service")
+@allure.suite("Invite Rate & Seats Limits (Free Plan)")
 @allure.title("Проверка лимитов: SeatsLimitReached и Too Many Requests")
 def test_invite_rate_and_seats_limits(temp_client):
     """

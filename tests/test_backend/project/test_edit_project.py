@@ -1,8 +1,8 @@
 import allure
 import pytest
 
-from tests.config.generators import generate_project_name, generate_slug, generate_project_description
-from tests.test_backend.data.endpoints.Project.project_endpoints import (
+from config.generators import generate_project_name, generate_slug, generate_project_description
+from test_backend.data.endpoints.Project.project_endpoints import (
     edit_project_endpoint,
 )
 

@@ -48,52 +48,6 @@ def edit_board_endpoint(board_id: str, name: str, space_id: str):
     }
 
 
-def import_board_file_endpoint(name: str, project_id: str, space_id: str):
-    return {
-        'path': '/ImportBoardFile',
-        'json': {'project': project_id, 'file': 'mock_file_data'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
-    }
-
-
-def import_board_text_endpoint(name: str, project_id: str, space_id: str):
-    return {
-        'path': '/ImportBoardText',
-        'json': {'project': project_id, 'text': 'imported text content'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
-    }
-
-
-def create_board_type_endpoint(name: str, project_id: str, space_id: str):
-    return {
-        'path': '/CreateBoardType',
-        'json': {'label': 'Bug', 'color': 'red', 'icon': 'Bug', 'description': ''},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
-    }
-
-
-def edit_board_type_endpoint(name: str, project_id: str, space_id: str):
-    return {
-        'path': '/EditBoardType',
-        'json': {
-            'id': 'type_id',
-            'label': 'Bug Updated',
-            'color': 'green',
-            'icon': 'BugCheck',
-            'description': 'Updated description',
-        },
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
-    }
-
-
-def remove_board_type_endpoint(name: str, project_id: str, space_id: str):
-    return {
-        'path': '/RemoveBoardType',
-        'json': {'id': 'type_id'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
-    }
-
-
 def create_board_group_endpoint(
     board_id: str, space_id: str, name: str, description: str = None, limit: int = None, hidden: bool = False
 ):
@@ -124,13 +78,11 @@ def edit_board_group_endpoint(
     hidden: bool = None,
     limit: int = None,
 ):
-    # Собираем payload с обязательными полями
     payload = {
         'boardId': board_id,
         'boardGroupId': board_group_id,
     }
 
-    # Добавляем только переданные параметры (Partial DTO)
     if name is not None:
         payload['name'] = name
     if description is not None:
@@ -143,22 +95,6 @@ def edit_board_group_endpoint(
     return {
         'path': '/EditBoardGroup',
         'json': payload,
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
-    }
-
-
-def remove_board_group_endpoint(name: str, project_id: str, space_id: str):
-    return {
-        'path': '/RemoveBoardGroup',
-        'json': {'id': 'group_id'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
-    }
-
-
-def reorder_board_groups_endpoint(name: str, project_id: str, space_id: str):
-    return {
-        'path': '/ReorderBoardGroups',
-        'json': {'order': ['group_id1', 'group_id2']},
         'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
     }
 
@@ -214,20 +150,4 @@ def edit_board_custom_field_endpoint(
         'path': '/EditBoardCustomField',
         'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
         'json': payload,
-    }
-
-
-def remove_board_custom_field_endpoint(name: str, project_id: str, space_id: str):
-    return {
-        'path': '/RemoveBoardCustomField',
-        'json': {'id': 'field_id'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
-    }
-
-
-def broadcast_board_endpoint(name: str, project_id: str, space_id: str):
-    return {
-        'path': '/BroadcastBoard',
-        'json': {'boardId': 'board_id'},
-        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
     }

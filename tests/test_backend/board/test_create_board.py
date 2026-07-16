@@ -1,7 +1,7 @@
 import allure
 import pytest
-from tests.config.generators import generate_board_name, generate_custom_field_title, generate_object_id
-from tests.test_backend.data.endpoints.Board.board_endpoints import (
+from config.generators import generate_board_name, generate_custom_field_title, generate_object_id
+from test_backend.data.endpoints.Board.board_endpoints import (
     create_board_endpoint,
     create_board_custom_field_endpoint,
     edit_board_custom_field_endpoint,
@@ -10,7 +10,7 @@ from tests.test_backend.data.endpoints.Board.board_endpoints import (
     create_board_group_endpoint,
     edit_board_group_endpoint,
 )
-from tests.test_backend.data.endpoints.Board.custom_field_types import CustomFieldType
+from test_backend.data.endpoints.Board.custom_field_types import CustomFieldType
 
 
 pytestmark = [pytest.mark.backend]
@@ -229,7 +229,7 @@ def test_edit_custom_field_common_fields(main_client, temp_board, temp_space, fi
         assert create_response.status_code == 200
         field_id = create_response.json()['payload']['customField']['_id']
 
-    new_name = 'Обновлённое имя'
+    new_name = generate_custom_field_title()
     new_description = 'Обновлённое описание'
     hidden = True
 
@@ -267,7 +267,7 @@ def test_edit_select_custom_field(main_client, temp_board, temp_space):
         assert create_response.status_code == 200, f'Create failed: {create_response.json()}'
         field_id = create_response.json()['payload']['customField']['_id']
 
-    new_title = 'Обновлённое имя'
+    new_title = generate_custom_field_title()
     new_options = [
         {'_id': generate_object_id(), 'title': 'Опция 1', 'color': 'red', 'icon': 'Thumb'},
         {'_id': generate_object_id(), 'title': 'Опция 2', 'color': 'Cursor'},
