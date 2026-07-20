@@ -21,14 +21,18 @@ from test_backend.data.endpoints.access_group.access_group_endpoints import crea
 from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint
 from config import settings
 from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
-from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
+from test_backend.data.endpoints.Board.board_endpoints import (
+    get_board_endpoint,
+    get_boards_endpoint,
+    delete_board_endpoint,
+)
 from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
 from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from core.client import APIClient
 from core.auth import get_token
 from core.response_utils import short_resp
 from config.settings import API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID
-from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
+from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS, typesList
 from test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint,
     create_board_endpoint,
@@ -298,6 +302,48 @@ def board_with_tasks(main_client, main_space):
     return BOARD_FOR_TEST
 
 
+TEMP_BOARD_NAME = "_autotest_temp_board"
+
+
+@pytest.fixture(scope='session')
+def temp_board_in_main(owner_client, main_space, main_project):
+    """
+    Временная борда в main_space/main_project.
+    Имя фиксированное — в setup удаляем мусорную борду от предыдущего прогона, если осталась.
+    """
+    # Setup: удаляем старую борду с таким же именем, если осталась
+    resp = owner_client.post(**get_boards_endpoint(space_id=main_space))
+    if resp.status_code == 200:
+        for board in resp.json().get("payload", {}).get("boards", []):
+            if board.get("name") == TEMP_BOARD_NAME:
+                owner_client.post(**delete_board_endpoint(
+                    board_id=board["_id"],
+                    board_name=TEMP_BOARD_NAME,
+                    space_id=main_space,
+                ))
+
+    # Создаём чистую борду
+    resp = owner_client.post(**create_board_endpoint(
+        name=TEMP_BOARD_NAME,
+        temp_project=main_project,
+        space_id=main_space,
+        groups=DEFAULT_BOARD_GROUPS,
+        typesList=typesList,
+        customFields=[],
+    ))
+    assert resp.status_code == 200, f"Ошибка создания борды: {resp.text}"
+    board_id = resp.json()["payload"]["board"]["_id"]
+
+    yield board_id
+
+    # Teardown
+    owner_client.post(**delete_board_endpoint(
+        board_id=board_id,
+        board_name=TEMP_BOARD_NAME,
+        space_id=main_space,
+    ))
+
+
 # Возвращает tasks_ids с board_with_tasks == 10.000 тасок в main_space
 @pytest.fixture(scope='session')
 def task_id_list(owner_client, main_space, board_with_10000_tasks):
@@ -402,14 +448,24 @@ def make_task_in_main(owner_client, main_space, main_board):
     Возвращает функцию create -> dict с данными созданной задачи.
     В body передаются только необходимые для теста поля. После использования задача удаляется.
     """
+    # Setup: удаляем задачи, оставшиеся от предыдущих прогонов
+    resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, board=main_board))
+    if resp.status_code == 200:
+        for t in resp.json().get("payload", {}).get("tasks", []):
+            try:
+                owner_client.post(**delete_task_endpoint(task_id=t["_id"], space_id=main_space))
+            except Exception:
+                pass
+
     created_ids = []
 
     def _create_task(body_overrides: dict):
         body = {
             "space_id": main_space,
-            "board": main_board
+            "board": main_board,
         }
-        resp = owner_client.post(**create_task_endpoint(**body, **body_overrides))
+        body.update(body_overrides)
+        resp = owner_client.post(**create_task_endpoint(**body))
         assert resp.status_code == 200, short_resp(resp)
         task = resp.json()["payload"]["task"]
         created_ids.append(task["_id"])
@@ -462,17 +518,17 @@ def temp_task(main_client, temp_space, temp_board):
 
 
 @pytest.fixture
-def temp_task_on_board_with_tasks(main_client, main_space, board_with_tasks):
+def temp_task_on_temp_board(owner_client, main_space, temp_board_in_main):
     """
     Фикстура для создания временной задачи перед тестом и её удаления после теста.
     Возвращает ID созданной задачи.
     """
     task_name = "Temp task for tests task events"
 
-    create_resp = main_client.post(
+    create_resp = owner_client.post(
         **create_task_endpoint(
             space_id=main_space,
-            board=board_with_tasks,
+            board=temp_board_in_main,
             name=task_name
         ))
     assert create_resp.status_code == 200, f"Ошибка создания задачи в фикстуре: {short_resp(create_resp)}"
@@ -482,7 +538,7 @@ def temp_task_on_board_with_tasks(main_client, main_space, board_with_tasks):
     yield task_id
 
     with allure.step("Teardown [Fixture]: Удаление временной задачи"):
-        delete_resp = main_client.post(
+        delete_resp = owner_client.post(
             **delete_task_endpoint(
                 space_id=main_space,
                 task_id=task_id
@@ -515,7 +571,7 @@ def temp_access_group(main_client, temp_space):
 
 
 @pytest.fixture
-def temp_milestone_on_board_with_tasks(owner_client, main_space, board_with_tasks, main_project):
+def temp_milestone_on_temp_board(owner_client, main_space, temp_board_in_main, main_project):
     """
     Фикстура для создания временного майлстоуна перед тестом и его Архивация после теста.
     Возвращает ID созданного майлстоуна.
@@ -525,7 +581,7 @@ def temp_milestone_on_board_with_tasks(owner_client, main_space, board_with_task
         create_resp = owner_client.post(
             **create_milestone_endpoint(
                 space_id=main_space,
-                board=board_with_tasks,
+                board=temp_board_in_main,
                 name=milestone_name,
                 project=main_project
             )

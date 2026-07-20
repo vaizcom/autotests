@@ -10,13 +10,13 @@ pytestmark = [pytest.mark.backend]
 @allure.suite("Duplicate Task")
 @allure.sub_suite("Access Check")
 @allure.title("Негативный тест: Попытка сдублировать задачу на доску в другом спейсе (Cross-board/Cross-space)")
-def test_duplicate_task_to_forbidden_board(main_client, main_space, temp_task_on_board_with_tasks, second_space, second_board, foreign_client):
+def test_duplicate_task_to_forbidden_board(main_client, main_space, temp_task_on_temp_board, second_space, second_board, foreign_client):
     """
     Проверяет, что бэкенд пресекает попытку дублирования задачи (DuplicateTask)
     на доску (board_id), к которой у текущего пользователя нет доступа
     (например, доска находится в чужом Space или это приватная доска).
     """
-    task_id = temp_task_on_board_with_tasks
+    task_id = temp_task_on_temp_board
 
     with allure.step("1. Пытаемся сдублировать задачу из main_space на доску в another_space"):
         # Пытаемся использовать уязвимость:
@@ -25,7 +25,7 @@ def test_duplicate_task_to_forbidden_board(main_client, main_space, temp_task_on
             **duplicate_task_endpoint(
                 space_id=main_space,  # Авторизуемся в текущем спейсе
                 task_id=task_id,  # Копируем нашу задачу
-                board_id="6966448978f899c026adc166"  # Пытаемся положить её на чужую доску, есть в бд
+                board_id=second_board  # Пытаемся положить её на чужую доску (другой спейс)
             )
         )
 
@@ -48,12 +48,12 @@ def test_duplicate_task_to_forbidden_board(main_client, main_space, temp_task_on
 @allure.suite("Duplicate Task")
 @allure.sub_suite("Access Check")
 @allure.title("Негативный тест: Попытка сдублировать задачу пользователем без доступа (foreign_client)")
-def test_duplicate_task_by_foreign_client(foreign_client, main_space, main_board, temp_task_on_board_with_tasks):
+def test_duplicate_task_by_foreign_client(foreign_client, main_space, main_board, temp_task_on_temp_board):
     """
     Проверяет, что "чужой" пользователь (foreign_client), не являющийся участником
     main_space, получает ошибку AccessDenied при попытке сдублировать вашу задачу.
     """
-    task_id = temp_task_on_board_with_tasks
+    task_id = temp_task_on_temp_board
 
     with allure.step("1. Чужой пользователь пытается сдублировать вашу задачу"):
         # foreign_client подставляет ваш space_id, task_id и board_id в свои заголовки

@@ -11,7 +11,7 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Task Created & Completed & Uncompleted & Deleted events")
-def test_task_created_completed_deleted_events(main_client, main_space, board_with_tasks):
+def test_task_created_completed_deleted_events(main_client, main_space, temp_board_in_main):
     """
     Проверяем генерацию базовых событий жизненного цикла задачи:
     TASK_CREATED -> TASK_COMPLETED -> TASK_UNCOMPLETED -> TASK_DELETED
@@ -22,7 +22,7 @@ def test_task_created_completed_deleted_events(main_client, main_space, board_wi
         create_resp = main_client.post(
             **create_task_endpoint(
                 space_id=main_space,
-                board=board_with_tasks,
+                board=temp_board_in_main,
                 name=task_name
             )
         )
@@ -86,12 +86,12 @@ def test_task_created_completed_deleted_events(main_client, main_space, board_wi
         assert delete_resp.status_code == 200
 
         # Бэкенд не отдает историю для удаленной задачи по kind="Task",
-        # здесь поменяли kind="Board" и kind_id=board_with_tasks
+        # здесь поменяли kind="Board" и kind_id=temp_board_in_main
         deleted_event = assert_history_event_exists(
             client=main_client,
             space_id=main_space,
             kind="Board",
-            kind_id=board_with_tasks,
+            kind_id=temp_board_in_main,
             expected_event_key="TASK_DELETED"
         )
 

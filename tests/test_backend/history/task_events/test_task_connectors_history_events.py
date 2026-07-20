@@ -27,7 +27,7 @@ pytestmark = [pytest.mark.backend]
     ids=["blockers", "blocking"]
 )
 def test_task_connectors_history_events(
-    owner_client, main_space, board_with_tasks, temp_task_on_board_with_tasks,
+    owner_client, main_space, board_with_tasks, temp_task_on_temp_board,
     direction, main_task_expected_added, main_task_expected_removed,
     connector_task_expected_added, connector_task_expected_removed
 ):
@@ -40,7 +40,7 @@ def test_task_connectors_history_events(
     """
     allure.dynamic.title(f"{direction} task connectors: Добавление и удаление связей для '{direction}'")
 
-    main_task_id = temp_task_on_board_with_tasks
+    main_task_id = temp_task_on_temp_board
 
     with allure.step("Setup: Создана основная задача, создаем вторую задачу (connector_task)"):
         resp = owner_client.post(

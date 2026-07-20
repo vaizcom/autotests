@@ -16,20 +16,20 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Move to another group: Move Task with Subtask")
-def test_task_with_subtask_moved_group(owner_client, main_space, board_with_tasks, temp_task_on_board_with_tasks):
+def test_task_with_subtask_moved_group(owner_client, main_space, temp_board_in_main, temp_task_on_temp_board):
     """
     При перемещении родительской задачи в другую группу:
     1. Родитель генерирует событие TASK_MOVED_GROUP
     2. Подзадача НЕ перемещается вместе с ней (остается в старой группе)
     """
-    parent_task_id = temp_task_on_board_with_tasks
+    parent_task_id = temp_task_on_temp_board
     subtask_id = None
 
     with allure.step("Setup: Создаем подзадачу для родительской задачи"):
         resp = owner_client.post(
             **create_task_endpoint(
                 space_id=main_space,
-                board=board_with_tasks,
+                board=temp_board_in_main,
                 name="Subtask for move group test",
                 parent_task=parent_task_id
             )
@@ -39,19 +39,20 @@ def test_task_with_subtask_moved_group(owner_client, main_space, board_with_task
         subtask_initial_group = resp.json()['payload']['task']['group']
 
         # Получаем ID второй группы на доске для перемещения родителя
-        board_resp = owner_client.post(**get_board_endpoint(board_id=board_with_tasks, space_id=main_space))
+        board_resp = owner_client.post(**get_board_endpoint(board_id=temp_board_in_main, space_id=main_space))
         groups = board_resp.json()['payload']['board']['groups']
         target_group_id = groups[1]['_id']
 
     try:
         with allure.step("1. Перемещаем родительскую задачу в другую группу (MoveTasks)"):
-            owner_client.post(
+            move_resp = owner_client.post(
                 **move_single_task_endpoint(
                     space_id=main_space,
                     task_id=parent_task_id,
                     to_group_id=target_group_id
                 )
             )
+            assert move_resp.status_code == 200, f"Ошибка перемещения задачи: {move_resp.status_code} {move_resp.text}"
 
             with allure.step("1.1 Проверяем историю родителя -> TASK_MOVED_GROUP"):
                 assert_history_event_exists(

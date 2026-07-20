@@ -11,11 +11,11 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Task Commented event")
-def test_task_commented_history_event(main_client, main_space, temp_task_on_board_with_tasks):
+def test_task_commented_history_event(main_client, main_space, temp_task_on_temp_board):
     """
     Проверяем генерацию события TASK_COMMENTED при добавлении комментария к задаче.
     """
-    task_id = temp_task_on_board_with_tasks
+    task_id = temp_task_on_temp_board
 
     with allure.step("1. Получаем document ID задачи"):
         task_resp = main_client.post(**get_task_endpoint(slug_id=task_id, space_id=main_space))

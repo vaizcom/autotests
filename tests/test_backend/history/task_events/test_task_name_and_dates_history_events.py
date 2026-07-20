@@ -11,16 +11,16 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Name & Due Dates events")
-def test_task_name_and_dates_history_events(member_client, main_space, temp_task_on_board_with_tasks):
+def test_task_name_and_dates_history_events(owner_client, main_space, temp_task_on_temp_board):
     """
     Проверяем генерацию событий при изменении базовых параметров задачи:
     TASK_RENAMED -> TASK_DUE_CHANGED
     """
-    task_id = temp_task_on_board_with_tasks
+    task_id = temp_task_on_temp_board
 
     with allure.step("1. Переименовываем задачу -> ожидаем TASK_RENAMED"):
         new_name = "Updated Task Name for History Test"
-        member_client.post(
+        owner_client.post(
             **edit_task_endpoint(
                 space_id=main_space,
                 task_id=task_id,
@@ -29,7 +29,7 @@ def test_task_name_and_dates_history_events(member_client, main_space, temp_task
         )
 
         assert_history_event_exists(
-            client=member_client,
+            client=owner_client,
             space_id=main_space,
             kind="Task",
             kind_id=task_id,
@@ -41,7 +41,7 @@ def test_task_name_and_dates_history_events(member_client, main_space, temp_task
         due_start = get_current_timestamp()
         due_end = get_due_end()
 
-        member_client.post(
+        owner_client.post(
             **edit_task_endpoint(
                 space_id=main_space,
                 task_id=task_id,
@@ -51,7 +51,7 @@ def test_task_name_and_dates_history_events(member_client, main_space, temp_task
         )
 
         event_data = assert_history_event_exists(
-            client=member_client,
+            client=owner_client,
             space_id=main_space,
             kind="Task",
             kind_id=task_id,

@@ -16,14 +16,14 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Move to another board: Move Task with Subtask")
-def test_task_with_subtask_moved_to_board(owner_client, main_space, board_with_tasks, main_board, temp_task_on_board_with_tasks):
+def test_task_with_subtask_moved_to_board(owner_client, main_space, temp_board_in_main, main_board, temp_task_on_temp_board):
     """
     При перемещении родительской задачи на другую доску:
     1. В Родительской таске лог TASK_MOVED_TO_BOARD
     2. Родитель и подзадача открепляются друг от друга (TASK_DETACHED_AS_SUBTASK / TASK_DETACHED_TO_PARENT)
     3. Подзадача остается на старой доске в старой группе
     """
-    parent_task_id = temp_task_on_board_with_tasks
+    parent_task_id = temp_task_on_temp_board
     target_board_id = main_board
     subtask_id = None
 
@@ -31,7 +31,7 @@ def test_task_with_subtask_moved_to_board(owner_client, main_space, board_with_t
         resp = owner_client.post(
             **create_task_endpoint(
                 space_id=main_space,
-                board=board_with_tasks,
+                board=temp_board_in_main,
                 name="Subtask for cross-board move test",
                 parent_task=parent_task_id
             )
@@ -91,7 +91,7 @@ def test_task_with_subtask_moved_to_board(owner_client, main_space, board_with_t
                 assert subtask_resp.status_code == 200
                 task_data = subtask_resp.json()['payload']['task']
 
-                assert task_data['board'] == board_with_tasks, "БАГ! Подзадача улетела на чужую доску вместе с родителем!"
+                assert task_data['board'] == temp_board_in_main, "БАГ! Подзадача улетела на чужую доску вместе с родителем!"
                 assert task_data['group'] == subtask_initial_group, "БАГ! Подзадача сменила группу после открепления!"
                 assert task_data.get('parentTask') is None, "БАГ! У подзадачи остался указан parentTask, хотя они на разных досках!"
 

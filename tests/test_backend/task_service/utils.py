@@ -60,6 +60,23 @@ def get_random_type_id(client, board_id, space_id):
     return random_type["_id"]
 
 
+def get_two_random_types(client, board_id, space_id):
+    """
+    Получение двух разных типов из typesList борды.
+    Возвращает list of tuples [(type_id, type_name), (type_id, type_name)].
+    """
+    response = client.post(**get_board_endpoint(board_id=board_id, space_id=space_id))
+    response.raise_for_status()
+
+    board_data = response.json().get("payload", {}).get("board", {})
+    types_list = board_data.get("typesList", [])
+
+    assert len(types_list) >= 2, f"Нужно минимум 2 типа на борде, найдено: {len(types_list)}"
+
+    two = random.sample(types_list, 2)
+    return [(t["_id"], t["label"]) for t in two]
+
+
 def get_random_group_id(client, board_id, space_id):
     """
     Получение случайного `_id` группы из списка groups борды.

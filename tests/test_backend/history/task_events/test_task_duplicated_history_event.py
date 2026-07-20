@@ -10,20 +10,20 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Task Duplicated event")
-def test_task_duplicated_history_event(owner_client, main_space, board_with_tasks, temp_task_on_board_with_tasks):
+def test_task_duplicated_history_event(owner_client, main_space, temp_board_in_main, temp_task_on_temp_board):
     """
     Проверяем генерацию события при дублировании задачи на ту же доску:
     (!! апи позволяет передать любой boardId, фронт только текущую доску, заложено на будущее (проверены права доступа tests Duplicate Task))
     TASK_DUPLICATED (в НОВОЙ скопированной задаче)
     """
-    task_id = temp_task_on_board_with_tasks
+    task_id = temp_task_on_temp_board
 
     with allure.step("1. Дублируем задачу на ту же доску -> ожидаем TASK_DUPLICATED"):
         resp = owner_client.post(
             **duplicate_task_endpoint(
                 space_id=main_space,
                 task_id=task_id,
-                board_id=board_with_tasks # апи позволяет передать любой boardId, фронт только текущую доску
+                board_id=temp_board_in_main  # апи позволяет передать любой boardId, фронт только текущую доску
             )
         )
         assert resp.status_code == 200, f"Ошибка при дублировании задачи: {resp.text}"
