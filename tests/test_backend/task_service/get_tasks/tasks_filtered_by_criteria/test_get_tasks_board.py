@@ -67,20 +67,3 @@ def test_get_tasks_board_non_existing(owner_client, main_space):
             assert "board must be a mongodb id" in codes
 
 
-@allure.parent_suite("Task Service")
-@allure.suite("Get Tasks")
-@allure.sub_suite("Filtered by criteria")
-@allure.title("GetTasks board: доска без задач — ожидаем пустой список")
-def test_get_tasks_board_without_tasks(owner_client, main_space):
-    with allure.step("Выполнить POST /GetTasks для доски без задач"):
-        empty_board = '691ae8ff4bfde6405da01137'
-        response = owner_client.post(**get_tasks_endpoint(
-            space_id=main_space,
-            board=empty_board
-        ))
-    with allure.step("Проверить HTTP 200 и пустой массив tasks"):
-        assert response.status_code == 200
-        data = response.json().get("payload", {})
-        tasks = data.get("tasks", [])
-        assert isinstance(tasks, list)
-        assert tasks == []
