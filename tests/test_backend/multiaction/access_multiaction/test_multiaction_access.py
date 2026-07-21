@@ -23,8 +23,11 @@ pytestmark = [pytest.mark.backend]
 )
 def test_multiaction_access_by_role(request, client_fixture, expect_success, main_space, make_task_in_main):
     """
+    Проверка прав доступа на примере completed, но распространяется
+    на все действия MultipleEditTasks (priority, types, assignees, due dates).
     Owner, Manager, Member — задача в success.
-    Guest, пользователь без доступа к борде — задача в failed.
+    Guest, пользователь без доступа к борде — HTTP 200, но задача в failed
+    (API не возвращает 403, а распределяет задачи по success/failed).
     """
     client = request.getfixturevalue(client_fixture)
 
@@ -49,7 +52,9 @@ def test_multiaction_access_by_role(request, client_fixture, expect_success, mai
             )
             assert payload["failed"] == [], f"failed не пуст: {payload['failed']}"
     else:
-        with allure.step("Проверяем, что задача в failed"):
+        # HTTP 200, но задача в failed — API не отдаёт 403,
+        # а распределяет задачи по success/failed внутри ответа
+        with allure.step("Проверяем, что задача в failed (статус 200, но нет прав)"):
             assert payload["failed"] == [task_id], (
                 f"Ожидали failed=[{task_id}], получили: {payload['failed']}"
             )
