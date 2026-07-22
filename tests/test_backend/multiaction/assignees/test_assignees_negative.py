@@ -18,15 +18,13 @@ def _get_task_assignees(client, space_id, task_id):
 @allure.parent_suite("Multiaction")
 @allure.suite("Assignees")
 @allure.sub_suite("Negative")
-@allure.title("Add невалидный member_id")
+@allure.title("Add member_id не из спейса — принимается без валидации")
 def test_add_invalid_member_id(owner_client, main_space, make_task_in_main):
     """
     Передаём несуществующий member_id (не в спейсе) с action=add.
-    BUG: MultipleEditTasks не валидирует принадлежность к спейсу —
-    принимает в success и записывает невалидный ID в assignees.
-    EditTask в аналогичном случае возвращает 400
-    "One or more members are not part of this workspace".
-
+    MultipleEditTasks не валидирует принадлежность к спейсу — ожидаемое поведение,
+    т.к. валидация на каждый member тяжёлая операция для массового эндпоинта.
+    EditTask валидирует (400) — это исключение, сделано для МСП.
     Фронт отображает такого пользователя как "missing member".
     """
     with allure.step("Создаём задачу"):

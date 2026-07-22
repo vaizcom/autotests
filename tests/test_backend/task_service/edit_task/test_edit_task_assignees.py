@@ -138,8 +138,8 @@ def test_edit_task_with_duplicate_assignees(owner_client, main_space, make_task_
 def test_edit_task_with_invalid_assignee_id(owner_client, main_space, make_task_in_main, main_board, main_project):
     """
     Несуществующий member_id → 400 "One or more members are not part of this workspace".
-    EditTask валидирует принадлежность пользователя к спейсу.
-    В отличие от MultipleEditTasks, который этого НЕ делает (баг?).
+    EditTask валидирует принадлежность пользователя к спейсу (сделано для МСП).
+    MultipleEditTasks этого не делает — ожидаемо, т.к. валидация тяжёлая для массового эндпоинта.
     """
     initial_task_data = make_task_in_main({"name": "Task for invalid assignee", "assignees": []})
     task_id = initial_task_data.get("_id")
