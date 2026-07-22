@@ -58,3 +58,55 @@ def assert_history_event_exists(
         assert_history_payload(history=found_event, expected_kind=kind, expected_kind_id=kind_id)
 
         return found_event
+
+
+def assert_history_event_not_exists(
+        client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
+        expected_data: dict = None, after_ts: float = None, wait: float = 5.0
+):
+    """
+    Проверяет, что событие НЕ появилось в истории.
+    after_ts — timestamp (time.time()), после которого событие не должно было появиться.
+    wait — сколько секунд подождать перед проверкой (дать бэкенду время на запись).
+    """
+    time.sleep(wait)
+
+    with allure.step(f"Проверяем, что событие '{expected_event_key}' НЕ появилось"):
+        resp = client.post(
+            **get_history_endpoint(
+                space_id=space_id,
+                kind=kind,
+                kind_id=kind_id,
+                next_cursor=0,
+            )
+        )
+        assert resp.status_code == 200, f"Ошибка при получении истории: {short_resp(resp)}"
+
+        histories = resp.json().get('payload', {}).get('items', [])
+
+        for event in histories:
+            if event.get('key') != expected_event_key:
+                continue
+            if expected_data:
+                event_data = event.get('data', {})
+                if not all(event_data.get(k) == v for k, v in expected_data.items()):
+                    continue
+            # Нашли совпадающее событие — если задан after_ts, проверяем время
+            if after_ts:
+                from datetime import datetime
+                event_time = event.get('createdAt', '')
+                # createdAt в ISO формате, парсим
+                try:
+                    event_dt = datetime.fromisoformat(event_time.replace('Z', '+00:00'))
+                    if event_dt.timestamp() > after_ts:
+                        raise AssertionError(
+                            f"Событие {expected_event_key} с данными {expected_data} "
+                            f"найдено после {after_ts}: {event}"
+                        )
+                except (ValueError, AttributeError):
+                    pass
+            else:
+                raise AssertionError(
+                    f"Событие {expected_event_key} с данными {expected_data} "
+                    f"найдено, хотя не должно было появиться: {event}"
+                )
