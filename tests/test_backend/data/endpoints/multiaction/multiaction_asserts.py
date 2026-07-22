@@ -18,4 +18,12 @@ def assert_multiaction_response(resp) -> dict:
             f"payload.{field} должен быть массивом, получили {type(value).__name__}: {value}"
         )
 
+    # Проверяем, что массивы не пересекаются
+    success = set(payload["success"])
+    failed = set(payload["failed"])
+    skipped = set(payload["skipped"])
+    assert not (success & failed), f"Пересечение success и failed: {success & failed}"
+    assert not (success & skipped), f"Пересечение success и skipped: {success & skipped}"
+    assert not (failed & skipped), f"Пересечение failed и skipped: {failed & skipped}"
+
     return payload
