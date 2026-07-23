@@ -42,7 +42,7 @@ jobs:
       - name: Determine test stand from .env
         if: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
-          STAND=$(grep -oP '^TEST_STAND_NAME=\K.*' .env || echo "dev")
+          STAND=$(grep '^TEST_STAND_NAME=' .env | cut -d'=' -f2 || echo "dev")
           echo "TEST_STAND_NAME=$STAND" >> $GITHUB_ENV
           echo "🧠 Test stand from .env: $STAND" >> $GITHUB_STEP_SUMMARY
 
@@ -106,6 +106,7 @@ jobs:
         if: github.event_name == 'pull_request'
         id: changed
         run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
           CHANGED=$(git diff --name-only --diff-filter=ACMR origin/${{ github.base_ref }}...HEAD \
             | grep '^tests/test_backend/.*\.py$' \
             | grep -v '__pycache__' \
