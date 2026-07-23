@@ -37,6 +37,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # 🧠 Определяем стенд из .env (push / pull_request)
       - name: Determine test stand from .env
@@ -106,7 +108,6 @@ jobs:
         if: github.event_name == 'pull_request'
         id: changed
         run: |
-          git fetch origin ${{ github.base_ref }} --depth=1
           CHANGED=$(git diff --name-only --diff-filter=ACMR origin/${{ github.base_ref }}...HEAD \
             | grep '^tests/test_backend/.*\.py$' \
             | grep -v '__pycache__' \
