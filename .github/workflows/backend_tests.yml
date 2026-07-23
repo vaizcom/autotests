@@ -38,16 +38,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 🧠 Определяем стенд по ветке
-      - name: Determine test stand from branch
+      # 🧠 Определяем стенд из .env (push / pull_request)
+      - name: Determine test stand from .env
         if: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
-          BRANCH="${GITHUB_REF##*/}"
-          if [[ "$BRANCH" == "main" || "$BRANCH" == "kuber_dev" ]]; then
-            echo "TEST_STAND_NAME=kuber_dev" >> $GITHUB_ENV
-          else
-            echo "TEST_STAND_NAME=dev" >> $GITHUB_ENV
-          fi
+          STAND=$(grep -oP '^TEST_STAND_NAME=\K.*' .env || echo "dev")
+          echo "TEST_STAND_NAME=$STAND" >> $GITHUB_ENV
+          echo "🧠 Test stand from .env: $STAND" >> $GITHUB_STEP_SUMMARY
 
       # 🧠 Получаем стенд из input (если ручной запуск)
       - name: Set test stand from input
@@ -104,10 +101,34 @@ jobs:
         continue-on-error: false
         run: curl -m 10 $API_URL/healthCheck
 
+      # 🔍 Для PR — запускаем только изменённые тестовые файлы
+      - name: Detect changed test files
+        if: github.event_name == 'pull_request'
+        id: changed
+        run: |
+          CHANGED=$(git diff --name-only --diff-filter=ACMR origin/${{ github.base_ref }}...HEAD \
+            | grep '^tests/test_backend/.*\.py$' \
+            | grep -v '__pycache__' \
+            | grep -v '__init__' \
+            | tr '\n' ' ')
+          echo "files=$CHANGED" >> $GITHUB_OUTPUT
+          if [ -n "$CHANGED" ]; then
+            echo "🔍 Changed test files: $CHANGED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🔍 No test files changed — running all backend tests" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: ✅ Run tests with Allure
         continue-on-error: true
-        run: pytest . --alluredir=allure-results -m "$TEST_SCOPE" --reruns 1 --reruns-delay 10 --maxfail=25
+        run: |
+          CHANGED="${{ steps.changed.outputs.files }}"
+          if [ -n "$CHANGED" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Running changed files only: $CHANGED"
+            pytest $CHANGED --alluredir=allure-results -m "$TEST_SCOPE" --reruns 1 --reruns-delay 10 --maxfail=50
+          else
+            echo "Running all backend tests"
+            pytest . --alluredir=allure-results -m "$TEST_SCOPE" --reruns 1 --reruns-delay 10 --maxfail=50
+          fi
 
       - name: Check allure-results content
         run: ls -lah allure-results
