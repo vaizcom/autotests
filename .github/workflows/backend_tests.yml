@@ -142,7 +142,7 @@ jobs:
           path: gh-pages
 
       - name: 📊 Generate Allure Report and Deploy
-        uses: simple-elf/allure-report-action@v1.13
+        uses: simple-elf/allure-report-action@v1.14
         if: ${{ !cancelled() }}
         with:
           allure_results: allure-results
