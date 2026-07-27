@@ -4,11 +4,13 @@ from enum import Enum
 class CustomFieldType(Enum):
     TEXT = 'Text'
     NUMBER = 'Number'
-    CHECKBOX = 'Boolean'
+    CHECKBOX = 'Checkbox'
     DATE = 'Date'
     MEMBER = 'Member'
     TASK_RELATIONS = 'TaskRelations'
     SELECT = 'Select'
+    URL = 'Url'
+    ESTIMATION = 'Estimation'
 
     @classmethod
     def list(cls):
