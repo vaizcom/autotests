@@ -141,21 +141,46 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      - name: 📊 Generate Allure Report and Deploy
-        uses: simple-elf/allure-report-action@v1.14
+      - name: 📊 Install Allure CLI
         if: ${{ !cancelled() }}
-        with:
-          allure_results: allure-results
-          allure_report: allure-report
-          allure_history: allure-history
-          gh_pages: gh-pages/backend/${{ env.TEST_STAND_NAME }}
-          keep_reports: 20
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          wget -q https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.25.0/allure-commandline-2.25.0.zip
+          unzip -q allure-commandline-2.25.0.zip -d /opt
+          echo "/opt/allure-2.25.0/bin" >> $GITHUB_PATH
 
-      - name: Fix Allure redirect for subdirectory
+      - name: 📊 Generate Allure Report
         if: ${{ !cancelled() }}
-        run: sudo sed -i "s|URL=https://vaizcom.github.io/autotests/|URL=https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/|" allure-history/index.html
+        run: |
+          # Копируем историю из gh-pages
+          GH_HISTORY="gh-pages/backend/${{ env.TEST_STAND_NAME }}/last-history"
+          if [ -d "$GH_HISTORY" ]; then
+            cp -r "$GH_HISTORY" allure-results/history
+          fi
+          # Генерируем отчёт
+          allure generate allure-results -o allure-report --clean
+
+      - name: 📊 Manage Allure History
+        if: ${{ !cancelled() }}
+        run: |
+          REPORT_NUM=${{ github.run_number }}
+          mkdir -p allure-history
+          # Копируем существующие отчёты из gh-pages
+          GH_DIR="gh-pages/backend/${{ env.TEST_STAND_NAME }}"
+          if [ -d "$GH_DIR" ]; then
+            cp -r "$GH_DIR"/* allure-history/ 2>/dev/null || true
+          fi
+          # Сохраняем новый отчёт
+          cp -r allure-report allure-history/${REPORT_NUM}
+          # Сохраняем историю для следующего запуска
+          cp -r allure-report/history allure-history/last-history 2>/dev/null || true
+          # Удаляем старые отчёты (оставляем 20)
+          cd allure-history
+          ls -d [0-9]* 2>/dev/null | sort -n | head -n -20 | xargs rm -rf 2>/dev/null || true
+          cd ..
+          # Генерируем index.html с редиректом
+          cat > allure-history/index.html << EOF
+          <html><head><meta http-equiv="refresh" content="0; URL=https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/${REPORT_NUM}/"></head></html>
+          EOF
 
       - name: Prepare deploy directory
         if: ${{ !cancelled() }}
@@ -196,7 +221,8 @@ jobs:
       - name: Add Allure link to summary
         if: ${{ !cancelled() }}
         run: |
-          REPORT_NUM=$(ls -d allure-history/[0-9]* 2>/dev/null | sort -n | tail -1 | xargs basename)
+          REPORT_NUM=$(ls -d allure-history/[0-9]* 2>/dev/null | sort -n | tail -1)
+          REPORT_NUM=$(basename "$REPORT_NUM")
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📊 **Allure Report**: [Открыть отчёт](https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/${REPORT_NUM}/)" >> $GITHUB_STEP_SUMMARY
 
