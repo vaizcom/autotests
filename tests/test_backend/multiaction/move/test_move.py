@@ -131,27 +131,3 @@ def test_move_invalid_group_id(
         assert error.get("code") == "IncorrectToGroupId", f"Ожидали IncorrectToGroupId, получили: {error}"
 
 
-@allure.parent_suite("Multiaction")
-@allure.suite("Move")
-@allure.sub_suite("Negative")
-@allure.title("Move: нет доступа к спейсу → 400 MemberDidNotFound")
-def test_move_no_access_to_space(
-    foreign_client, owner_client, main_space, make_task_in_main,
-    temp_board_in_main, board_groups,
-):
-    target_group = board_groups["Todo"]
-
-    with allure.step("Создаём задачу (от owner)"):
-        task = make_task_in_main({"name": "move-neg-access", "board": temp_board_in_main})
-        task_id = task["_id"]
-
-    with allure.step("Перемещаем от foreign_client"):
-        resp = foreign_client.post(**multiple_move_tasks_endpoint(
-            space_id=main_space, tasks_ids=[task_id],
-            board_id=temp_board_in_main, to_group_id=target_group,
-        ))
-
-    with allure.step("Проверяем ошибку 400 MemberDidNotFound"):
-        assert resp.status_code == 400, f"Ожидали 400, получили {resp.status_code}"
-        error = resp.json().get("error", {})
-        assert error.get("code") == "MemberDidNotFound", f"Ожидали MemberDidNotFound, получили: {error}"

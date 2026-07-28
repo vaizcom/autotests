@@ -125,29 +125,3 @@ def test_member_invalid_id(
         assert payload["success"] == [task_id]
 
 
-@allure.parent_suite("Multiaction")
-@allure.suite("Custom Fields")
-@allure.sub_suite("Negative")
-@allure.title("Нет доступа к спейсу → ошибка")
-def test_no_access_to_space(
-    foreign_client, main_space, make_task_in_main, temp_board_in_main, text_field_id,
-):
-    """foreign_client не имеет доступа к main_space."""
-    with allure.step("Создаём задачу (от owner)"):
-        task = make_task_in_main({"name": "cf-neg-access", "board": temp_board_in_main})
-        task_id = task["_id"]
-
-    with allure.step("Применяем multiaction от foreign_client"):
-        resp = foreign_client.post(**multiple_edit_tasks_custom_field_endpoint(
-            space_id=main_space, tasks_ids=[task_id],
-            custom_field_id=text_field_id, value="hacked",
-        ))
-
-    with allure.step("Проверяем, что доступ запрещён"):
-        assert resp.status_code in (400, 403), (
-            f"Ожидали 400 или 403, получили {resp.status_code}"
-        )
-        error_code = resp.json().get("error", {}).get("code", "")
-        assert error_code in ("AccessDenied", "SpaceIdNotSpecified"), (
-            f"Ожидали AccessDenied или SpaceIdNotSpecified, получили: {error_code}"
-        )

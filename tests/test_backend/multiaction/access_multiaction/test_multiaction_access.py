@@ -94,3 +94,25 @@ def test_cross_board_tasks(owner_client, main_space, make_task_in_main, temp_boa
             f"Ожидали обе задачи в success, получили: {payload['success']}"
         )
         assert payload["failed"] == [], f"failed не пуст: {payload['failed']}"
+
+
+@allure.parent_suite("Multiaction")
+@allure.suite("Access")
+@allure.title("Пользователь без доступа к спейсу → 400")
+def test_no_access_to_space(foreign_client, main_space, make_task_in_main):
+    """foreign_client не является мембером спейса — API возвращает 400, а не 200 с failed."""
+    with allure.step("Создаём задачу от owner"):
+        task = make_task_in_main({"name": "access-foreign", "completed": False})
+        task_id = task["_id"]
+
+    with allure.step("Отправляем MultipleEditTasks от foreign_client"):
+        resp = foreign_client.post(**multiple_edit_tasks_endpoint(
+            space_id=main_space,
+            tasks_ids=[task_id],
+            completed=True,
+        ))
+
+    with allure.step("Проверяем ошибку 400"):
+        assert resp.status_code == 400, f"Ожидали 400, получили {resp.status_code}"
+        error = resp.json().get("error", {})
+        assert error.get("code") == "NotFound", f"Ожидали NotFound, получили: {error}"
