@@ -125,14 +125,16 @@ def test_move_invalid_group_id(
             board_id=temp_board_in_main, to_group_id=fake_group_id,
         ))
 
-    with allure.step("Проверяем ошибку"):
-        assert resp.status_code in (400, 404), f"Ожидали 400/404, получили {resp.status_code}"
+    with allure.step("Проверяем ошибку 400 IncorrectToGroupId"):
+        assert resp.status_code == 400, f"Ожидали 400, получили {resp.status_code}"
+        error = resp.json().get("error", {})
+        assert error.get("code") == "IncorrectToGroupId", f"Ожидали IncorrectToGroupId, получили: {error}"
 
 
 @allure.parent_suite("Multiaction")
 @allure.suite("Move")
 @allure.sub_suite("Negative")
-@allure.title("Move: нет доступа к спейсу → ошибка")
+@allure.title("Move: нет доступа к спейсу → 400 MemberDidNotFound")
 def test_move_no_access_to_space(
     foreign_client, owner_client, main_space, make_task_in_main,
     temp_board_in_main, board_groups,
@@ -149,5 +151,7 @@ def test_move_no_access_to_space(
             board_id=temp_board_in_main, to_group_id=target_group,
         ))
 
-    with allure.step("Проверяем, что доступ запрещён"):
-        assert resp.status_code in (400, 403), f"Ожидали 400/403, получили {resp.status_code}"
+    with allure.step("Проверяем ошибку 400 MemberDidNotFound"):
+        assert resp.status_code == 400, f"Ожидали 400, получили {resp.status_code}"
+        error = resp.json().get("error", {})
+        assert error.get("code") == "MemberDidNotFound", f"Ожидали MemberDidNotFound, получили: {error}"
