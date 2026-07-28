@@ -1,0 +1,348 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Tue Jul 28 10:09:10 UTC 2026","Tue Jul 28 10:09:12 UTC 2026","2180","Multiaction","Types","Positive","","","Remove type mixed — тип есть у части задач","
+    Часть задач с типом, часть без.
+    Remove type: с типом → success, без типа → skipped.
+    "
+"passed","Tue Jul 28 10:08:35 UTC 2026","Tue Jul 28 10:08:38 UTC 2026","2454","Multiaction","Priority","Positive","","","Mixed state: часть задач уже с нужным приоритетом","
+    Часть задач уже с MEDIUM, часть с GENERAL.
+    Применяем MEDIUM: изменённые в success, совпадающие в skipped.
+    "
+"passed","Tue Jul 28 09:59:35 UTC 2026","Tue Jul 28 09:59:35 UTC 2026","191","Board Service","Reorder Board Type","Negative","","","Несуществующий boardTypeId → IncorrectMoveFromIndex","Несуществующий boardTypeId → 400 IncorrectMoveFromIndex."
+"passed","Tue Jul 28 10:09:30 UTC 2026","Tue Jul 28 10:09:31 UTC 2026","613","Task Service","Edit Task","Assignees edit Task","","","Edit Task Assignees: Назначение несуществующего member_id","
+    Несуществующий member_id → 400 ""One or more members are not part of this workspace"".
+    EditTask валидирует принадлежность пользователя к спейсу (сделано для МСП).
+    MultipleEditTasks этого не делает — ожидаемо, т.к. валидация тяжёлая для массового эндпоинта.
+    "
+"passed","Tue Jul 28 09:59:29 UTC 2026","Tue Jul 28 09:59:30 UTC 2026","218","Board Service","Reorder Board Custom Field","Negative","","","Несуществующий fieldId → IncorrectMoveFromIndex","Несуществующий fieldId → 400 IncorrectMoveFromIndex."
+"failed","Tue Jul 28 10:05:47 UTC 2026","Tue Jul 28 10:05:47 UTC 2026","0","Multiaction","Custom Fields","Member","","","Member add: мембер уже есть → skipped",""
+"passed","Tue Jul 28 10:08:44 UTC 2026","Tue Jul 28 10:08:46 UTC 2026","2595","Multiaction","Types","Positive","","","Add type на задачи без types","
+    Задачи без types, добавляем один тип.
+    Все задачи в success, GetTask подтверждает.
+    "
+"passed","Tue Jul 28 10:00:49 UTC 2026","Tue Jul 28 10:00:52 UTC 2026","2904","Multiaction","Archive","Positive","","","Archive: задача уже в архиве → skipped",""
+"passed","Tue Jul 28 09:59:19 UTC 2026","Tue Jul 28 09:59:20 UTC 2026","972","Board Service","Access board","ReorderBoardCustomField","","","ReorderBoardCustomField: manager_client → 200","Пользователи с правами управления бордой могут менять порядок custom fields."
+"passed","Tue Jul 28 10:00:27 UTC 2026","Tue Jul 28 10:00:28 UTC 2026","894","Multiaction","Access","","","","Проверка прав на MultipleEditTasks клиентом: owner_client","
+    Проверка прав доступа на примере completed, но распространяется
+    на все действия MultipleEditTasks (priority, types, assignees, due dates).
+    Owner, Manager, Member — задача в success.
+    Guest, пользователь без доступа к борде — HTTP 200, но задача в failed
+    (API не возвращает 403, а распределяет задачи по success/failed).
+    "
+"passed","Tue Jul 28 10:01:33 UTC 2026","Tue Jul 28 10:01:36 UTC 2026","2167","Multiaction","Assignees","Positive","","","Mixed state: add assignee — часть задач уже с ним","
+    Часть задач уже с assignee, часть без.
+    Add assignee: изменённые в success, совпадающие в skipped.
+    "
+"failed","Tue Jul 28 10:07:29 UTC 2026","Tue Jul 28 10:07:29 UTC 2026","0","Multiaction","Custom Fields","Text / Number","","","Значение уже совпадает → задача в skipped",""
+"passed","Tue Jul 28 09:59:35 UTC 2026","Tue Jul 28 09:59:35 UTC 2026","563","Board Service","Reorder Board Type","Negative","","","Неверный fromIndex (тип на позиции 0, передаём 2) → IncorrectMoveFromIndex","typeId на позиции 0, передаём fromIndex=2 → 400."
+"failed","Tue Jul 28 10:02:28 UTC 2026","Tue Jul 28 10:02:28 UTC 2026","0","Multiaction","Custom Fields","Base logic","","","Задачи с разных бордов: поле есть на одной, нет на другой",""
+"passed","Tue Jul 28 10:09:20 UTC 2026","Tue Jul 28 10:09:21 UTC 2026","867","Multiaction","Types","Negative","","","Add несуществующий typeId — принимается без валидации","
+    Передаём несуществующий typeId с action=add.
+    MultipleEditTasks не валидирует существование typeId — ожидаемое поведение,
+    т.к. валидация тяжёлая операция для массового эндпоинта.
+    На фронте несуществующий тип не отображается.
+    "
+"passed","Tue Jul 28 09:59:34 UTC 2026","Tue Jul 28 09:59:35 UTC 2026","349","Board Service","Reorder Board Type","Positive","","","Перемещение типа на ту же позицию — порядок не меняется","Одинаковые индексы → 200, порядок не изменился."
+"failed","Tue Jul 28 10:06:48 UTC 2026","Tue Jul 28 10:06:48 UTC 2026","0","Multiaction","Custom Fields","Select","","","Select remove: элемент есть → убирается",""
+"passed","Tue Jul 28 10:08:52 UTC 2026","Tue Jul 28 10:08:55 UTC 2026","2957","Multiaction","Types","Positive","","","Add type — тип уже есть у всех → все в skipped","
+    Все задачи уже с нужным типом.
+    Add type → все в skipped.
+    "
+"failed","Tue Jul 28 10:03:54 UTC 2026","Tue Jul 28 10:03:54 UTC 2026","0","Multiaction","Custom Fields","Date","","","Date: установить диапазон дат",""
+"passed","Tue Jul 28 10:01:14 UTC 2026","Tue Jul 28 10:01:16 UTC 2026","2178","Multiaction","Assignees","Positive","","","Add assignee на задачи без assignees","
+    Задачи без assignees, добавляем одного.
+    Все задачи в success, GetTask подтверждает.
+    "
+"passed","Tue Jul 28 10:09:37 UTC 2026","Tue Jul 28 10:09:38 UTC 2026","767","Task Service","Edit Task","Types edit Task","","","Edit Task Types: Проверка ошибки при передаче повторяющихся типов (APP-4046-Done)","
+    Проверяет, что при попытке редактирования задачи с повторяющимися типами
+    возвращается ошибка и корректное сообщение.
+    "
+"failed","Tue Jul 28 10:07:40 UTC 2026","Tue Jul 28 10:07:40 UTC 2026","0","Multiaction","Custom Fields","Url","","","Url: установить ссылку",""
+"failed","Tue Jul 28 10:02:49 UTC 2026","Tue Jul 28 10:02:49 UTC 2026","0","Multiaction","Custom Fields","Checkbox","","","Checkbox: значение совпадает → skipped",""
+"passed","Tue Jul 28 09:59:27 UTC 2026","Tue Jul 28 09:59:28 UTC 2026","950","Board Service","Reorder Board Custom Field","Positive","","","Перемещение поля в конец списка","Перемещаем первое поле на последнюю позицию."
+"failed","Tue Jul 28 10:05:36 UTC 2026","Tue Jul 28 10:05:36 UTC 2026","0","Multiaction","Custom Fields","Member","","","Member add: добавить второго мембера — первый сохраняется",""
+"passed","Tue Jul 28 10:07:55 UTC 2026","Tue Jul 28 10:07:57 UTC 2026","1693","Multiaction","Dates","Positive","","","Установить только dueStart — dueEnd не трогается","
+    Задачи с dueEnd, устанавливаем только dueStart.
+    dueEnd не должен измениться.
+    "
+"passed","Tue Jul 28 10:09:24 UTC 2026","Tue Jul 28 10:09:25 UTC 2026","1077","Task Service","Edit Task","Assignees edit Task","","","Edit Task Assignees: Проверка удаления всех исполнителей в задаче передав пустой массив","
+    Проверяет успешное удаление всех исполнителей из задачи передав пустой массив ""assignees"": [].
+    "
+"failed","Tue Jul 28 10:04:55 UTC 2026","Tue Jul 28 10:04:55 UTC 2026","0","Multiaction","Custom Fields","Linked Tasks","","","Linked Tasks add: добавить вторую связь — первая сохраняется",""
+"passed","Tue Jul 28 10:09:36 UTC 2026","Tue Jul 28 10:09:36 UTC 2026","732","Task Service","Edit Task","Types edit Task","","","Edit Task Types: Проверка очистки поля 'types' пустым списком","
+    Проверяет успешную очистку поля 'types' задачи путем передачи пустого списка.
+    "
+"passed","Tue Jul 28 10:09:22 UTC 2026","Tue Jul 28 10:09:23 UTC 2026","896","Task Service","Edit Task","Assignees edit Task","","","Edit Task Assignees: Проверка редактирования только поля 'assignees'","
+    Проверяет успешное редактирование только поля 'assignees' задачи.
+    "
+"passed","Tue Jul 28 10:00:34 UTC 2026","Tue Jul 28 10:00:35 UTC 2026","749","Multiaction","Access","","","","Проверка прав на MultipleEditTasks клиентом: guest_client","
+    Проверка прав доступа на примере completed, но распространяется
+    на все действия MultipleEditTasks (priority, types, assignees, due dates).
+    Owner, Manager, Member — задача в success.
+    Guest, пользователь без доступа к борде — HTTP 200, но задача в failed
+    (API не возвращает 403, а распределяет задачи по success/failed).
+    "
+"passed","Tue Jul 28 09:59:22 UTC 2026","Tue Jul 28 09:59:23 UTC 2026","905","Board Service","Access board","ReorderBoardCustomField","","","ReorderBoardCustomField: client_with_access_only_in_project → 403 AccessDenied","Пользователи без прав управления бордой не могут менять порядок custom fields."
+"passed","Tue Jul 28 10:08:48 UTC 2026","Tue Jul 28 10:08:50 UTC 2026","1741","Multiaction","Types","Positive","","","Remove type","
+    Задачи с типом, убираем его.
+    Все в success, GetTask подтверждает.
+    "
+"passed","Tue Jul 28 10:09:26 UTC 2026","Tue Jul 28 10:09:27 UTC 2026","1100","Task Service","Edit Task","Assignees edit Task","","","Edit Task Assignees: Проверка изменения списка исполнителей задачи","
+    Проверяет успешное изменение списка исполнителей задачи с одного набора на другой.
+    "
+"passed","Tue Jul 28 10:01:22 UTC 2026","Tue Jul 28 10:01:24 UTC 2026","1883","Multiaction","Assignees","Positive","","","Два последовательных add — оба assignee на задаче","
+    Задачи без assignees. Два последовательных вызова add с разными member_id.
+    Оба assignee на задаче.
+    "
+"passed","Tue Jul 28 09:59:25 UTC 2026","Tue Jul 28 09:59:26 UTC 2026","161","Board Service","Access board","ReorderBoardType","","","ReorderBoardType: client_with_access_only_in_project → 403 AccessDenied","Пользователи без прав управления бордой не могут менять порядок типов."
+"passed","Tue Jul 28 10:09:07 UTC 2026","Tue Jul 28 10:09:09 UTC 2026","2402","Multiaction","Types","Positive","","","Remove один из двух типов — второй остаётся","
+    Задача с двумя типами, убираем один.
+    Задача в success, GetTask подтверждает что второй тип остался.
+    "
+"passed","Tue Jul 28 09:59:26 UTC 2026","Tue Jul 28 09:59:27 UTC 2026","1025","Board Service","Reorder Board Custom Field","Positive","","","Успешная перестановка поля с позиции 1 на позицию 0","Перемещаем второе поле на первую позицию, проверяем что порядок изменился."
+"passed","Tue Jul 28 10:01:30 UTC 2026","Tue Jul 28 10:01:32 UTC 2026","1671","Multiaction","Assignees","Positive","","","Remove одного из нескольких assignees — второй остаётся","
+    Задачи с двумя assignees, убираем одного.
+    Второй остаётся.
+    "
+"passed","Tue Jul 28 10:00:07 UTC 2026","Tue Jul 28 10:00:27 UTC 2026","20435","History Service","Task History","","","","Task Types events via MultipleEditTasks: TASK_TYPE_ADDED (mixed) -> TASK_TYPE_REMOVED","
+    Проверяем, что MultipleEditTasks генерирует history-события только для задач,
+    которые реально изменились, и не генерирует для пропущенных.
+
+    Сценарий:
+    1. Создаём задачу_А (без типа) и задачу_Б (уже с типом).
+    2. Добавляем тип на обе → задача_А изменилась, задача_Б пропущена (тип уже есть).
+       - У задачи_А должно появиться событие TASK_TYPE_ADDED.
+       - У задачи_Б событие НЕ должно появиться.
+    3. Удаляем тип с обеих (теперь обе с типом) → обе изменились.
+       - У обеих должно появиться событие TASK_TYPE_REMOVED.
+    "
+"passed","Tue Jul 28 09:59:33 UTC 2026","Tue Jul 28 09:59:34 UTC 2026","1027","Board Service","Reorder Board Type","Positive","","","Перемещение типа в конец списка","Перемещаем первый тип на последнюю позицию."
+"failed","Tue Jul 28 10:06:38 UTC 2026","Tue Jul 28 10:06:38 UTC 2026","0","Multiaction","Custom Fields","Select","","","Select add: элемент уже есть → skipped",""
+"passed","Tue Jul 28 10:01:18 UTC 2026","Tue Jul 28 10:01:20 UTC 2026","1829","Multiaction","Assignees","Positive","","","Add assignee не заменяет существующего","
+    Задачи уже с assignee (owner), добавляем другого (member).
+    Оба assignee на задаче.
+    "
+"passed","Tue Jul 28 10:00:36 UTC 2026","Tue Jul 28 10:00:36 UTC 2026","650","Multiaction","Access","","","","Проверка прав на MultipleEditTasks клиентом: client_with_access_only_in_project","
+    Проверка прав доступа на примере completed, но распространяется
+    на все действия MultipleEditTasks (priority, types, assignees, due dates).
+    Owner, Manager, Member — задача в success.
+    Guest, пользователь без доступа к борде — HTTP 200, но задача в failed
+    (API не возвращает 403, а распределяет задачи по success/failed).
+    "
+"passed","Tue Jul 28 09:59:30 UTC 2026","Tue Jul 28 09:59:30 UTC 2026","353","Board Service","Reorder Board Custom Field","Negative","","","Несуществующий boardId → AccessDenied","Несуществующий boardId → 403 AccessDenied."
+"passed","Tue Jul 28 10:09:41 UTC 2026","Tue Jul 28 10:09:47 UTC 2026","6196","Task Service","Get Tasks","Filtered by criteria","","","GetTasks board: валидная доска — успешный ответ и задачи этой доски",""
+"failed","Tue Jul 28 10:04:25 UTC 2026","Tue Jul 28 10:04:25 UTC 2026","0","Multiaction","Custom Fields","Estimation","","","Estimation: значение совпадает → skipped",""
+"passed","Tue Jul 28 10:01:08 UTC 2026","Tue Jul 28 10:01:10 UTC 2026","2183","Multiaction","Archive","Positive","","","Unarchive: mixed — часть в архиве, часть нет",""
+"passed","Tue Jul 28 09:59:22 UTC 2026","Tue Jul 28 09:59:22 UTC 2026","841","Board Service","Access board","ReorderBoardCustomField","","","ReorderBoardCustomField: client_with_access_only_in_space → 403 AccessDenied","Пользователи без прав управления бордой не могут менять порядок custom fields."
+"passed","Tue Jul 28 09:59:37 UTC 2026","Tue Jul 28 09:59:38 UTC 2026","974","Board Service","Reorder Board Type","Negative","","","toIndex=999 — элемент перемещается в конец (arrayMove)","
+    arrayMove интерпретирует toIndex за пределами массива как последний элемент.
+    Фиксируем текущее поведение API.
+    "
+"passed","Tue Jul 28 09:59:36 UTC 2026","Tue Jul 28 09:59:36 UTC 2026","354","Board Service","Reorder Board Type","Negative","","","Несуществующий boardId → AccessDenied","Несуществующий boardId → 403 AccessDenied."
+"failed","Tue Jul 28 10:07:19 UTC 2026","Tue Jul 28 10:07:19 UTC 2026","0","Multiaction","Custom Fields","Text / Number","","","Number: обновить значение у нескольких задач",""
+"failed","Tue Jul 28 10:03:12 UTC 2026","Tue Jul 28 10:03:12 UTC 2026","0","Multiaction","Custom Fields","Negative","","","Операция add/remove для поля Text → failed",""
+"passed","Tue Jul 28 09:59:31 UTC 2026","Tue Jul 28 09:59:32 UTC 2026","927","Board Service","Reorder Board Custom Field","Negative","","","toIndex=999 — элемент перемещается в конец (arrayMove)","
+    arrayMove интерпретирует toIndex за пределами массива как последний элемент.
+    Фиксируем текущее поведение API.
+    "
+"passed","Tue Jul 28 09:59:35 UTC 2026","Tue Jul 28 09:59:36 UTC 2026","345","Board Service","Reorder Board Type","Negative","","","Отрицательный fromIndex=-1 → IncorrectMoveFromIndex","fromIndex=-1 → 400 IncorrectMoveFromIndex."
+"passed","Tue Jul 28 09:59:20 UTC 2026","Tue Jul 28 09:59:21 UTC 2026","909","Board Service","Access board","ReorderBoardCustomField","","","ReorderBoardCustomField: member_client → 403 AccessDenied","Пользователи без прав управления бордой не могут менять порядок custom fields."
+"passed","Tue Jul 28 10:08:11 UTC 2026","Tue Jul 28 10:08:12 UTC 2026","1089","Multiaction","Dates","Positive","","","dueStart совпадает, dueEnd отличается → success","
+    Задача с dueStart=A и dueEnd=A.
+    Применяем dueStart=A + dueEnd=B.
+    dueEnd отличается → задача в success (достаточно одного отличия).
+    "
+"failed","Tue Jul 28 10:07:09 UTC 2026","Tue Jul 28 10:07:09 UTC 2026","0","Multiaction","Custom Fields","Text / Number","","","Text: обновить значение у одной задачи",""
+"passed","Tue Jul 28 09:59:26 UTC 2026","Tue Jul 28 09:59:26 UTC 2026","149","Board Service","Access board","ReorderBoardType","","","ReorderBoardType: foreign_client → 403 AccessDenied","Пользователи без прав управления бордой не могут менять порядок типов."
+"passed","Tue Jul 28 09:59:28 UTC 2026","Tue Jul 28 09:59:28 UTC 2026","350","Board Service","Reorder Board Custom Field","Positive","","","Перемещение поля на ту же позицию — порядок не меняется","Одинаковые индексы → 200, порядок не изменился."
+"failed","Tue Jul 28 10:02:07 UTC 2026","Tue Jul 28 10:02:07 UTC 2026","0","Multiaction","Custom Fields","Base logic","","","Поле не определено на борде → все в skipped","Общая логика для всех типов (Text, Number, Checkbox, Date, Select, Member, TaskRelations, Url, Estimation).
+    Поле определено на temp_board, задача на main_board — тип поля не влияет."
+"failed","Tue Jul 28 10:03:02 UTC 2026","Tue Jul 28 10:03:02 UTC 2026","213","Multiaction","Custom Fields","Negative","","","customFieldId не существует ни на одном борде → все в skipped",""
+"passed","Tue Jul 28 10:00:37 UTC 2026","Tue Jul 28 10:00:40 UTC 2026","2363","Multiaction","Access","","","","Задачи на разных бордах — все в success","
+    Задачи созданы на разных бордах в одном space.
+    API обрабатывает их все, boardId не ограничивает multiaction.
+    "
+"passed","Tue Jul 28 10:08:40 UTC 2026","Tue Jul 28 10:08:41 UTC 2026","724","Multiaction","Priority","Negative","","","Невалидный priority (за пределами допустимого диапазона)","
+    Передаём невалидный priority (за пределами LOW-HIGH).
+    Ожидаем 400 или задачи в failed.
+    "
+"passed","Tue Jul 28 10:00:53 UTC 2026","Tue Jul 28 10:00:55 UTC 2026","1731","Multiaction","Archive","Positive","","","Archive: mixed — часть уже в архиве, часть нет",""
+"passed","Tue Jul 28 09:59:18 UTC 2026","Tue Jul 28 09:59:19 UTC 2026","381","Board Service","Access board","ReorderBoardCustomField","","","ReorderBoardCustomField: owner_client → 200","Пользователи с правами управления бордой могут менять порядок custom fields."
+"passed","Tue Jul 28 09:59:30 UTC 2026","Tue Jul 28 09:59:31 UTC 2026","934","Board Service","Reorder Board Custom Field","Negative","","","toIndex=-1 — элемент перемещается в конец (arrayMove)","
+    arrayMove интерпретирует toIndex за пределами массива как последний элемент.
+    Фиксируем текущее поведение API.
+    "
+"passed","Tue Jul 28 10:01:42 UTC 2026","Tue Jul 28 10:01:43 UTC 2026","917","Multiaction","Assignees","Negative","","","Невалидный taskId + add assignee","
+    Передаём валидный и несуществующий taskId с assignee add.
+    Валидный — в success, невалидный — в failed.
+    "
+"failed","Tue Jul 28 10:02:17 UTC 2026","Tue Jul 28 10:02:17 UTC 2026","0","Multiaction","Custom Fields","Base logic","","","Mixed: часть задач уже с тем же значением → partial skipped/success",""
+"failed","Tue Jul 28 10:05:05 UTC 2026","Tue Jul 28 10:05:05 UTC 2026","0","Multiaction","Custom Fields","Linked Tasks","","","Linked Tasks add: связь уже есть → skipped",""
+"passed","Tue Jul 28 10:09:32 UTC 2026","Tue Jul 28 10:09:33 UTC 2026","1343","Task Service","Edit Task","Assignees edit Task","","","Edit Task Assignees: Назначение пользователя без доступа к борде (ожидаемо 200)","
+    Пользователь есть в спейсе, но нет доступа к борде → API разрешает (200).
+    Это ожидаемое поведение: API проверяет только принадлежность к спейсу,
+    валидация доступа к борде была бы слишком тяжёлой для внутреннего API.
+    UI ограничивает выбор — показывает только пользователей с доступом к борде.
+    "
+"passed","Tue Jul 28 09:59:25 UTC 2026","Tue Jul 28 09:59:25 UTC 2026","182","Board Service","Access board","ReorderBoardType","","","ReorderBoardType: guest_client → 403 AccessDenied","Пользователи без прав управления бордой не могут менять порядок типов."
+"passed","Tue Jul 28 10:00:32 UTC 2026","Tue Jul 28 10:00:33 UTC 2026","998","Multiaction","Access","","","","Проверка прав на MultipleEditTasks клиентом: member_client","
+    Проверка прав доступа на примере completed, но распространяется
+    на все действия MultipleEditTasks (priority, types, assignees, due dates).
+    Owner, Manager, Member — задача в success.
+    Guest, пользователь без доступа к борде — HTTP 200, но задача в failed
+    (API не возвращает 403, а распределяет задачи по success/failed).
+    "
+"passed","Tue Jul 28 10:01:38 UTC 2026","Tue Jul 28 10:01:39 UTC 2026","914","Multiaction","Assignees","Negative","","","Add member_id не из спейса — принимается без валидации","
+    Передаём несуществующий member_id (не в спейсе) с action=add.
+    MultipleEditTasks не валидирует принадлежность к спейсу — ожидаемое поведение,
+    т.к. валидация на каждый member тяжёлая операция для массового эндпоинта.
+    EditTask валидирует (400) — это исключение, сделано для МСП.
+    Фронт отображает такого пользователя как ""missing member"".
+    "
+"passed","Tue Jul 28 10:01:06 UTC 2026","Tue Jul 28 10:01:07 UTC 2026","1271","Multiaction","Archive","Positive","","","Unarchive: задача не в архиве → skipped",""
+"passed","Tue Jul 28 10:08:19 UTC 2026","Tue Jul 28 10:08:20 UTC 2026","1531","Multiaction","Priority","Positive","","","Установить priority на нескольких задачах","
+    Задачи с Default приоритетом (без приоритета GENERAL), применяем MEDIUM.
+    Все задачи в success, GetTask подтверждает.
+    "
+"passed","Tue Jul 28 10:08:26 UTC 2026","Tue Jul 28 10:08:28 UTC 2026","1698","Multiaction","Priority","Positive","","","Сбросить priority (GENERAL)","
+    Задачи с MEDIUM, сбрасываем в GENERAL (дефолт).
+    Все в success.
+    "
+"failed","Tue Jul 28 10:02:38 UTC 2026","Tue Jul 28 10:02:38 UTC 2026","0","Multiaction","Custom Fields","Checkbox","","","Checkbox: установить true",""
+"failed","Tue Jul 28 10:03:33 UTC 2026","Tue Jul 28 10:03:33 UTC 2026","0","Multiaction","Custom Fields","Negative","","","Member add: невалидный member → все в failed",""
+"passed","Tue Jul 28 10:07:50 UTC 2026","Tue Jul 28 10:07:52 UTC 2026","1967","Multiaction","Dates","Positive","","","Установить dueEnd на задачах без дат","
+    Задачи без дат, устанавливаем dueEnd.
+    Все задачи в success, GetTask подтверждает.
+    "
+"passed","Tue Jul 28 10:08:15 UTC 2026","Tue Jul 28 10:08:16 UTC 2026","1006","Multiaction","Dates","Negative","","","dueStart позже dueEnd — валидации нет (internal API)","
+    Передаём dueStart позже dueEnd.
+    В EditTask это 400 InvalidForm, но multiaction — internal API,
+    валидация порядка дат не применяется (будет в public API).
+    Ожидаем 200 + success.
+    "
+"passed","Tue Jul 28 09:59:36 UTC 2026","Tue Jul 28 09:59:37 UTC 2026","901","Board Service","Reorder Board Type","Negative","","","toIndex=-1 — элемент перемещается в конец (arrayMove)","
+    arrayMove интерпретирует toIndex за пределами массива как последний элемент.
+    Фиксируем текущее поведение API.
+    "
+"passed","Tue Jul 28 09:59:21 UTC 2026","Tue Jul 28 09:59:22 UTC 2026","865","Board Service","Access board","ReorderBoardCustomField","","","ReorderBoardCustomField: guest_client → 403 AccessDenied","Пользователи без прав управления бордой не могут менять порядок custom fields."
+"passed","Tue Jul 28 10:07:59 UTC 2026","Tue Jul 28 10:08:02 UTC 2026","2533","Multiaction","Dates","Positive","","","Установить оба поля: dueStart и dueEnd","
+    Задачи без дат, устанавливаем dueStart и dueEnd одновременно.
+    Оба поля обновляются в одном запросе.
+    "
+"passed","Tue Jul 28 10:08:17 UTC 2026","Tue Jul 28 10:08:18 UTC 2026","1324","Multiaction","Dates","Negative","","","Нельзя сбросить дату через multiaction","
+    Создаём задачу с dueEnd, затем вызываем multiaction без dueEnd (передаём только dueStart).
+    dueStart должен установиться, а dueEnd — остаться прежним.
+    "
+"failed","Tue Jul 28 10:04:04 UTC 2026","Tue Jul 28 10:04:04 UTC 2026","0","Multiaction","Custom Fields","Date","","","Date: значение совпадает → skipped",""
+"passed","Tue Jul 28 09:59:25 UTC 2026","Tue Jul 28 09:59:25 UTC 2026","160","Board Service","Access board","ReorderBoardType","","","ReorderBoardType: member_client → 403 AccessDenied","Пользователи без прав управления бордой не могут менять порядок типов."
+"passed","Tue Jul 28 10:09:05 UTC 2026","Tue Jul 28 10:09:06 UTC 2026","1115","Multiaction","Types","Positive","","","Add второй тип — первый сохраняется","
+    Задача уже с типом type_1, добавляем type_2.
+    type_2 в success, GetTask подтверждает оба типа.
+    "
+"passed","Tue Jul 28 09:59:40 UTC 2026","Tue Jul 28 10:00:06 UTC 2026","26317","History Service","Task History","","","","Task Types events","
+    Проверяем генерацию событий при работе с массивом типов задачи (Types):
+    TASK_TYPE_ADDED -> TASK_TYPE_ADDED (еще один) -> TASK_TYPE_REMOVED -> TASK_TYPE_CHANGED
+    "
+"passed","Tue Jul 28 09:59:25 UTC 2026","Tue Jul 28 09:59:25 UTC 2026","157","Board Service","Access board","ReorderBoardType","","","ReorderBoardType: client_with_access_only_in_space → 403 AccessDenied","Пользователи без прав управления бордой не могут менять порядок типов."
+"passed","Tue Jul 28 09:59:30 UTC 2026","Tue Jul 28 09:59:30 UTC 2026","415","Board Service","Reorder Board Custom Field","Negative","","","Отрицательный fromIndex=-1 → IncorrectMoveFromIndex","fromIndex=-1 → 400 IncorrectMoveFromIndex."
+"failed","Tue Jul 28 10:04:35 UTC 2026","Tue Jul 28 10:04:35 UTC 2026","0","Multiaction","Custom Fields","Linked Tasks","","","Linked Tasks add: привязать задачу",""
+"failed","Tue Jul 28 10:03:23 UTC 2026","Tue Jul 28 10:03:23 UTC 2026","0","Multiaction","Custom Fields","Negative","","","Select add: невалидная опция → все в failed",""
+"passed","Tue Jul 28 10:01:40 UTC 2026","Tue Jul 28 10:01:41 UTC 2026","1086","Multiaction","Assignees","Negative","","","Remove assignee, которого нет на задаче","
+    Задача без assignees, пытаемся remove.
+    Ожидаем skipped.
+    "
+"passed","Tue Jul 28 09:59:32 UTC 2026","Tue Jul 28 09:59:33 UTC 2026","1014","Board Service","Reorder Board Type","Positive","","","Успешная перестановка типа с позиции 1 на позицию 0","Перемещаем второй тип на первую позицию, проверяем что порядок изменился."
+"passed","Tue Jul 28 10:09:34 UTC 2026","Tue Jul 28 10:09:35 UTC 2026","961","Task Service","Edit Task","Types edit Task","","","Edit Task Types: Проверка редактирования поля 'types'","
+    Проверяет успешное редактирование поля 'types' задачи.
+    "
+"passed","Tue Jul 28 10:08:05 UTC 2026","Tue Jul 28 10:08:09 UTC 2026","3285","Multiaction","Dates","Positive","","","Mixed: dueStart совпадает у части задач → partial skipped/success","
+    Часть задач уже с dueStart=A, часть без.
+    Применяем dueStart=A: совпадающие в skipped, остальные в success.
+    "
+"failed","Tue Jul 28 10:01:57 UTC 2026","Tue Jul 28 10:01:57 UTC 2026","0","Multiaction","Custom Fields","Base logic","","","Очистка: value=null → 400 InvalidForm","Общая логика для всех типов (Text, Number, Checkbox, Date, Select, Member, TaskRelations, Url, Estimation).
+    API не поддерживает очистку через value=null."
+"passed","Tue Jul 28 10:09:28 UTC 2026","Tue Jul 28 10:09:29 UTC 2026","730","Task Service","Edit Task","Assignees edit Task","","","Edit Task Assignees: Проверка на уникалность ID исполнителей","
+    Проверяет, что при попытке добавить повторяющиеся ID исполнителей выводится ошибка.
+    Корректность возвращаемого сообщения об ошибке
+    "
+"passed","Tue Jul 28 10:09:47 UTC 2026","Tue Jul 28 10:09:48 UTC 2026","218","Task Service","Get Tasks","Filtered by criteria","","","GetTasks board: доска не принадлежит space — ожидаем пустой список задач",""
+"passed","Tue Jul 28 10:08:23 UTC 2026","Tue Jul 28 10:08:24 UTC 2026","1390","Multiaction","Priority","Positive","","","Сменить priority на другой","
+    Задачи с MEDIUM, повышаем до HIGH.
+    Все в success.
+    "
+"passed","Tue Jul 28 10:08:56 UTC 2026","Tue Jul 28 10:08:58 UTC 2026","1700","Multiaction","Types","Positive","","","Remove type — типа нет ни у одной → все в skipped","
+    Ни у одной задачи нет этого типа.
+    Remove type → все в skipped.
+    "
+"passed","Tue Jul 28 10:01:45 UTC 2026","Tue Jul 28 10:01:46 UTC 2026","523","Multiaction","Assignees","Negative","","","Допустимые action только 'add' и 'remove' — 'toggle' отклоняется","
+    assignees принимает только [memberId, 'add'] или [memberId, 'remove'].
+    Любой другой action (например 'toggle') → 400.
+    "
+"failed","Tue Jul 28 10:04:45 UTC 2026","Tue Jul 28 10:04:45 UTC 2026","0","Multiaction","Custom Fields","Linked Tasks","","","Linked Tasks remove: отвязать задачу",""
+"passed","Tue Jul 28 10:09:48 UTC 2026","Tue Jul 28 10:09:48 UTC 2026","168","Task Service","Get Tasks","Filtered by criteria","","","GetTasks board: неверный формат идентификатора — ожидаем ошибку валидации 'board must be a mongodb id'",""
+"passed","Tue Jul 28 10:09:39 UTC 2026","Tue Jul 28 10:09:40 UTC 2026","586","Task Service","Edit Task","Types edit Task","","","Edit Task Types: Назначение несуществующего typeId (фиксируем текущее поведение API: валидация отсутствует)","
+    Несуществующий typeId → проверяем, валидирует ли EditTask существование типа.
+    Тест фиксирует текущее поведение API для types.
+    "
+"failed","Tue Jul 28 10:06:28 UTC 2026","Tue Jul 28 10:06:28 UTC 2026","0","Multiaction","Custom Fields","Select","","","Select: замена одной опции на другую (remove + add)",""
+"passed","Tue Jul 28 10:08:29 UTC 2026","Tue Jul 28 10:08:33 UTC 2026","4067","Multiaction","Priority","Positive","","","Понизить priority (LOW)","
+    Задачи с HIGH, понижаем до LOW.
+    Все в success.
+    "
+"passed","Tue Jul 28 09:59:28 UTC 2026","Tue Jul 28 09:59:29 UTC 2026","1131","Board Service","Reorder Board Custom Field","Negative","","","Неверный fromIndex (поле на позиции 0, передаём 2) → IncorrectMoveFromIndex","fieldId на позиции 0, передаём fromIndex=2 → 400."
+"passed","Tue Jul 28 10:08:42 UTC 2026","Tue Jul 28 10:08:43 UTC 2026","1028","Multiaction","Priority","Negative","","","Невалидный taskId + priority: валидный в success, невалидный в failed","
+    Передаём валидный и несуществующий taskId с priority=MEDIUM.
+    Валидный — в success, невалидный — в failed.
+    "
+"failed","Tue Jul 28 10:07:50 UTC 2026","Tue Jul 28 10:07:50 UTC 2026","0","Multiaction","Custom Fields","Url","","","Url: значение совпадает → skipped",""
+"passed","Tue Jul 28 10:09:16 UTC 2026","Tue Jul 28 10:09:17 UTC 2026","926","Multiaction","Types","Negative","","","Два typeId в одном запросе","
+    Передаём [typeId1, typeId2, 'add'] — два typeId в одном запросе.
+    Формат предполагает [typeId, action], длина массива != 2 → 400.
+    "
+"passed","Tue Jul 28 10:00:57 UTC 2026","Tue Jul 28 10:01:02 UTC 2026","5435","Multiaction","Archive","Positive","","","Unarchive: разархивировать несколько задач","Unarchive работает только из Table Task — архивные задачи пропадают с доски и их нельзя выделить."
+"passed","Tue Jul 28 10:09:15 UTC 2026","Tue Jul 28 10:09:16 UTC 2026","800","Multiaction","Types","Negative","","","Допустимые action только 'add' и 'remove' — 'toggle' отклоняется","
+    types принимает только [typeId, 'add'] или [typeId, 'remove'].
+    Любой другой action (например 'toggle') → 400.
+    "
+"passed","Tue Jul 28 10:08:03 UTC 2026","Tue Jul 28 10:08:05 UTC 2026","1177","Multiaction","Dates","Positive","","","dueEnd совпадает с текущим значением → задача в skipped","
+    dueEnd совпадает с текущим значением задачи.
+    Задача попадает в skipped (значение не изменилось).
+    "
+"passed","Tue Jul 28 09:59:24 UTC 2026","Tue Jul 28 09:59:25 UTC 2026","182","Board Service","Access board","ReorderBoardType","","","ReorderBoardType: owner_client → 200","Пользователи с правами управления бордой могут менять порядок типов."
+"passed","Tue Jul 28 10:00:41 UTC 2026","Tue Jul 28 10:00:45 UTC 2026","3920","Multiaction","Archive","Positive","","","Archive: архивировать несколько задач",""
+"failed","Tue Jul 28 10:06:07 UTC 2026","Tue Jul 28 10:06:07 UTC 2026","0","Multiaction","Custom Fields","Member","","","Member remove: мембера нет в поле → skipped",""
+"failed","Tue Jul 28 10:05:57 UTC 2026","Tue Jul 28 10:05:57 UTC 2026","0","Multiaction","Custom Fields","Member","","","Member remove: убрать мембера",""
+"failed","Tue Jul 28 10:04:14 UTC 2026","Tue Jul 28 10:04:14 UTC 2026","0","Multiaction","Custom Fields","Estimation","","","Estimation: установить длительность",""
+"passed","Tue Jul 28 10:01:44 UTC 2026","Tue Jul 28 10:01:44 UTC 2026","568","Multiaction","Assignees","Negative","","","Два member_id в одном запросе","
+    Передаём [""id1"", ""id2"", ""add""] — два member_id в одном запросе.
+    Формат предполагает [memberId, action], длина массива != 2 → 400.
+    "
+"failed","Tue Jul 28 10:06:17 UTC 2026","Tue Jul 28 10:06:17 UTC 2026","0","Multiaction","Custom Fields","Select","","","Select add: элемента нет в массиве → добавляется",""
+"passed","Tue Jul 28 10:01:26 UTC 2026","Tue Jul 28 10:01:28 UTC 2026","1698","Multiaction","Assignees","Positive","","","Remove assignee","
+    Задачи с одним assignee, убираем его.
+    Все в success, assignees пуст.
+    "
+"passed","Tue Jul 28 09:59:25 UTC 2026","Tue Jul 28 09:59:25 UTC 2026","177","Board Service","Access board","ReorderBoardType","","","ReorderBoardType: manager_client → 200","Пользователи с правами управления бордой могут менять порядок типов."
+"passed","Tue Jul 28 10:08:13 UTC 2026","Tue Jul 28 10:08:14 UTC 2026","1014","Multiaction","Dates","Positive","","","Оба поля совпадают → все в skipped","
+    Задача с dueStart=A и dueEnd=A.
+    Применяем те же значения → задача в skipped.
+    "
+"passed","Tue Jul 28 10:09:00 UTC 2026","Tue Jul 28 10:09:02 UTC 2026","2818","Multiaction","Types","Positive","","","Add type mixed — часть задач уже с типом","
+    Часть задач уже с типом, часть без.
+    Add type: без типа → success, с типом → skipped.
+    "
+"failed","Tue Jul 28 10:05:26 UTC 2026","Tue Jul 28 10:05:26 UTC 2026","0","Multiaction","Custom Fields","Member","","","Member add: добавить валидного мембера",""
+"failed","Tue Jul 28 10:03:43 UTC 2026","Tue Jul 28 10:03:43 UTC 2026","0","Multiaction","Custom Fields","Negative","","","Нет доступа к спейсу → ошибка","foreign_client не имеет доступа к main_space."
+"passed","Tue Jul 28 10:09:18 UTC 2026","Tue Jul 28 10:09:19 UTC 2026","1015","Multiaction","Types","Negative","","","Невалидный taskId + add type","
+    Передаём валидный и несуществующий taskId с type add.
+    Валидный — в success, невалидный — в failed.
+    "
+"failed","Tue Jul 28 10:05:16 UTC 2026","Tue Jul 28 10:05:16 UTC 2026","0","Multiaction","Custom Fields","Linked Tasks","","","Linked Tasks remove: связи нет → skipped",""
+"passed","Tue Jul 28 09:59:23 UTC 2026","Tue Jul 28 09:59:24 UTC 2026","1032","Board Service","Access board","ReorderBoardCustomField","","","ReorderBoardCustomField: foreign_client → 403 AccessDenied","Пользователи без прав управления бордой не могут менять порядок custom fields."
+"passed","Tue Jul 28 10:00:29 UTC 2026","Tue Jul 28 10:00:31 UTC 2026","1347","Multiaction","Access","","","","Проверка прав на MultipleEditTasks клиентом: manager_client","
+    Проверка прав доступа на примере completed, но распространяется
+    на все действия MultipleEditTasks (priority, types, assignees, due dates).
+    Owner, Manager, Member — задача в success.
+    Guest, пользователь без доступа к борде — HTTP 200, но задача в failed
+    (API не возвращает 403, а распределяет задачи по success/failed).
+    "
+"failed","Tue Jul 28 10:06:58 UTC 2026","Tue Jul 28 10:06:58 UTC 2026","0","Multiaction","Custom Fields","Select","","","Select remove: элемента нет → skipped",""
