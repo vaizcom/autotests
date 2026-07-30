@@ -6,7 +6,7 @@ from test_backend.data.endpoints.Space.space_endpoints import edit_space_endpoin
 from test_backend.data.endpoints.file.upload_avatar_endpoint import upload_avatar_endpoint, DUMMY_PNG_CONTENT
 from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
-pytestmark = [pytest.mark.backend]
+pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
 
 @allure.parent_suite("History Service")

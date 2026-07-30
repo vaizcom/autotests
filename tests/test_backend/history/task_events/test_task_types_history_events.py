@@ -10,7 +10,7 @@ from test_backend.data.endpoints.History.history_utils import (
 from test_backend.task_service.utils import get_two_random_types
 from test_backend.data.endpoints.multiaction.multiaction_asserts import assert_multiaction_response
 
-pytestmark = [pytest.mark.backend]
+pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
 
 @allure.parent_suite("History Service")

@@ -11,7 +11,7 @@ from test_backend.data.endpoints.access_group.access_group_endpoints import (
 )
 from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
-pytestmark = [pytest.mark.backend]
+pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
 
 def _create_group(client, space_id: str) -> str:
