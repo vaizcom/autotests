@@ -85,14 +85,17 @@ def test_task_created_completed_deleted_events(main_client, main_space, temp_boa
         )
         assert delete_resp.status_code == 200
 
-        # Бэкенд не отдает историю для удаленной задачи по kind="Task",
-        # здесь поменяли kind="Board" и kind_id=temp_board_in_main
+        # Бэкенд не отдает историю для удаленной задачи по kind="Task" (задача удалена).
+        # kind="Board" удалён из THistoryKind в APP-5670, используем kind="Space".
+        # check_self=False т.к. TASK_DELETED имеет projectId/boardId, а checkSelf для Space
+        # ожидает их отсутствия (он рассчитан на чисто пространственные события).
         deleted_event = assert_history_event_exists(
             client=main_client,
             space_id=main_space,
-            kind="Board",
-            kind_id=temp_board_in_main,
-            expected_event_key="TASK_DELETED"
+            kind="Space",
+            kind_id=main_space,
+            expected_event_key="TASK_DELETED",
+            check_self=False,
         )
 
         # Дополнительно проверяем, что ивент удаления принадлежит именно нашей задаче

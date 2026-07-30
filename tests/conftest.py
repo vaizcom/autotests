@@ -485,39 +485,6 @@ def make_task_in_main(owner_client, main_space, main_board):
 
 
 @pytest.fixture
-def temp_task(main_client, temp_space, temp_board):
-    """
-    Фикстура для создания временной задачи перед тестом и её удаления после теста.
-    Возвращает ID созданной задачи.
-    """
-    task_name = "Temp task"
-
-    create_resp = main_client.post(
-        **create_task_endpoint(
-            space_id=temp_space,
-            board=temp_board,
-            name=task_name
-        ))
-    assert create_resp.status_code == 200, f"Ошибка создания задачи в фикстуре: {short_resp(create_resp)}"
-    task_id = create_resp.json()['payload']['task']['_id']
-
-    # Передаем ID задачи в сам тест
-    yield task_id
-
-    with allure.step("Teardown [Fixture]: Удаление временной задачи"):
-        delete_resp = main_client.post(
-            **delete_task_endpoint(
-                space_id=temp_space,
-                task_id=task_id
-            )
-        )
-        # Вместо жесткого assert == 200, мы допускаем, что задача уже удалена или конвертирована
-        if delete_resp.status_code not in (200, 400, 404):
-            pytest.fail(f"Ошибка при удалении задачи в фикстуре: {short_resp(delete_resp)}")
-
-
-
-@pytest.fixture
 def temp_task_on_temp_board(owner_client, main_space, temp_board_in_main):
     """
     Фикстура для создания временной задачи перед тестом и её удаления после теста.

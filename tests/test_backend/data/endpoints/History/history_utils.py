@@ -2,12 +2,17 @@ import allure
 import time
 
 from test_backend.data.endpoints.History.get_history_endpoint import get_history_endpoint
-from test_backend.data.endpoints.History.assert_history_payload import assert_history_payload
+from test_backend.data.endpoints.History.assert_history_payload import (
+    assert_history_schema,
+    assert_history_kind_fields,
+    assert_history_check_self,
+)
 from core.response_utils import short_resp
 
 def assert_history_event_exists(
         client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
-        expected_data: dict = None, timeout: int = 20, interval: float = 1.0
+        expected_data: dict = None, timeout: int = 20, interval: float = 1.0,
+        check_self: bool = True,
 ) -> dict:
     """
     Вспомогательная функция: запрашивает историю с механизмом ожидания (поллингом).
@@ -55,7 +60,10 @@ def assert_history_event_exists(
             f"Последний ответ: {histories}"
         )
 
-        assert_history_payload(history=found_event, expected_kind=kind, expected_kind_id=kind_id)
+        assert_history_schema(found_event)
+        assert_history_kind_fields(found_event, kind)
+        if check_self:
+            assert_history_check_self(found_event, kind, kind_id)
 
         return found_event
 
