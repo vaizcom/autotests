@@ -102,3 +102,35 @@ def test_edit_task_duplicate_types_error(owner_client, main_space, make_task_in_
             f"Ожидалась ошибка для поля 'types', получено для '{error_field.get('name')}'"
         assert "Types array must not contain duplicate types" in error_field.get("codes", []), \
             f"Неверное сообщение об ошибке для 'types'. Получено: {error_field.get('codes')!r}"
+
+
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Types edit Task")
+@allure.title("Edit Task Types: Назначение несуществующего typeId (фиксируем текущее поведение API: валидация отсутствует)")
+def test_edit_task_with_invalid_type_id(owner_client, main_space, make_task_in_main, main_board, main_project):
+    """
+    Несуществующий typeId → проверяем, валидирует ли EditTask существование типа.
+    Тест фиксирует текущее поведение API для types.
+    """
+    initial_task_data = make_task_in_main({"name": "Task for invalid type", "types": []})
+    task_id = initial_task_data.get("_id")
+
+    invalid_type_id = "000000000000000000000000"
+
+    with allure.step(f"Отправляем запрос EditTask с несуществующим typeId для задачи {task_id}"):
+        resp = owner_client.post(**edit_task_endpoint(
+            space_id=main_space, task_id=task_id, types=[invalid_type_id],
+        ))
+
+    with allure.step("Фиксируем текущее поведение API"):
+        # EditTask НЕ валидирует принадлежность typeId к борде(в отличие от assignees).
+        # Записывает несуществующий typeId (200). На фронте такой тип не отображается.
+        assert resp.status_code == 200, (
+            f"Ожидался 200 (API не валидирует typeId), получен {resp.status_code}. "
+            f"Ответ: {resp.json()!r}"
+        )
+        task = resp.json()["payload"]["task"]
+        assert invalid_type_id in task.get("types", []), (
+            f"Несуществующий typeId не записан: {task.get('types')}"
+        )

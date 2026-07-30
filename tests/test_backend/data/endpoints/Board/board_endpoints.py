@@ -151,3 +151,41 @@ def edit_board_custom_field_endpoint(
         'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
         'json': payload,
     }
+
+
+def reorder_board_type_endpoint(
+    board_id: str,
+    space_id: str,
+    board_type_id: str,
+    from_index: int,
+    to_index: int,
+):
+    return {
+        'path': '/ReorderBoardType',
+        'json': {
+            'boardId': board_id,
+            'boardTypeId': board_type_id,
+            'fromIndex': from_index,
+            'toIndex': to_index,
+        },
+        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+    }
+
+
+def reorder_board_custom_field_endpoint(
+    board_id: str,
+    space_id: str,
+    field_id: str,
+    from_index: int,
+    to_index: int,
+):
+    return {
+        'path': '/ReorderBoardCustomField',
+        'json': {
+            'boardId': board_id,
+            'fieldId': field_id,
+            'fromIndex': from_index,
+            'toIndex': to_index,
+        },
+        'headers': {'Content-Type': 'application/json', 'Current-Space-Id': space_id},
+    }

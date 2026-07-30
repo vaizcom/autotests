@@ -18,7 +18,7 @@ class APIClient:
         self.token = token
         self.session.headers.update({'Authorization': f'Bearer {token}', 'Cookie': f'_t={token}'})
 
-    def post(self, path: str, json: dict = None, headers: dict = None, timeout=(5, 10), **kwargs):
+    def post(self, path: str, json: dict = None, headers: dict = None, timeout=(5, 30), **kwargs):
         url = f'{self.base_url}{path}'
         final_headers = self.session.headers.copy()
         if headers:

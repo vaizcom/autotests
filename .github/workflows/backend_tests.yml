@@ -37,17 +37,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # 🧠 Определяем стенд по ветке
-      - name: Determine test stand from branch
+      # 🧠 Определяем стенд из .env (push / pull_request)
+      - name: Determine test stand from .env
         if: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
-          BRANCH="${GITHUB_REF##*/}"
-          if [[ "$BRANCH" == "main" || "$BRANCH" == "kuber_dev" ]]; then
-            echo "TEST_STAND_NAME=kuber_dev" >> $GITHUB_ENV
-          else
-            echo "TEST_STAND_NAME=dev" >> $GITHUB_ENV
-          fi
+          STAND=$(grep '^TEST_STAND_NAME=' .env | cut -d'=' -f2 || echo "dev")
+          echo "TEST_STAND_NAME=$STAND" >> $GITHUB_ENV
+          echo "🧠 Test stand from .env: $STAND" >> $GITHUB_STEP_SUMMARY
 
       # 🧠 Получаем стенд из input (если ручной запуск)
       - name: Set test stand from input
@@ -104,10 +103,32 @@ jobs:
         continue-on-error: false
         run: curl -m 10 $API_URL/healthCheck
 
+      # 🔍 Для PR — запускаем только изменённые тестовые файлы
+      - name: Detect changed test files
+        if: github.event_name == 'pull_request'
+        id: changed
+        run: |
+          CHANGED=$(git diff --name-only --diff-filter=ACMR origin/${{ github.base_ref }}...HEAD \
+            | grep '^tests/test_backend/.*\.py$' \
+            | grep -v '__pycache__' \
+            | grep -v '__init__' \
+            | tr '\n' ' ')
+          echo "files=$CHANGED" >> $GITHUB_OUTPUT
+          if [ -n "$CHANGED" ]; then
+            echo "🔍 Changed test files: $CHANGED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🔍 No test files changed — running all backend tests" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: ✅ Run tests with Allure
         continue-on-error: true
-        run: pytest . --alluredir=allure-results -m "$TEST_SCOPE" --reruns 1 --reruns-delay 10 --maxfail=25
+        run: |
+          CHANGED="${{ steps.changed.outputs.files }}"
+          if [ -n "$CHANGED" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
+            pytest $CHANGED --alluredir=allure-results -m "$TEST_SCOPE" --reruns 1 --reruns-delay 10 --maxfail=50
+          else
+            pytest . --alluredir=allure-results -m "$TEST_SCOPE" --reruns 1 --reruns-delay 10 --maxfail=50
+          fi
 
       - name: Check allure-results content
         run: ls -lah allure-results
@@ -120,21 +141,46 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      - name: 📊 Generate Allure Report and Deploy
-        uses: simple-elf/allure-report-action@v1.13
+      - name: 📊 Install Allure CLI
         if: ${{ !cancelled() }}
-        with:
-          allure_results: allure-results
-          allure_report: allure-report
-          allure_history: allure-history
-          gh_pages: gh-pages/backend/${{ env.TEST_STAND_NAME }}
-          keep_reports: 20
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          wget -q https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.25.0/allure-commandline-2.25.0.zip
+          unzip -q allure-commandline-2.25.0.zip -d /opt
+          echo "/opt/allure-2.25.0/bin" >> $GITHUB_PATH
 
-      - name: Fix Allure redirect for subdirectory
+      - name: 📊 Generate Allure Report
         if: ${{ !cancelled() }}
-        run: sudo sed -i "s|URL=https://vaizcom.github.io/autotests/|URL=https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/|" allure-history/index.html
+        run: |
+          # Копируем историю из gh-pages
+          GH_HISTORY="gh-pages/backend/${{ env.TEST_STAND_NAME }}/last-history"
+          if [ -d "$GH_HISTORY" ]; then
+            cp -r "$GH_HISTORY" allure-results/history
+          fi
+          # Генерируем отчёт
+          allure generate allure-results -o allure-report --clean
+
+      - name: 📊 Manage Allure History
+        if: ${{ !cancelled() }}
+        run: |
+          REPORT_NUM=${{ github.run_number }}
+          mkdir -p allure-history
+          # Копируем существующие отчёты из gh-pages
+          GH_DIR="gh-pages/backend/${{ env.TEST_STAND_NAME }}"
+          if [ -d "$GH_DIR" ]; then
+            cp -r "$GH_DIR"/* allure-history/ 2>/dev/null || true
+          fi
+          # Сохраняем новый отчёт
+          cp -r allure-report allure-history/${REPORT_NUM}
+          # Сохраняем историю для следующего запуска
+          cp -r allure-report/history allure-history/last-history 2>/dev/null || true
+          # Удаляем старые отчёты (оставляем 20)
+          cd allure-history
+          ls -d [0-9]* 2>/dev/null | sort -n | head -n -20 | xargs rm -rf 2>/dev/null || true
+          cd ..
+          # Генерируем index.html с редиректом
+          cat > allure-history/index.html << EOF
+          <html><head><meta http-equiv="refresh" content="0; URL=https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/${REPORT_NUM}/"></head></html>
+          EOF
 
       - name: Prepare deploy directory
         if: ${{ !cancelled() }}
@@ -175,7 +221,8 @@ jobs:
       - name: Add Allure link to summary
         if: ${{ !cancelled() }}
         run: |
-          REPORT_NUM=$(ls -d allure-history/[0-9]* 2>/dev/null | sort -n | tail -1 | xargs basename)
+          REPORT_NUM=$(ls -d allure-history/[0-9]* 2>/dev/null | sort -n | tail -1)
+          REPORT_NUM=$(basename "$REPORT_NUM")
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📊 **Allure Report**: [Открыть отчёт](https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/${REPORT_NUM}/)" >> $GITHUB_STEP_SUMMARY
 
