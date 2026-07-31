@@ -208,7 +208,6 @@ def test_edit_task_relations_custom_field_negative(owner_client, main_space):
     """
     Task Relations Custom Fields. Негативный тест.
     Проверяет что передача дублирующихся task ID возвращает ошибку валидации.
-    Примечание: несуществующий ID в формате 24-hex ObjectId — позитивный кейс (см. тест выше).
     """
     target_task_id = "696a1a04c7fd1dbba471efc2"
     relations_field_id = "696e02e42452157dfd7e25cd"

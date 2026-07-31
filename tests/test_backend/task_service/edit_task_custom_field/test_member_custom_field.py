@@ -131,7 +131,6 @@ def test_edit_task_member_custom_field_negative(
     Проверяет валидацию формата на транспортном уровне:
     - duplicates: дублирующиеся ID участников.
     - none_value: передача [None] — невалидный формат.
-    Примечание: несуществующий ID в формате 24-hex ObjectId — позитивный кейс (см. test выше).
     """
     target_task_id = "696a1a04c7fd1dbba471efc2"
     target_custom_field_id = "696e02e02452157dfd7e2577"
