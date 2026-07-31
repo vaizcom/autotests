@@ -127,6 +127,46 @@ def global_ssl_settings():
         requests.Session.request = patched_request
 
 
+@pytest.fixture(scope='session', autouse=True)
+def cleanup_stale_test_spaces():
+    """
+    Safety-net: удаляет тестовые спейсы от предыдущих прогонов,
+    которые не были очищены из-за падений, таймаутов или аварийного завершения.
+    Запускается автоматически в начале каждой сессии.
+    Удаляет только спейсы с именем по паттерну space_YYYY-MM-DD_HH-MM-SS старше 2 часов.
+    """
+    import re
+
+    pattern = re.compile(r'^space_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})$')
+    cutoff = datetime.datetime.now() - datetime.timedelta(hours=2)
+
+    # Проверяем спейсы для каждого клиента, который создаёт временные спейсы
+    # main — temp_space, space_id_module, invite spaces
+    # owner — space_id_function
+    # second_main — invite second_space_id
+    for role in ('main', 'owner', 'second_main'):
+        try:
+            client = APIClient(base_url=API_URL, token=get_token(role))
+            resp = client.post(**get_spaces_endpoint())
+            if resp.status_code != 200:
+                continue
+
+            spaces = resp.json().get("payload", {}).get("spaces", [])
+            for space in spaces:
+                name = space.get("name", "")
+                match = pattern.match(name)
+                if not match:
+                    continue
+                try:
+                    created = datetime.datetime.strptime(match.group(1), "%Y-%m-%d_%H-%M-%S")
+                    if created < cutoff:
+                        client.post(**remove_space_endpoint(space_id=space["_id"]))
+                except ValueError:
+                    continue
+        except Exception:
+            continue
+
+
 @pytest.fixture(scope='session')
 def main_client():
     return APIClient(base_url=API_URL, token=get_token('main'))

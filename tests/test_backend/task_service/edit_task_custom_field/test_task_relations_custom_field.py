@@ -176,7 +176,7 @@ def test_edit_task_relations_custom_field_multiple(owner_client, main_space, boa
 def test_edit_task_relations_custom_field_nonexistent_id(owner_client, main_space):
     """
     API валидирует только формат (24-hex ObjectId), но не проверяет существование задачи.
-    Несуществующий ID в корректном формате принимается и сохраняется.
+    Несуществующий ID в корректном формате принимается и сохраняется. На фронте Link task остается пустым.
     Это ожидаемое поведение после разделения транспортной валидации и бизнес-логики.
     """
     target_task_id = "696a1a04c7fd1dbba471efc2"
