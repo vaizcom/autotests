@@ -4,7 +4,7 @@ import random
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, get_task_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, get_task_endpoint, get_tasks_endpoint
 from test_backend.task_service.utils import validate_hrid, get_client, get_member_profile, create_task, get_random_type_id, get_random_group_id, \
     get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone, assert_task_keys, delete_task_with_retry
 
@@ -38,6 +38,12 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
 
     client = get_client(request, client_fixture)
     member_id = get_member_profile(client, main_space)
+
+    with allure.step("Pre-condition: очищаем борду от задач предыдущих прогонов"):
+        resp = owner_client.post(**get_tasks_endpoint(board=main_board, space_id=main_space))
+        if resp.status_code == 200:
+            for t in resp.json()["payload"].get("tasks", []):
+                delete_task_with_retry(owner_client, t["_id"], main_space)
 
     task_id = None  # переменную объявляем до блока try
 
@@ -139,7 +145,13 @@ def test_create_task_with_specific_payload_and_response(
 
     client = get_client(request, client_fixture)
     task_name = f"Create task клиент={client_fixture}, дата={datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    member_id = get_member_profile(client, main_space) # Получение профиля для извлечения creator ID
+    member_id = get_member_profile(client, main_space)
+
+    with allure.step("Pre-condition: очищаем борду от задач предыдущих прогонов"):
+        resp = owner_client.post(**get_tasks_endpoint(board=main_board, space_id=main_space))
+        if resp.status_code == 200:
+            for t in resp.json()["payload"].get("tasks", []):
+                delete_task_with_retry(owner_client, t["_id"], main_space)
     random_type_id = get_random_type_id(client, main_board, main_space)
     random_group_id = get_random_group_id(client, main_board, main_space)
     current_timestamp = get_current_timestamp()
@@ -244,7 +256,7 @@ def test_create_task_with_specific_payload_and_response(
                         }
                         assert_task_keys(task, expected_task_keys)
 
-                with allure.step("Post-condition: Проверка сохранения данных в БД через GetTask"):
+                with allure.step("Проверка сохранения данных в БД через GetTask"):
                     resp_db = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=task_id))
                     assert resp_db.status_code == 200, f"GetTask вернул {resp_db.status_code}"
                     task_db = resp_db.json()["payload"]["task"]
