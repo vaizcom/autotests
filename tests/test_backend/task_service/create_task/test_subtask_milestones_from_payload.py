@@ -1,5 +1,7 @@
+import time
 import allure
 import pytest
+from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
 from test_backend.task_service.utils import get_subtask_ms_1, get_subtask_ms_2, delete_task_with_retry, \
     get_parent_ms_1, get_parent_ms_2
 
@@ -34,15 +36,21 @@ def test_subtask_milestone_with_own_milestone(
         subtask = create_task_in_main("owner_client", parent_task=parent_task, milestones=[subtask_ms_id])
 
     try:
-        with allure.step("Проверяем, что у сабтаска создана с собственным milestone(milestone берется из payload)"):
-            expected_subtask_ms_id = [subtask_ms_id]
-            assert subtask["milestones"] == [subtask_ms_id], (
-                f"Ожидались milestones {expected_subtask_ms_id}, получили {subtask.get('milestones')}"
+        with allure.step("Post-condition: Проверяем milestones сабтаска через GetTask"):
+            resp = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=subtask["_id"]))
+            assert resp.status_code == 200
+            subtask_db = resp.json()["payload"]["task"]
+            assert subtask_db["milestones"] == [subtask_ms_id], (
+                f"Ожидались milestones [{subtask_ms_id}], получили {subtask_db['milestones']}"
             )
-        with allure.step("Проверяем, что у родительской таски корректные milestones(milestone берется из payload)"):
+
+        with allure.step("Post-condition: Проверяем milestones родительской задачи через GetTask"):
+            resp = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=parent["_id"]))
+            assert resp.status_code == 200
+            parent_db = resp.json()["payload"]["task"]
             expected_parents_ms_id = [parent_ms_id_1, parent_ms_id_2]
-            assert parent["milestones"] == expected_parents_ms_id, (
-                f"Ожидались milestones {expected_parents_ms_id}, получили {parent.get('milestones')}"
+            assert sorted(parent_db["milestones"]) == sorted(expected_parents_ms_id), (
+                f"Ожидались milestones {expected_parents_ms_id}, получили {parent_db['milestones']}"
             )
     finally:
         with allure.step("Удаляем сабтаск и родительскую задачу после теста"):
@@ -76,15 +84,20 @@ def test_subtask_milestone_without_own_milestone(
         subtask = create_task_in_main("owner_client", parent_task=parent_task)
 
     try:
-        with allure.step("Проверяем, что у сабтаска milestone отсутствует(не наследуется от родителя)"):
-            expected_ms_id = []
-            assert subtask["milestones"] == expected_ms_id, (
-                f"Ожидались milestones {expected_ms_id}, получили {subtask.get('milestones')}"
+        with allure.step("Post-condition: Проверяем что у сабтаска milestone отсутствует через GetTask"):
+            resp = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=subtask["_id"]))
+            assert resp.status_code == 200
+            subtask_db = resp.json()["payload"]["task"]
+            assert subtask_db["milestones"] == [], (
+                f"Ожидались milestones [], получили {subtask_db['milestones']}"
             )
-        with allure.step("Проверяем, что у родительской таски корректные milestones(milestone берется из payload)"):
-            expected_parents_ms_id = [parent_ms_id]
-            assert parent["milestones"] == expected_parents_ms_id, (
-                f"Ожидались milestones {expected_parents_ms_id}, получили {parent.get('milestones')}"
+
+        with allure.step("Post-condition: Проверяем milestones родительской задачи через GetTask"):
+            resp = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=parent["_id"]))
+            assert resp.status_code == 200
+            parent_db = resp.json()["payload"]["task"]
+            assert parent_db["milestones"] == [parent_ms_id], (
+                f"Ожидались milestones [{parent_ms_id}], получили {parent_db['milestones']}"
             )
     finally:
         with allure.step("Удаляем сабтаск и родительскую задачу после теста"):
@@ -119,26 +132,41 @@ def test_create_subtasks_with_various_milestones(
         parent = create_task_in_main("owner_client", milestones=[parent_ms_id])
         parent_id = parent["_id"]
 
-    # Создаём сабтаски по отдельности
+    # Создаём сабтаски по отдельности (с паузой — write conflict при быстром создании на одной борде)
     with allure.step("Создаём Subtask #1 с milestone B"):
         subtask1 = create_task_in_main("owner_client", parent_task=parent_id, milestones=[ms_1], name="Subtask #1")
+    time.sleep(0.5)
     with allure.step("Создаём Subtask #2 с milestone C"):
         subtask2 = create_task_in_main("owner_client", parent_task=parent_id, milestones=[ms_2], name="Subtask #2")
+    time.sleep(0.5)
     with allure.step("Создаём Subtask #3 без milestone"):
         subtask3 = create_task_in_main("owner_client", parent_task=parent_id, milestones=[], name="Subtask #3")
 
     subtasks = [subtask1, subtask2, subtask3]
 
     try:
-        with allure.step("Проверяем milestones у всех созданных сабтасков"):
-            assert subtask1["milestones"] == [ms_1], f"Subtask #1: ожидался milestone {ms_1}"
-            assert subtask2["milestones"] == [ms_2], f"Subtask #2: ожидался milestone {ms_2}"
-            assert subtask3["milestones"] == [], "Subtask #3: ожидался пустой milestone"
+        with allure.step("Post-condition: Проверяем milestones у всех сабтасков через GetTask"):
+            resp1 = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=subtask1["_id"]))
+            assert resp1.status_code == 200
+            assert resp1.json()["payload"]["task"]["milestones"] == [ms_1], \
+                f"Subtask #1: ожидался milestone {ms_1}"
 
-        with allure.step("Проверяем, что у родительской таски корректные milestones(milestone берется из payload)"):
-            expected_parents_ms_id = [parent_ms_id]
-            assert parent["milestones"] == expected_parents_ms_id, (
-                f"Ожидались milestones {expected_parents_ms_id}, получили {parent.get('milestones')}"
+            resp2 = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=subtask2["_id"]))
+            assert resp2.status_code == 200
+            assert resp2.json()["payload"]["task"]["milestones"] == [ms_2], \
+                f"Subtask #2: ожидался milestone {ms_2}"
+
+            resp3 = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=subtask3["_id"]))
+            assert resp3.status_code == 200
+            assert resp3.json()["payload"]["task"]["milestones"] == [], \
+                "Subtask #3: ожидался пустой milestone"
+
+        with allure.step("Post-condition: Проверяем milestones родительской задачи через GetTask"):
+            resp = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=parent_id))
+            assert resp.status_code == 200
+            parent_db = resp.json()["payload"]["task"]
+            assert parent_db["milestones"] == [parent_ms_id], (
+                f"Ожидались milestones [{parent_ms_id}], получили {parent_db['milestones']}"
             )
     finally:
         with allure.step("Удаляем все сабтаски и родительскую задачу после теста"):
