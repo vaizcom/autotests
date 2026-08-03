@@ -4,9 +4,9 @@ import random
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, get_task_endpoint, get_tasks_endpoint
 from test_backend.task_service.utils import validate_hrid, get_client, get_member_profile, create_task, get_random_type_id, get_random_group_id, \
-    get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone, assert_task_keys
+    get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone, assert_task_keys, delete_task_with_retry
 
 pytestmark = [pytest.mark.backend]
 
@@ -38,6 +38,12 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
 
     client = get_client(request, client_fixture)
     member_id = get_member_profile(client, main_space)
+
+    with allure.step("Pre-condition: очищаем борду от задач предыдущих прогонов"):
+        resp = owner_client.post(**get_tasks_endpoint(board=main_board, space_id=main_space))
+        if resp.status_code == 200:
+            for t in resp.json()["payload"].get("tasks", []):
+                delete_task_with_retry(owner_client, t["_id"], main_space)
 
     task_id = None  # переменную объявляем до блока try
 
@@ -108,10 +114,7 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
     finally:
         if task_id:
             with allure.step(f"Удаляем задачу: {task_id}"):
-                del_resp = owner_client.post(**delete_task_endpoint(task_id=task_id, space_id=main_space))
-                assert del_resp.status_code == 200, (
-                    f"Не удалось удалить задачу {task_id}: {del_resp.status_code} {del_resp.text}"
-                )
+                delete_task_with_retry(owner_client, task_id, main_space)
 
 
 @allure.parent_suite("Task Service")
@@ -142,7 +145,13 @@ def test_create_task_with_specific_payload_and_response(
 
     client = get_client(request, client_fixture)
     task_name = f"Create task клиент={client_fixture}, дата={datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    member_id = get_member_profile(client, main_space) # Получение профиля для извлечения creator ID
+    member_id = get_member_profile(client, main_space)
+
+    with allure.step("Pre-condition: очищаем борду от задач предыдущих прогонов"):
+        resp = owner_client.post(**get_tasks_endpoint(board=main_board, space_id=main_space))
+        if resp.status_code == 200:
+            for t in resp.json()["payload"].get("tasks", []):
+                delete_task_with_retry(owner_client, t["_id"], main_space)
     random_type_id = get_random_type_id(client, main_board, main_space)
     random_group_id = get_random_group_id(client, main_board, main_space)
     current_timestamp = get_current_timestamp()
@@ -181,6 +190,7 @@ def test_create_task_with_specific_payload_and_response(
         # Проверяем статус ответа
         with allure.step(f"Проверка статус-кода: ожидаем {expected_status}"):
             assert response.status_code == expected_status, response.text
+            resp = response.json()
 
         # Если запрос успешен, проверяем содержимое ответа
         if response.status_code == 200:
@@ -246,10 +256,22 @@ def test_create_task_with_specific_payload_and_response(
                         }
                         assert_task_keys(task, expected_task_keys)
 
+                with allure.step("Проверка сохранения данных в БД через GetTask"):
+                    resp_db = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=task_id))
+                    assert resp_db.status_code == 200, f"GetTask вернул {resp_db.status_code}"
+                    task_db = resp_db.json()["payload"]["task"]
+
+                    assert task_db["name"] == task_name, f"В БД name={task_db['name']}, ожидалось {task_name}"
+                    assert task_db["types"] == [random_type_id], f"В БД types={task_db['types']}"
+                    assert sorted(task_db["assignees"]) == sorted(random_member_id), f"В БД assignees={task_db['assignees']}"
+                    assert task_db["priority"] == priority, f"В БД priority={task_db['priority']}"
+                    assert task_db["completed"] == get_random_complete, f"В БД completed={task_db['completed']}"
+                    assert task_db["group"] == random_group_id, f"В БД group={task_db['group']}"
+                    assert task_db["milestones"] == [get_random_milestone], f"В БД milestones={task_db['milestones']}"
+                    assert task_db["dueStart"] == current_timestamp.replace("+00:00", "Z"), f"В БД dueStart={task_db['dueStart']}"
+                    assert task_db["dueEnd"] == due_end.replace("+00:00", "Z"), f"В БД dueEnd={task_db['dueEnd']}"
+
     finally:
         if task_id:
             with allure.step(f"Удаляем задачу: {task_id}"):
-                del_resp = owner_client.post(**delete_task_endpoint(space_id=main_space, task_id=task_id))
-                assert del_resp.status_code == 200, (
-                    f"Не удалось удалить задачу {task_id}: {del_resp.status_code} {del_resp.text}"
-                )
+                delete_task_with_retry(owner_client, task_id, main_space)

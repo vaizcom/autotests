@@ -172,39 +172,50 @@ def test_edit_task_relations_custom_field_multiple(owner_client, main_space, boa
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
 @allure.sub_suite("Task Relations Custom Fields")
-@pytest.mark.parametrize("case_name, invalid_value, expected_message", [
-    (
-            "Duplicate IDs",
-            ["690af8691a593d8d7c4a8688", "690af86b1a593d8d7c4a86e9", "690af86b1a593d8d7c4a86e9"],
-            "Duplicate task IDs are not allowed"
-    ),
-    (
-            "Non-existent Task ID",
-            ["000000000000000000000000"],  # Валидный формат (24 hex), но несуществующий ID
-            "One or more tasks do not exist or are not accessible"
-    ),
-])
-def test_edit_task_relations_custom_field_negative(owner_client, main_space, case_name, invalid_value,
-                                                   expected_message):
-    allure.dynamic.title(f"Edit Task Relations Custom Field. Negative: {case_name}")
+@allure.title("Edit Task Relations Custom Field. Несуществующий task ID в валидном формате ObjectId → 200, значение сохраняется")
+def test_edit_task_relations_custom_field_nonexistent_id(owner_client, main_space):
     """
-    Task Relations Custom Fields. Negative tests.
-    Проверяет:
-    1. Передачу дублей ID.
-    2. Передачу несуществующего ID задачи.
+    API валидирует только формат (24-hex ObjectId), но не проверяет существование задачи.
+    Несуществующий ID в корректном формате принимается и сохраняется. На фронте Link task остается пустым.
+    Это ожидаемое поведение после разделения транспортной валидации и бизнес-логики.
     """
-    allure.dynamic.title(f"Edit Task Relations Custom Field. Negative: {case_name}")
-
     target_task_id = "696a1a04c7fd1dbba471efc2"
     relations_field_id = "696e02e42452157dfd7e25cd"
+    nonexistent_id = "000000000000000000000000"  # валидный формат ObjectId, но не существует
 
-    with allure.step(f"Action: Отправка некорректного значения: {invalid_value}"):
+    with allure.step(f"Action: Установка несуществующего task ID = {nonexistent_id}"):
         resp_edit = _update_custom_field(
-            owner_client,
-            main_space,
-            target_task_id,
-            relations_field_id,
-            invalid_value
+            owner_client, main_space, target_task_id, relations_field_id, [nonexistent_id]
+        )
+
+    with allure.step("Verification: API возвращает 200, значение сохранилось"):
+        assert resp_edit.status_code == 200, f"Ожидался 200, получен {resp_edit.status_code}"
+        task = resp_edit.json()["payload"]["task"]
+        updated_field = next((cf for cf in task["customFields"] if cf["id"] == relations_field_id), None)
+        assert updated_field is not None, "Поле не найдено в ответе"
+        assert updated_field["value"] == [nonexistent_id], \
+            f"Значение не сохранилось. Ожидалось: [{nonexistent_id}], получено: {updated_field['value']}"
+
+    with allure.step("Post-condition: Очистка поля"):
+        _update_custom_field(owner_client, main_space, target_task_id, relations_field_id, [])
+
+
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task Custom Field")
+@allure.sub_suite("Task Relations Custom Fields")
+@allure.title("Edit Task Relations Custom Field. Negative: дубликаты ID → 400 InvalidForm")
+def test_edit_task_relations_custom_field_negative(owner_client, main_space):
+    """
+    Task Relations Custom Fields. Негативный тест.
+    Проверяет что передача дублирующихся task ID возвращает ошибку валидации.
+    """
+    target_task_id = "696a1a04c7fd1dbba471efc2"
+    relations_field_id = "696e02e42452157dfd7e25cd"
+    duplicate_values = ["690af8691a593d8d7c4a8688", "690af86b1a593d8d7c4a86e9", "690af86b1a593d8d7c4a86e9"]
+
+    with allure.step(f"Action: Отправка дублирующихся ID: {duplicate_values}"):
+        resp_edit = _update_custom_field(
+            owner_client, main_space, target_task_id, relations_field_id, duplicate_values
         )
 
     with allure.step("Verification: Проверка ошибки валидации (InvalidForm)"):
@@ -217,15 +228,9 @@ def test_edit_task_relations_custom_field_negative(owner_client, main_space, cas
         assert error_data.get("code") == "InvalidForm", \
             f"Ожидался код ошибки InvalidForm, получен {error_data.get('code')}"
 
-        # Проверка деталей ошибки поля
         fields_errors = error_data.get("fields", [])
         assert len(fields_errors) > 0, "Список ошибок полей пуст"
 
-        field_error = fields_errors[0]
-        # # Имя поля в ошибке обычно "Linked Tasks"
-        # assert field_error["name"] == "Linked Tasks"
-        # assert "IllegalField" in field_error["codes"]
-
-        meta = field_error.get("meta", {})
-        assert meta.get("message") == expected_message, \
-            f"Некорректное сообщение об ошибке. Ожидалось: '{expected_message}', получено: '{meta.get('message')}'"
+        meta = fields_errors[0].get("meta", {})
+        assert meta.get("message") == "Duplicate task IDs are not allowed", \
+            f"Некорректное сообщение: '{meta.get('message')}'"

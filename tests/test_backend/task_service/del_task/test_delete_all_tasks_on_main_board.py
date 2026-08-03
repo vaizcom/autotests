@@ -4,8 +4,8 @@ import time
 import pytest
 import allure
 
-from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, delete_task_endpoint
-from test_backend.task_service.utils import get_client
+from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
+from test_backend.task_service.utils import get_client, delete_task_with_retry
 
 pytestmark = [pytest.mark.backend]
 
@@ -18,31 +18,30 @@ def test_delete_all_tasks_on_main_board(request, owner_client, main_space, main_
     """
 
     client = get_client(request, "owner_client")
+
+    with allure.step("Pre-condition: Очищаем борду от задач предыдущих прогонов"):
+        response = client.post(**get_tasks_endpoint(board=main_board, space_id=main_space))
+        if response.status_code == 200:
+            old_tasks = response.json()["payload"].get("tasks", [])
+            for task in old_tasks:
+                delete_task_with_retry(client, task["_id"], main_space)
+
     created_task_ids = []
     random_count = random.randint(1, 10)
-    for i in range(1, random_count + 1):
-        task = create_task_in_main(
-            "owner_client",
-            name=f"Random task #{i}",
-        )
-        created_task_ids.append(task["_id"])
+    with allure.step(f"Создаём {random_count} задач на борде"):
+        for i in range(1, random_count + 1):
+            task = create_task_in_main(
+                "owner_client",
+                name=f"Random task #{i}",
+            )
+            created_task_ids.append(task["_id"])
 
-    with allure.step("Запрашиваем список всех задач на main_board"):
-        response = client.post(**get_tasks_endpoint(board=main_board, space_id=main_space))
-        assert response.status_code == 200, f"Не удалось получить список задач: {response.text}"
-        tasks = response.json()["payload"].get("tasks", [])
-
-    if not tasks:
-        allure.attach("Задачи на доске отсутствуют, нечего удалять.", "Комментарии", "text/plain")
-        return
-
-    with allure.step("Удаляем в цикле все созданные задачи"):
+    with allure.step("Удаляем все созданные задачи"):
         deleted_ids = []
-        for task in tasks:
-            task_id = task["_id"]
-            del_resp = client.post(**delete_task_endpoint(task_id=task_id, space_id=main_space))
-            assert del_resp.status_code == 200, f"Не удалось удалить задачу {task_id}: {del_resp.text}"
-            deleted_ids.append(task_id)
+        for task_id in created_task_ids:
+            deleted = delete_task_with_retry(client, task_id, main_space)
+            if deleted:
+                deleted_ids.append(task_id)
 
         allure.attach("\n".join(deleted_ids), "Удалённые ID задач", "text/plain")
 

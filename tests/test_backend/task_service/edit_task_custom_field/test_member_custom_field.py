@@ -70,14 +70,49 @@ def test_edit_task_member_custom_field(owner_client, main_space, board_with_task
 @allure.parent_suite("Task Service")
 @allure.suite("Edit Task Custom Field")
 @allure.sub_suite("Member Custom Fields")
+@allure.title("Edit Member Custom Field. Несуществующий member ID в валидном формате ObjectId → 200, значение сохраняется")
+def test_edit_task_member_custom_field_nonexistent_id(owner_client, main_space):
+    """
+    API валидирует только формат (24-hex ObjectId), но не проверяет существование member в спейсе.
+    Несуществующий ID в корректном формате принимается и сохраняется. На фронте он отображается как missing member
+    Это ожидаемое поведение после разделения транспортной валидации и бизнес-логики.
+    """
+    target_task_id = "696a1a04c7fd1dbba471efc2"
+    target_custom_field_id = "696e02e02452157dfd7e2577"
+    nonexistent_id = "000000000000000000000000"  # валидный формат ObjectId, но не существует
+
+    with allure.step(f"Action: Установка несуществующего member ID = {nonexistent_id}"):
+        resp_edit = owner_client.post(**edit_task_custom_field_endpoint(
+            space_id=main_space,
+            task_id=target_task_id,
+            field_id=target_custom_field_id,
+            value=[nonexistent_id]
+        ))
+
+    with allure.step("Verification: API возвращает 200, значение сохранилось"):
+        assert resp_edit.status_code == 200, f"Ожидался 200, получен {resp_edit.status_code}"
+        task = resp_edit.json()["payload"]["task"]
+        updated_field = next((cf for cf in task["customFields"] if cf["id"] == target_custom_field_id), None)
+        assert updated_field is not None, "Поле не найдено в ответе"
+        assert updated_field["value"] == [nonexistent_id], \
+            f"Значение не сохранилось. Ожидалось: [{nonexistent_id}], получено: {updated_field['value']}"
+
+    with allure.step("Post-condition: Очистка поля"):
+        owner_client.post(**edit_task_custom_field_endpoint(
+            space_id=main_space,
+            task_id=target_task_id,
+            field_id=target_custom_field_id,
+            value=[]
+        ))
+
+
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task Custom Field")
+@allure.sub_suite("Member Custom Fields")
 @pytest.mark.parametrize("case_key, expected_message", [
     (
             "duplicates",
             "Duplicate member IDs are not allowed"
-    ),
-    (
-            "invalid_id",
-            "One or more members do not exist in this workspace or are not accessible"
     ),
     (
             "none_value",
@@ -93,10 +128,9 @@ def test_edit_task_member_custom_field_negative(
     allure.dynamic.title(f"Edit Member Custom Field. Negative Flows. Case: {case_key}")
     """
     Member Custom Fields. Параметризованный негативный тест.
-    Проверяет валидацию API при передаче некорректных данных:
+    Проверяет валидацию формата на транспортном уровне:
     - duplicates: дублирующиеся ID участников.
-    - invalid_id: несуществующий ID (24 hex char).
-    - none_value: передача [None].
+    - none_value: передача [None] — невалидный формат.
     """
     target_task_id = "696a1a04c7fd1dbba471efc2"
     target_custom_field_id = "696e02e02452157dfd7e2577"
@@ -106,8 +140,6 @@ def test_edit_task_member_custom_field_negative(
         # Получаем реальный ID и дублируем его
         real_id = get_assignee(owner_client, main_space)[0]
         invalid_value = [real_id, real_id]
-    elif case_key == "invalid_id":
-        invalid_value = ["000000000000000000000000"]
     elif case_key == "none_value":
         invalid_value = [None]
     else:
@@ -124,7 +156,6 @@ def test_edit_task_member_custom_field_negative(
     with allure.step("Verification: Проверка структуры ошибки"):
         response_json = resp_edit.json()
 
-        # Общая проверка структуры
         assert response_json.get("payload") is None
         assert response_json.get("type") == "EditTaskCustomField"
 
@@ -142,8 +173,6 @@ def test_edit_task_member_custom_field_negative(
 
         # Специфичные проверки meta
         if case_key == "duplicates":
-            # Проверяем, что в received вернулись дубликаты
             assert sorted(meta.get("received")) == sorted(invalid_value)
         elif case_key == "none_value":
-            # Проверяем invalidIds
             assert meta.get("invalidIds") == [None]
