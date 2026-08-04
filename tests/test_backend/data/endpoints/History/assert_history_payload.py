@@ -1,5 +1,3 @@
-import allure
-
 # Обязательные поля в каждом событии ответа GetHistory
 HISTORY_REQUIRED_SCHEMA = {
     "_id": str,
@@ -34,29 +32,27 @@ KIND_REQUIRED_FIELDS = {
 
 def assert_history_schema(history: dict):
     """Проверяет обязательные поля, их типы и отсутствие неизвестных полей."""
-    with allure.step("Проверка набора полей события истории"):
-        actual_keys = set(history.keys())
-        required_keys = set(HISTORY_REQUIRED_SCHEMA.keys())
-        all_allowed_keys = required_keys.union(set(HISTORY_OPTIONAL_FIELDS.keys()))
+    actual_keys = set(history.keys())
+    required_keys = set(HISTORY_REQUIRED_SCHEMA.keys())
+    all_allowed_keys = required_keys.union(set(HISTORY_OPTIONAL_FIELDS.keys()))
 
-        missing = required_keys - actual_keys
-        extra = actual_keys - all_allowed_keys
+    missing = required_keys - actual_keys
+    extra = actual_keys - all_allowed_keys
 
-        assert not missing, f"Отсутствуют обязательные поля: {sorted(missing)}"
-        assert not extra, f"Найдены лишние/неизвестные поля: {sorted(extra)}"
+    assert not missing, f"Отсутствуют обязательные поля: {sorted(missing)}"
+    assert not extra, f"Найдены лишние/неизвестные поля: {sorted(extra)}"
 
-    with allure.step("Проверка типов данных полей истории"):
-        for field, expected_type in HISTORY_REQUIRED_SCHEMA.items():
+    for field, expected_type in HISTORY_REQUIRED_SCHEMA.items():
+        value = history[field]
+        assert isinstance(value, expected_type), (
+            f"Поле '{field}' имеет неверный тип: {type(value).__name__}, ожидается {expected_type.__name__}"
+        )
+    for field, expected_type in HISTORY_OPTIONAL_FIELDS.items():
+        if field in history:
             value = history[field]
-            assert isinstance(value, expected_type), (
-                f"Поле '{field}' имеет неверный тип: {type(value).__name__}, ожидается {expected_type.__name__}"
+            assert isinstance(value, expected_type) or value is None, (
+                f"Поле '{field}' имеет неверный тип: {type(value).__name__}, ожидается {expected_type.__name__} или None"
             )
-        for field, expected_type in HISTORY_OPTIONAL_FIELDS.items():
-            if field in history:
-                value = history[field]
-                assert isinstance(value, expected_type) or value is None, (
-                    f"Поле '{field}' имеет неверный тип: {type(value).__name__}, ожидается {expected_type.__name__} или None"
-                )
 
 
 def assert_history_kind_fields(history: dict, kind: str):
@@ -66,46 +62,44 @@ def assert_history_kind_fields(history: dict, kind: str):
         return
 
     required_fields = KIND_REQUIRED_FIELDS.get(kind, [])
-    with allure.step(f"Проверка обязательных полей для kind={kind}: {required_fields}"):
-        for field in required_fields:
-            assert history.get(field) is not None, (
-                f"Поле '{field}' обязательно для kind={kind}, но отсутствует. "
-                f"Событие: key={history.get('key')}, _id={history.get('_id')}"
-            )
+    for field in required_fields:
+        assert history.get(field) is not None, (
+            f"Поле '{field}' обязательно для kind={kind}, но отсутствует. "
+            f"Событие: key={history.get('key')}, _id={history.get('_id')}"
+        )
 
 
 def assert_history_check_self(history: dict, kind: str, kind_id: str):
     """Проверяет что событие принадлежит запрошенной сущности (checkSelf)."""
-    with allure.step(f"Проверка checkSelf: событие принадлежит kind={kind}, id={kind_id}"):
-        if kind == "Task":
-            assert history.get("taskId") == kind_id, (
-                f"Ожидался taskId={kind_id}, получен {history.get('taskId')}"
-            )
-        elif kind == "Milestone":
-            assert history.get("milestoneId") == kind_id, (
-                f"Ожидался milestoneId={kind_id}, получен {history.get('milestoneId')}"
-            )
-        elif kind == "Project":
-            assert history.get("projectId") == kind_id, (
-                f"Ожидался projectId={kind_id}, получен {history.get('projectId')}"
-            )
-            assert history.get("boardId") is None, "Для Project поле boardId должно отсутствовать"
-            assert history.get("documentId") is None, "Для Project поле documentId должно отсутствовать"
-        elif kind == "Document":
-            assert history.get("documentId") == kind_id, (
-                f"Ожидался documentId={kind_id}, получен {history.get('documentId')}"
-            )
-        elif kind == "Member":
-            assert history.get("memberId") == kind_id, (
-                f"Ожидался memberId={kind_id}, получен {history.get('memberId')}"
-            )
-        elif kind == "Space":
-            assert history.get("spaceId") == kind_id, (
-                f"Ожидался spaceId={kind_id}, получен {history.get('spaceId')}"
-            )
-            assert history.get("projectId") is None, "Для Space поле projectId должно отсутствовать"
-            assert history.get("documentId") is None, "Для Space поле documentId должно отсутствовать"
-        elif kind == "Board":
-            assert history.get("boardId") == kind_id, (
-                f"Ожидался boardId={kind_id}, получен {history.get('boardId')}"
-            )
+    if kind == "Task":
+        assert history.get("taskId") == kind_id, (
+            f"Ожидался taskId={kind_id}, получен {history.get('taskId')}"
+        )
+    elif kind == "Milestone":
+        assert history.get("milestoneId") == kind_id, (
+            f"Ожидался milestoneId={kind_id}, получен {history.get('milestoneId')}"
+        )
+    elif kind == "Project":
+        assert history.get("projectId") == kind_id, (
+            f"Ожидался projectId={kind_id}, получен {history.get('projectId')}"
+        )
+        assert history.get("boardId") is None, "Для Project поле boardId должно отсутствовать"
+        assert history.get("documentId") is None, "Для Project поле documentId должно отсутствовать"
+    elif kind == "Document":
+        assert history.get("documentId") == kind_id, (
+            f"Ожидался documentId={kind_id}, получен {history.get('documentId')}"
+        )
+    elif kind == "Member":
+        assert history.get("memberId") == kind_id, (
+            f"Ожидался memberId={kind_id}, получен {history.get('memberId')}"
+        )
+    elif kind == "Space":
+        assert history.get("spaceId") == kind_id, (
+            f"Ожидался spaceId={kind_id}, получен {history.get('spaceId')}"
+        )
+        assert history.get("projectId") is None, "Для Space поле projectId должно отсутствовать"
+        assert history.get("documentId") is None, "Для Space поле documentId должно отсутствовать"
+    elif kind == "Board":
+        assert history.get("boardId") == kind_id, (
+            f"Ожидался boardId={kind_id}, получен {history.get('boardId')}"
+        )
