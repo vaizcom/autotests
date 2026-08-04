@@ -4,6 +4,10 @@ import pytest
 pytestmark = [pytest.mark.backend]
 
 _VALID_MONGO_ID = "a" * 24  # валидный формат MongoId, несуществующая сущность
+_MISSING = object()  # sentinel — поле не передаётся в запросе
+
+# Доступные kind для GetHistory: Space, Project, Task, Document, Milestone
+# Запрещённые (есть в EKind, но нет в HISTORY_KINDS): Board, Member
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -12,12 +16,23 @@ _VALID_MONGO_ID = "a" * 24  # валидный формат MongoId, несущ�
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kind отсутствует → 400")
-def test_get_history_missing_kind(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory без поля kind"):
+@allure.sub_suite("Negative")
+@pytest.mark.parametrize("kind_value, case", [
+    (_MISSING, "kind отсутствует"),
+    ("",       "kind = пустая строка"),
+    ("WRONG",  "kind = произвольная строка"),
+], ids=["missing", "empty", "wrong_string"])
+def test_get_history_invalid_kind(main_client, main_space, kind_value, case):
+    """Невалидное значение kind должно вернуть 400 InvalidForm."""
+    allure.dynamic.title(f"GetHistory: {case} → 400")
+
+    body = {"kindId": _VALID_MONGO_ID}
+    if kind_value is not _MISSING:
+        body["kind"] = kind_value
+
+    with allure.step(f"Отправляем POST /GetHistory: {case}"):
         resp = main_client.post(
-            path="/GetHistory",
-            json={"kindId": _VALID_MONGO_ID},
+            path="/GetHistory", json=body,
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
     with allure.step("Получаем 400 InvalidForm"):
@@ -27,90 +42,17 @@ def test_get_history_missing_kind(main_client, main_space):
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kind = пустая строка → 400")
-def test_get_history_empty_kind(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory с kind=''"):
+@allure.sub_suite("Negative")
+@pytest.mark.parametrize("kind", ["Board", "Member"], ids=["board", "member"])
+def test_get_history_rejected_kind(main_client, main_space, kind):
+    """kind есть в EKind, но исключён из HISTORY_KINDS — историю для них через GetHistory запросить нельзя,
+    должен вернуть 400."""
+    allure.dynamic.title(f"GetHistory: kind='{kind}' — не в HISTORY_KINDS → 400")
+
+    with allure.step(f"Отправляем POST /GetHistory с kind='{kind}'"):
         resp = main_client.post(
             path="/GetHistory",
-            json={"kind": "", "kindId": _VALID_MONGO_ID},
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400 InvalidForm"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "InvalidForm"
-
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kind = произвольная строка → 400 с кодом InvalidKind")
-def test_get_history_invalid_string_kind(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory с kind='WRONG'"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": "WRONG", "kindId": _VALID_MONGO_ID},
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400, в error.fields — код InvalidKind"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "InvalidForm"
-        field_codes = [c for f in resp.json()["error"]["fields"] for c in f.get("codes", [])]
-        assert "InvalidKind" in field_codes
-
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kind = число → 400")
-def test_get_history_numeric_kind(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory с kind=0"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": 0, "kindId": _VALID_MONGO_ID},
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400 InvalidForm"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "InvalidForm"
-
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kind = null → 400")
-def test_get_history_null_kind(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory с kind=null"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": None, "kindId": _VALID_MONGO_ID},
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400 InvalidForm"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "InvalidForm"
-
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kind='Board' — в EKind, но не в HISTORY_KINDS → 400")
-def test_get_history_kind_board_rejected(main_client, main_space):
-    """Board исключён из HISTORY_KINDS — validators must reject."""
-    with allure.step("Отправляем POST /GetHistory с kind='Board'"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": "Board", "kindId": _VALID_MONGO_ID},
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400"):
-        assert resp.status_code == 400
-
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kind='Member' — в EKind, но не в HISTORY_KINDS → 400")
-def test_get_history_kind_member_rejected(main_client, main_space):
-    """Member исключён из HISTORY_KINDS — validators must reject."""
-    with allure.step("Отправляем POST /GetHistory с kind='Member'"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": "Member", "kindId": _VALID_MONGO_ID},
+            json={"kind": kind, "kindId": _VALID_MONGO_ID},
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
     with allure.step("Получаем 400"):
@@ -123,12 +65,22 @@ def test_get_history_kind_member_rejected(main_client, main_space):
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kindId отсутствует → 400")
-def test_get_history_missing_kind_id(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory без поля kindId"):
+@allure.sub_suite("Negative")
+@pytest.mark.parametrize("kind_id_value, case", [
+    (_MISSING, "kindId отсутствует"),
+    ("",       "kindId = пустая строка"),
+], ids=["missing", "empty"])
+def test_get_history_invalid_kind_id(main_client, main_space, kind_id_value, case):
+    """Невалидное значение kindId должно вернуть 400 InvalidForm."""
+    allure.dynamic.title(f"GetHistory: {case} → 400")
+
+    body = {"kind": "Task"}
+    if kind_id_value is not _MISSING:
+        body["kindId"] = kind_id_value
+
+    with allure.step(f"Отправляем POST /GetHistory: {case}"):
         resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": "Task"},
+            path="/GetHistory", json=body,
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
     with allure.step("Получаем 400 InvalidForm"):
@@ -138,96 +90,21 @@ def test_get_history_missing_kind_id(main_client, main_space):
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kindId = пустая строка → 400")
-def test_get_history_empty_kind_id(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory с kindId=''"):
+@allure.sub_suite("Negative")
+@pytest.mark.parametrize("kind_id, case", [
+    ("abc",    "kindId = 'abc' (короче MongoId)"),
+    ("a" * 25, "kindId = 25 символов (длиннее MongoId)"),
+], ids=["too_short", "too_long"])
+def test_get_history_invalid_format_kind_id(main_client, main_space, kind_id, case):
+    """kindId неверного формата (не 24-символьный MongoId) должен вернуть 400 InvalidForm."""
+    allure.dynamic.title(f"GetHistory: {case} → 400")
+
+    with allure.step(f"Отправляем POST /GetHistory: {case}"):
         resp = main_client.post(
             path="/GetHistory",
-            json={"kind": "Task", "kindId": ""},
+            json={"kind": "Task", "kindId": kind_id},
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
     with allure.step("Получаем 400 InvalidForm"):
         assert resp.status_code == 400
         assert resp.json()["error"]["code"] == "InvalidForm"
-
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kindId = 'abc' (не MongoId) → 400")
-def test_get_history_short_kind_id(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory с kindId='abc'"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": "Task", "kindId": "abc"},
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400, в error.fields — ошибка mongodb id"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "InvalidForm"
-        field_codes = [c for f in resp.json()["error"]["fields"] for c in f.get("codes", [])]
-        assert any("mongodb id" in c for c in field_codes)
-
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kindId = 25 символов (длиннее MongoId) → 400")
-def test_get_history_long_kind_id(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory с kindId длиной 25 символов"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": "Task", "kindId": "a" * 25},
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400 InvalidForm"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "InvalidForm"
-
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kindId = число → 400")
-def test_get_history_numeric_kind_id(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory с kindId=123"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": "Task", "kindId": 123},
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400 InvalidForm"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "InvalidForm"
-
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.title("GetHistory: kindId = null → 400")
-def test_get_history_null_kind_id(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory с kindId=null"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": "Task", "kindId": None},
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400 InvalidForm"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "InvalidForm"
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# 3. Оба обязательных поля отсутствуют
-# ──────────────────────────────────────────────────────────────────────────────
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.title("GetHistory: пустое тело {} → 400, ошибки по обоим полям")
-def test_get_history_empty_body(main_client, main_space):
-    with allure.step("Отправляем POST /GetHistory с пустым телом {}"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={},
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400, не менее 2 ошибок в error.fields"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "InvalidForm"
-        assert len(resp.json()["error"]["fields"]) >= 2

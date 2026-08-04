@@ -24,13 +24,11 @@ HISTORY_OPTIONAL_FIELDS = {
 
 # Поля, которые должны присутствовать в каждом событии в ответе GetHistory для данного kind (APP-5670).
 KIND_REQUIRED_FIELDS = {
-    "Task":      ["taskId", "boardId", "projectId", "spaceId", "creatorId"],
-    "Board":     ["boardId", "projectId", "spaceId", "creatorId"],
-    "Milestone": ["milestoneId", "boardId", "projectId", "spaceId", "creatorId"],
-    "Project":   ["projectId", "spaceId", "creatorId"],
     "Space":     ["spaceId", "creatorId"],
+    "Project":   ["projectId", "spaceId", "creatorId"],
+    "Task":      ["taskId", "boardId", "projectId", "spaceId", "creatorId"],
     "Document":  ["documentId", "creatorId"],
-    "Member":    ["creatorId"],
+    "Milestone": ["milestoneId", "boardId", "projectId", "spaceId", "creatorId"],
 }
 
 
