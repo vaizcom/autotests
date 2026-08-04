@@ -10,6 +10,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
+@allure.sub_suite("Negative: GetHistory — нет доступа к спейсу")
 @pytest.mark.parametrize("kind,kind_id_fixture", [
     ("Space",     "main_space"),
     ("Project",   "main_project"),
@@ -17,7 +18,7 @@ pytestmark = [pytest.mark.backend]
     ("Document",  "main_space_doc"),
     ("Milestone", "temp_milestone_on_temp_board"),
 ], ids=["space", "project", "task", "document", "milestone"])
-def test_get_history_user_not_in_space(request, foreign_client, main_space, kind, kind_id_fixture):
+def test_get_history_foreign_user(request, foreign_client, main_space, kind, kind_id_fixture):
     """
     Пользователь без доступа к спейсу не может получить историю ни для одного kind.
     foreign_client не является участником main_space.
@@ -47,6 +48,7 @@ def test_get_history_user_not_in_space(request, foreign_client, main_space, kind
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
+@allure.sub_suite("Positive: GetHistory — доступ по ролям")
 @pytest.mark.parametrize("client_fixture", [
     "owner_client",
     "manager_client",
@@ -81,6 +83,7 @@ def test_get_history_roles_with_access(request, main_space, main_project, client
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
+@allure.sub_suite("Positive/Negative: GetHistory — иерархия сущностей")
 @pytest.mark.parametrize("client_fixture,kind,kind_id_fixture,entity,expected_status", [
     # space-only: видит Space и спейс-документы, не видит Project и ниже (включая Task, Milestone, Member doc)
     ("client_with_access_only_in_space", "Space",     "main_space",                   "Space",             200),
