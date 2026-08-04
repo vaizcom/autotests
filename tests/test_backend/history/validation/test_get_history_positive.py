@@ -4,6 +4,7 @@ import pytest
 from test_backend.data.endpoints.History.assert_history_payload import (
     assert_history_schema,
     assert_history_kind_fields,
+    KIND_REQUIRED_FIELDS,
 )
 
 pytestmark = [pytest.mark.backend]
@@ -49,7 +50,8 @@ def test_get_history_response_structure(request, main_client, main_space, kind, 
         items = resp.json()["payload"]["items"]
         assert len(items) > 0, "Ожидается хотя бы одно событие в истории"
 
-    with allure.step(f"Smoke: проверяем структуру первых {len(items)} событий"):
+    kind_fields = KIND_REQUIRED_FIELDS.get(kind, [])
+    with allure.step(f"Проверяем структуру {len(items)} событий. Kind-поля: {kind_fields}"):
         for item in items:
             assert_history_schema(item)
             assert_history_kind_fields(item, kind)
