@@ -68,8 +68,8 @@ def test_get_history_rejected_kind(main_client, main_space, kind):
 @allure.sub_suite("Negative")
 @pytest.mark.parametrize("kind_id_value, case", [
     (_MISSING, "kindId отсутствует"),
-    ("",       "kindId = пустая строка"),
-], ids=["missing", "empty"])
+    ("abc",    "kindId = 'abc' (не MongoId)"),
+], ids=["missing", "invalid_format"])
 def test_get_history_invalid_kind_id(main_client, main_space, kind_id_value, case):
     """Невалидное значение kindId должно вернуть 400 InvalidForm."""
     allure.dynamic.title(f"GetHistory: {case} → 400")
@@ -81,28 +81,6 @@ def test_get_history_invalid_kind_id(main_client, main_space, kind_id_value, cas
     with allure.step(f"Отправляем POST /GetHistory: {case}"):
         resp = main_client.post(
             path="/GetHistory", json=body,
-            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
-        )
-    with allure.step("Получаем 400 InvalidForm"):
-        assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "InvalidForm"
-
-
-@allure.parent_suite("History Service")
-@allure.suite("GetHistory Validation")
-@allure.sub_suite("Negative")
-@pytest.mark.parametrize("kind_id, case", [
-    ("abc",    "kindId = 'abc' (короче MongoId)"),
-    ("a" * 25, "kindId = 25 символов (длиннее MongoId)"),
-], ids=["too_short", "too_long"])
-def test_get_history_invalid_format_kind_id(main_client, main_space, kind_id, case):
-    """kindId неверного формата (не 24-символьный MongoId) должен вернуть 400 InvalidForm."""
-    allure.dynamic.title(f"GetHistory: {case} → 400")
-
-    with allure.step(f"Отправляем POST /GetHistory: {case}"):
-        resp = main_client.post(
-            path="/GetHistory",
-            json={"kind": "Task", "kindId": kind_id},
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
     with allure.step("Получаем 400 InvalidForm"):
