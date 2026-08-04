@@ -1,0 +1,114 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Tue Aug 04 12:58:41 UTC 2026","Tue Aug 04 12:58:41 UTC 2026","207","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: owner_client, Personal document → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:55 UTC 2026","Tue Aug 04 12:58:56 UTC 2026","209","History Service","GetHistory Validation","Negative","","","GetHistory: kindId = 25 символов (длиннее MongoId) → 400","kindId неверного формата (не 24-символьный MongoId) должен вернуть 400 InvalidForm."
+"passed","Tue Aug 04 12:58:41 UTC 2026","Tue Aug 04 12:58:41 UTC 2026","410","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: main_client, Personal document → 200","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:35 UTC 2026","Tue Aug 04 12:58:36 UTC 2026","1038","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_space, Task → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:55 UTC 2026","Tue Aug 04 12:58:55 UTC 2026","204","History Service","GetHistory Validation","Negative","","","GetHistory: kindId = пустая строка → 400","Невалидное значение kindId должно вернуть 400 InvalidForm."
+"passed","Tue Aug 04 12:58:39 UTC 2026","Tue Aug 04 12:58:39 UTC 2026","261","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_project, Project → 200","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:39 UTC 2026","Tue Aug 04 12:58:39 UTC 2026","220","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_project, Project document → 200","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:54 UTC 2026","Tue Aug 04 12:58:54 UTC 2026","218","History Service","GetHistory Validation","Negative","","","GetHistory: kind = произвольная строка → 400","Невалидное значение kind должно вернуть 400 InvalidForm."
+"passed","Tue Aug 04 12:58:34 UTC 2026","Tue Aug 04 12:58:34 UTC 2026","451","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_space, Project → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:34 UTC 2026","Tue Aug 04 12:58:35 UTC 2026","213","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_space, Member document → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:52 UTC 2026","Tue Aug 04 12:58:52 UTC 2026","384","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям","","","GetHistory: manager_client запрашивает историю проекта → 200","Owner, Manager, Member, Guest имеют доступ к истории проекта."
+"passed","Tue Aug 04 12:58:36 UTC 2026","Tue Aug 04 12:58:38 UTC 2026","1754","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_space, Milestone → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:53 UTC 2026","Tue Aug 04 12:58:54 UTC 2026","253","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям","","","GetHistory: guest_client запрашивает историю проекта → 200","Owner, Manager, Member, Guest имеют доступ к истории проекта."
+"passed","Tue Aug 04 12:58:52 UTC 2026","Tue Aug 04 12:58:52 UTC 2026","484","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям","","","GetHistory: owner_client запрашивает историю проекта → 200","Owner, Manager, Member, Guest имеют доступ к истории проекта."
+"passed","Tue Aug 04 12:58:59 UTC 2026","Tue Aug 04 12:58:59 UTC 2026","240","History Service","GetHistory Validation","Positive","","","GetHistory: структура событий для kind='Document'","
+    Smoke: проверяем структуру первых 5 событий в ответе.
+    Каждое событие должно содержать:
+    - обязательные общие поля: _id, creatorId, createdAt, key, type, data
+    - kind-специфичные поля согласно KIND_REQUIRED_FIELDS (APP-5670)
+    ""Space"":     [""spaceId"", ""creatorId""],
+    ""Project"":   [""projectId"", ""spaceId"", ""creatorId""],
+    ""Task"":      [""taskId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""],
+    ""Document"":  [""documentId"", ""creatorId""],
+    ""Milestone"": [""milestoneId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""]
+    "
+"passed","Tue Aug 04 12:58:42 UTC 2026","Tue Aug 04 12:58:43 UTC 2026","925","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: guest_client, Personal document → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:55 UTC 2026","Tue Aug 04 12:58:55 UTC 2026","221","History Service","GetHistory Validation","Negative","","","GetHistory: kindId отсутствует → 400","Невалидное значение kindId должно вернуть 400 InvalidForm."
+"passed","Tue Aug 04 12:58:54 UTC 2026","Tue Aug 04 12:58:54 UTC 2026","210","History Service","GetHistory Validation","Negative","","","GetHistory: kind='Board' — не в HISTORY_KINDS → 400","kind есть в EKind, но исключён из HISTORY_KINDS — историю для них через GetHistory запросить нельзя,
+    должен вернуть 400."
+"passed","Tue Aug 04 12:58:54 UTC 2026","Tue Aug 04 12:58:54 UTC 2026","207","History Service","GetHistory Validation","Negative","","","GetHistory: kind = пустая строка → 400","Невалидное значение kind должно вернуть 400 InvalidForm."
+"passed","Tue Aug 04 12:58:59 UTC 2026","Tue Aug 04 12:59:00 UTC 2026","567","History Service","GetHistory Validation","Positive","","","GetHistory: структура событий для kind='Milestone'","
+    Smoke: проверяем структуру первых 5 событий в ответе.
+    Каждое событие должно содержать:
+    - обязательные общие поля: _id, creatorId, createdAt, key, type, data
+    - kind-специфичные поля согласно KIND_REQUIRED_FIELDS (APP-5670)
+    ""Space"":     [""spaceId"", ""creatorId""],
+    ""Project"":   [""projectId"", ""spaceId"", ""creatorId""],
+    ""Task"":      [""taskId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""],
+    ""Document"":  [""documentId"", ""creatorId""],
+    ""Milestone"": [""milestoneId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""]
+    "
+"passed","Tue Aug 04 12:58:56 UTC 2026","Tue Aug 04 12:58:57 UTC 2026","552","History Service","GetHistory Validation","Positive","","","GetHistory: структура событий для kind='Task'","
+    Smoke: проверяем структуру первых 5 событий в ответе.
+    Каждое событие должно содержать:
+    - обязательные общие поля: _id, creatorId, createdAt, key, type, data
+    - kind-специфичные поля согласно KIND_REQUIRED_FIELDS (APP-5670)
+    ""Space"":     [""spaceId"", ""creatorId""],
+    ""Project"":   [""projectId"", ""spaceId"", ""creatorId""],
+    ""Task"":      [""taskId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""],
+    ""Document"":  [""documentId"", ""creatorId""],
+    ""Milestone"": [""milestoneId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""]
+    "
+"passed","Tue Aug 04 12:58:40 UTC 2026","Tue Aug 04 12:58:40 UTC 2026","217","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_project, Task → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:56 UTC 2026","Tue Aug 04 12:58:56 UTC 2026","233","History Service","GetHistory Validation","Positive","","","GetHistory: структура событий для kind='Space'","
+    Smoke: проверяем структуру первых 5 событий в ответе.
+    Каждое событие должно содержать:
+    - обязательные общие поля: _id, creatorId, createdAt, key, type, data
+    - kind-специфичные поля согласно KIND_REQUIRED_FIELDS (APP-5670)
+    ""Space"":     [""spaceId"", ""creatorId""],
+    ""Project"":   [""projectId"", ""spaceId"", ""creatorId""],
+    ""Task"":      [""taskId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""],
+    ""Document"":  [""documentId"", ""creatorId""],
+    ""Milestone"": [""milestoneId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""]
+    "
+"passed","Tue Aug 04 12:58:52 UTC 2026","Tue Aug 04 12:58:53 UTC 2026","976","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям","","","GetHistory: member_client запрашивает историю проекта → 200","Owner, Manager, Member, Guest имеют доступ к истории проекта."
+"passed","Tue Aug 04 12:58:55 UTC 2026","Tue Aug 04 12:58:55 UTC 2026","230","History Service","GetHistory Validation","Negative","","","GetHistory: kindId = 'abc' (короче MongoId) → 400","kindId неверного формата (не 24-символьный MongoId) должен вернуть 400 InvalidForm."
+"passed","Tue Aug 04 12:58:39 UTC 2026","Tue Aug 04 12:58:40 UTC 2026","216","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_project, Member document → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:44 UTC 2026","Tue Aug 04 12:58:45 UTC 2026","191","History Service","GetHistory Access","Negative: GetHistory — нет доступа к спейсу","","","GetHistory: foreign_client запрашивает kind='Document' → 400 SpaceIdNotSpecified","
+    Пользователь без доступа к спейсу не может получить историю ни для одного kind.
+    foreign_client не является участником main_space.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 SpaceIdNotSpecified.
+    "
+"passed","Tue Aug 04 12:58:38 UTC 2026","Tue Aug 04 12:58:39 UTC 2026","971","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_project, Space → 200","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:34 UTC 2026","Tue Aug 04 12:58:34 UTC 2026","216","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_space, Project document → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:39 UTC 2026","Tue Aug 04 12:58:39 UTC 2026","209","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_project, Space document → 200","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:54 UTC 2026","Tue Aug 04 12:58:54 UTC 2026","223","History Service","GetHistory Validation","Negative","","","GetHistory: kind отсутствует → 400","Невалидное значение kind должно вернуть 400 InvalidForm."
+"passed","Tue Aug 04 12:58:44 UTC 2026","Tue Aug 04 12:58:44 UTC 2026","185","History Service","GetHistory Access","Negative: GetHistory — нет доступа к спейсу","","","GetHistory: foreign_client запрашивает kind='Task' → 400 SpaceIdNotSpecified","
+    Пользователь без доступа к спейсу не может получить историю ни для одного kind.
+    foreign_client не является участником main_space.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 SpaceIdNotSpecified.
+    "
+"passed","Tue Aug 04 12:58:54 UTC 2026","Tue Aug 04 12:58:55 UTC 2026","206","History Service","GetHistory Validation","Negative","","","GetHistory: kind='Member' — не в HISTORY_KINDS → 400","kind есть в EKind, но исключён из HISTORY_KINDS — историю для них через GetHistory запросить нельзя,
+    должен вернуть 400."
+"passed","Tue Aug 04 12:58:56 UTC 2026","Tue Aug 04 12:58:56 UTC 2026","214","History Service","GetHistory Validation","Positive","","","GetHistory: структура событий для kind='Project'","
+    Smoke: проверяем структуру первых 5 событий в ответе.
+    Каждое событие должно содержать:
+    - обязательные общие поля: _id, creatorId, createdAt, key, type, data
+    - kind-специфичные поля согласно KIND_REQUIRED_FIELDS (APP-5670)
+    ""Space"":     [""spaceId"", ""creatorId""],
+    ""Project"":   [""projectId"", ""spaceId"", ""creatorId""],
+    ""Task"":      [""taskId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""],
+    ""Document"":  [""documentId"", ""creatorId""],
+    ""Milestone"": [""milestoneId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""]
+    "
+"passed","Tue Aug 04 12:58:44 UTC 2026","Tue Aug 04 12:58:44 UTC 2026","190","History Service","GetHistory Access","Negative: GetHistory — нет доступа к спейсу","","","GetHistory: foreign_client запрашивает kind='Project' → 400 SpaceIdNotSpecified","
+    Пользователь без доступа к спейсу не может получить историю ни для одного kind.
+    foreign_client не является участником main_space.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 SpaceIdNotSpecified.
+    "
+"passed","Tue Aug 04 12:58:34 UTC 2026","Tue Aug 04 12:58:34 UTC 2026","242","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_space, Space document → 200","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:44 UTC 2026","Tue Aug 04 12:58:44 UTC 2026","234","History Service","GetHistory Access","Negative: GetHistory — нет доступа к спейсу","","","GetHistory: foreign_client запрашивает kind='Space' → 400 SpaceIdNotSpecified","
+    Пользователь без доступа к спейсу не может получить историю ни для одного kind.
+    foreign_client не является участником main_space.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 SpaceIdNotSpecified.
+    "
+"passed","Tue Aug 04 12:58:40 UTC 2026","Tue Aug 04 12:58:40 UTC 2026","556","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_project, Milestone → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:33 UTC 2026","Tue Aug 04 12:58:34 UTC 2026","967","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: client_with_access_only_in_space, Space → 200","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
+"passed","Tue Aug 04 12:58:45 UTC 2026","Tue Aug 04 12:58:51 UTC 2026","6619","History Service","GetHistory Access","Negative: GetHistory — нет доступа к спейсу","","","GetHistory: foreign_client запрашивает kind='Milestone' → 400 SpaceIdNotSpecified","
+    Пользователь без доступа к спейсу не может получить историю ни для одного kind.
+    foreign_client не является участником main_space.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 SpaceIdNotSpecified.
+    "
+"passed","Tue Aug 04 12:58:41 UTC 2026","Tue Aug 04 12:58:42 UTC 2026","941","History Service","GetHistory Access","Positive/Negative: GetHistory — иерархия сущностей","","","GetHistory: manager_client, Personal document → 403","Матрица доступа: проверяем что GetHistory соблюдает иерархию Space → Project → Board → Personal."
