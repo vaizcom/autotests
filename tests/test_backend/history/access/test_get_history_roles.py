@@ -1,6 +1,8 @@
 import allure
 import pytest
 
+from core.response_utils import short_resp
+
 pytestmark = [pytest.mark.backend]
 
 
@@ -31,7 +33,7 @@ def test_get_history_roles_with_access(
     if isinstance(kind_id, list):
         kind_id = kind_id[0]
 
-    allure.dynamic.title(f"GetHistory: {client_fixture} → {entity} → 200")
+    allure.dynamic.title(f"GetHistory: {client_fixture} → {entity} → 200 (OK)")
 
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) от имени {client_fixture}"):
         resp = client.post(
@@ -40,5 +42,5 @@ def test_get_history_roles_with_access(
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
 
-    with allure.step("Получаем 200"):
-        assert resp.status_code == 200
+    with allure.step("Получаем 200 (OK)"):
+        assert resp.status_code == 200, f"Ожидали 200 (OK), получили: {short_resp(resp)}"

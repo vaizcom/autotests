@@ -305,7 +305,7 @@ def main_project_2(main_client, main_space):
     return MAIN_PROJECT_2_ID
 
 
-_TEMP_MAIN_PROJECT_2 = "_autotest_temp_main_project_2"
+_TEMP_MAIN_PROJECT_2 = "_temp_project_2"
 
 
 @pytest.fixture(scope='session')
@@ -328,7 +328,7 @@ def temp_main_project_2(owner_client, main_space):
         description='temporary project 2',
         space_id=main_space,
     ))
-    assert resp.status_code == 200, f'Ошибка создания проекта: {short_resp(resp)}'
+    assert resp.status_code == 200, f'Setup: не удалось создать temp_main_project_2: {short_resp(resp)}'
     project_id = resp.json()['payload']['project']['_id']
 
     yield project_id

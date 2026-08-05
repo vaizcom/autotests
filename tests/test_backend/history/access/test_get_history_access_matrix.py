@@ -1,6 +1,8 @@
 import allure
 import pytest
 
+from core.response_utils import short_resp
+
 pytestmark = [pytest.mark.backend]
 
 
@@ -65,7 +67,7 @@ def test_get_history_access_matrix(
     if isinstance(kind_id, list):
         kind_id = kind_id[0]
 
-    allure.dynamic.title(f"GetHistory: {client_fixture}, {entity} → {expected_status}")
+    allure.dynamic.title(f"GetHistory: {client_fixture}, {entity} → {expected_status} ({'OK' if expected_status == 200 else 'Forbidden'})")
 
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) от имени {client_fixture}"):
         resp = client.post(
@@ -74,5 +76,5 @@ def test_get_history_access_matrix(
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
 
-    with allure.step(f"Получаем {expected_status}"):
-        assert resp.status_code == expected_status
+    with allure.step(f"Получаем {expected_status} ({'OK' if expected_status == 200 else 'Forbidden'})"):
+        assert resp.status_code == expected_status, f"Ожидали {expected_status} ({'OK' if expected_status == 200 else 'Forbidden'}), получили: {short_resp(resp)}"

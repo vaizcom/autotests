@@ -1,6 +1,8 @@
 import allure
 import pytest
 
+from core.response_utils import short_resp
+
 pytestmark = [pytest.mark.backend]
 
 
@@ -18,13 +20,13 @@ def test_get_history_foreign_user(request, foreign_client, main_space, kind, kin
     """
     Пользователь без доступа к спейсу не может получить историю ни для одного kind.
     foreign_client не является участником main_space.
-    Бек отклоняет на уровне проверки Current-Space-Id → 400 SpaceIdNotSpecified.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 (SpaceIdNotSpecified).
     """
     kind_id = request.getfixturevalue(kind_id_fixture)
     if isinstance(kind_id, list):
         kind_id = kind_id[0]
 
-    allure.dynamic.title(f"GetHistory: foreign_client запрашивает kind='{kind}' → 400 SpaceIdNotSpecified")
+    allure.dynamic.title(f"GetHistory: foreign_client запрашивает kind='{kind}' → 400 (SpaceIdNotSpecified)")
 
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' от имени foreign_client"):
         resp = foreign_client.post(
@@ -33,6 +35,6 @@ def test_get_history_foreign_user(request, foreign_client, main_space, kind, kin
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
 
-    with allure.step("Получаем 400 SpaceIdNotSpecified"):
-        assert resp.status_code == 400
+    with allure.step("Получаем 400 (SpaceIdNotSpecified)"):
+        assert resp.status_code == 400, f"Ожидали 400 (SpaceIdNotSpecified), получили: {short_resp(resp)}"
         assert resp.json()["error"]["code"] == "SpaceIdNotSpecified"

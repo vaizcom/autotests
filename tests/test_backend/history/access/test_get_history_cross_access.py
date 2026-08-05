@@ -1,6 +1,8 @@
 import allure
 import pytest
 
+from core.response_utils import short_resp
+
 pytestmark = [pytest.mark.backend]
 
 
@@ -32,13 +34,13 @@ def test_get_history_no_access_to_other_project(
 ):
     """
     Кросс-проект изоляция: project_client имеет доступ к main_project,
-    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403.
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
     """
     kind_id = request.getfixturevalue(kind_id_fixture)
     if isinstance(kind_id, list):
         kind_id = kind_id[0]
 
-    allure.dynamic.title(f"GetHistory: project_client → {entity} → 403")
+    allure.dynamic.title(f"GetHistory: project_client → {entity} → 403 (Forbidden)")
 
     with allure.step(
         f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) "
@@ -50,8 +52,8 @@ def test_get_history_no_access_to_other_project(
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
 
-    with allure.step("Получаем 403"):
-        assert resp.status_code == 403
+    with allure.step("Получаем 403 (Forbidden)"):
+        assert resp.status_code == 403, f"Ожидали 403 (Forbidden), получили: {short_resp(resp)}"
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -73,14 +75,14 @@ def test_get_history_no_access_to_other_board(
     """
     Кросс-борд изоляция: member_client имеет доступ к main_project,
     но НЕ к приватной борде (temp_board_in_main), созданной owner_client.
-    Задачи и майлстоуны на этой борде недоступны → 403.
+    Задачи и майлстоуны на этой борде недоступны → 403 (Forbidden).
     """
     kind_id = request.getfixturevalue(kind_id_fixture)
     if isinstance(kind_id, list):
         kind_id = kind_id[0]
 
     allure.dynamic.title(
-        f"GetHistory: member_client → {entity} → 403"
+        f"GetHistory: member_client → {entity} → 403 (Forbidden)"
     )
 
     with allure.step(
@@ -93,8 +95,8 @@ def test_get_history_no_access_to_other_board(
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
 
-    with allure.step("Получаем 403"):
-        assert resp.status_code == 403
+    with allure.step("Получаем 403 (Forbidden)"):
+        assert resp.status_code == 403, f"Ожидали 403 (Forbidden), получили: {short_resp(resp)}"
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -111,7 +113,7 @@ def test_get_history_no_access_to_other_space(main_client, main_space, foreign_s
     но НЕ в foreign_space. Запрос истории foreign_space
     через свой Current-Space-Id не должен вернуть 200.
     """
-    allure.dynamic.title("GetHistory: main_client → foreign_space → не 200")
+    allure.dynamic.title("GetHistory: main_client → foreign_space → 403 (Forbidden)")
 
     with allure.step(
         f"Отправляем POST /GetHistory: kind='Space', kindId=foreign_space "
@@ -123,5 +125,5 @@ def test_get_history_no_access_to_other_space(main_client, main_space, foreign_s
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
 
-    with allure.step("Получаем 403 — main_client не является участником foreign_space"):
-        assert resp.status_code == 403
+    with allure.step("Получаем 403 (Forbidden) — main_client не является участником foreign_space"):
+        assert resp.status_code == 403, f"Ожидали 403 (Forbidden), получили: {short_resp(resp)}"
