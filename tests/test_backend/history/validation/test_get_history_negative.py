@@ -86,3 +86,28 @@ def test_get_history_invalid_kind_id(main_client, main_space, kind_id_value, cas
     with allure.step("Получаем 400 InvalidForm"):
         assert resp.status_code == 400
         assert resp.json()["error"]["code"] == "InvalidForm"
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 3. Несуществующая сущность → 403
+# ──────────────────────────────────────────────────────────────────────────────
+
+@allure.parent_suite("History Service")
+@allure.suite("GetHistory Validation")
+@allure.sub_suite("Negative")
+@pytest.mark.parametrize("kind", [
+    "Space", "Project", "Task", "Document", "Milestone",
+], ids=["space", "project", "task", "document", "milestone"])
+def test_get_history_nonexistent_entity(main_client, main_space, kind):
+    """Валидный kind + валидный формат kindId, но несуществующая сущность → 403."""
+    allure.dynamic.title(f"GetHistory: kind='{kind}', kindId несуществующий → 403")
+
+    with allure.step(f"Отправляем POST /GetHistory: kind='{kind}', kindId='{_VALID_MONGO_ID}'"):
+        resp = main_client.post(
+            path="/GetHistory",
+            json={"kind": kind, "kindId": _VALID_MONGO_ID},
+            headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
+        )
+
+    with allure.step("Получаем 403 — сущность не существует, доступ запрещён"):
+        assert resp.status_code == 403

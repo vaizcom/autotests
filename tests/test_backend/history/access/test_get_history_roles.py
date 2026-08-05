@@ -13,16 +13,26 @@ pytestmark = [pytest.mark.backend]
     "member_client",
     "guest_client",
 ], ids=["owner", "manager", "member", "guest"])
-def test_get_history_roles_with_access(request, main_space, main_project, client_fixture):
-    """Owner, Manager, Member, Guest имеют доступ к истории проекта."""
+@pytest.mark.parametrize("kind,kind_id_fixture,entity", [
+    ("Space",    "main_space",       "Space"),
+    ("Project",  "main_project",     "Project"),
+    ("Document", "main_space_doc",   "Space document"),
+    ("Document", "main_project_doc", "Project document"),
+], ids=["space", "project", "space_doc", "project_doc"])
+def test_get_history_roles_with_access(
+    request, main_space, client_fixture, kind, kind_id_fixture, entity,
+):
+    """Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса и проекта."""
     client = request.getfixturevalue(client_fixture)
+    kind_id = request.getfixturevalue(kind_id_fixture)
 
-    allure.dynamic.title(f"GetHistory: {client_fixture} запрашивает историю проекта → 200")
+    allure.dynamic.title(f"GetHistory: {client_fixture} → {entity} → 200")
 
-    with allure.step(f"Отправляем POST /GetHistory: kind='Project' от имени {client_fixture}"):
+    with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) от имени {client_fixture}"):
         resp = client.post(
             path="/GetHistory",
-            json={"kind": "Project", "kindId": main_project},
+            json={"kind": kind, "kindId": kind_id},
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
 
