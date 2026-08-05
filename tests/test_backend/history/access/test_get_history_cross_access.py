@@ -12,9 +12,9 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
-@allure.sub_suite("Negative: GetHistory — кросс-проект")
+@allure.sub_suite("Cross access: Cross project")
 @pytest.mark.parametrize("kind,kind_id_fixture,entity", [
-    ("Project",   "temp_main_project_2",                   "Проект"),
+    ("Project",   "temp_main_project_2",                   "Кросс_проект_2"),
     ("Task",      "temp_task_in_project_2",            "Задача в проекте_2"),
     ("Milestone", "temp_milestone_in_project_2",       "Майлстоун в проекте_2"),
     ("Document",  "isolation_project_2_doc",           "Проджект-документ проекта_2"),
@@ -44,7 +44,7 @@ def test_get_history_no_access_to_other_project(
 
     with allure.step(
         f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) "
-        f"от имени project_client"
+        f"от имени project_client который имеет доступ к main_project,но НЕ к temp_main_project_2"
     ):
         resp = client_with_access_only_in_project.post(
             path="/GetHistory",
@@ -63,7 +63,7 @@ def test_get_history_no_access_to_other_project(
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
-@allure.sub_suite("Negative: GetHistory — кросс-борд")
+@allure.sub_suite("Cross access: Cross board")
 @pytest.mark.parametrize("kind,kind_id_fixture,entity", [
     ("Task",      "temp_task_on_temp_board",      "Задача на приватной борде"),
     ("Milestone", "temp_milestone_on_temp_board",  "Майлстоун на приватной борде"),
@@ -106,7 +106,7 @@ def test_get_history_no_access_to_other_board(
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
-@allure.sub_suite("Negative: GetHistory — кросс-спейс")
+@allure.sub_suite("Cross access: Cross space")
 def test_get_history_no_access_to_other_space(main_client, main_space, foreign_space):
     """
     Кросс-спейс изоляция: main_client находится в main_space,
