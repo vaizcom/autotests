@@ -19,18 +19,35 @@ from test_backend.data.endpoints.Task.task_endpoints import (
 from test_backend.data.endpoints.milestone.milestones_endpoints import (
     create_milestone_endpoint,
     archive_milestone_endpoint,
+    get_milestones_endpoint,
 )
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Борда / Задача / Майлстоун в project_2 (для кросс-проект изоляции)
+# Существующий майлстоун на main_board (для roles теста)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@pytest.fixture(scope="session")
+def milestone_id_on_main_board(owner_client, main_space, main_board):
+    """Возвращает ID первого существующего майлстоуна на main_board."""
+    resp = owner_client.post(**get_milestones_endpoint(
+        space_id=main_space, board_id=main_board, limit=1,
+    ))
+    assert resp.status_code == 200, f"Ошибка GetMilestones: {short_resp(resp)}"
+    milestones = resp.json().get("payload", {}).get("milestones", [])
+    assert len(milestones) > 0, "На main_board нет майлстоунов"
+    return milestones[0]["_id"]
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Борда / Задача / Майлстоун в temp_main_project_2 (для кросс-проект изоляции)
 # ──────────────────────────────────────────────────────────────────────────────
 
 _TEMP_BOARD_PROJECT_2 = "_autotest_temp_board_project_2"
 
 
 @pytest.fixture(scope="session")
-def temp_board_in_project_2(owner_client, main_space, main_project_2):
-    """Временная борда в main_project_2 для тестов кросс-проект изоляции."""
+def temp_board_in_project_2(owner_client, main_space, temp_main_project_2):
+    """Временная борда в temp_main_project_2 для тестов кросс-проект изоляции."""
     # Cleanup: удаляем мусор от предыдущего прогона
     resp = owner_client.post(**get_boards_endpoint(space_id=main_space))
     if resp.status_code == 200:
@@ -44,7 +61,7 @@ def temp_board_in_project_2(owner_client, main_space, main_project_2):
 
     resp = owner_client.post(**create_board_endpoint(
         name=_TEMP_BOARD_PROJECT_2,
-        temp_project=main_project_2,
+        temp_project=temp_main_project_2,
         space_id=main_space,
         groups=DEFAULT_BOARD_GROUPS,
         typesList=typesList,
@@ -81,13 +98,13 @@ def temp_task_in_project_2(owner_client, main_space, temp_board_in_project_2):
 
 
 @pytest.fixture
-def temp_milestone_in_project_2(owner_client, main_space, temp_board_in_project_2, main_project_2):
+def temp_milestone_in_project_2(owner_client, main_space, temp_board_in_project_2, temp_main_project_2):
     """Временный майлстоун на борде в project_2."""
     resp = owner_client.post(**create_milestone_endpoint(
         space_id=main_space,
         board=temp_board_in_project_2,
         name="Temp Milestone project_2 " + generate_date(),
-        project=main_project_2,
+        project=temp_main_project_2,
     ))
     assert resp.status_code == 200, f"Ошибка создания майлстоуна: {short_resp(resp)}"
     milestone_id = resp.json()["payload"]["milestone"]["_id"]
@@ -121,9 +138,9 @@ def _archive_doc(client, doc_id, space_id):
 
 
 @pytest.fixture
-def isolation_project_2_doc(owner_client, main_space, main_project_2):
-    """Проджект-документ project_2: CreateDocument(kind='Project', kindId=main_project_2)."""
-    doc_id = _create_doc(owner_client, "Project", main_project_2, main_space)
+def isolation_project_2_doc(owner_client, main_space, temp_main_project_2):
+    """Проджект-документ project_2: CreateDocument(kind='Project', kindId=temp_main_project_2)."""
+    doc_id = _create_doc(owner_client, "Project", temp_main_project_2, main_space)
     yield doc_id
     _archive_doc(owner_client, doc_id, main_space)
 

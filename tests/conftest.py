@@ -37,6 +37,8 @@ from test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint,
     create_board_endpoint,
     get_project_endpoint,
+    get_projects_endpoint,
+    archive_project_endpoint,
 )
 from test_backend.data.endpoints.Space.space_endpoints import (
     create_space_endpoint,
@@ -301,6 +303,40 @@ def main_project_2(main_client, main_space):
     resp = main_client.post(**get_project_endpoint(project_id=MAIN_PROJECT_2_ID, space_id=main_space))
     assert resp.status_code == 200, f'Space {MAIN_PROJECT_2_ID} not found: {short_resp(resp)}'
     return MAIN_PROJECT_2_ID
+
+
+_TEMP_MAIN_PROJECT_2 = "_autotest_temp_main_project_2"
+
+
+@pytest.fixture(scope='session')
+def temp_main_project_2(owner_client, main_space):
+    """Временный проект в main_space — замена main_project_2 для тестов,
+    которым нужен 'другой проект' без риска каскадных падений."""
+    # Cleanup: архивируем мусор от предыдущего прогона
+    resp = owner_client.post(**get_projects_endpoint(space_id=main_space))
+    if resp.status_code == 200:
+        for project in resp.json().get("payload", {}).get("projects", []):
+            if project.get("name") == _TEMP_MAIN_PROJECT_2:
+                owner_client.post(**archive_project_endpoint(
+                    project_id=project["_id"], space_id=main_space,
+                ))
+
+    slug = generate_slug()
+    resp = owner_client.post(**create_project_endpoint(
+        name=_TEMP_MAIN_PROJECT_2, slug=slug,
+        color='blue', icon='Dot',
+        description='temporary project 2',
+        space_id=main_space,
+    ))
+    assert resp.status_code == 200, f'Ошибка создания проекта: {short_resp(resp)}'
+    project_id = resp.json()['payload']['project']['_id']
+
+    yield project_id
+
+    owner_client.post(**archive_project_endpoint(
+        project_id=project_id, space_id=main_space,
+    ))
+
 
 @pytest.fixture(scope='session')
 def second_project(main_client, second_space):
