@@ -6,7 +6,7 @@ from test_backend.data.endpoints.Space.space_endpoints import edit_space_endpoin
 from test_backend.data.endpoints.file.upload_avatar_endpoint import upload_avatar_endpoint, DUMMY_PNG_CONTENT
 from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
-pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
+pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("History Service")
@@ -19,14 +19,19 @@ def test_space_created_event(main_client, space_for_history):
     space_id = space_for_history["space_id"]
     name = space_for_history["name"]
 
-    assert_history_event_exists(
+    event = assert_history_event_exists(
         client=main_client,
         space_id=space_id,
         kind="Space",
         kind_id=space_id,
         expected_event_key="SPACE_CREATED",
-        expected_data={"name": name},
+        expected_data={"_id": space_id, "name": name},
     )
+
+    with allure.step("Проверяем что data содержит только _id и name"):
+        assert set(event["data"].keys()) == {"_id", "name"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'_id', 'name'}}"
+        )
 
 
 @allure.parent_suite("History Service")
@@ -43,14 +48,19 @@ def test_space_renamed_event(main_client, space_for_history):
         resp = main_client.post(**edit_space_endpoint(name=new_name, space_id=space_id))
         assert resp.status_code == 200, f"Ошибка переименования space: {resp.text}"
 
-    assert_history_event_exists(
+    event = assert_history_event_exists(
         client=main_client,
         space_id=space_id,
         kind="Space",
         kind_id=space_id,
         expected_event_key="SPACE_RENAMED",
-        expected_data={"name": new_name},
+        expected_data={"_id": space_id, "name": new_name},
     )
+
+    with allure.step("Проверяем что data содержит только _id и name"):
+        assert set(event["data"].keys()) == {"_id", "name"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'_id', 'name'}}"
+        )
 
 
 @allure.parent_suite("History Service")
@@ -76,10 +86,16 @@ def test_space_avatar_changed_event(main_client, space_for_history):
         )
         assert resp.status_code == 200, f"Ошибка загрузки аватара: {resp.text}"
 
-    assert_history_event_exists(
+    event = assert_history_event_exists(
         client=main_client,
         space_id=space_id,
         kind="Space",
         kind_id=space_id,
         expected_event_key="SPACE_AVATAR_CHANGED",
+        expected_data={"_id": space_id},
     )
+
+    with allure.step("Проверяем что data содержит только _id и name"):
+        assert set(event["data"].keys()) == {"_id", "name"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'_id', 'name'}}"
+        )

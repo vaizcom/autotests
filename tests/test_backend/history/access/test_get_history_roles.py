@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
-@allure.sub_suite("Positive: GetHistory — доступ по ролям")
+@allure.sub_suite("Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)")
 @pytest.mark.parametrize("client_fixture", [
     "owner_client",
     "manager_client",
