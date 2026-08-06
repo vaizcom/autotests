@@ -180,9 +180,9 @@ jobs:
           cp -r allure-report allure-history/${REPORT_NUM}
           # Сохраняем историю для следующего запуска
           cp -r allure-report/history allure-history/last-history 2>/dev/null || true
-          # Удаляем старые отчёты (оставляем 20)
+          # Удаляем старые отчёты (оставляем 5)
           cd allure-history
-          ls -d [0-9]* 2>/dev/null | sort -n | head -n -20 | xargs rm -rf 2>/dev/null || true
+          ls -d [0-9]* 2>/dev/null | sort -n | head -n -5 | xargs rm -rf 2>/dev/null || true
           cd ..
           # Генерируем index.html с редиректом
           cat > allure-history/index.html << EOF
