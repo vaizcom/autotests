@@ -14,7 +14,7 @@ from test_backend.data.endpoints.Space.space_endpoints import get_spaces_endpoin
 from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
-pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
+pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("History Service")
@@ -33,16 +33,23 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
         invite_resp = main_client.post(**invite_to_space_endpoint(
             space_id=space_id,
             email=owner_email,
-            space_access="Member",
+            space_access="Owner",
         ))
         assert invite_resp.status_code == 200, f"Ошибка инвайта: {invite_resp.text}"
 
-        assert_history_event_exists(
+        event = assert_history_event_exists(
             client=main_client,
             space_id=space_id,
             kind="Space",
             kind_id=space_id,
             expected_event_key="SPACE_INVITED",
+            expected_data={"role": "Owner", "email": owner_email},
+            assert_unique=True,
+        )
+
+    with allure.step("Проверяем что data содержит только role и email"):
+        assert set(event["data"].keys()) == {"role", "email"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'role', 'email'}}"
         )
 
     with allure.step("2. owner принимает инвайт → ожидаем SPACE_INVITE_ACCEPTED"):
@@ -61,20 +68,45 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
         ))
         assert confirm_resp.status_code == 200, f"Ошибка подтверждения инвайта: {confirm_resp.text}"
 
-        assert_history_event_exists(
+        event = assert_history_event_exists(
             client=main_client,
             space_id=space_id,
             kind="Space",
             kind_id=space_id,
             expected_event_key="SPACE_INVITE_ACCEPTED",
+            expected_data={"email": owner_email},
+            assert_unique=True,
+        )
+
+    with allure.step("Проверяем что data содержит только email"):
+        assert set(event["data"].keys()) == {"email"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'email'}}"
+        )
+
+    with allure.step("owner_client тоже видит SPACE_INVITED и SPACE_INVITE_ACCEPTED"):
+        assert_history_event_exists(
+            client=owner_client,
+            space_id=space_id,
+            kind="Space",
+            kind_id=space_id,
+            expected_event_key="SPACE_INVITED",
+            check_self=False,
+        )
+        assert_history_event_exists(
+            client=owner_client,
+            space_id=space_id,
+            kind="Space",
+            kind_id=space_id,
+            expected_event_key="SPACE_INVITE_ACCEPTED",
+            check_self=False,
         )
 
     with allure.step("3. Получаем member_id owner в space"):
         members_resp = main_client.post(**get_space_members_endpoint(space_id=space_id))
         assert members_resp.status_code == 200
         members = members_resp.json()["payload"]["members"]
-        owner_member = next((m for m in members if m.get("fullName") == "owner"), None)
-        assert owner_member is not None, "owner не найден в списке участников space"
+        owner_member = next((m for m in members if m.get("email") == owner_email), None)
+        assert owner_member is not None, f"owner ({owner_email}) не найден в списке участников space"
         member_id = owner_member["_id"]
 
     with allure.step("4. Деактивируем owner → ожидаем SPACE_USER_DEACTIVATED"):
@@ -84,12 +116,19 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
         ))
         assert deactivate_resp.status_code == 200, f"Ошибка деактивации: {deactivate_resp.text}"
 
-        assert_history_event_exists(
+        event = assert_history_event_exists(
             client=main_client,
             space_id=space_id,
             kind="Space",
             kind_id=space_id,
             expected_event_key="SPACE_USER_DEACTIVATED",
+            expected_data={"members": [member_id]},
+            assert_unique=True,
+        )
+
+    with allure.step("Проверяем что data содержит только members"):
+        assert set(event["data"].keys()) == {"members"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'members'}}"
         )
 
     with allure.step("5. Реактивируем owner → ожидаем SPACE_USER_REACTIVATED"):
@@ -99,12 +138,19 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
         ))
         assert reactivate_resp.status_code == 200, f"Ошибка реактивации: {reactivate_resp.text}"
 
-        assert_history_event_exists(
+        event = assert_history_event_exists(
             client=main_client,
             space_id=space_id,
             kind="Space",
             kind_id=space_id,
             expected_event_key="SPACE_USER_REACTIVATED",
+            expected_data={"members": [member_id]},
+            assert_unique=True,
+        )
+
+    with allure.step("Проверяем что data содержит только members"):
+        assert set(event["data"].keys()) == {"members"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'members'}}"
         )
 
 
@@ -114,6 +160,7 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
 def test_space_invite_removed_event(main_client, space_for_history):
     """
     При удалении инвайта до его принятия генерируется событие SPACE_INVITE_REMOVED.
+    data содержит email приглашённого.
     """
     space_id = space_for_history["space_id"]
     manager_email = USERS['manager']['email']
@@ -146,12 +193,19 @@ def test_space_invite_removed_event(main_client, space_for_history):
         ))
         assert remove_resp.status_code == 200, f"Ошибка удаления инвайта: {remove_resp.text}"
 
-        assert_history_event_exists(
+        event = assert_history_event_exists(
             client=main_client,
             space_id=space_id,
             kind="Space",
             kind_id=space_id,
             expected_event_key="SPACE_INVITE_REMOVED",
+            expected_data={"email": manager_email},
+            assert_unique=True,
+        )
+
+    with allure.step("Проверяем что data содержит только email"):
+        assert set(event["data"].keys()) == {"email"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'email'}}"
         )
 
 
@@ -161,6 +215,7 @@ def test_space_invite_removed_event(main_client, space_for_history):
 def test_space_invite_declined_event(main_client, member_client, space_for_history):
     """
     При отклонении инвайта приглашённым пользователем генерируется событие SPACE_INVITE_DECLINED.
+    data содержит email отклонившего.
     """
     space_id = space_for_history["space_id"]
     member_email = USERS['member']['email']
@@ -188,10 +243,17 @@ def test_space_invite_declined_event(main_client, member_client, space_for_histo
         ))
         assert decline_resp.status_code == 200, f"Ошибка отклонения инвайта: {decline_resp.text}"
 
-        assert_history_event_exists(
+        event = assert_history_event_exists(
             client=main_client,
             space_id=space_id,
             kind="Space",
             kind_id=space_id,
             expected_event_key="SPACE_INVITE_DECLINED",
+            expected_data={"email": member_email},
+            assert_unique=True,
+        )
+
+    with allure.step("Проверяем что data содержит только email"):
+        assert set(event["data"].keys()) == {"email"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'email'}}"
         )

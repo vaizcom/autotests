@@ -12,7 +12,7 @@ from core.response_utils import short_resp
 def assert_history_event_exists(
         client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
         expected_data: dict = None, timeout: int = 20, interval: float = 1.0,
-        check_self: bool = True,
+        check_self: bool = True, assert_unique: bool = False,
 ) -> dict:
     """
     Вспомогательная функция: запрашивает историю с механизмом ожидания (поллингом).
@@ -64,6 +64,21 @@ def assert_history_event_exists(
         assert_history_kind_fields(found_event, kind)
         if check_self:
             assert_history_check_self(found_event, kind, kind_id)
+
+        if assert_unique:
+            duplicates = []
+            for event in histories:
+                if event.get('key') != expected_event_key:
+                    continue
+                if expected_data:
+                    event_data = event.get('data', {})
+                    if not all(event_data.get(k) == v for k, v in expected_data.items()):
+                        continue
+                duplicates.append(event)
+            assert len(duplicates) == 1, (
+                f"Событие {expected_event_key} найдено {len(duplicates)} раз (ожидалось 1). "
+                f"IDs: {[e.get('_id') for e in duplicates]}"
+            )
 
         return found_event
 
