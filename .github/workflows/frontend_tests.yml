@@ -157,7 +157,7 @@ jobs:
           allure_report: allure-report
           allure_history: allure-history
           gh_pages: gh-pages/frontend/${{ env.FRONTEND_STAND }}
-          keep_reports: 20
+          keep_reports: 5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -168,8 +168,26 @@ jobs:
       - name: Prepare deploy directory
         if: ${{ !cancelled() && github.event.inputs.update_snapshots != 'true' }}
         run: |
+          # Берём полное содержимое gh-pages как базу (сохраняем backend и другие стенды)
+          if [ -d "gh-pages" ]; then
+            cp -r gh-pages deploy
+            rm -rf deploy/.git
+          else
+            mkdir -p deploy
+          fi
+
+          # Чистим старые отчёты во ВСЕХ frontend-стендах (оставляем 5)
+          for STAND_DIR in deploy/frontend/*/; do
+            if [ -d "$STAND_DIR" ]; then
+              (cd "$STAND_DIR" && ls -d [0-9]* 2>/dev/null | sort -n | head -n -5 | xargs rm -rf 2>/dev/null || true)
+            fi
+          done
+
+          # Заменяем отчёты текущего стенда
+          rm -rf deploy/frontend/${{ env.FRONTEND_STAND }}
           mkdir -p deploy/frontend/${{ env.FRONTEND_STAND }}
           cp -r allure-history/* deploy/frontend/${{ env.FRONTEND_STAND }}/
+
           cat > deploy/index.html << 'HTMLEOF'
           <!DOCTYPE html>
           <html lang="ru">
@@ -198,7 +216,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./deploy
-          keep_files: true
           full_commit_message: "deploy: frontend ${{ env.FRONTEND_STAND }} allure report"
 
       - name: Add Allure link to summary
