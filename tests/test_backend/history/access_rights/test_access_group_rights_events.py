@@ -33,8 +33,13 @@ def test_access_group_rights_updated_event(
     main_client, space_for_history, project_for_history, board_for_history, rights_kind,
 ):
     """
-    При обновлении прав группы доступа на сущность генерируется событие ACCESS_GROUP_RIGHTS_UPDATED.
-    data содержит groupId, groupName, kind, kindName и level.
+    Сценарий: изменение уровня доступа группы на сущность (Space/Project/Board).
+
+    Шаги:
+    1. Создаём группу доступа в спейсе
+    2. Назначаем группе уровень Member на сущность через UpdateAccessGroupRights
+    3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_RIGHTS_UPDATED
+    4. Проверяем data: groupId, groupName, kind, kindName, level
     """
     allure.dynamic.title(f"ACCESS_GROUP_RIGHTS_UPDATED event — rights on {rights_kind}")
     space_id = space_for_history["space_id"]
