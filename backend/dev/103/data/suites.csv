@@ -1,0 +1,249 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Fri Aug 07 09:17:15 UTC 2026","Fri Aug 07 09:17:15 UTC 2026","162","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: owner_client → Space document → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:10 UTC 2026","Fri Aug 07 09:17:11 UTC 2026","148","History Service","GetHistory Access","Negative: GetHistory — нет доступа к спейсу","","","GetHistory: foreign_client запрашивает kind='Space' → 400 (SpaceIdNotSpecified)","
+    Пользователь без доступа к спейсу не может получить историю ни для одного kind.
+    foreign_client не является участником main_space.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 (SpaceIdNotSpecified).
+    "
+"passed","Fri Aug 07 09:18:33 UTC 2026","Fri Aug 07 09:18:33 UTC 2026","155","History Service","GetHistory Validation","Negative: несуществующая сущность","","","GetHistory: kind='Milestone', kindId несуществующий → 400 (Bad Request)","Валидный kind + валидный формат kindId, но несуществующая сущность."
+"passed","Fri Aug 07 09:17:13 UTC 2026","Fri Aug 07 09:17:13 UTC 2026","193","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: manager_client → Project → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:16:50 UTC 2026","Fri Aug 07 09:16:51 UTC 2026","153","History Service","GetHistory Access","Access matrix: Space level","","","GetHistory: space_only, Member document → 403 (Forbidden)","Space-only клиент: видит Space и спейс-документы, не видит Project и ниже."
+"passed","Fri Aug 07 09:17:15 UTC 2026","Fri Aug 07 09:17:15 UTC 2026","166","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: manager_client → Space document → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:49 UTC 2026","Fri Aug 07 09:17:50 UTC 2026","598","History Service","Space events","","","","ACCESS_GROUP_UPDATED event — обновление description","
+    При обновлении имени/описания группы доступа генерируется событие ACCESS_GROUP_UPDATED.
+    data содержит groupId и name.
+    "
+"passed","Fri Aug 07 09:17:16 UTC 2026","Fri Aug 07 09:17:16 UTC 2026","165","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: manager_client → Project document → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:16:50 UTC 2026","Fri Aug 07 09:16:50 UTC 2026","307","History Service","GetHistory Access","Access matrix: Space level","","","GetHistory: space_only, Project → 403 (Forbidden)","Space-only клиент: видит Space и спейс-документы, не видит Project и ниже."
+"passed","Fri Aug 07 09:16:56 UTC 2026","Fri Aug 07 09:16:56 UTC 2026","157","History Service","GetHistory Access","Access matrix: Personal document","","","GetHistory: owner_client, Personal document → 403 (Forbidden)","Персональный документ доступен только владельцу (main_client), остальные получают 403."
+"passed","Fri Aug 07 09:17:51 UTC 2026","Fri Aug 07 09:18:07 UTC 2026","16580","History Service","Space events","Settings","","","SPACE_RENAMED event","
+    При переименовании space генерируется событие SPACE_RENAMED с новым именем в data.
+    "
+"passed","Fri Aug 07 09:18:33 UTC 2026","Fri Aug 07 09:18:34 UTC 2026","503","History Service","GetHistory Validation","Positive","","","GetHistory: структура событий для kind='Task'","
+    Smoke: проверяем структуру первых 5 событий в ответе.
+    Каждое событие должно содержать:
+    - обязательные общие поля: _id, creatorId, createdAt, key, type, data
+    - kind-специфичные поля согласно KIND_REQUIRED_FIELDS (APP-5670)
+    ""Space"":     [""spaceId"", ""creatorId""],
+    ""Project"":   [""projectId"", ""spaceId"", ""creatorId""],
+    ""Task"":      [""taskId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""],
+    ""Document"":  [""documentId"", ""creatorId""],
+    ""Milestone"": [""milestoneId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""]
+    "
+"passed","Fri Aug 07 09:17:11 UTC 2026","Fri Aug 07 09:17:11 UTC 2026","386","History Service","GetHistory Access","Negative: GetHistory — нет доступа к спейсу","","","GetHistory: foreign_client запрашивает kind='Milestone' → 400 (SpaceIdNotSpecified)","
+    Пользователь без доступа к спейсу не может получить историю ни для одного kind.
+    foreign_client не является участником main_space.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 (SpaceIdNotSpecified).
+    "
+"passed","Fri Aug 07 09:16:58 UTC 2026","Fri Aug 07 09:17:00 UTC 2026","2694","History Service","GetHistory Access","Cross access: Cross project","","","GetHistory: project_client → Кросс_проект_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Fri Aug 07 09:18:34 UTC 2026","Fri Aug 07 09:18:35 UTC 2026","340","History Service","GetHistory Validation","Positive","","","GetHistory: структура событий для kind='Document'","
+    Smoke: проверяем структуру первых 5 событий в ответе.
+    Каждое событие должно содержать:
+    - обязательные общие поля: _id, creatorId, createdAt, key, type, data
+    - kind-специфичные поля согласно KIND_REQUIRED_FIELDS (APP-5670)
+    ""Space"":     [""spaceId"", ""creatorId""],
+    ""Project"":   [""projectId"", ""spaceId"", ""creatorId""],
+    ""Task"":      [""taskId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""],
+    ""Document"":  [""documentId"", ""creatorId""],
+    ""Milestone"": [""milestoneId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""]
+    "
+"passed","Fri Aug 07 09:16:55 UTC 2026","Fri Aug 07 09:16:56 UTC 2026","559","History Service","GetHistory Access","Access matrix: Project level","","","GetHistory: project_only, Milestone → 403 (Forbidden)","Project-only клиент: видит Space, Project и их документы, не видит бордовые сущности и Member doc."
+"passed","Fri Aug 07 09:18:32 UTC 2026","Fri Aug 07 09:18:32 UTC 2026","167","History Service","GetHistory Validation","Negative: невалидный kindId","","","GetHistory: kindId отсутствует → 400 (InvalidForm)","Невалидное значение kindId должно вернуть 400 (InvalidForm)."
+"passed","Fri Aug 07 09:17:16 UTC 2026","Fri Aug 07 09:17:16 UTC 2026","158","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: guest_client → Space document → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:16:55 UTC 2026","Fri Aug 07 09:16:55 UTC 2026","154","History Service","GetHistory Access","Access matrix: Project level","","","GetHistory: project_only, Task → 403 (Forbidden)","Project-only клиент: видит Space, Project и их документы, не видит бордовые сущности и Member doc."
+"passed","Fri Aug 07 09:17:17 UTC 2026","Fri Aug 07 09:17:17 UTC 2026","159","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: guest_client → Project document → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:16:56 UTC 2026","Fri Aug 07 09:16:56 UTC 2026","362","History Service","GetHistory Access","Access matrix: Personal document","","","GetHistory: main_client, Personal document → 200 (OK)","Персональный документ доступен только владельцу (main_client), остальные получают 403."
+"passed","Fri Aug 07 09:16:50 UTC 2026","Fri Aug 07 09:16:50 UTC 2026","155","History Service","GetHistory Access","Access matrix: Space level","","","GetHistory: space_only, Project document → 403 (Forbidden)","Space-only клиент: видит Space и спейс-документы, не видит Project и ниже."
+"passed","Fri Aug 07 09:17:12 UTC 2026","Fri Aug 07 09:17:12 UTC 2026","263","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: manager_client → Space → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:00 UTC 2026","Fri Aug 07 09:17:02 UTC 2026","1347","History Service","GetHistory Access","Cross access: Cross project","","","GetHistory: project_client → Задача в проекте_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Fri Aug 07 09:18:32 UTC 2026","Fri Aug 07 09:18:32 UTC 2026","158","History Service","GetHistory Validation","Negative: несуществующая сущность","","","GetHistory: kind='Task', kindId несуществующий → 400 (Bad Request)","Валидный kind + валидный формат kindId, но несуществующая сущность."
+"passed","Fri Aug 07 09:16:54 UTC 2026","Fri Aug 07 09:16:54 UTC 2026","752","History Service","GetHistory Access","Access matrix: Project level","","","GetHistory: project_only, Space → 200 (OK)","Project-only клиент: видит Space, Project и их документы, не видит бордовые сущности и Member doc."
+"passed","Fri Aug 07 09:18:32 UTC 2026","Fri Aug 07 09:18:32 UTC 2026","162","History Service","GetHistory Validation","Negative: несуществующая сущность","","","GetHistory: kind='Project', kindId несуществующий → 403 (Forbidden)","Валидный kind + валидный формат kindId, но несуществующая сущность."
+"passed","Fri Aug 07 09:17:07 UTC 2026","Fri Aug 07 09:17:07 UTC 2026","572","History Service","GetHistory Access","Cross access: Cross board","","","GetHistory: member_client → Задача на приватной борде → 403 (Forbidden)","
+    Кросс-борд изоляция: member_client имеет доступ к main_project,
+    но НЕ к приватной борде (temp_board_in_main), созданной owner_client.
+    Задачи и майлстоуны на этой борде недоступны → 403 (Forbidden).
+    "
+"passed","Fri Aug 07 09:17:16 UTC 2026","Fri Aug 07 09:17:17 UTC 2026","775","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: member_client → Project document → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:49 UTC 2026","Fri Aug 07 09:17:49 UTC 2026","606","History Service","Space events","","","","ACCESS_GROUP_UPDATED event — обновление name","
+    При обновлении имени/описания группы доступа генерируется событие ACCESS_GROUP_UPDATED.
+    data содержит groupId и name.
+    "
+"passed","Fri Aug 07 09:18:31 UTC 2026","Fri Aug 07 09:18:31 UTC 2026","155","History Service","GetHistory Validation","Negative: невалидный kind","","","GetHistory: kind = пустая строка → 400 (InvalidForm)","Невалидное значение kind должно вернуть 400 (InvalidForm)."
+"passed","Fri Aug 07 09:17:05 UTC 2026","Fri Aug 07 09:17:06 UTC 2026","389","History Service","GetHistory Access","Cross access: Cross project","","","GetHistory: project_client → Персональный спейс-документ → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Fri Aug 07 09:17:13 UTC 2026","Fri Aug 07 09:17:14 UTC 2026","174","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: owner_client → Task → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:18:32 UTC 2026","Fri Aug 07 09:18:33 UTC 2026","165","History Service","GetHistory Validation","Negative: несуществующая сущность","","","GetHistory: kind='Document', kindId несуществующий → 400 (Bad Request)","Валидный kind + валидный формат kindId, но несуществующая сущность."
+"passed","Fri Aug 07 09:17:51 UTC 2026","Fri Aug 07 09:17:51 UTC 2026","191","History Service","Space events","Settings","","","SPACE_CREATED event","
+    При создании space генерируется событие SPACE_CREATED с именем space в data.
+    "
+"passed","Fri Aug 07 09:17:14 UTC 2026","Fri Aug 07 09:17:15 UTC 2026","503","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: owner_client → Milestone → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:15 UTC 2026","Fri Aug 07 09:17:15 UTC 2026","157","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: manager_client → Milestone → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:14 UTC 2026","Fri Aug 07 09:17:14 UTC 2026","166","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: manager_client → Task → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:18:32 UTC 2026","Fri Aug 07 09:18:32 UTC 2026","164","History Service","GetHistory Validation","Negative: несуществующая сущность","","","GetHistory: kind='Space', kindId несуществующий → 403 (Forbidden)","Валидный kind + валидный формат kindId, но несуществующая сущность."
+"broken","Fri Aug 07 09:17:27 UTC 2026","Fri Aug 07 09:17:27 UTC 2026","0","History Service","Access Rights","","","","test_access_group_rights_updated_event[rights_on_space]","
+    При обновлении прав группы доступа на сущность генерируется событие ACCESS_GROUP_RIGHTS_UPDATED.
+    data содержит groupId, groupName, kind, kindName и level.
+    "
+"passed","Fri Aug 07 09:18:31 UTC 2026","Fri Aug 07 09:18:31 UTC 2026","164","History Service","GetHistory Validation","Negative: невалидный kind","","","GetHistory: kind отсутствует → 400 (InvalidForm)","Невалидное значение kind должно вернуть 400 (InvalidForm)."
+"passed","Fri Aug 07 09:17:14 UTC 2026","Fri Aug 07 09:17:14 UTC 2026","176","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: member_client → Task → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:48 UTC 2026","Fri Aug 07 09:17:49 UTC 2026","808","History Service","Space events","Access Group","","","ACCESS_GROUP_CREATED event","
+    При создании группы доступа генерируется событие ACCESS_GROUP_CREATED.
+    data содержит groupId и name.
+    "
+"passed","Fri Aug 07 09:17:03 UTC 2026","Fri Aug 07 09:17:04 UTC 2026","1172","History Service","GetHistory Access","Cross access: Cross project","","","GetHistory: project_client → Проджект-документ проекта_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Fri Aug 07 09:16:51 UTC 2026","Fri Aug 07 09:16:53 UTC 2026","1945","History Service","GetHistory Access","Access matrix: Space level","","","GetHistory: space_only, Milestone → 403 (Forbidden)","Space-only клиент: видит Space и спейс-документы, не видит Project и ниже."
+"passed","Fri Aug 07 09:17:12 UTC 2026","Fri Aug 07 09:17:13 UTC 2026","222","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: guest_client → Space → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:08 UTC 2026","Fri Aug 07 09:17:08 UTC 2026","528","History Service","GetHistory Access","Cross access: Cross board","","","GetHistory: member_client → Майлстоун на приватной борде → 403 (Forbidden)","
+    Кросс-борд изоляция: member_client имеет доступ к main_project,
+    но НЕ к приватной борде (temp_board_in_main), созданной owner_client.
+    Задачи и майлстоуны на этой борде недоступны → 403 (Forbidden).
+    "
+"passed","Fri Aug 07 09:18:28 UTC 2026","Fri Aug 07 09:18:30 UTC 2026","1409","History Service","Space events","Team","","","SPACE_INVITE_REMOVED event","
+    При удалении инвайта до его принятия генерируется событие SPACE_INVITE_REMOVED.
+    data содержит email приглашённого.
+    "
+"broken","Fri Aug 07 09:17:47 UTC 2026","Fri Aug 07 09:17:47 UTC 2026","0","History Service","Access Rights","","","","test_access_group_rights_updated_event[rights_on_board]","
+    При обновлении прав группы доступа на сущность генерируется событие ACCESS_GROUP_RIGHTS_UPDATED.
+    data содержит groupId, groupName, kind, kindName и level.
+    "
+"passed","Fri Aug 07 09:17:15 UTC 2026","Fri Aug 07 09:17:15 UTC 2026","178","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: guest_client → Milestone → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:15 UTC 2026","Fri Aug 07 09:17:15 UTC 2026","165","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: member_client → Milestone → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:16:55 UTC 2026","Fri Aug 07 09:16:55 UTC 2026","182","History Service","GetHistory Access","Access matrix: Project level","","","GetHistory: project_only, Project → 200 (OK)","Project-only клиент: видит Space, Project и их документы, не видит бордовые сущности и Member doc."
+"passed","Fri Aug 07 09:17:09 UTC 2026","Fri Aug 07 09:17:10 UTC 2026","326","History Service","GetHistory Access","Cross access: Cross space","","","GetHistory: main_client → foreign_space → 403 (Forbidden)","
+    Кросс-спейс изоляция: main_client находится в main_space,
+    но НЕ в foreign_space. Запрос истории foreign_space
+    через свой Current-Space-Id не должен вернуть 200.
+    "
+"passed","Fri Aug 07 09:16:56 UTC 2026","Fri Aug 07 09:16:57 UTC 2026","663","History Service","GetHistory Access","Access matrix: Personal document","","","GetHistory: manager_client, Personal document → 403 (Forbidden)","Персональный документ доступен только владельцу (main_client), остальные получают 403."
+"passed","Fri Aug 07 09:18:07 UTC 2026","Fri Aug 07 09:18:24 UTC 2026","16522","History Service","Space events","Settings","","","SPACE_AVATAR_CHANGED event","
+    При загрузке аватара для space генерируется событие SPACE_AVATAR_CHANGED.
+    "
+"passed","Fri Aug 07 09:18:33 UTC 2026","Fri Aug 07 09:18:33 UTC 2026","162","History Service","GetHistory Validation","Positive","","","GetHistory: структура событий для kind='Space'","
+    Smoke: проверяем структуру первых 5 событий в ответе.
+    Каждое событие должно содержать:
+    - обязательные общие поля: _id, creatorId, createdAt, key, type, data
+    - kind-специфичные поля согласно KIND_REQUIRED_FIELDS (APP-5670)
+    ""Space"":     [""spaceId"", ""creatorId""],
+    ""Project"":   [""projectId"", ""spaceId"", ""creatorId""],
+    ""Task"":      [""taskId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""],
+    ""Document"":  [""documentId"", ""creatorId""],
+    ""Milestone"": [""milestoneId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""]
+    "
+"passed","Fri Aug 07 09:18:32 UTC 2026","Fri Aug 07 09:18:32 UTC 2026","153","History Service","GetHistory Validation","Negative: невалидный kindId","","","GetHistory: kindId = 'abc' (не MongoId) → 400 (InvalidForm)","Невалидное значение kindId должно вернуть 400 (InvalidForm)."
+"passed","Fri Aug 07 09:18:35 UTC 2026","Fri Aug 07 09:18:35 UTC 2026","512","History Service","GetHistory Validation","Positive","","","GetHistory: структура событий для kind='Milestone'","
+    Smoke: проверяем структуру первых 5 событий в ответе.
+    Каждое событие должно содержать:
+    - обязательные общие поля: _id, creatorId, createdAt, key, type, data
+    - kind-специфичные поля согласно KIND_REQUIRED_FIELDS (APP-5670)
+    ""Space"":     [""spaceId"", ""creatorId""],
+    ""Project"":   [""projectId"", ""spaceId"", ""creatorId""],
+    ""Task"":      [""taskId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""],
+    ""Document"":  [""documentId"", ""creatorId""],
+    ""Milestone"": [""milestoneId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""]
+    "
+"passed","Fri Aug 07 09:18:33 UTC 2026","Fri Aug 07 09:18:33 UTC 2026","171","History Service","GetHistory Validation","Positive","","","GetHistory: структура событий для kind='Project'","
+    Smoke: проверяем структуру первых 5 событий в ответе.
+    Каждое событие должно содержать:
+    - обязательные общие поля: _id, creatorId, createdAt, key, type, data
+    - kind-специфичные поля согласно KIND_REQUIRED_FIELDS (APP-5670)
+    ""Space"":     [""spaceId"", ""creatorId""],
+    ""Project"":   [""projectId"", ""spaceId"", ""creatorId""],
+    ""Task"":      [""taskId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""],
+    ""Document"":  [""documentId"", ""creatorId""],
+    ""Milestone"": [""milestoneId"", ""boardId"", ""projectId"", ""spaceId"", ""creatorId""]
+    "
+"passed","Fri Aug 07 09:18:24 UTC 2026","Fri Aug 07 09:18:28 UTC 2026","4145","History Service","Space events","Team","","","SPACE_INVITED → SPACE_INVITE_ACCEPTED → SPACE_USER_DEACTIVATED → SPACE_USER_REACTIVATED","
+    Полный жизненный цикл участника space:
+    приглашение → принятие → деактивация → реактивация.
+    "
+"passed","Fri Aug 07 09:18:31 UTC 2026","Fri Aug 07 09:18:32 UTC 2026","172","History Service","GetHistory Validation","Negative: невалидный kind","","","GetHistory: kind='Member' — не в HISTORY_KINDS → 400 (Bad Request)","kind есть в EKind, но исключён из HISTORY_KINDS — историю для них через GetHistory запросить нельзя,
+    должен вернуть 400 (Bad Request)."
+"passed","Fri Aug 07 09:16:57 UTC 2026","Fri Aug 07 09:16:58 UTC 2026","662","History Service","GetHistory Access","Access matrix: Personal document","","","GetHistory: guest_client, Personal document → 403 (Forbidden)","Персональный документ доступен только владельцу (main_client), остальные получают 403."
+"passed","Fri Aug 07 09:17:14 UTC 2026","Fri Aug 07 09:17:14 UTC 2026","175","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: guest_client → Task → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:50 UTC 2026","Fri Aug 07 09:17:51 UTC 2026","598","History Service","Space events","Access Group","","","ACCESS_GROUP_REMOVED event","
+    При удалении группы доступа генерируется событие ACCESS_GROUP_REMOVED.
+    data содержит groupId и name.
+    "
+"passed","Fri Aug 07 09:16:55 UTC 2026","Fri Aug 07 09:16:55 UTC 2026","150","History Service","GetHistory Access","Access matrix: Project level","","","GetHistory: project_only, Member document → 403 (Forbidden)","Project-only клиент: видит Space, Project и их документы, не видит бордовые сущности и Member doc."
+"passed","Fri Aug 07 09:18:31 UTC 2026","Fri Aug 07 09:18:31 UTC 2026","152","History Service","GetHistory Validation","Negative: невалидный kind","","","GetHistory: kind='Board' — не в HISTORY_KINDS → 400 (Bad Request)","kind есть в EKind, но исключён из HISTORY_KINDS — историю для них через GetHistory запросить нельзя,
+    должен вернуть 400 (Bad Request)."
+"broken","Fri Aug 07 09:17:37 UTC 2026","Fri Aug 07 09:17:37 UTC 2026","0","History Service","Access Rights","","","","test_access_group_rights_updated_event[rights_on_project]","
+    При обновлении прав группы доступа на сущность генерируется событие ACCESS_GROUP_RIGHTS_UPDATED.
+    data содержит groupId, groupName, kind, kindName и level.
+    "
+"passed","Fri Aug 07 09:18:31 UTC 2026","Fri Aug 07 09:18:31 UTC 2026","156","History Service","GetHistory Validation","Negative: невалидный kind","","","GetHistory: kind = произвольная строка → 400 (InvalidForm)","Невалидное значение kind должно вернуть 400 (InvalidForm)."
+"passed","Fri Aug 07 09:16:55 UTC 2026","Fri Aug 07 09:16:55 UTC 2026","156","History Service","GetHistory Access","Access matrix: Project level","","","GetHistory: project_only, Project document → 200 (OK)","Project-only клиент: видит Space, Project и их документы, не видит бордовые сущности и Member doc."
+"passed","Fri Aug 07 09:16:50 UTC 2026","Fri Aug 07 09:16:50 UTC 2026","171","History Service","GetHistory Access","Access matrix: Space level","","","GetHistory: space_only, Space document → 200 (OK)","Space-only клиент: видит Space и спейс-документы, не видит Project и ниже."
+"passed","Fri Aug 07 09:17:12 UTC 2026","Fri Aug 07 09:17:12 UTC 2026","310","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: owner_client → Space → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:04 UTC 2026","Fri Aug 07 09:17:05 UTC 2026","714","History Service","GetHistory Access","Cross access: Cross project","","","GetHistory: project_client → Персональный проджект-документ_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Fri Aug 07 09:17:11 UTC 2026","Fri Aug 07 09:17:11 UTC 2026","143","History Service","GetHistory Access","Negative: GetHistory — нет доступа к спейсу","","","GetHistory: foreign_client запрашивает kind='Document' → 400 (SpaceIdNotSpecified)","
+    Пользователь без доступа к спейсу не может получить историю ни для одного kind.
+    foreign_client не является участником main_space.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 (SpaceIdNotSpecified).
+    "
+"passed","Fri Aug 07 09:17:12 UTC 2026","Fri Aug 07 09:17:12 UTC 2026","170","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: member_client → Space → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:11 UTC 2026","Fri Aug 07 09:17:11 UTC 2026","158","History Service","GetHistory Access","Negative: GetHistory — нет доступа к спейсу","","","GetHistory: foreign_client запрашивает kind='Project' → 400 (SpaceIdNotSpecified)","
+    Пользователь без доступа к спейсу не может получить историю ни для одного kind.
+    foreign_client не является участником main_space.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 (SpaceIdNotSpecified).
+    "
+"passed","Fri Aug 07 09:17:13 UTC 2026","Fri Aug 07 09:17:13 UTC 2026","195","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: guest_client → Project → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:13 UTC 2026","Fri Aug 07 09:17:13 UTC 2026","185","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: owner_client → Project → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:16:51 UTC 2026","Fri Aug 07 09:16:51 UTC 2026","815","History Service","GetHistory Access","Access matrix: Space level","","","GetHistory: space_only, Task → 403 (Forbidden)","Space-only клиент: видит Space и спейс-документы, не видит Project и ниже."
+"passed","Fri Aug 07 09:17:13 UTC 2026","Fri Aug 07 09:17:13 UTC 2026","187","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: member_client → Project → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:16 UTC 2026","Fri Aug 07 09:17:16 UTC 2026","163","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: owner_client → Project document → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:15 UTC 2026","Fri Aug 07 09:17:16 UTC 2026","181","History Service","GetHistory Access","Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)","","","GetHistory: member_client → Space document → 200 (OK)","Все роли (Owner, Manager, Member, Guest) имеют доступ к истории
+    сущностей на уровне спейса, проекта и борды."
+"passed","Fri Aug 07 09:17:11 UTC 2026","Fri Aug 07 09:17:11 UTC 2026","141","History Service","GetHistory Access","Negative: GetHistory — нет доступа к спейсу","","","GetHistory: foreign_client запрашивает kind='Task' → 400 (SpaceIdNotSpecified)","
+    Пользователь без доступа к спейсу не может получить историю ни для одного kind.
+    foreign_client не является участником main_space.
+    Бек отклоняет на уровне проверки Current-Space-Id → 400 (SpaceIdNotSpecified).
+    "
+"passed","Fri Aug 07 09:18:30 UTC 2026","Fri Aug 07 09:18:31 UTC 2026","1306","History Service","Space events","Team","","","SPACE_INVITE_DECLINED event","
+    При отклонении инвайта приглашённым пользователем генерируется событие SPACE_INVITE_DECLINED.
+    data содержит email отклонившего.
+    "
+"passed","Fri Aug 07 09:16:49 UTC 2026","Fri Aug 07 09:16:50 UTC 2026","908","History Service","GetHistory Access","Access matrix: Space level","","","GetHistory: space_only, Space → 200 (OK)","Space-only клиент: видит Space и спейс-документы, не видит Project и ниже."
+"passed","Fri Aug 07 09:17:02 UTC 2026","Fri Aug 07 09:17:03 UTC 2026","430","History Service","GetHistory Access","Cross access: Cross project","","","GetHistory: project_client → Майлстоун в проекте_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Fri Aug 07 09:16:54 UTC 2026","Fri Aug 07 09:16:55 UTC 2026","158","History Service","GetHistory Access","Access matrix: Project level","","","GetHistory: project_only, Space document → 200 (OK)","Project-only клиент: видит Space, Project и их документы, не видит бордовые сущности и Member doc."
