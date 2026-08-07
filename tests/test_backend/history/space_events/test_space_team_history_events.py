@@ -86,7 +86,7 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
             f"Лишние поля в data: {set(event['data'].keys()) - {'email'}}"
         )
 
-    with allure.step("Приглашенный клиент(owner_client) тоже видит у себя события через GetHistory"):
+    with allure.step("Приглашенный клиент(owner_client) через GetHistory видит у себя события SPACE_INVITED, SPACE_INVITE_ACCEPTED"):
         assert_get_history_event(
             client=owner_client,
             space_id=space_id,
