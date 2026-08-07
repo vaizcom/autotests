@@ -1,3 +1,4 @@
+import allure
 import pytest
 
 from config.generators import generate_slug
@@ -34,9 +35,10 @@ def space_for_history(main_client):
             if space.get("name") == _SPACE_FOR_HISTORY:
                 main_client.post(**remove_space_endpoint(space_id=space["_id"]))
 
-    resp = main_client.post(**create_space_endpoint(name=_SPACE_FOR_HISTORY))
-    assert resp.status_code == 200, f"Setup: не удалось создать space_for_history: {resp.text}"
-    space_id = resp.json()["payload"]["space"]["_id"]
+    with allure.step(f"Создаём спейс '{_SPACE_FOR_HISTORY}'"):
+        resp = main_client.post(**create_space_endpoint(name=_SPACE_FOR_HISTORY))
+        assert resp.status_code == 200, f"Setup: не удалось создать space_for_history: {resp.text}"
+        space_id = resp.json()["payload"]["space"]["_id"]
 
     yield {"space_id": space_id, "name": _SPACE_FOR_HISTORY}
 

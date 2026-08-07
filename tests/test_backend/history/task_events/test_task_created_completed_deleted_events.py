@@ -3,7 +3,7 @@ import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, edit_task_endpoint, \
     delete_task_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
@@ -29,7 +29,7 @@ def test_task_created_completed_deleted_events(main_client, main_space, temp_boa
         assert create_resp.status_code == 200
         task_id = create_resp.json()['payload']['task']['_id']
 
-        assert_history_event_exists(
+        assert_get_history_event(
             client=main_client,
             space_id=main_space,
             kind="Task",
@@ -48,7 +48,7 @@ def test_task_created_completed_deleted_events(main_client, main_space, temp_boa
         )
         assert complete_resp.status_code == 200
 
-        assert_history_event_exists(
+        assert_get_history_event(
             client=main_client,
             space_id=main_space,
             kind="Task",
@@ -67,7 +67,7 @@ def test_task_created_completed_deleted_events(main_client, main_space, temp_boa
         )
         assert uncomplete_resp.status_code == 200
 
-        assert_history_event_exists(
+        assert_get_history_event(
             client=main_client,
             space_id=main_space,
             kind="Task",
@@ -87,15 +87,12 @@ def test_task_created_completed_deleted_events(main_client, main_space, temp_boa
 
         # Бэкенд не отдает историю для удаленной задачи по kind="Task" (задача удалена).
         # kind="Board" удалён из THistoryKind в APP-5670, используем kind="Space".
-        # check_self=False т.к. TASK_DELETED имеет projectId/boardId, а checkSelf для Space
-        # ожидает их отсутствия (он рассчитан на чисто пространственные события).
-        deleted_event = assert_history_event_exists(
+        deleted_event = assert_get_history_event(
             client=main_client,
             space_id=main_space,
             kind="Space",
             kind_id=main_space,
             expected_event_key="TASK_DELETED",
-            check_self=False,
         )
 
         # Дополнительно проверяем, что ивент удаления принадлежит именно нашей задаче

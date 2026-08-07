@@ -7,7 +7,7 @@ from test_backend.data.endpoints.access_group.access_group_endpoints import (
     create_access_group_endpoint,
     update_access_group_rights_endpoint,
 )
-from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend]
 
@@ -66,22 +66,22 @@ def test_access_group_rights_updated_event(
         ))
         assert resp.status_code == 200, f"Ошибка обновления прав группы: {resp.text}"
 
-    event = assert_history_event_exists(
-        client=main_client,
-        space_id=space_id,
-        kind="Space",
-        kind_id=space_id,
-        expected_event_key="ACCESS_GROUP_RIGHTS_UPDATED",
-        expected_data={
-            "groupId": group_id,
-            "groupName": group_name,
-            "kind": rights_kind,
-            "kindName": kind_name,
-            "level": "Member",
-        },
-        assert_unique=True,
-        check_self=False,
-    )
+    with allure.step("Проверяем через GetHistory что появилось событие ACCESS_GROUP_RIGHTS_UPDATED"):
+        event = assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Space",
+            kind_id=space_id,
+            expected_event_key="ACCESS_GROUP_RIGHTS_UPDATED",
+            expected_data={
+                "groupId": group_id,
+                "groupName": group_name,
+                "kind": rights_kind,
+                "kindName": kind_name,
+                "level": "Member",
+            },
+            assert_unique=True,
+        )
 
     with allure.step("Проверяем что data содержит только groupId, groupName, kind, kindName, level"):
         expected_keys = {"groupId", "groupName", "kind", "kindName", "level"}

@@ -2,7 +2,7 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import duplicate_task_endpoint, delete_task_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
@@ -34,7 +34,7 @@ def test_task_duplicated_history_event(owner_client, main_space, temp_board_in_m
     try:
         with allure.step("1.1 Проверяем историю НОВОЙ задачи (что её сдублировали)"):
             # Запрашиваем историю оригинала
-            assert_history_event_exists(
+            assert_get_history_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Task",

@@ -4,7 +4,7 @@ import pytest
 from test_backend.data.endpoints.Task.task_endpoints import convert_task_to_milestone_endpoint, create_task_endpoint, \
     delete_task_endpoint
 from test_backend.data.endpoints.milestone.milestones_endpoints import archive_milestone_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
@@ -54,7 +54,7 @@ def test_convert_task_to_milestone_history_events(owner_client, main_space, main
             milestone_id = convert_resp.json()['payload']['milestone']['_id']
 
         with allure.step("1.1 Проверяем историю нового Майлстоуна -> ожидаем MILESTONE_CREATED_FROM_TASK"):
-            assert_history_event_exists(
+            assert_get_history_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Milestone",
@@ -65,7 +65,7 @@ def test_convert_task_to_milestone_history_events(owner_client, main_space, main
 
         with allure.step("1.2 Проверяем каскадные события в истории Подзадачи"):
             with allure.step("A) Задача узнала о конвертации родителя"):
-                assert_history_event_exists(
+                assert_get_history_event(
                     client=owner_client,
                     space_id=main_space,
                     kind="Task",
@@ -75,7 +75,7 @@ def test_convert_task_to_milestone_history_events(owner_client, main_space, main
                 )
 
             with allure.step("B) Задача была автоматически отвязана от старого родителя"):
-                assert_history_event_exists(
+                assert_get_history_event(
                     client=owner_client,
                     space_id=main_space,
                     kind="Task",
@@ -85,7 +85,7 @@ def test_convert_task_to_milestone_history_events(owner_client, main_space, main
                 )
 
             with allure.step("C) Задача была автоматически привязана к новому майлстоуну"):
-                assert_history_event_exists(
+                assert_get_history_event(
                     client=owner_client,
                     space_id=main_space,
                     kind="Task",
@@ -97,7 +97,7 @@ def test_convert_task_to_milestone_history_events(owner_client, main_space, main
                 )
 
         with allure.step("1.3 Проверяем каскадное событие в самом Майлстоуне (что подзадача к нему прикрепилась)"):
-            assert_history_event_exists(
+            assert_get_history_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Milestone",
