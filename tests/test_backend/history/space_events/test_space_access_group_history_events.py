@@ -27,7 +27,8 @@ def _create_group(client, space_id: str, name: str = None) -> tuple:
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
+@allure.suite("Space events")
+@allure.sub_suite("Access Group")
 @allure.title("ACCESS_GROUP_CREATED event")
 def test_access_group_created_event(main_client, space_for_history):
     """
@@ -56,7 +57,8 @@ def test_access_group_created_event(main_client, space_for_history):
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
+@allure.suite("Space events")
+@allure.sub_suite("Access Group")
 @pytest.mark.parametrize("update_field, update_value", [
     ("name", "_at_group_renamed"),
     ("description", "updated description"),
@@ -100,7 +102,8 @@ def test_access_group_updated_event(main_client, space_for_history, update_field
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
+@allure.suite("Space events")
+@allure.sub_suite("Access Group")
 @allure.title("ACCESS_GROUP_REMOVED event")
 def test_access_group_removed_event(main_client, space_for_history):
     """

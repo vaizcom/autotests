@@ -26,7 +26,8 @@ def _create_group(client, space_id: str, name: str = None) -> tuple:
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
+@allure.suite("Space events")
+@allure.sub_suite("Access Group Rights")
 @pytest.mark.parametrize("rights_kind", ["Space", "Project", "Board"],
                          ids=["rights_on_space", "rights_on_project", "rights_on_board"])
 def test_access_group_rights_updated_event(

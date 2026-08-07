@@ -10,7 +10,8 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
+@allure.suite("Space events")
+@allure.sub_suite("Settings")
 @allure.title("SPACE_CREATED event")
 def test_space_created_event(main_client, space_for_history):
     """
@@ -35,7 +36,8 @@ def test_space_created_event(main_client, space_for_history):
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
+@allure.suite("Space events")
+@allure.sub_suite("Settings")
 @allure.title("SPACE_RENAMED event")
 def test_space_renamed_event(main_client, space_for_history):
     """
@@ -64,7 +66,8 @@ def test_space_renamed_event(main_client, space_for_history):
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
+@allure.suite("Space events")
+@allure.sub_suite("Settings")
 @allure.title("SPACE_AVATAR_CHANGED event")
 def test_space_avatar_changed_event(main_client, space_for_history):
     """

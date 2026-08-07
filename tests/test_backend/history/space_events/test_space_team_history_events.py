@@ -18,7 +18,8 @@ pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
+@allure.suite("Space events")
+@allure.sub_suite("Team")
 @allure.title("SPACE_INVITED → SPACE_INVITE_ACCEPTED → SPACE_USER_DEACTIVATED → SPACE_USER_REACTIVATED")
 def test_space_invite_lifecycle_events(main_client, owner_client, space_for_history):
     """
@@ -155,7 +156,8 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
+@allure.suite("Space events")
+@allure.sub_suite("Team")
 @allure.title("SPACE_INVITE_REMOVED event")
 def test_space_invite_removed_event(main_client, space_for_history):
     """
@@ -210,7 +212,8 @@ def test_space_invite_removed_event(main_client, space_for_history):
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
+@allure.suite("Space events")
+@allure.sub_suite("Team")
 @allure.title("SPACE_INVITE_DECLINED event")
 def test_space_invite_declined_event(main_client, member_client, space_for_history):
     """
