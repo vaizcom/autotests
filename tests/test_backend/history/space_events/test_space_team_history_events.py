@@ -161,37 +161,42 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
 @allure.title("SPACE_INVITE_REMOVED event")
 def test_space_invite_removed_event(main_client, space_for_history):
     """
-    При удалении инвайта до его принятия генерируется событие SPACE_INVITE_REMOVED.
-    data содержит email приглашённого.
+    Сценарий: удаление pending-инвайта до его принятия.
+
+    Шаги:
+    1. Приглашаем member в space (InviteToSpace)
+    2. Удаляем инвайт через RemoveInvite до принятия
+    3. Проверяем через GetHistory что появилось событие SPACE_INVITE_REMOVED
+    4. Проверяем data: email
     """
     space_id = space_for_history["space_id"]
-    manager_email = USERS['manager']['email']
+    member_email = USERS['member']['email']
 
     with allure.step("Получаем список участников до приглашения"):
         members_resp = main_client.post(**get_space_members_endpoint(space_id=space_id))
         assert members_resp.status_code == 200
         ids_before = {m["_id"] for m in members_resp.json()["payload"]["members"]}
 
-    with allure.step("Приглашаем manager в space"):
+    with allure.step("Приглашаем member в space"):
         invite_resp = main_client.post(**invite_to_space_endpoint(
             space_id=space_id,
-            email=manager_email,
+            email=member_email,
             space_access="Member",
         ))
         assert invite_resp.status_code == 200, f"Ошибка инвайта: {invite_resp.text}"
 
-    with allure.step("Получаем member_id приглашённого manager"):
+    with allure.step("Получаем member_id приглашённого member"):
         members_resp = main_client.post(**get_space_members_endpoint(space_id=space_id))
         assert members_resp.status_code == 200
         members_after = members_resp.json()["payload"]["members"]
         invited_member = next((m for m in members_after if m["_id"] not in ids_before), None)
         assert invited_member is not None, "Приглашённый участник не найден в GetSpaceMembers"
-        member_id = invited_member["_id"]
+        invited_member_id = invited_member["_id"]
 
     with allure.step("Удаляем инвайт → ожидаем SPACE_INVITE_REMOVED"):
         remove_resp = main_client.post(**remove_invite_endpoint(
             space_id=space_id,
-            member_id=member_id,
+            member_id=invited_member_id,
         ))
         assert remove_resp.status_code == 200, f"Ошибка удаления инвайта: {remove_resp.text}"
 
@@ -201,7 +206,7 @@ def test_space_invite_removed_event(main_client, space_for_history):
             kind="Space",
             kind_id=space_id,
             expected_event_key="SPACE_INVITE_REMOVED",
-            expected_data={"email": manager_email},
+            expected_data={"email": member_email},
             assert_unique=True,
         )
 

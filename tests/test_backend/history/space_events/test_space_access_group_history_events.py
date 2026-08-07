@@ -31,7 +31,7 @@ def _create_group(client, space_id: str, name: str = None) -> tuple:
 @allure.parent_suite("History Service")
 @allure.suite("Space events")
 @allure.sub_suite("Access Group")
-@allure.title("ACCESS_GROUP_CREATED event")
+@allure.title("ACCESS_GROUP_CREATED — создание группы, проверка через GetHistory спейса")
 def test_access_group_created_event(main_client, space_for_history):
     """
     Сценарий: создание группы (Groups) в спейсе.
@@ -64,6 +64,7 @@ def test_access_group_created_event(main_client, space_for_history):
 
 @allure.parent_suite("History Service")
 @allure.suite("Space events")
+@allure.sub_suite("Access Group")
 @pytest.mark.parametrize("update_field, update_value", [
     ("name", "_at_group_renamed"),
     ("description", "updated description"),
@@ -78,7 +79,7 @@ def test_access_group_updated_event(main_client, space_for_history, update_field
     3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_UPDATED
     4. Проверяем data: groupId, name (актуальное имя после обновления)
     """
-    allure.dynamic.title(f"ACCESS_GROUP_UPDATED event — обновление {update_field}")
+    allure.dynamic.title(f"ACCESS_GROUP_UPDATED — обновление {update_field} группы, проверка через GetHistory спейса")
     space_id = space_for_history["space_id"]
 
     with allure.step("Создаём группу"):
@@ -114,7 +115,7 @@ def test_access_group_updated_event(main_client, space_for_history, update_field
 @allure.parent_suite("History Service")
 @allure.suite("Space events")
 @allure.sub_suite("Access Group")
-@allure.title("ACCESS_GROUP_REMOVED event")
+@allure.title("ACCESS_GROUP_REMOVED — удаление группы, проверка через GetHistory спейса")
 def test_access_group_removed_event(main_client, space_for_history):
     """
     Сценарий: удаление группы из спейса.
@@ -156,7 +157,7 @@ def test_access_group_removed_event(main_client, space_for_history):
 @allure.parent_suite("History Service")
 @allure.suite("Space events")
 @allure.sub_suite("Access Group")
-@allure.title("MEMBER_SET_ACCESS → MEMBER_REMOVE_ACCESS events")
+@allure.title("MEMBER_SET_ACCESS / MEMBER_REMOVE_ACCESS — добавление и удаление участника из группы, проверка через GetHistory спейса")
 def test_member_set_and_remove_access_events(main_client, space_for_history, manager_in_space):
     """
     Сценарий: добавление и удаление участника из группы доступа.

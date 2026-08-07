@@ -41,7 +41,7 @@ def test_access_group_rights_updated_event(
     3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_RIGHTS_UPDATED
     4. Проверяем data: groupId, groupName, kind, kindName, level
     """
-    allure.dynamic.title(f"ACCESS_GROUP_RIGHTS_UPDATED event — rights on {rights_kind}")
+    allure.dynamic.title(f"ACCESS_GROUP_RIGHTS_UPDATED — изменение прав группы на {rights_kind}, проверка через GetHistory спейса")
     space_id = space_for_history["space_id"]
 
     kind_map = {
