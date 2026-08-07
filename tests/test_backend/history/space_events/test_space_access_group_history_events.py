@@ -3,7 +3,6 @@ import uuid
 import allure
 import pytest
 
-from config.settings import USERS
 from test_backend.data.endpoints.access_group.access_group_endpoints import (
     create_access_group_endpoint,
     update_access_group_endpoint,
@@ -11,12 +10,6 @@ from test_backend.data.endpoints.access_group.access_group_endpoints import (
     set_access_group_member_endpoint,
     remove_access_group_member_endpoint,
 )
-from test_backend.data.endpoints.invite.invite_endpoint import (
-    invite_to_space_endpoint,
-    confirm_space_invite_endpoint,
-)
-from test_backend.data.endpoints.Space.space_endpoints import get_spaces_endpoint
-from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
 from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
 
 pytestmark = [pytest.mark.backend]
@@ -164,55 +157,24 @@ def test_access_group_removed_event(main_client, space_for_history):
 @allure.suite("Space events")
 @allure.sub_suite("Access Group")
 @allure.title("MEMBER_SET_ACCESS → MEMBER_REMOVE_ACCESS events")
-def test_member_set_and_remove_access_events(main_client, manager_client, space_for_history):
+def test_member_set_and_remove_access_events(main_client, space_for_history, manager_in_space):
     """
-    Сценарий: добавление и удаление участника из группы.
+    Сценарий: добавление и удаление участника из группы доступа.
 
     Шаги:
-    1. Создаём группу в спейсе
-    2. Приглашаем manager в спейс (если ещё не приглашён)
-    3. Находим member_id manager'а в списке участников спейса
-    4. Добавляем manager в группу доступа (SetAccessGroupsMember)
-       → ожидаем событие MEMBER_SET_ACCESS в Space history
-    5. Удаляем manager из группы доступа (RemoveAccessGroupMember)
-       → ожидаем событие MEMBER_REMOVE_ACCESS в Space history
+    1. Создаём группу доступа в спейсе
+    2. Добавляем manager в группу (SetAccessGroupsMember)
+       → проверяем через GetHistory событие MEMBER_SET_ACCESS
+    3. Удаляем manager из группы (RemoveAccessGroupMember)
+       → проверяем через GetHistory событие MEMBER_REMOVE_ACCESS
     """
     space_id = space_for_history["space_id"]
-    manager_email = USERS["manager"]["email"]
-    manager_password = USERS["manager"]["password"]
+    member_id = manager_in_space["member_id"]
 
     with allure.step("1. Создаём группу доступа"):
         group_id, group_name = _create_group(main_client, space_id, name="_at_member_access")
 
-    with allure.step("2. Приглашаем manager в спейс"):
-        invite_resp = main_client.post(**invite_to_space_endpoint(
-            space_id=space_id,
-            email=manager_email,
-            space_access="Manager",
-        ))
-        if invite_resp.status_code == 200:
-            spaces_resp = manager_client.post(**get_spaces_endpoint())
-            assert spaces_resp.status_code == 200
-            spaces = spaces_resp.json().get("payload", {}).get("spaces", [])
-            target = next((s for s in spaces if s.get("_id") == space_id), None)
-            assert target is not None, f"Space {space_id} не найден у manager"
-            confirm_resp = manager_client.post(**confirm_space_invite_endpoint(
-                code=target["inviteCode"],
-                full_name="manager",
-                password=manager_password,
-                termsAccepted=True,
-            ))
-            assert confirm_resp.status_code == 200, f"Ошибка принятия инвайта: {confirm_resp.text}"
-
-    with allure.step("3. Получаем member_id manager'а"):
-        members_resp = main_client.post(**get_space_members_endpoint(space_id=space_id))
-        assert members_resp.status_code == 200
-        members = members_resp.json()["payload"]["members"]
-        manager_member = next((m for m in members if m.get("email") == manager_email), None)
-        assert manager_member is not None, f"Manager ({manager_email}) не найден в участниках"
-        member_id = manager_member["_id"]
-
-    with allure.step("4. Добавляем manager в группу → ожидаем MEMBER_SET_ACCESS"):
+    with allure.step("2. Добавляем manager в группу → ожидаем MEMBER_SET_ACCESS"):
         resp = main_client.post(**set_access_group_member_endpoint(
             space_id=space_id,
             member_id=member_id,
@@ -240,7 +202,7 @@ def test_member_set_and_remove_access_events(main_client, manager_client, space_
             f"Лишние поля в data: {set(event_set['data'].keys()) - expected_keys}"
         )
 
-    with allure.step("5. Удаляем manager из группы → ожидаем MEMBER_REMOVE_ACCESS"):
+    with allure.step("3. Удаляем manager из группы → ожидаем MEMBER_REMOVE_ACCESS"):
         resp = main_client.post(**remove_access_group_member_endpoint(
             space_id=space_id,
             member_id=member_id,
