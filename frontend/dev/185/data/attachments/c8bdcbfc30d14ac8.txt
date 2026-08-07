@@ -1,7 +1,0 @@
-tests/test_frontend/tests/smoke/test_create_flow.py:50: in test_create_space_with_project_and_task
-    expect(page.get_by_role("button", name="Next")).to_be_visible(timeout=10000)
-E   AssertionError: Locator expected to be visible
-E   Actual value: <element(s) not found> 
-E   Call log:
-E     - LocatorAssertions.to_be_visible with timeout 10000ms
-E     -   - waiting for get_by_role("button", name="Next")

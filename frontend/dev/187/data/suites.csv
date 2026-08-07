@@ -1,7 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","13651","Sign in with email","Frontend","Mon Jun 08 11:15:56 UTC 2026","skipped","Mon Jun 08 11:16:09 UTC 2026","","Auth","",""
-"","11962","Logout","Frontend","Mon Jun 08 11:15:44 UTC 2026","skipped","Mon Jun 08 11:15:56 UTC 2026","","Auth","",""
-"
-    Smoke-тест: создание Space → открытие дефолтного Project → Task.
-    Space удаляется через API в teardown.
-    ","13407","Create space → project → task","Frontend","Mon Jun 08 11:16:10 UTC 2026","skipped","Mon Jun 08 11:16:23 UTC 2026","","Smoke","",""

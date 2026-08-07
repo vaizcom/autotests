@@ -1,6 +1,0 @@
-FAILURE: [1 subtask] Элемент не найден — возможно изменился UI или локатор устарел
-tests/test_frontend/tests/tasks/test_10_task_subtasks.py:182 in test_03_delete_task_subtask() -> soft_step("1 subtask", lambda: (
-tests/test_frontend/conftest.py:366 in _soft_step() -> check.fail(f"[{name}] {hint}")
-
-------------------------------------------------------------
-Failed Checks: 1

@@ -1,1 +1,0 @@
-[{"uid":"52d00f8ab07c03da","name":"Sign in via email (OTP)","time":{"start":1781599229611,"stop":1781599242901,"duration":13290},"status":"passed","severity":"normal"},{"uid":"63c92c7f82ab79bb","name":"Sign up with email (OTP)","time":{"start":1781599243039,"stop":1781599260830,"duration":17791},"status":"passed","severity":"normal"}]

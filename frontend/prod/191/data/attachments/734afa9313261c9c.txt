@@ -1,7 +1,0 @@
-tests/test_frontend/tests/tasks/test_12_task_to_milestone.py:273: in test_04_verify_milestone_fields
-    open_card(page, soft_step, _SUBTASK_NAME)
-tests/test_frontend/tests/tasks/conftest.py:106: in open_card
-    wait_for_card(page, card_name)
-tests/test_frontend/tests/tasks/conftest.py:100: in wait_for_card
-    raise AssertionError(f"Карточка '{card_name}' не найдена на борде после 4 попыток")
-E   AssertionError: Карточка 'ConvSub 115028' не найдена на борде после 4 попыток

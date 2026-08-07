@@ -1,2 +1,0 @@
-Причина: Элемент заблокирован (disabled) — проверьте состояние UI
-Locator expected to be enabled

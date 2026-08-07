@@ -1,7 +1,0 @@
-FAILURE: [Установка дат] Элемент заблокирован (disabled) — проверьте состояние UI
-tests/test_frontend/tests/milestones/test_milestone_fields.py:158 in test_05_dates() -> soft_step("Установка дат", lambda: set_date(page, date=_DATE_START))
-tests/test_frontend/conftest.py:366 in _soft_step() -> check.fail(f"[{name}] {hint}")
-
-FAILURE: [Даты сохранены] Элемент не найден — возможно изменился UI или локатор устарел
-------------------------------------------------------------
-Failed Checks: 2

@@ -1,3 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","13290","Sign in via email (OTP)","Frontend","Tue Jun 16 08:40:29 UTC 2026","passed","Tue Jun 16 08:40:42 UTC 2026","","Auth","",""
-"","17791","Sign up with email (OTP)","Frontend","Tue Jun 16 08:40:43 UTC 2026","passed","Tue Jun 16 08:41:00 UTC 2026","","Auth","",""

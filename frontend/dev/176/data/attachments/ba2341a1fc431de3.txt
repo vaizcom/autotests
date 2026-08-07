@@ -1,7 +1,0 @@
-tests/test_frontend/tests/tasks/test_12_task_to_milestone.py:325: in test_05_verify_subtasks_kept
-    expect(find_subtask_row_by_name(sidebar, _SUB_SUBTASK_NAME)).to_be_visible(timeout=10000)
-E   AssertionError: Locator expected to be visible
-E   Actual value: <element(s) not found> 
-E   Call log:
-E     - LocatorAssertions.to_be_visible with timeout 10000ms
-E     -   - waiting for locator("[class*=\"RightSidebar-module_Root\"]").get_by_role("button").filter(has_text=re.compile(r"[A-Z]+-\d+")).filter(has_text="ConvSubSub 123452")

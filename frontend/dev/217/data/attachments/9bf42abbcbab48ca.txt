@@ -1,7 +1,0 @@
-tests/test_frontend/tests/spaces/test_navigation.py:23: in test_navigation
-    expect(page.get_by_test_id(Sidebar.HOME)).to_be_visible(timeout=15000)
-E   AssertionError: Locator expected to be visible
-E   Actual value: <element(s) not found> 
-E   Call log:
-E     - LocatorAssertions.to_be_visible with timeout 15000ms
-E     -   - waiting for get_by_test_id("aside.aside-menu.list-item.home")

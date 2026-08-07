@@ -1,3 +1,0 @@
-Причина: Элемент перекрыт другим элементом — попап, оверлей или изменилась вёрстка
-Locator.click: Timeout 15000ms exceeded.
-Блокирует: <div class="FlyNav-module_TextBlock_9Bm2N">autotest_ms_133542</div> from <div class="szh-menu-container FlyNav-module_Root_lpqEj">…</div> subtree intercepts pointer events
