@@ -1,4 +1,4 @@
-.PHONY: lint lint-frontend lint-backend clean debug report report-backend report-frontend
+.PHONY: lint lint-frontend lint-backend clean debug report
 
 # Отладка отдельного теста с автоматическим сетапом и клинапом.
 # Генерирует TS, запускает test_01 → целевой тест → test_99 в одном прогоне.
@@ -28,25 +28,15 @@ lint-backend:
 	@exec ruff format tests/test_backend
 
 clean:
-	rm -rf allure-results allure-results-backend allure-results-frontend
-	rm -rf allure-report allure-report-backend allure-report-frontend
-	find . -type d -name test-results -exec rm -rf {} +
-
-report-backend:
-	allure generate allure-results-backend -o allure-report-backend --clean
-	allure open allure-report-backend
-
-report-frontend:
-	allure generate allure-results-frontend -o allure-report-frontend --clean
-	allure open allure-report-frontend
+	find . -type d -name "allure-results*" -exec rm -rf {} + 2>/dev/null; true
+	rm -rf allure-report
+	find . -type d -name test-results -exec rm -rf {} + 2>/dev/null; true
 
 report:
-	@if [ -d allure-results-frontend ]; then \
-		allure generate allure-results-frontend -o allure-report-frontend --clean; \
-		allure open allure-report-frontend; \
-	elif [ -d allure-results-backend ]; then \
-		allure generate allure-results-backend -o allure-report-backend --clean; \
-		allure open allure-report-backend; \
-	else \
-		echo "No allure results found. Run tests first."; \
-	fi
+	@RESULTS=$$(find . -type d -name "allure-results*" -not -empty 2>/dev/null | head -1); \
+	if [ -z "$$RESULTS" ]; then \
+		echo "No allure results found. Run tests first."; exit 1; \
+	fi; \
+	echo "Using: $$RESULTS"; \
+	allure generate $$RESULTS -o allure-report --clean
+	allure open allure-report

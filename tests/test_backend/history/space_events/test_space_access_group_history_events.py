@@ -58,7 +58,6 @@ def test_access_group_created_event(main_client, space_for_history):
 
 @allure.parent_suite("History Service")
 @allure.suite("Space events")
-@allure.sub_suite("Access Group")
 @pytest.mark.parametrize("update_field, update_value", [
     ("name", "_at_group_renamed"),
     ("description", "updated description"),
