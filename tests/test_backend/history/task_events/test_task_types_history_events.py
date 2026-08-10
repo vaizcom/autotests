@@ -4,8 +4,8 @@ import pytest
 from test_backend.data.endpoints.Task.task_endpoints import edit_task_endpoint, create_task_endpoint, delete_task_endpoint
 from test_backend.data.endpoints.multiaction.multiaction_endpoints import multiple_edit_tasks_endpoint
 from test_backend.data.endpoints.History.history_utils import (
-    assert_history_event_exists,
-    assert_history_event_not_exists,
+    assert_get_history_event,
+    assert_get_history_no_event,
 )
 from test_backend.task_service.utils import get_two_random_types
 from test_backend.data.endpoints.multiaction.multiaction_asserts import assert_multiaction_response
@@ -36,7 +36,7 @@ def test_task_types_history_events(owner_client, main_space, temp_board_in_main,
             )
         )
 
-        assert_history_event_exists(
+        assert_get_history_event(
             client=owner_client,
             space_id=main_space,
             kind="Task",
@@ -54,7 +54,7 @@ def test_task_types_history_events(owner_client, main_space, temp_board_in_main,
             )
         )
 
-        assert_history_event_exists(
+        assert_get_history_event(
             client=owner_client,
             space_id=main_space,
             kind="Task",
@@ -72,7 +72,7 @@ def test_task_types_history_events(owner_client, main_space, temp_board_in_main,
             )
         )
 
-        assert_history_event_exists(
+        assert_get_history_event(
             client=owner_client,
             space_id=main_space,
             kind="Task",
@@ -90,7 +90,7 @@ def test_task_types_history_events(owner_client, main_space, temp_board_in_main,
             )
         )
 
-        assert_history_event_exists(
+        assert_get_history_event(
             client=owner_client,
             space_id=main_space,
             kind="Task",
@@ -159,7 +159,7 @@ def test_task_types_history_events_multiaction(owner_client, main_space, temp_bo
             )
 
         with allure.step("Задача_А изменилась → событие TASK_TYPE_ADDED есть"):
-            assert_history_event_exists(
+            assert_get_history_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Task",
@@ -169,7 +169,7 @@ def test_task_types_history_events_multiaction(owner_client, main_space, temp_bo
             )
 
         with allure.step("Задача_Б пропущена → событие TASK_TYPE_ADDED отсутствует"):
-            assert_history_event_not_exists(
+            assert_get_history_no_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Task",
@@ -189,7 +189,7 @@ def test_task_types_history_events_multiaction(owner_client, main_space, temp_bo
 
         with allure.step("Обе задачи изменились → событие TASK_TYPE_REMOVED у обеих"):
             for tid in [task_a_id, task_b_id]:
-                assert_history_event_exists(
+                assert_get_history_event(
                     client=owner_client,
                     space_id=main_space,
                     kind="Task",

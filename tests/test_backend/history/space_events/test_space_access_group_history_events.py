@@ -6,146 +6,232 @@ import pytest
 from test_backend.data.endpoints.access_group.access_group_endpoints import (
     create_access_group_endpoint,
     update_access_group_endpoint,
-    update_access_group_rights_endpoint,
     remove_access_group_endpoint,
+    set_access_group_member_endpoint,
+    remove_access_group_member_endpoint,
 )
-from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
-pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
+pytestmark = [pytest.mark.backend]
 
 
-def _create_group(client, space_id: str) -> str:
-    """Вспомогательная функция: создаёт Groups и возвращает её _id."""
-    name = f"test_group_{uuid.uuid4().hex[:6]}"
+def _create_group(client, space_id: str, name: str = None) -> tuple:
+    """Вспомогательная функция: создаёт группу (Groups) и возвращает (group_id, name)."""
+    name = name or f"test_group_{uuid.uuid4().hex[:6]}"
     resp = client.post(**create_access_group_endpoint(
         space_id=space_id,
         name=name,
         description="history event test group",
     ))
     assert resp.status_code == 200, f"Ошибка создания группы: {resp.text}"
-    return resp.json()["payload"]["accessGroup"]["_id"]
+    group_id = resp.json()["payload"]["accessGroup"]["_id"]
+    return group_id, name
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
-@allure.title("ACCESS_GROUP_CREATED event")
+@allure.suite("Space events")
+@allure.sub_suite("Access Group")
+@allure.title("ACCESS_GROUP_CREATED — создание группы, проверка через GetHistory спейса")
 def test_access_group_created_event(main_client, space_for_history):
     """
-    При создании группы доступа генерируется событие ACCESS_GROUP_CREATED.
+    Сценарий: создание группы (Groups) в спейсе.
+
+    Шаги:
+    1. Создаём группу (CreateAccessGroup)
+    2. Проверяем через GetHistory что появилось событие ACCESS_GROUP_CREATED
+    3. Проверяем data: groupId, name
     """
     space_id = space_for_history["space_id"]
 
     with allure.step("Создаём группу доступа"):
-        group_id = _create_group(main_client, space_id)
+        group_id, group_name = _create_group(main_client, space_id, name="_at_group_created")
 
-    assert_history_event_exists(
-        client=main_client,
-        space_id=space_id,
-        kind="Space",
-        kind_id=space_id,
-        expected_event_key="ACCESS_GROUP_CREATED",
-    )
+    with allure.step("Проверяем через GetHistory что появилось событие ACCESS_GROUP_CREATED"):
+        event = assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Space",
+            kind_id=space_id,
+            expected_event_key="ACCESS_GROUP_CREATED",
+            expected_data={"groupId": group_id, "name": group_name},
+            assert_unique=True,
+        )
 
-
-ACCESS_GROUP_UPDATE_CASES = [
-    pytest.param(
-        {"name": f"updated_name_{uuid.uuid4().hex[:6]}"},
-        "Обновление имени группы доступа",
-        id="update_name",
-    ),
-    pytest.param(
-        {"description": "updated description"},
-        "Обновление описания группы доступа",
-        id="update_description",
-    ),
-]
+    with allure.step("Проверяем что data содержит только groupId и name"):
+        assert set(event["data"].keys()) == {"groupId", "name"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'groupId', 'name'}}"
+        )
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
-@pytest.mark.parametrize("update_kwargs,title", ACCESS_GROUP_UPDATE_CASES)
-def test_access_group_updated_event(main_client, space_for_history, update_kwargs, title):
+@allure.suite("Space events")
+@allure.sub_suite("Access Group")
+@pytest.mark.parametrize("update_field, update_value", [
+    ("name", "_at_group_renamed"),
+    ("description", "updated description"),
+], ids=["update_name", "update_description"])
+def test_access_group_updated_event(main_client, space_for_history, update_field, update_value):
     """
-    При обновлении имени/описания группы доступа генерируется событие ACCESS_GROUP_UPDATED.
+    Сценарий: обновление имени или описания группы.
+
+    Шаги:
+    1. Создаём группу
+    2. Обновляем поле (name или description) через UpdateAccessGroup
+    3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_UPDATED
+    4. Проверяем data: groupId, name (актуальное имя после обновления)
     """
-    allure.dynamic.title(title)
+    allure.dynamic.title(f"ACCESS_GROUP_UPDATED — обновление {update_field} группы, проверка через GetHistory спейса")
     space_id = space_for_history["space_id"]
 
-    with allure.step("Создаём группу доступа"):
-        group_id = _create_group(main_client, space_id)
+    with allure.step("Создаём группу"):
+        group_id, group_name = _create_group(
+            main_client, space_id, name=f"_at_upd_{update_field}",
+        )
 
-    with allure.step(f"Обновляем группу: {list(update_kwargs.keys())}"):
+    with allure.step(f"Обновляем {update_field} группы"):
         resp = main_client.post(**update_access_group_endpoint(
             space_id=space_id,
             group_id=group_id,
-            **update_kwargs,
+            **{update_field: update_value},
         ))
         assert resp.status_code == 200, f"Ошибка обновления группы: {resp.text}"
 
-    assert_history_event_exists(
-        client=main_client,
-        space_id=space_id,
-        kind="Space",
-        kind_id=space_id,
-        expected_event_key="ACCESS_GROUP_UPDATED",
-    )
-
-
-@allure.parent_suite("History Service")
-@allure.suite("Space History")
-@allure.title("ACCESS_GROUP_RIGHTS_UPDATED event")
-def test_access_group_rights_updated_event(main_client, space_for_history):
-    """
-    При обновлении прав группы доступа на сущность генерируется событие ACCESS_GROUP_RIGHTS_UPDATED.
-    По дефолту группа создается с правами доступа Guest, тест обновляет до уровня доступа Member
-    """
-    space_id = space_for_history["space_id"]
-
-    with allure.step("Создаём группу доступа"):
-        group_id = _create_group(main_client, space_id)
-
-    with allure.step("Обновляем права группы на Space (уровень Member)"):
-        resp = main_client.post(**update_access_group_rights_endpoint(
+    expected_name = update_value if update_field == "name" else group_name
+    with allure.step("Проверяем через GetHistory что появилось событие ACCESS_GROUP_UPDATED"):
+        event = assert_get_history_event(
+            client=main_client,
             space_id=space_id,
-            group_id=group_id,
             kind="Space",
             kind_id=space_id,
-            level="Member",
-        ))
-        assert resp.status_code == 200, f"Ошибка обновления прав группы: {resp.text}"
+            expected_event_key="ACCESS_GROUP_UPDATED",
+            expected_data={"groupId": group_id, "name": expected_name},
+            assert_unique=True,
+        )
 
-    assert_history_event_exists(
-        client=main_client,
-        space_id=space_id,
-        kind="Space",
-        kind_id=space_id,
-        expected_event_key="ACCESS_GROUP_RIGHTS_UPDATED",
-    )
+    with allure.step("Проверяем что data содержит только groupId и name"):
+        assert set(event["data"].keys()) == {"groupId", "name"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'groupId', 'name'}}"
+        )
 
 
 @allure.parent_suite("History Service")
-@allure.suite("Space History")
-@allure.title("ACCESS_GROUP_REMOVED event")
+@allure.suite("Space events")
+@allure.sub_suite("Access Group")
+@allure.title("ACCESS_GROUP_REMOVED — удаление группы, проверка через GetHistory спейса")
 def test_access_group_removed_event(main_client, space_for_history):
     """
-    При удалении группы доступа генерируется событие ACCESS_GROUP_REMOVED.
+    Сценарий: удаление группы из спейса.
+
+    Шаги:
+    1. Создаём группу
+    2. Удаляем группу через RemoveAccessGroup
+    3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_REMOVED
+    4. Проверяем data: groupId, name
     """
     space_id = space_for_history["space_id"]
 
-    with allure.step("Создаём группу доступа"):
-        group_id = _create_group(main_client, space_id)
+    with allure.step("Создаём группу"):
+        group_id, group_name = _create_group(main_client, space_id, name="_at_group_removed")
 
-    with allure.step("Удаляем группу доступа"):
+    with allure.step("Удаляем группу"):
         resp = main_client.post(**remove_access_group_endpoint(
             space_id=space_id,
             group_id=group_id,
         ))
         assert resp.status_code == 200, f"Ошибка удаления группы: {resp.text}"
 
-    assert_history_event_exists(
-        client=main_client,
-        space_id=space_id,
-        kind="Space",
-        kind_id=space_id,
-        expected_event_key="ACCESS_GROUP_REMOVED",
-    )
+    with allure.step("Проверяем через GetHistory что появилось событие ACCESS_GROUP_REMOVED"):
+        event = assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Space",
+            kind_id=space_id,
+            expected_event_key="ACCESS_GROUP_REMOVED",
+            expected_data={"groupId": group_id, "name": group_name},
+            assert_unique=True,
+        )
+
+    with allure.step("Проверяем что data содержит только groupId и name"):
+        assert set(event["data"].keys()) == {"groupId", "name"}, (
+            f"Лишние поля в data: {set(event['data'].keys()) - {'groupId', 'name'}}"
+        )
+
+
+@allure.parent_suite("History Service")
+@allure.suite("Space events")
+@allure.sub_suite("Access Group")
+@allure.title("MEMBER_SET_ACCESS / MEMBER_REMOVE_ACCESS — добавление и удаление участника из группы, проверка через GetHistory спейса")
+def test_member_set_and_remove_access_events(main_client, space_for_history, manager_in_space):
+    """
+    Сценарий: добавление и удаление участника из группы доступа.
+
+    Шаги:
+    1. Создаём группу доступа в спейсе
+    2. Добавляем manager в группу (SetAccessGroupsMember)
+       → проверяем через GetHistory событие MEMBER_SET_ACCESS
+    3. Удаляем manager из группы (RemoveAccessGroupMember)
+       → проверяем через GetHistory событие MEMBER_REMOVE_ACCESS
+    """
+    space_id = space_for_history["space_id"]
+    member_id = manager_in_space["member_id"]
+
+    with allure.step("1. Создаём группу доступа"):
+        group_id, group_name = _create_group(main_client, space_id, name="_at_member_access")
+
+    with allure.step("2. Добавляем manager в группу"):
+        resp = main_client.post(**set_access_group_member_endpoint(
+            space_id=space_id,
+            member_id=member_id,
+            access_group_id=group_id,
+        ))
+        assert resp.status_code == 200, f"Ошибка добавления в группу: {resp.text}"
+
+    with allure.step("Проверяем через GetHistory что появилось событие MEMBER_SET_ACCESS"):
+        event_set = assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Space",
+            kind_id=space_id,
+            expected_event_key="MEMBER_SET_ACCESS",
+            expected_data={
+                "groupId": group_id,
+                "groupName": group_name,
+                "members": [member_id],
+            },
+            assert_unique=True,
+        )
+
+    with allure.step("Проверяем что data содержит только groupId, groupName, members"):
+        expected_keys = {"groupId", "groupName", "members"}
+        assert set(event_set["data"].keys()) == expected_keys, (
+            f"Лишние поля в data: {set(event_set['data'].keys()) - expected_keys}"
+        )
+
+    with allure.step("3. Удаляем manager из группы"):
+        resp = main_client.post(**remove_access_group_member_endpoint(
+            space_id=space_id,
+            member_id=member_id,
+            access_group_id=group_id,
+        ))
+        assert resp.status_code == 200, f"Ошибка удаления из группы: {resp.text}"
+
+    with allure.step("Проверяем через GetHistory что появилось событие MEMBER_REMOVE_ACCESS"):
+        event_remove = assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Space",
+            kind_id=space_id,
+            expected_event_key="MEMBER_REMOVE_ACCESS",
+            expected_data={
+                "groupId": group_id,
+                "groupName": group_name,
+                "members": [member_id],
+            },
+            assert_unique=True,
+        )
+
+    with allure.step("Проверяем что data содержит только groupId, groupName, members"):
+        expected_keys = {"groupId", "groupName", "members"}
+        assert set(event_remove["data"].keys()) == expected_keys, (
+            f"Лишние поля в data: {set(event_remove['data'].keys()) - expected_keys}"
+        )

@@ -3,7 +3,7 @@ import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, toggle_subtask_endpoint, \
     delete_task_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
@@ -35,7 +35,7 @@ def test_task_parent_subtask_history_events(owner_client, main_space, main_board
 
     try:
         with allure.step("1.1 Проверяем историю родительской задачи (появился сабтаск)"):
-            assert_history_event_exists(
+            assert_get_history_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Task",
@@ -46,7 +46,7 @@ def test_task_parent_subtask_history_events(owner_client, main_space, main_board
             )
 
         with allure.step("1.2 Проверяем историю самой подзадачи (прикрепилась к родителю)"):
-            assert_history_event_exists(
+            assert_get_history_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Task",
@@ -67,7 +67,7 @@ def test_task_parent_subtask_history_events(owner_client, main_space, main_board
             assert toggle_resp.status_code == 200, f"Ошибка при отвязке подзадачи: {toggle_resp.text}"
 
             with allure.step("2.1 Проверяем историю родителя (сабтаск отвязан)"):
-                assert_history_event_exists(
+                assert_get_history_event(
                     client=owner_client,
                     space_id=main_space,
                     kind="Task",
@@ -77,7 +77,7 @@ def test_task_parent_subtask_history_events(owner_client, main_space, main_board
                 )
 
             with allure.step("2.2 Проверяем историю подзадачи (родитель отвязан)"):
-                assert_history_event_exists(
+                assert_get_history_event(
                     client=owner_client,
                     space_id=main_space,
                     kind="Task",

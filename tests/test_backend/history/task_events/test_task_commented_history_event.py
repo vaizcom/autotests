@@ -3,7 +3,7 @@ import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
 from test_backend.data.endpoints.Comment.comment_endpoints import create_comment_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
@@ -36,7 +36,7 @@ def test_task_commented_history_event(main_client, main_space, temp_task_on_temp
         )
         assert comment_resp.status_code == 200, f"Ошибка создания комментария: {comment_resp.text}"
 
-        assert_history_event_exists(
+        assert_get_history_event(
             client=main_client,
             space_id=main_space,
             kind="Task",

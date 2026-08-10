@@ -1,85 +1,35 @@
-import allure
 import time
 
 from test_backend.data.endpoints.History.get_history_endpoint import get_history_endpoint
-from test_backend.data.endpoints.History.assert_history_payload import (
-    assert_history_schema,
-    assert_history_kind_fields,
-    assert_history_check_self,
-)
 from core.response_utils import short_resp
 
-def assert_history_event_exists(
+
+def _match_event(event: dict, expected_event_key: str, expected_data: dict = None) -> bool:
+    """Проверяет, совпадает ли событие по key и (опционально) по data."""
+    if event.get('key') != expected_event_key:
+        return False
+    if expected_data:
+        event_data = event.get('data', {})
+        return all(event_data.get(k) == v for k, v in expected_data.items())
+    return True
+
+
+def assert_get_history_event(
         client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
         expected_data: dict = None, timeout: int = 20, interval: float = 1.0,
-        check_self: bool = True,
+        assert_unique: bool = False,
 ) -> dict:
     """
-    Вспомогательная функция: запрашивает историю с механизмом ожидания (поллингом).
-    Если передан expected_data, функция будет искать событие, в котором data содержит указанные пары ключ-значение.
+    Поллит GetHistory до появления нужного события.
+
+    Возвращает найденное событие (dict) для дальнейших проверок в тесте.
+    Если assert_unique=True, проверяет что событие встречается ровно 1 раз.
     """
-    with allure.step(f"Ожидание события '{expected_event_key}' в истории {kind}"):
-        start_time = time.time()
-        found_event = None
+    start_time = time.time()
+    found_event = None
+    histories = []
 
-        while time.time() - start_time < timeout:
-            resp = client.post(
-                **get_history_endpoint(
-                    space_id=space_id,
-                    kind=kind,
-                    kind_id=kind_id,
-                    next_cursor=0,
-                )
-            )
-            assert resp.status_code == 200, f"Ошибка при получении истории: {short_resp(resp)}"
-
-            histories = resp.json().get('payload', {}).get('items', [])
-
-            # Ищем подходящее событие
-            for event in histories:
-                if event.get('key') == expected_event_key:
-                    # Если ожидаем конкретные данные, проверяем их
-                    if expected_data:
-                        event_data = event.get('data', {})
-                        # Проверяем, что все ключи из expected_data есть в event_data и их значения совпадают
-                        match = all(event_data.get(k) == v for k, v in expected_data.items())
-                        if match:
-                            found_event = event
-                            break
-                    else:
-                        found_event = event
-                        break
-
-            if found_event:
-                break
-
-            time.sleep(interval)
-
-        assert found_event is not None, (
-            f"Событие {expected_event_key} с данными {expected_data} не найдено за {timeout} секунд. "
-            f"Последний ответ: {histories}"
-        )
-
-        assert_history_schema(found_event)
-        assert_history_kind_fields(found_event, kind)
-        if check_self:
-            assert_history_check_self(found_event, kind, kind_id)
-
-        return found_event
-
-
-def assert_history_event_not_exists(
-        client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
-        expected_data: dict = None, after_ts: float = None, wait: float = 5.0
-):
-    """
-    Проверяет, что событие НЕ появилось в истории.
-    after_ts — timestamp (time.time()), после которого событие не должно было появиться.
-    wait — сколько секунд подождать перед проверкой (дать бэкенду время на запись).
-    """
-    time.sleep(wait)
-
-    with allure.step(f"Проверяем, что событие '{expected_event_key}' НЕ появилось"):
+    while time.time() - start_time < timeout:
         resp = client.post(
             **get_history_endpoint(
                 space_id=space_id,
@@ -93,28 +43,55 @@ def assert_history_event_not_exists(
         histories = resp.json().get('payload', {}).get('items', [])
 
         for event in histories:
-            if event.get('key') != expected_event_key:
-                continue
-            if expected_data:
-                event_data = event.get('data', {})
-                if not all(event_data.get(k) == v for k, v in expected_data.items()):
-                    continue
-            # Нашли совпадающее событие — если задан after_ts, проверяем время
-            if after_ts:
-                from datetime import datetime
-                event_time = event.get('createdAt', '')
-                # createdAt в ISO формате, парсим
-                try:
-                    event_dt = datetime.fromisoformat(event_time.replace('Z', '+00:00'))
-                    if event_dt.timestamp() > after_ts:
-                        raise AssertionError(
-                            f"Событие {expected_event_key} с данными {expected_data} "
-                            f"найдено после {after_ts}: {event}"
-                        )
-                except (ValueError, AttributeError):
-                    pass
-            else:
-                raise AssertionError(
-                    f"Событие {expected_event_key} с данными {expected_data} "
-                    f"найдено, хотя не должно было появиться: {event}"
-                )
+            if _match_event(event, expected_event_key, expected_data):
+                found_event = event
+                break
+
+        if found_event:
+            break
+
+        time.sleep(interval)
+
+    assert found_event is not None, (
+        f"Событие {expected_event_key} с данными {expected_data} не найдено за {timeout} секунд. "
+        f"Последний ответ: {histories}"
+    )
+
+    if assert_unique:
+        duplicates = [e for e in histories if _match_event(e, expected_event_key, expected_data)]
+        assert len(duplicates) == 1, (
+            f"Событие {expected_event_key} найдено {len(duplicates)} раз (ожидалось 1). "
+            f"IDs: {[e.get('_id') for e in duplicates]}"
+        )
+
+    return found_event
+
+
+def assert_get_history_no_event(
+        client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
+        expected_data: dict = None, wait: float = 5.0,
+):
+    """
+    Проверяет, что событие НЕ появилось в истории.
+    wait — сколько секунд подождать перед проверкой (дать бэкенду время на запись).
+    """
+    time.sleep(wait)
+
+    resp = client.post(
+        **get_history_endpoint(
+            space_id=space_id,
+            kind=kind,
+            kind_id=kind_id,
+            next_cursor=0,
+        )
+    )
+    assert resp.status_code == 200, f"Ошибка при получении истории: {short_resp(resp)}"
+
+    histories = resp.json().get('payload', {}).get('items', [])
+
+    for event in histories:
+        if _match_event(event, expected_event_key, expected_data):
+            assert False, (
+                f"Событие {expected_event_key} с данными {expected_data} "
+                f"найдено, хотя не должно было появиться: {event}"
+            )

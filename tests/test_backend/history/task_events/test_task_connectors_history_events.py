@@ -3,7 +3,7 @@ import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import toggle_task_connector_endpoint, create_task_endpoint, \
     delete_task_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
@@ -66,7 +66,7 @@ def test_task_connectors_history_events(
             assert toggle_resp.status_code == 200, f"Ошибка при установке связи: {toggle_resp.text}"
 
             with allure.step(f"1.1 Проверяем историю основной задачи -> ожидаем {main_task_expected_added}"):
-                assert_history_event_exists(
+                assert_get_history_event(
                     client=owner_client,
                     space_id=main_space,
                     kind="Task",
@@ -76,7 +76,7 @@ def test_task_connectors_history_events(
                 )
 
             with allure.step(f"1.2 Проверяем историю второй задачи -> ожидаем {connector_task_expected_added}"):
-                assert_history_event_exists(
+                assert_get_history_event(
                     client=owner_client,
                     space_id=main_space,
                     kind="Task",
@@ -97,7 +97,7 @@ def test_task_connectors_history_events(
             assert toggle_resp_remove.status_code == 200, f"Ошибка при снятии связи: {toggle_resp_remove.text}"
 
             with allure.step(f"2.1 Проверяем историю основной задачи -> ожидаем {main_task_expected_removed}"):
-                assert_history_event_exists(
+                assert_get_history_event(
                     client=owner_client,
                     space_id=main_space,
                     kind="Task",
@@ -107,7 +107,7 @@ def test_task_connectors_history_events(
                 )
 
             with allure.step(f"2.2 Проверяем историю второй задачи -> ожидаем {connector_task_expected_removed}"):
-                assert_history_event_exists(
+                assert_get_history_event(
                     client=owner_client,
                     space_id=main_space,
                     kind="Task",

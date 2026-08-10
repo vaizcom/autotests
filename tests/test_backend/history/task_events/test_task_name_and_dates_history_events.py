@@ -3,7 +3,7 @@ import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import edit_task_endpoint
 from test_backend.task_service.utils import get_current_timestamp, get_due_end
-from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
@@ -28,7 +28,7 @@ def test_task_name_and_dates_history_events(owner_client, main_space, temp_task_
             )
         )
 
-        assert_history_event_exists(
+        assert_get_history_event(
             client=owner_client,
             space_id=main_space,
             kind="Task",
@@ -50,7 +50,7 @@ def test_task_name_and_dates_history_events(owner_client, main_space, temp_task_
             )
         )
 
-        event_data = assert_history_event_exists(
+        event_data = assert_get_history_event(
             client=owner_client,
             space_id=main_space,
             kind="Task",

@@ -2,7 +2,7 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import toggle_milestone_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_history_event_exists
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
 
@@ -35,7 +35,7 @@ def test_task_milestones_history_events(owner_client, main_space, temp_task_on_t
         assert resp_attach.status_code == 200, f"Ошибка привязки майлстоуна: {resp_attach.text}"
 
         with allure.step("1.1 Проверяем историю Задачи -> ожидаем TASK_ATTACHED_TO_MILESTONE"):
-            assert_history_event_exists(
+            assert_get_history_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Task",
@@ -46,7 +46,7 @@ def test_task_milestones_history_events(owner_client, main_space, temp_task_on_t
             )
 
         with allure.step("1.2 Проверяем историю Майлстоуна -> ожидаем TASK_ATTACHED_INTO_MILESTONE"):
-            assert_history_event_exists(
+            assert_get_history_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Milestone",  # Запрашиваем историю Майлстоуна!
@@ -67,7 +67,7 @@ def test_task_milestones_history_events(owner_client, main_space, temp_task_on_t
         assert resp_detach.status_code == 200, f"Ошибка отвязки майлстоуна: {resp_detach.text}"
 
         with allure.step("2.1 Проверяем историю Задачи -> ожидаем TASK_DETACHED_TO_MILESTONE"):
-            assert_history_event_exists(
+            assert_get_history_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Task",
@@ -77,7 +77,7 @@ def test_task_milestones_history_events(owner_client, main_space, temp_task_on_t
             )
 
         with allure.step("2.2 Проверяем историю Майлстоуна -> ожидаем TASK_DETACHED_INTO_MILESTONE"):
-            assert_history_event_exists(
+            assert_get_history_event(
                 client=owner_client,
                 space_id=main_space,
                 kind="Milestone",  # Запрашиваем историю Майлстоуна!
