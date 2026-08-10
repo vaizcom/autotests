@@ -30,7 +30,7 @@ def test_create_project_access_by_roles(request, client_fixture, expected_status
             response = client.post(**create_project_endpoint(name=name, slug=slug, space_id=main_space, **common_kwargs))
         with allure.step(f'Проверка статус-кода: ожидаемый {expected_status}'):
             assert response.status_code == expected_status, response.text
-        if expected_status == 200:
+        if response.status_code == 200:
             prj_id = response.json()['payload']['project']['_id']
             with allure.step('Проверка, что проект был создан'):
                 assert response.json()['payload']['project']['name'] == name
