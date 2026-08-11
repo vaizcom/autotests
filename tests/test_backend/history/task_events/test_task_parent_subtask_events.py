@@ -3,7 +3,7 @@ import pytest
 
 from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, toggle_subtask_endpoint, \
     delete_task_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_get_history_event
+from test_backend.data.endpoints.History.history_utils import assert_get_history_event, assert_history_event_count
 
 pytestmark = [pytest.mark.backend]
 
@@ -50,6 +50,14 @@ def test_task_parent_subtask_history_events(main_client, space_for_history, boar
                 kind="Task", kind_id=subtask_id,
                 expected_event_key="TASK_ATTACHED_TO_PARENT",
                 expected_data={"_id": parent_task_id, "name": _PARENT_TASK_NAME},
+            )
+
+        with allure.step("Проверяем что событие TASK_ATTACHED_TO_PARENT не дублируется"):
+            assert_history_event_count(
+                client=main_client, space_id=space_id,
+                kind="Task", kind_id=subtask_id,
+                event_key="TASK_ATTACHED_TO_PARENT",
+                expected_count=1,
             )
 
         with allure.step("2. Отвязываем подзадачу (ToggleSubtask)"):
