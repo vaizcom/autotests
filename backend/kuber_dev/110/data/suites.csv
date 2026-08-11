@@ -1,0 +1,99 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Tue Aug 11 14:06:52 UTC 2026","Tue Aug 11 14:07:00 UTC 2026","7917","History Service","Task History","","","","Move to another group: Move Task with Subtask","
+    При перемещении родительской задачи в другую группу:
+    1. Родитель генерирует событие TASK_MOVED_GROUP
+    2. Подзадача НЕ перемещается вместе с ней (остается в старой группе)
+    "
+"passed","Tue Aug 11 14:04:40 UTC 2026","Tue Aug 11 14:04:42 UTC 2026","1467","History Service","Task History","","","","TASK_DELETED event","
+    Проверяем генерацию события при удалении задачи:
+    TASK_DELETED (проверяем через kind=Space, т.к. задача удалена)
+    "
+"passed","Tue Aug 11 14:05:39 UTC 2026","Tue Aug 11 14:05:43 UTC 2026","3831","History Service","Task History","","","","Parent & Subtask events: ATTACHED / DETACHED","
+    Проверяем генерацию событий при связывании задач (Родитель - Подзадача):
+    TASK_ATTACHED_AS_SUBTASK / TASK_ATTACHED_TO_PARENT
+    И события открепления:
+    TASK_DETACHED_AS_SUBTASK / TASK_DETACHED_TO_PARENT
+    "
+"passed","Tue Aug 11 14:04:31 UTC 2026","Tue Aug 11 14:04:34 UTC 2026","3075","History Service","Task History","","","","blockers task connectors: Добавление и удаление связей для 'blockers'","
+    Проверяем генерацию событий при установке зависимостей между задачами
+    в обоих направлениях ('blockers' и 'blocking').
+    "
+"passed","Tue Aug 11 14:05:44 UTC 2026","Tue Aug 11 14:05:49 UTC 2026","5691","History Service","Task History","","","","Priority event: TASK_PRIORITY_CHANGED","
+    Проверяем генерацию события при изменении приоритета задачи:
+    TASK_PRIORITY_CHANGED
+    "
+"passed","Tue Aug 11 14:04:35 UTC 2026","Tue Aug 11 14:04:38 UTC 2026","3046","History Service","Task History","","","","blocking task connectors: Добавление и удаление связей для 'blocking'","
+    Проверяем генерацию событий при установке зависимостей между задачами
+    в обоих направлениях ('blockers' и 'blocking').
+    "
+"passed","Tue Aug 11 14:04:11 UTC 2026","Tue Aug 11 14:04:17 UTC 2026","6336","History Service","Task History","","","","TASK_COMMENTED event","
+    Проверяем генерацию события TASK_COMMENTED при добавлении комментария к задаче.
+
+    Событие пишется бэкендом с kind=Task и возвращается GetHistory.
+    На фронте оно фильтруется из вкладки Activities (DocumentActivity.tsx),
+    т.к. комментарии отображаются отдельно на вкладке Comments — это ожидаемое поведение.
+    "
+"passed","Tue Aug 11 14:03:47 UTC 2026","Tue Aug 11 14:03:52 UTC 2026","4714","History Service","Task History","","","","Convert Task to Milestone events","
+    Проверяем генерацию событий при конвертации задачи + сабтаски в Milestone:
+
+    В истории нового Milestone:
+      - MILESTONE_CREATED_FROM_TASK
+      - TASK_ATTACHED_INTO_MILESTONE (подзадача автоматически прикреплена)
+
+    В истории Подзадачи:
+      - PARENT_TASK_CONVERTED_TO_MILESTONE
+      - TASK_DETACHED_TO_PARENT (отвязка от исчезнувшей родительской задачи)
+      - TASK_ATTACHED_TO_MILESTONE (привязка к новому майлстоуну)
+    "
+"passed","Tue Aug 11 14:05:51 UTC 2026","Tue Aug 11 14:06:06 UTC 2026","15945","History Service","Task History","","","","TASK_RENAMED event","
+    Проверяем генерацию события при переименовании задачи:
+    TASK_RENAMED
+    "
+"passed","Tue Aug 11 14:05:35 UTC 2026","Tue Aug 11 14:05:37 UTC 2026","2611","History Service","Task History","","","","Task & Milestones Attach/Detach events","
+    Проверяем генерацию событий при привязке и отвязке задачи к Milestone.
+    События в истории Задачи (kind=""Task""):
+      - TASK_ATTACHED_TO_MILESTONE / TASK_DETACHED_TO_MILESTONE
+    События в истории Майлстоуна (kind=""Milestone""):
+      - TASK_ATTACHED_INTO_MILESTONE / TASK_DETACHED_INTO_MILESTONE
+    "
+"passed","Tue Aug 11 14:04:39 UTC 2026","Tue Aug 11 14:04:40 UTC 2026","1560","History Service","Task History","","","","TASK_CREATED event","
+    Проверяем генерацию события при создании задачи:
+    TASK_CREATED
+    "
+"passed","Tue Aug 11 14:04:42 UTC 2026","Tue Aug 11 14:04:48 UTC 2026","5678","History Service","Task History","","","","TASK_DUE_CHANGED_V2 event","
+    Проверяем генерацию события при изменении дедлайна задачи:
+    TASK_DUE_CHANGED_V2
+    "
+"passed","Tue Aug 11 14:04:18 UTC 2026","Tue Aug 11 14:04:30 UTC 2026","11458","History Service","Task History","","","","TASK_COMPLETED & TASK_UNCOMPLETED events","
+    Проверяем генерацию событий при завершении и возврате задачи:
+    TASK_COMPLETED -> TASK_UNCOMPLETED
+    "
+"passed","Tue Aug 11 14:06:31 UTC 2026","Tue Aug 11 14:06:52 UTC 2026","20431","History Service","Task History","","","","Task Types events via MultipleEditTasks: TASK_TYPE_ADDED (mixed) -> TASK_TYPE_REMOVED","
+    Проверяем, что MultipleEditTasks генерирует history-события только для задач,
+    которые реально изменились, и не генерирует для пропущенных.
+    "
+"passed","Tue Aug 11 14:07:02 UTC 2026","Tue Aug 11 14:07:06 UTC 2026","4172","History Service","Task History","","","","Move to another board: Move Task with Subtask","
+    При перемещении родительской задачи на другую доску:
+    1. В родительской таске лог TASK_MOVED_TO_BOARD
+    2. Родитель и подзадача открепляются друг от друга (TASK_DETACHED_AS_SUBTASK / TASK_DETACHED_TO_PARENT)
+    3. Подзадача остается на старой доске в старой группе
+    "
+"passed","Tue Aug 11 14:03:53 UTC 2026","Tue Aug 11 14:03:54 UTC 2026","1396","History Service","Task History","","","","TASK_ARCHIVED & TASK_UNARCHIVED events","
+    Проверяем генерацию событий при архивации и разархивации задачи:
+    TASK_ARCHIVED -> TASK_UNARCHIVED
+
+    data содержит: _id, hrid, name, board, title, project.
+    hrid проверяется только как строка — значение недоступно без дополнительного запроса.
+    "
+"passed","Tue Aug 11 14:03:58 UTC 2026","Tue Aug 11 14:04:10 UTC 2026","12723","History Service","Task History","","","","Assignees events: TASK_ASSIGNED & TASK_UNASSIGNED","
+    Проверяем генерацию событий при назначении и снятии исполнителей:
+    TASK_ASSIGNED -> TASK_UNASSIGNED
+    "
+"passed","Tue Aug 11 14:06:08 UTC 2026","Tue Aug 11 14:06:31 UTC 2026","23170","History Service","Task History","","","","Task Types events: TASK_TYPE_ADDED & TASK_TYPE_REMOVED","
+    Проверяем генерацию событий при работе с массивом типов задачи (Types):
+    TASK_TYPE_ADDED -> TASK_TYPE_ADDED (еще один) -> TASK_TYPE_REMOVED -> TASK_TYPE_CHANGED
+    "
+"passed","Tue Aug 11 14:05:32 UTC 2026","Tue Aug 11 14:05:33 UTC 2026","1508","History Service","Task History","","","","TASK_DUPLICATED event","
+    Проверяем генерацию события при дублировании задачи на ту же доску:
+    TASK_DUPLICATED (в НОВОЙ скопированной задаче)
+    "
