@@ -5,93 +5,77 @@ from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
     delete_task_endpoint
 from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
-pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
+pytestmark = [pytest.mark.backend]
+
+_PARENT_TASK_NAME = "Temp task for history events"
+_SUBTASK_NAME = "Subtask for hierarchy test"
 
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.title("Parent & Subtask events")
-def test_task_parent_subtask_history_events(owner_client, main_space, main_board, temp_task_on_temp_board):
+@allure.title("Parent & Subtask events: ATTACHED / DETACHED")
+def test_task_parent_subtask_history_events(main_client, space_for_history, board_for_history, temp_task):
     """
     Проверяем генерацию событий при связывании задач (Родитель - Подзадача):
     TASK_ATTACHED_AS_SUBTASK / TASK_ATTACHED_TO_PARENT
     И события открепления:
     TASK_DETACHED_AS_SUBTASK / TASK_DETACHED_TO_PARENT
-    (при отвязке через ToggleSubtask)
     """
-    parent_task_id = temp_task_on_temp_board
+    space_id = space_for_history["space_id"]
+    board_id = board_for_history["board_id"]
+    parent_task_id = temp_task
 
-    with allure.step("1. Создаем подзадачу, сразу указывая parent_task -> ожидаем ATTACHED"):
-        resp = owner_client.post(
+    with allure.step("1. Создаем подзадачу, указывая parent_task"):
+        resp = main_client.post(
             **create_task_endpoint(
-                space_id=main_space,
-                board=main_board,
-                name="Subtask for hierarchy test",
-                parent_task=parent_task_id
+                space_id=space_id, board=board_id,
+                name=_SUBTASK_NAME, parent_task=parent_task_id
             )
         )
         assert resp.status_code == 200, f"Ошибка создания подзадачи: {resp.text}"
         subtask_id = resp.json()['payload']['task']['_id']
 
     try:
-        with allure.step("1.1 Проверяем историю родительской задачи (появился сабтаск)"):
+        with allure.step("Проверяем событие TASK_ATTACHED_AS_SUBTASK у родителя: получено и содержит верные данные (_id, name)"):
             assert_get_history_event(
-                client=owner_client,
-                space_id=main_space,
-                kind="Task",
-                kind_id=parent_task_id,
+                client=main_client, space_id=space_id,
+                kind="Task", kind_id=parent_task_id,
                 expected_event_key="TASK_ATTACHED_AS_SUBTASK",
-                # Ожидаем, что в данных указан ID привязанной подзадачи
-                expected_data={"_id": subtask_id}
+                expected_data={"_id": subtask_id, "name": _SUBTASK_NAME},
             )
 
-        with allure.step("1.2 Проверяем историю самой подзадачи (прикрепилась к родителю)"):
+        with allure.step("Проверяем событие TASK_ATTACHED_TO_PARENT у подзадачи: получено и содержит верные данные (_id, name)"):
             assert_get_history_event(
-                client=owner_client,
-                space_id=main_space,
-                kind="Task",
-                kind_id=subtask_id,
+                client=main_client, space_id=space_id,
+                kind="Task", kind_id=subtask_id,
                 expected_event_key="TASK_ATTACHED_TO_PARENT",
-                # Ожидаем, что в данных указан ID родителя
-                expected_data={"_id": parent_task_id}
+                expected_data={"_id": parent_task_id, "name": _PARENT_TASK_NAME},
             )
 
-        with allure.step("2. Отвязываем подзадачу (ToggleSubtask) -> ожидаем DETACHED"):
-            toggle_resp = owner_client.post(
+        with allure.step("2. Отвязываем подзадачу (ToggleSubtask)"):
+            toggle_resp = main_client.post(
                 **toggle_subtask_endpoint(
-                    space_id=main_space,
-                    task_id=subtask_id,
-                    parent_task_id=None  # Отвязываем от родителя
+                    space_id=space_id, task_id=subtask_id, parent_task_id=None
                 )
             )
             assert toggle_resp.status_code == 200, f"Ошибка при отвязке подзадачи: {toggle_resp.text}"
 
-            with allure.step("2.1 Проверяем историю родителя (сабтаск отвязан)"):
+            with allure.step("Проверяем событие TASK_DETACHED_AS_SUBTASK у родителя: получено и содержит верные данные (_id, name)"):
                 assert_get_history_event(
-                    client=owner_client,
-                    space_id=main_space,
-                    kind="Task",
-                    kind_id=parent_task_id,
+                    client=main_client, space_id=space_id,
+                    kind="Task", kind_id=parent_task_id,
                     expected_event_key="TASK_DETACHED_AS_SUBTASK",
-                    expected_data={"_id": subtask_id}
+                    expected_data={"_id": subtask_id, "name": _SUBTASK_NAME},
                 )
 
-            with allure.step("2.2 Проверяем историю подзадачи (родитель отвязан)"):
+            with allure.step("Проверяем событие TASK_DETACHED_TO_PARENT у подзадачи: получено и содержит верные данные (_id, name)"):
                 assert_get_history_event(
-                    client=owner_client,
-                    space_id=main_space,
-                    kind="Task",
-                    kind_id=subtask_id,
+                    client=main_client, space_id=space_id,
+                    kind="Task", kind_id=subtask_id,
                     expected_event_key="TASK_DETACHED_TO_PARENT",
-                    expected_data={"_id": parent_task_id}
+                    expected_data={"_id": parent_task_id, "name": _PARENT_TASK_NAME},
                 )
 
     finally:
-        with allure.step("Teardown: Удаление созданной подзадачи"):
-            # Удаляем подзадачу, чтобы не мусорить в базе
-            owner_client.post(
-                **delete_task_endpoint(
-                    space_id=main_space,
-                    task_id=subtask_id
-                )
-            )
+        with allure.step("Teardown: удаляем подзадачу"):
+            main_client.post(**delete_task_endpoint(space_id=space_id, task_id=subtask_id))
