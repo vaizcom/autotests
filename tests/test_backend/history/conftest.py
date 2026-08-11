@@ -17,7 +17,7 @@ from test_backend.data.endpoints.Project.project_endpoints import (
     create_project_endpoint,
     create_board_endpoint,
 )
-from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
+from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS, typesList as DEFAULT_TYPES_LIST
 
 _SPACE_FOR_HISTORY = "_autotest_history_space"
 
@@ -68,7 +68,7 @@ def board_for_history(main_client, space_for_history, project_for_history):
     name = "_autotest_history_board"
     resp = main_client.post(**create_board_endpoint(
         name=name, temp_project=project_id, space_id=space_id,
-        groups=DEFAULT_BOARD_GROUPS, typesList=[], customFields=[],
+        groups=DEFAULT_BOARD_GROUPS, typesList=DEFAULT_TYPES_LIST, customFields=[],
     ))
     assert resp.status_code == 200, f"Setup: не удалось создать board_for_history: {resp.text}"
     board_id = resp.json()["payload"]["board"]["_id"]
