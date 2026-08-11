@@ -4,84 +4,68 @@ import pytest
 from test_backend.data.endpoints.Task.task_endpoints import toggle_milestone_endpoint
 from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
-pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
+pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Task & Milestones Attach/Detach events")
-def test_task_milestones_history_events(owner_client, main_space, temp_task_on_temp_board,
-                                        temp_milestone_on_temp_board):
+def test_task_milestones_history_events(main_client, space_for_history, temp_task, temp_milestone):
     """
-    Проверяем генерацию событий при привязке и отвязке задачи к Milestones.
+    Проверяем генерацию событий при привязке и отвязке задачи к Milestone.
     События в истории Задачи (kind="Task"):
-      - TASK_ATTACHED_TO_MILESTONE
-      - TASK_DETACHED_TO_MILESTONE
+      - TASK_ATTACHED_TO_MILESTONE / TASK_DETACHED_TO_MILESTONE
     События в истории Майлстоуна (kind="Milestone"):
-      - TASK_ATTACHED_INTO_MILESTONE
-      - TASK_DETACHED_INTO_MILESTONE
+      - TASK_ATTACHED_INTO_MILESTONE / TASK_DETACHED_INTO_MILESTONE
     """
-    task_id = temp_task_on_temp_board
-    milestone_id = temp_milestone_on_temp_board
+    space_id = space_for_history["space_id"]
+    task_id = temp_task
+    milestone_id = temp_milestone
 
     with allure.step("1. Привязываем задачу к майлстоуну (ToggleMilestone)"):
-        resp_attach = owner_client.post(
+        resp_attach = main_client.post(
             **toggle_milestone_endpoint(
-                space_id=main_space,
-                task_id=task_id,
-                milestone_ids=[milestone_id]  # Передаем массив с ID майлстоуна (добавляем)
+                space_id=space_id, task_id=task_id, milestone_ids=[milestone_id]
             )
         )
         assert resp_attach.status_code == 200, f"Ошибка привязки майлстоуна: {resp_attach.text}"
 
-        with allure.step("1.1 Проверяем историю Задачи -> ожидаем TASK_ATTACHED_TO_MILESTONE"):
+        with allure.step("Проверяем событие TASK_ATTACHED_TO_MILESTONE у задачи: получено и содержит верные данные (milestoneId)"):
             assert_get_history_event(
-                client=owner_client,
-                space_id=main_space,
-                kind="Task",
-                kind_id=task_id,
+                client=main_client, space_id=space_id,
+                kind="Task", kind_id=task_id,
                 expected_event_key="TASK_ATTACHED_TO_MILESTONE",
-                # В истории задачи ожидаем увидеть ID привязанного майлстоуна
-                expected_data={"_id": milestone_id}
+                expected_data={"milestoneId": milestone_id}
             )
 
-        with allure.step("1.2 Проверяем историю Майлстоуна -> ожидаем TASK_ATTACHED_INTO_MILESTONE"):
+        with allure.step("Проверяем событие TASK_ATTACHED_INTO_MILESTONE у майлстоуна: получено и содержит верные данные (milestoneId, taskName)"):
             assert_get_history_event(
-                client=owner_client,
-                space_id=main_space,
-                kind="Milestone",  # Запрашиваем историю Майлстоуна!
-                kind_id=milestone_id,
+                client=main_client, space_id=space_id,
+                kind="Milestone", kind_id=milestone_id,
                 expected_event_key="TASK_ATTACHED_INTO_MILESTONE",
-                # В истории майлстоуна ожидаем увидеть ID привязанной задачи
-                expected_data={"_id": task_id}
+                expected_data={"milestoneId": milestone_id, "taskName": "Temp task for history events"},
             )
 
-    with allure.step("2. Отвязываем задачу (повторно передаем тот же ID для toggle)"):
-        resp_detach = owner_client.post(
+    with allure.step("2. Отвязываем задачу (повторный toggle)"):
+        resp_detach = main_client.post(
             **toggle_milestone_endpoint(
-                space_id=main_space,
-                task_id=task_id,
-                milestone_ids=[milestone_id]  # Тот же ID снимет привязку (toggle)
+                space_id=space_id, task_id=task_id, milestone_ids=[milestone_id]
             )
         )
         assert resp_detach.status_code == 200, f"Ошибка отвязки майлстоуна: {resp_detach.text}"
 
-        with allure.step("2.1 Проверяем историю Задачи -> ожидаем TASK_DETACHED_TO_MILESTONE"):
+        with allure.step("Проверяем событие TASK_DETACHED_TO_MILESTONE у задачи: получено и содержит верные данные (milestoneId)"):
             assert_get_history_event(
-                client=owner_client,
-                space_id=main_space,
-                kind="Task",
-                kind_id=task_id,
+                client=main_client, space_id=space_id,
+                kind="Task", kind_id=task_id,
                 expected_event_key="TASK_DETACHED_TO_MILESTONE",
-                expected_data={"_id": milestone_id}
+                expected_data={"milestoneId": milestone_id}
             )
 
-        with allure.step("2.2 Проверяем историю Майлстоуна -> ожидаем TASK_DETACHED_INTO_MILESTONE"):
+        with allure.step("Проверяем событие TASK_DETACHED_INTO_MILESTONE у майлстоуна: получено и содержит верные данные (milestoneId, taskName)"):
             assert_get_history_event(
-                client=owner_client,
-                space_id=main_space,
-                kind="Milestone",  # Запрашиваем историю Майлстоуна!
-                kind_id=milestone_id,
+                client=main_client, space_id=space_id,
+                kind="Milestone", kind_id=milestone_id,
                 expected_event_key="TASK_DETACHED_INTO_MILESTONE",
-                expected_data={"_id": task_id}
+                expected_data={"milestoneId": milestone_id, "taskName": "Temp task for history events"},
             )

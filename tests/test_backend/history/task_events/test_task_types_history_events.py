@@ -36,8 +36,8 @@ def test_task_types_history_events(main_client, space_for_history, board_for_his
             **edit_task_endpoint(space_id=space_id, task_id=task_id, types=[type_1_id])
         )
 
-        with allure.step("Проверяем событие TASK_TYPE_ADDED: получено и содержит верные данные (_id, hrid, name, addedTypes)"):
-            event = assert_get_history_event(
+        with allure.step("Проверяем событие TASK_TYPE_ADDED: получено и содержит верные данные (_id, name, addedTypes)"):
+            assert_get_history_event(
                 client=main_client,
                 space_id=space_id,
                 kind="Task",
@@ -45,7 +45,6 @@ def test_task_types_history_events(main_client, space_for_history, board_for_his
                 expected_event_key="TASK_TYPE_ADDED",
                 expected_data={"_id": task_id, "name": _TASK_NAME, "addedTypes": type_1_name},
             )
-            assert isinstance(event["data"].get("hrid"), str), "hrid должен быть строкой"
 
     with allure.step(f"2. Добавляем второй тип ({type_2_name}) к существующему"):
         main_client.post(

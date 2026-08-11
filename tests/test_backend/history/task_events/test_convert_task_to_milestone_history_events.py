@@ -48,7 +48,7 @@ def test_convert_task_to_milestone_history_events(main_client, space_for_history
             assert convert_resp.status_code == 200, f"Ошибка при конвертации: {convert_resp.text}"
             milestone_id = convert_resp.json()['payload']['milestone']['_id']
 
-        with allure.step("Проверяем через GetHistory событие MILESTONE_CREATED_FROM_TASK у майлстоуна"):
+        with allure.step("Проверяем событие MILESTONE_CREATED_FROM_TASK у майлстоуна: получено и содержит верные данные (_id)"):
             assert_get_history_event(
                 client=main_client, space_id=space_id,
                 kind="Milestone", kind_id=milestone_id,
@@ -57,7 +57,7 @@ def test_convert_task_to_milestone_history_events(main_client, space_for_history
             )
 
         with allure.step("Проверяем каскадные события в истории подзадачи"):
-            with allure.step("Проверяем через GetHistory событие PARENT_TASK_CONVERTED_TO_MILESTONE"):
+            with allure.step("Проверяем событие PARENT_TASK_CONVERTED_TO_MILESTONE: получено и содержит верные данные (_id)"):
                 assert_get_history_event(
                     client=main_client, space_id=space_id,
                     kind="Task", kind_id=subtask_id,
@@ -65,7 +65,7 @@ def test_convert_task_to_milestone_history_events(main_client, space_for_history
                     expected_data={"_id": parent_task_id}
                 )
 
-            with allure.step("Проверяем через GetHistory событие TASK_DETACHED_TO_PARENT"):
+            with allure.step("Проверяем событие TASK_DETACHED_TO_PARENT: получено и содержит верные данные (_id)"):
                 assert_get_history_event(
                     client=main_client, space_id=space_id,
                     kind="Task", kind_id=subtask_id,
@@ -73,7 +73,7 @@ def test_convert_task_to_milestone_history_events(main_client, space_for_history
                     expected_data={"_id": parent_task_id}
                 )
 
-            with allure.step("Проверяем через GetHistory событие TASK_ATTACHED_TO_MILESTONE"):
+            with allure.step("Проверяем событие TASK_ATTACHED_TO_MILESTONE: получено и содержит верные данные (milestoneId)"):
                 assert_get_history_event(
                     client=main_client, space_id=space_id,
                     kind="Task", kind_id=subtask_id,
@@ -81,11 +81,12 @@ def test_convert_task_to_milestone_history_events(main_client, space_for_history
                     expected_data={"milestoneId": milestone_id}
                 )
 
-        with allure.step("Проверяем через GetHistory событие TASK_ATTACHED_INTO_MILESTONE у майлстоуна"):
+        with allure.step("Проверяем событие TASK_ATTACHED_INTO_MILESTONE у майлстоуна: получено и содержит верные данные (milestoneId, taskName)"):
             assert_get_history_event(
                 client=main_client, space_id=space_id,
                 kind="Milestone", kind_id=milestone_id,
                 expected_event_key="TASK_ATTACHED_INTO_MILESTONE",
+                expected_data={"milestoneId": milestone_id, "taskName": "Subtask for conversion test"},
             )
 
     finally:

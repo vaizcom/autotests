@@ -11,7 +11,9 @@ from test_backend.data.endpoints.member.member_endpoints import get_space_member
 
 @pytest.fixture
 def temp_task(main_client, space_for_history, board_for_history):
-    """Временная задача на board_for_history. Создаётся перед тестом, удаляется после."""
+    """Временная задача на board_for_history. Создаётся перед тестом, удаляется после.
+    Добавлять pre-cleanup для каждой временной сущности — лишний код.
+    Достаточно каскада удаления в space_for_history"""
     space_id = space_for_history["space_id"]
     board_id = board_for_history["board_id"]
     with allure.step("Setup: создаём временную задачу"):
