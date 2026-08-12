@@ -1,29 +1,22 @@
-name: Backend Tests
+name: Public API Tests
 
 on:
   push:
     branches: [ main, master ]
     paths:
-      - 'tests/test_backend/**'
+      - 'tests/test_public_api/**'
   pull_request:
     branches: [ main, master ]
     paths:
-      - 'tests/test_backend/**'
+      - 'tests/test_public_api/**'
   workflow_dispatch:
-    inputs:
-      test_scope:
-        description: 'Which tests to run?'
-        default: 'backend'
-        type: choice
-        options: [ backend ]
-      test_stand:
-        description: 'Which test stand to run?'
-        default: 'dev'
-        type: choice
-        options: [ dev, kuber_dev, kuber_uat ]
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
 
 permissions:
-  contents: write 
+  contents: write
   issues: write
   pull-requests: write
 
@@ -32,28 +25,11 @@ jobs:
     runs-on: ubuntu-latest-m
     timeout-minutes: 60
 
-    env:
-      TEST_SCOPE: ${{ github.event.inputs.test_scope || 'backend' }}
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 🧠 Определяем стенд из .env (push / pull_request)
-      - name: Determine test stand from .env
-        if: ${{ github.event_name != 'workflow_dispatch' }}
-        run: |
-          STAND=$(grep '^TEST_STAND_NAME=' .env | cut -d'=' -f2 || echo "dev")
-          echo "TEST_STAND_NAME=$STAND" >> $GITHUB_ENV
-          echo "🧠 Test stand from .env: $STAND" >> $GITHUB_STEP_SUMMARY
-
-      # 🧠 Получаем стенд из input (если ручной запуск)
-      - name: Set test stand from input
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: echo "TEST_STAND_NAME=${{ github.event.inputs.test_stand }}" >> $GITHUB_ENV
-
-      # ✅ Добавляем tests/ в PYTHONPATH (для from config import settings)
       - name: Add tests to PYTHONPATH
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
 
@@ -68,55 +44,36 @@ jobs:
           pip install -r requirements.txt
           pip install allure-pytest
 
-      # ✅ Импортируем settings.py, чтобы API_URL записался в GITHUB_ENV
-      - name: Export API_URL from settings.py
-        run: python -c "from config import settings"
-
-      - name: Display selected options
+      - name: Print test environment
         run: |
-          echo "Test scope: $TEST_SCOPE"
-          echo "Test stand: $TEST_STAND_NAME"
-          echo "API URL: $API_URL"
+          echo "## Public API Tests" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **API** | https://api.vaiz.com/public/v1 |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | ${{ github.head_ref || github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | ${GITHUB_SHA::7} |" >> $GITHUB_STEP_SUMMARY
 
       - name: ❌ Clean old Allure results
         run: rm -rf allure-results
 
-      # ✅ Allure Environment: API_URL теперь доступен
       - name: Set Allure environment metadata
         run: |
           mkdir -p allure-results
-          echo "TEST_SCOPE=$TEST_SCOPE" >> allure-results/environment.properties
-          echo "TEST_STAND=$TEST_STAND_NAME" >> allure-results/environment.properties
-          echo "API_URL=$API_URL" >> allure-results/environment.properties
+          echo "API=https://api.vaiz.com/public/v1" >> allure-results/environment.properties
 
-      - name: Print test environment
-        run: |
-          echo "## Backend Tests" >> $GITHUB_STEP_SUMMARY
-          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Stand** | $TEST_STAND_NAME |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Scope** | $TEST_SCOPE |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Branch** | ${{ github.head_ref || github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Commit** | ${GITHUB_SHA::7} |" >> $GITHUB_STEP_SUMMARY
-
-      - name: ✅ Check if the API is available from the agent
-        continue-on-error: false
-        run: curl -m 10 $API_URL/healthCheck
-
-      # 🔍 Для PR — запускаем только изменённые тестовые файлы
       - name: Detect changed test files
         if: github.event_name == 'pull_request'
         id: changed
         run: |
           CHANGED=$(git diff --name-only --diff-filter=ACMR origin/${{ github.base_ref }}...HEAD \
-            | grep '^tests/test_backend/.*/test_.*\.py$' \
+            | grep '^tests/test_public_api/.*/test_.*\.py$' \
             | grep -v '__pycache__' \
             | tr '\n' ' ')
           echo "files=$CHANGED" >> $GITHUB_OUTPUT
           if [ -n "$CHANGED" ]; then
             echo "🔍 Changed test files: $CHANGED" >> $GITHUB_STEP_SUMMARY
           else
-            echo "🔍 No test files changed — running all backend tests" >> $GITHUB_STEP_SUMMARY
+            echo "🔍 No test files changed — running all public API tests" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: ✅ Run tests with Allure
@@ -124,9 +81,9 @@ jobs:
         run: |
           CHANGED="${{ steps.changed.outputs.files }}"
           if [ -n "$CHANGED" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
-            pytest $CHANGED --alluredir=allure-results -m "$TEST_SCOPE" --reruns 1 --reruns-delay 10 --maxfail=50
+            pytest $CHANGED --alluredir=allure-results -m "public_api" --reruns 1 --reruns-delay 10 --maxfail=50
           else
-            pytest . --alluredir=allure-results -m "$TEST_SCOPE" --reruns 1 --reruns-delay 10 --maxfail=50
+            pytest tests/test_public_api/ --alluredir=allure-results -m "public_api" --reruns 1 --reruns-delay 10 --maxfail=50
           fi
 
       - name: Check allure-results content
@@ -158,12 +115,10 @@ jobs:
       - name: 📊 Generate Allure Report
         if: ${{ !cancelled() && steps.check_results.outputs.result_count != '0' }}
         run: |
-          # Копируем историю из gh-pages
-          GH_HISTORY="gh-pages/backend/${{ env.TEST_STAND_NAME }}/last-history"
+          GH_HISTORY="gh-pages/public_api/last-history"
           if [ -d "$GH_HISTORY" ]; then
             cp -r "$GH_HISTORY" allure-results/history
           fi
-          # Генерируем отчёт
           allure generate allure-results -o allure-report --clean
 
       - name: 📊 Manage Allure History
@@ -171,46 +126,31 @@ jobs:
         run: |
           REPORT_NUM=${{ github.run_number }}
           mkdir -p allure-history
-          # Копируем существующие отчёты из gh-pages
-          GH_DIR="gh-pages/backend/${{ env.TEST_STAND_NAME }}"
+          GH_DIR="gh-pages/public_api"
           if [ -d "$GH_DIR" ]; then
             cp -r "$GH_DIR"/* allure-history/ 2>/dev/null || true
           fi
-          # Сохраняем новый отчёт
           cp -r allure-report allure-history/${REPORT_NUM}
-          # Сохраняем историю для следующего запуска
           cp -r allure-report/history allure-history/last-history 2>/dev/null || true
-          # Удаляем старые отчёты (оставляем 5)
           cd allure-history
           ls -d [0-9]* 2>/dev/null | sort -n | head -n -5 | xargs rm -rf 2>/dev/null || true
           cd ..
-          # Генерируем index.html с редиректом
           cat > allure-history/index.html << EOF
-          <html><head><meta http-equiv="refresh" content="0; URL=https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/${REPORT_NUM}/"></head></html>
+          <html><head><meta http-equiv="refresh" content="0; URL=https://vaizcom.github.io/autotests/public_api/${REPORT_NUM}/"></head></html>
           EOF
 
       - name: Prepare deploy directory
         if: ${{ !cancelled() && steps.check_results.outputs.result_count != '0' }}
         run: |
-          # Берём полное содержимое gh-pages как базу (сохраняем frontend и другие стенды)
           if [ -d "gh-pages" ]; then
             cp -r gh-pages deploy
             rm -rf deploy/.git
           else
             mkdir -p deploy
           fi
-
-          # Чистим старые отчёты во ВСЕХ backend-стендах (оставляем 5)
-          for STAND_DIR in deploy/backend/*/; do
-            if [ -d "$STAND_DIR" ]; then
-              (cd "$STAND_DIR" && ls -d [0-9]* 2>/dev/null | sort -n | head -n -5 | xargs rm -rf 2>/dev/null || true)
-            fi
-          done
-
-          # Заменяем отчёты текущего стенда
-          rm -rf deploy/backend/${{ env.TEST_STAND_NAME }}
-          mkdir -p deploy/backend/${{ env.TEST_STAND_NAME }}
-          cp -r allure-history/* deploy/backend/${{ env.TEST_STAND_NAME }}/
+          rm -rf deploy/public_api
+          mkdir -p deploy/public_api
+          cp -r allure-history/* deploy/public_api/
 
           cat > deploy/index.html << 'HTMLEOF'
           <!DOCTYPE html>
@@ -242,7 +182,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./deploy
-          full_commit_message: "deploy: backend ${{ env.TEST_STAND_NAME }} allure report"
+          full_commit_message: "deploy: public_api allure report"
 
       - name: Add Allure link to summary
         if: ${{ !cancelled() && steps.check_results.outputs.result_count != '0' }}
@@ -250,7 +190,7 @@ jobs:
           REPORT_NUM=$(ls -d allure-history/[0-9]* 2>/dev/null | sort -n | tail -1)
           REPORT_NUM=$(basename "$REPORT_NUM")
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📊 **Allure Report**: [Открыть отчёт](https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/${REPORT_NUM}/)" >> $GITHUB_STEP_SUMMARY
+          echo "📊 **Allure Report**: [Открыть отчёт](https://vaizcom.github.io/autotests/public_api/${REPORT_NUM}/)" >> $GITHUB_STEP_SUMMARY
 
       - name: 📝 Comment Allure Report link on PR
         if: github.event_name == 'pull_request' && steps.check_results.outputs.result_count != '0'
@@ -274,7 +214,7 @@ jobs:
 
             const sha = context.payload.pull_request.head.sha.substring(0, 7);
             const time = new Date().toISOString();
-            const link = "https://vaizcom.github.io/autotests/backend/${{ env.TEST_STAND_NAME }}/";
+            const link = "https://vaizcom.github.io/autotests/public_api/";
 
             await github.rest.issues.createComment({
               issue_number: context.payload.pull_request.number,

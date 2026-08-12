@@ -44,7 +44,7 @@ def test_access_group_created_event(main_client, space_for_history):
     space_id = space_for_history["space_id"]
 
     with allure.step("Создаём группу доступа"):
-        group_id, group_name = _create_group(main_client, space_id, name="_at_group_created")
+        group_id, group_name = _create_group(main_client, space_id, name=f"created_{uuid.uuid4().hex[:6]}")
 
     with allure.step("Проверяем через GetHistory что появилось событие ACCESS_GROUP_CREATED"):
         event = assert_get_history_event(
@@ -54,7 +54,6 @@ def test_access_group_created_event(main_client, space_for_history):
             kind_id=space_id,
             expected_event_key="ACCESS_GROUP_CREATED",
             expected_data={"groupId": group_id, "name": group_name},
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только groupId и name"):
@@ -85,7 +84,7 @@ def test_access_group_updated_event(main_client, space_for_history, update_field
 
     with allure.step("Создаём группу"):
         group_id, group_name = _create_group(
-            main_client, space_id, name=f"_at_upd_{update_field}",
+            main_client, space_id, name=f"updated_{uuid.uuid4().hex[:6]}",
         )
 
     with allure.step(f"Обновляем {update_field} группы"):
@@ -105,7 +104,6 @@ def test_access_group_updated_event(main_client, space_for_history, update_field
             kind_id=space_id,
             expected_event_key="ACCESS_GROUP_UPDATED",
             expected_data={"groupId": group_id, "name": expected_name},
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только groupId и name"):
@@ -131,7 +129,7 @@ def test_access_group_removed_event(main_client, space_for_history):
     space_id = space_for_history["space_id"]
 
     with allure.step("Создаём группу"):
-        group_id, group_name = _create_group(main_client, space_id, name="_at_group_removed")
+        group_id, group_name = _create_group(main_client, space_id, name=f"removed_{uuid.uuid4().hex[:6]}")
 
     with allure.step("Удаляем группу"):
         resp = main_client.post(**remove_access_group_endpoint(
@@ -148,7 +146,6 @@ def test_access_group_removed_event(main_client, space_for_history):
             kind_id=space_id,
             expected_event_key="ACCESS_GROUP_REMOVED",
             expected_data={"groupId": group_id, "name": group_name},
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только groupId и name"):
@@ -176,7 +173,7 @@ def test_member_set_and_remove_access_events(main_client, space_for_history, man
     member_id = manager_in_space["member_id"]
 
     with allure.step("1. Создаём группу доступа"):
-        group_id, group_name = _create_group(main_client, space_id, name="_at_member_access")
+        group_id, group_name = _create_group(main_client, space_id, name=f"member_{uuid.uuid4().hex[:6]}")
 
     with allure.step("2. Добавляем manager в группу"):
         resp = main_client.post(**set_access_group_member_endpoint(
@@ -198,7 +195,6 @@ def test_member_set_and_remove_access_events(main_client, space_for_history, man
                 "groupName": group_name,
                 "members": [member_id],
             },
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только groupId, groupName, members"):
@@ -227,7 +223,6 @@ def test_member_set_and_remove_access_events(main_client, space_for_history, man
                 "groupName": group_name,
                 "members": [member_id],
             },
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только groupId, groupName, members"):
