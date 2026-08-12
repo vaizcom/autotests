@@ -1,0 +1,18 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Wed Aug 12 14:12:12 UTC 2026","Wed Aug 12 14:12:14 UTC 2026","1464","History Service","Space events","Team","","","SPACE_INVITE_DECLINED event","
+    При отклонении инвайта приглашённым пользователем генерируется событие SPACE_INVITE_DECLINED.
+    data содержит email отклонившего.
+    "
+"passed","Wed Aug 12 14:12:02 UTC 2026","Wed Aug 12 14:12:07 UTC 2026","5415","History Service","Space events","Team","","","SPACE_INVITED → SPACE_INVITE_ACCEPTED → SPACE_USER_DEACTIVATED → SPACE_USER_REACTIVATED","
+    Полный жизненный цикл участника space:
+    приглашение → принятие → деактивация → реактивация.
+    "
+"passed","Wed Aug 12 14:12:07 UTC 2026","Wed Aug 12 14:12:12 UTC 2026","4345","History Service","Space events","Team","","","SPACE_INVITE_REMOVED event","
+    Сценарий: удаление pending-инвайта до его принятия.
+
+    Шаги:
+    1. Приглашаем member в space (InviteToSpace)
+    2. Удаляем инвайт через RemoveInvite до принятия
+    3. Проверяем через GetHistory что появилось событие SPACE_INVITE_REMOVED
+    4. Проверяем data: email
+    "
