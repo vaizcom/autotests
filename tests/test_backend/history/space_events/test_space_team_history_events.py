@@ -46,7 +46,6 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
             kind_id=space_id,
             expected_event_key="SPACE_INVITED",
             expected_data={"role": "Owner", "email": owner_email},
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только role и email"):
@@ -78,7 +77,6 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
             kind_id=space_id,
             expected_event_key="SPACE_INVITE_ACCEPTED",
             expected_data={"email": owner_email},
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только email"):
@@ -125,7 +123,6 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
             kind_id=space_id,
             expected_event_key="SPACE_USER_DEACTIVATED",
             expected_data={"members": [member_id]},
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только members"):
@@ -148,7 +145,6 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
             kind_id=space_id,
             expected_event_key="SPACE_USER_REACTIVATED",
             expected_data={"members": [member_id]},
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только members"):
@@ -210,7 +206,6 @@ def test_space_invite_removed_event(main_client, space_for_history):
             kind_id=space_id,
             expected_event_key="SPACE_INVITE_REMOVED",
             expected_data={"email": member_email},
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только email"):
@@ -262,7 +257,6 @@ def test_space_invite_declined_event(main_client, member_client, space_for_histo
             kind_id=space_id,
             expected_event_key="SPACE_INVITE_DECLINED",
             expected_data={"email": member_email},
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только email"):

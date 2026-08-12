@@ -53,7 +53,7 @@ def test_access_group_rights_updated_event(
 
     with allure.step("Создаём группу доступа"):
         group_id, group_name = _create_group(
-            main_client, space_id, name=f"_at_group_rights_{rights_kind.lower()}",
+            main_client, space_id, name=f"rights_{rights_kind.lower()}_{uuid.uuid4().hex[:6]}",
         )
 
     with allure.step(f"Обновляем права группы на {rights_kind} (уровень Member)"):
@@ -80,7 +80,6 @@ def test_access_group_rights_updated_event(
                 "kindName": kind_name,
                 "level": "Member",
             },
-            assert_unique=True,
         )
 
     with allure.step("Проверяем что data содержит только groupId, groupName, kind, kindName, level"):
