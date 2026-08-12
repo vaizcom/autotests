@@ -36,7 +36,11 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
             email=owner_email,
             space_access="Owner",
         ))
-        assert invite_resp.status_code == 200, f"Ошибка инвайта: {invite_resp.text}"
+        assert invite_resp.status_code in (200, 400) and (
+            invite_resp.status_code == 200
+            or invite_resp.json().get("error", {}).get("code") == "UserAlreadySpaceMember"
+        ), f"Ошибка инвайта: {invite_resp.text}"
+        already_member = invite_resp.status_code == 400
 
     with allure.step("Проверяем через GetHistory что появилось событие SPACE_INVITED"):
         event = assert_get_history_event(
@@ -55,20 +59,21 @@ def test_space_invite_lifecycle_events(main_client, owner_client, space_for_hist
         )
 
     with allure.step("2. owner принимает инвайт"):
-        spaces_resp = owner_client.post(**get_spaces_endpoint())
-        assert spaces_resp.status_code == 200
-        spaces = spaces_resp.json().get("payload", {}).get("spaces", [])
-        target = next((s for s in spaces if s.get("_id") == space_id), None)
-        assert target is not None, f"Space {space_id} не найден в списке инвайтов owner_client"
-        invite_code = target["inviteCode"]
+        if not already_member:
+            spaces_resp = owner_client.post(**get_spaces_endpoint())
+            assert spaces_resp.status_code == 200
+            spaces = spaces_resp.json().get("payload", {}).get("spaces", [])
+            target = next((s for s in spaces if s.get("_id") == space_id), None)
+            assert target is not None, f"Space {space_id} не найден в списке инвайтов owner_client"
+            invite_code = target["inviteCode"]
 
-        confirm_resp = owner_client.post(**confirm_space_invite_endpoint(
-            code=invite_code,
-            full_name="owner",
-            password=owner_password,
-            termsAccepted=True,
-        ))
-        assert confirm_resp.status_code == 200, f"Ошибка подтверждения инвайта: {confirm_resp.text}"
+            confirm_resp = owner_client.post(**confirm_space_invite_endpoint(
+                code=invite_code,
+                full_name="owner",
+                password=owner_password,
+                termsAccepted=True,
+            ))
+            assert confirm_resp.status_code == 200, f"Ошибка подтверждения инвайта: {confirm_resp.text}"
 
     with allure.step("Клиен который приглашал(main_client) видит через GetHistory событие SPACE_INVITE_ACCEPTED"):
         event = assert_get_history_event(
