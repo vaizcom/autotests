@@ -231,6 +231,8 @@ jobs:
           <a href="backend/dev/">Dev</a>
           <a href="backend/kuber_dev/">Kuber Dev</a>
           <a href="backend/kuber_uat/">Kuber UAT</a>
+          <h2>Public API Tests</h2>
+          <a href="public_api/">Production</a>
           </body></html>
           HTMLEOF
 
