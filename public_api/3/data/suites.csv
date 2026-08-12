@@ -1,0 +1,34 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Wed Aug 12 12:55:38 UTC 2026","Wed Aug 12 12:55:38 UTC 2026","131","Public API","History","","","","GET /public/v1/history — отсутствие обязательного параметра возвращает 400","
+    При отсутствии любого обязательного параметра (spaceId, kind, kindId)
+    публичный API должен вернуть 400.
+    "
+"passed","Wed Aug 12 12:55:32 UTC 2026","Wed Aug 12 12:55:33 UTC 2026","550","Public API","History","","","","GET /public/v1/history — smoke: валидный запрос возвращает 200 с корректной структурой","
+    Базовый smoke-тест: валидный запрос с kind=Space возвращает 200
+    и ответ содержит корректную структуру (items, page.hasMore, page.nextCursor).
+
+    Формат ответа публичного API отличается от внутреннего:
+    - нет обёртки payload
+    - пагинация через page.hasMore + page.nextCursor (Unix timestamp в мс)
+    - nextCursor присутствует только если hasMore=true
+    "
+"passed","Wed Aug 12 12:55:34 UTC 2026","Wed Aug 12 12:55:34 UTC 2026","242","Public API","History","","","","GET /public/v1/history — структура элементов items","
+    Проверяем, что каждый элемент items содержит обязательные поля.
+
+    Источник: интерфейс IHistory в packages/shared/src/models/history/types.ts.
+    Поля без ? — обязательные, всегда присутствуют: _id, key, createdAt, type, data, creatorId.
+    Поля с ? — опциональные, зависят от типа события: memberId, spaceId, projectId,
+    boardId, taskId, documentId, milestoneId.
+
+    Набор полей одинаковый для публичного и внутреннего API — бэкенд не скрывает
+    и не фильтрует поля истории перед отдачей (в отличие от, например, Document API,
+    который скрывает поля space и content).
+    "
+"passed","Wed Aug 12 12:55:37 UTC 2026","Wed Aug 12 12:55:37 UTC 2026","130","Public API","History","","","","GET /public/v1/history — отсутствие обязательного параметра возвращает 400","
+    При отсутствии любого обязательного параметра (spaceId, kind, kindId)
+    публичный API должен вернуть 400.
+    "
+"passed","Wed Aug 12 12:55:35 UTC 2026","Wed Aug 12 12:55:36 UTC 2026","343","Public API","History","","","","GET /public/v1/history — отсутствие обязательного параметра возвращает 400","
+    При отсутствии любого обязательного параметра (spaceId, kind, kindId)
+    публичный API должен вернуть 400.
+    "
