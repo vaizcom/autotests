@@ -1,0 +1,220 @@
+name: Public API Tests
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'tests/test_public_api/**'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'tests/test_public_api/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest-m
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add tests to PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install allure-pytest
+
+      - name: Print test environment
+        run: |
+          echo "## Public API Tests" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **API** | https://api.vaiz.com/public/v1 |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | ${{ github.head_ref || github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | ${GITHUB_SHA::7} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: ❌ Clean old Allure results
+        run: rm -rf allure-results
+
+      - name: Set Allure environment metadata
+        run: |
+          mkdir -p allure-results
+          echo "API=https://api.vaiz.com/public/v1" >> allure-results/environment.properties
+
+      - name: Detect changed test files
+        if: github.event_name == 'pull_request'
+        id: changed
+        run: |
+          CHANGED=$(git diff --name-only --diff-filter=ACMR origin/${{ github.base_ref }}...HEAD \
+            | grep '^tests/test_public_api/.*/test_.*\.py$' \
+            | grep -v '__pycache__' \
+            | tr '\n' ' ')
+          echo "files=$CHANGED" >> $GITHUB_OUTPUT
+          if [ -n "$CHANGED" ]; then
+            echo "🔍 Changed test files: $CHANGED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "🔍 No test files changed — running all public API tests" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: ✅ Run tests with Allure
+        continue-on-error: true
+        run: |
+          CHANGED="${{ steps.changed.outputs.files }}"
+          if [ -n "$CHANGED" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
+            pytest $CHANGED --alluredir=allure-results -m "public_api" --reruns 1 --reruns-delay 10 --maxfail=50
+          else
+            pytest tests/test_public_api/ --alluredir=allure-results -m "public_api" --reruns 1 --reruns-delay 10 --maxfail=50
+          fi
+
+      - name: Check allure-results content
+        id: check_results
+        if: ${{ !cancelled() }}
+        run: |
+          COUNT=$(find allure-results -name '*-result.json' 2>/dev/null | wc -l)
+          echo "result_count=$COUNT" >> $GITHUB_OUTPUT
+          if [ "$COUNT" -eq 0 ]; then
+            echo "⚠️ Тесты не запускались или не дали результатов — деплой отчёта пропущен" >> $GITHUB_STEP_SUMMARY
+          fi
+          ls -lah allure-results
+
+      - name: 🕘 Get Allure history
+        uses: actions/checkout@v4
+        if: ${{ !cancelled() && steps.check_results.outputs.result_count != '0' }}
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: 📊 Install Allure CLI
+        if: ${{ !cancelled() && steps.check_results.outputs.result_count != '0' }}
+        run: |
+          wget -q https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.25.0/allure-commandline-2.25.0.zip
+          unzip -q allure-commandline-2.25.0.zip -d /opt
+          echo "/opt/allure-2.25.0/bin" >> $GITHUB_PATH
+
+      - name: 📊 Generate Allure Report
+        if: ${{ !cancelled() && steps.check_results.outputs.result_count != '0' }}
+        run: |
+          GH_HISTORY="gh-pages/public_api/last-history"
+          if [ -d "$GH_HISTORY" ]; then
+            cp -r "$GH_HISTORY" allure-results/history
+          fi
+          allure generate allure-results -o allure-report --clean
+
+      - name: 📊 Manage Allure History
+        if: ${{ !cancelled() && steps.check_results.outputs.result_count != '0' }}
+        run: |
+          REPORT_NUM=${{ github.run_number }}
+          mkdir -p allure-history
+          GH_DIR="gh-pages/public_api"
+          if [ -d "$GH_DIR" ]; then
+            cp -r "$GH_DIR"/* allure-history/ 2>/dev/null || true
+          fi
+          cp -r allure-report allure-history/${REPORT_NUM}
+          cp -r allure-report/history allure-history/last-history 2>/dev/null || true
+          cd allure-history
+          ls -d [0-9]* 2>/dev/null | sort -n | head -n -5 | xargs rm -rf 2>/dev/null || true
+          cd ..
+          cat > allure-history/index.html << EOF
+          <html><head><meta http-equiv="refresh" content="0; URL=https://vaizcom.github.io/autotests/public_api/${REPORT_NUM}/"></head></html>
+          EOF
+
+      - name: Prepare deploy directory
+        if: ${{ !cancelled() && steps.check_results.outputs.result_count != '0' }}
+        run: |
+          if [ -d "gh-pages" ]; then
+            cp -r gh-pages deploy
+            rm -rf deploy/.git
+          else
+            mkdir -p deploy
+          fi
+          rm -rf deploy/public_api
+          mkdir -p deploy/public_api
+          cp -r allure-history/* deploy/public_api/
+
+          cat > deploy/index.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html lang="ru">
+          <head><meta charset="utf-8"><title>Allure Reports</title>
+          <style>
+            body{font-family:sans-serif;max-width:500px;margin:80px auto}
+            h1{margin-bottom:32px}
+            h2{margin:24px 0 8px;font-size:20px}
+            a{display:block;margin:4px 0 4px 16px;font-size:18px}
+          </style>
+          </head><body>
+          <h1>Allure Reports</h1>
+          <h2>Frontend Tests</h2>
+          <a href="frontend/dev/">Dev</a>
+          <a href="frontend/prod/">Prod</a>
+          <h2>Backend Tests</h2>
+          <a href="backend/dev/">Dev</a>
+          <a href="backend/kuber_dev/">Kuber Dev</a>
+          <a href="backend/kuber_uat/">Kuber UAT</a>
+          <h2>Public API Tests</h2>
+          <a href="public_api/">Production</a>
+          </body></html>
+          HTMLEOF
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ !cancelled() && steps.check_results.outputs.result_count != '0' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy
+          full_commit_message: "deploy: public_api allure report"
+
+      - name: Add Allure link to summary
+        if: ${{ !cancelled() && steps.check_results.outputs.result_count != '0' }}
+        run: |
+          REPORT_NUM=$(ls -d allure-history/[0-9]* 2>/dev/null | sort -n | tail -1)
+          REPORT_NUM=$(basename "$REPORT_NUM")
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 **Allure Report**: [Открыть отчёт](https://vaizcom.github.io/autotests/public_api/${REPORT_NUM}/)" >> $GITHUB_STEP_SUMMARY
+
+      - name: 📝 Comment Allure Report link on PR
+        if: github.event_name == 'pull_request' && steps.check_results.outputs.result_count != '0'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const summaryPath = './allure-report/widgets/summary.json';
+
+            let status = "✅ Tests passed";
+            try {
+              const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+              const { failed, broken } = summary.statistic;
+              if (failed > 0 || broken > 0) {
+                status = "❌ Tests failed";
+              }
+            } catch (e) {
+              status = "⚠️ Could not read test results";
+            }
+
+            const sha = context.payload.pull_request.head.sha.substring(0, 7);
+            const time = new Date().toISOString();
+            const link = "https://vaizcom.github.io/autotests/public_api/";
+
+            await github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+              body: `${status}\n\n🧪 **Allure Report for Commit \`${sha}\`**\n\n📄 [Click to view Allure Report](${link})\n\n🕒 Generated at: \`${time}\``
+            });
