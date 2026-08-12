@@ -11,6 +11,10 @@ on:
       - 'tests/test_public_api/**'
   workflow_dispatch:
 
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
 permissions:
   contents: write
   issues: write
