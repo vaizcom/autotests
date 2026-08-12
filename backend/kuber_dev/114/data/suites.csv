@@ -1,0 +1,90 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Wed Aug 12 12:51:51 UTC 2026","Wed Aug 12 12:51:52 UTC 2026","1443","History Service","Space events","Access Group","","","MEMBER_SET_ACCESS / MEMBER_REMOVE_ACCESS — добавление и удаление участника из группы, проверка через GetHistory спейса","
+    Сценарий: добавление и удаление участника из группы доступа.
+
+    Шаги:
+    1. Создаём группу доступа в спейсе
+    2. Добавляем manager в группу (SetAccessGroupsMember)
+       → проверяем через GetHistory событие MEMBER_SET_ACCESS
+    3. Удаляем manager из группы (RemoveAccessGroupMember)
+       → проверяем через GetHistory событие MEMBER_REMOVE_ACCESS
+    "
+"passed","Wed Aug 12 12:51:45 UTC 2026","Wed Aug 12 12:51:45 UTC 2026","589","History Service","Space events","Access Group","","","ACCESS_GROUP_CREATED — создание группы, проверка через GetHistory спейса","
+    Сценарий: создание группы (Groups) в спейсе.
+
+    Шаги:
+    1. Создаём группу (CreateAccessGroup)
+    2. Проверяем через GetHistory что появилось событие ACCESS_GROUP_CREATED
+    3. Проверяем data: groupId, name
+    "
+"passed","Wed Aug 12 12:51:56 UTC 2026","Wed Aug 12 12:51:58 UTC 2026","1912","History Service","Space events","Team","","","SPACE_INVITE_REMOVED event","
+    Сценарий: удаление pending-инвайта до его принятия.
+
+    Шаги:
+    1. Приглашаем member в space (InviteToSpace)
+    2. Удаляем инвайт через RemoveInvite до принятия
+    3. Проверяем через GetHistory что появилось событие SPACE_INVITE_REMOVED
+    4. Проверяем data: email
+    "
+"passed","Wed Aug 12 12:51:47 UTC 2026","Wed Aug 12 12:51:48 UTC 2026","943","History Service","Space events","Access Group","","","ACCESS_GROUP_REMOVED — удаление группы, проверка через GetHistory спейса","
+    Сценарий: удаление группы из спейса.
+
+    Шаги:
+    1. Создаём группу
+    2. Удаляем группу через RemoveAccessGroup
+    3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_REMOVED
+    4. Проверяем data: groupId, name
+    "
+"passed","Wed Aug 12 12:51:46 UTC 2026","Wed Aug 12 12:51:47 UTC 2026","935","History Service","Space events","Access Group","","","ACCESS_GROUP_UPDATED — обновление description группы, проверка через GetHistory спейса","
+    Сценарий: обновление имени или описания группы.
+
+    Шаги:
+    1. Создаём группу
+    2. Обновляем поле (name или description) через UpdateAccessGroup
+    3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_UPDATED
+    4. Проверяем data: groupId, name (актуальное имя после обновления)
+    "
+"passed","Wed Aug 12 12:51:42 UTC 2026","Wed Aug 12 12:51:43 UTC 2026","1008","History Service","Access Rights","","","","ACCESS_GROUP_RIGHTS_UPDATED — изменение прав группы на Space, проверка через GetHistory спейса","
+    Сценарий: изменение уровня доступа группы на сущность (Space/Project/Board).
+
+    Шаги:
+    1. Создаём группу доступа в спейсе
+    2. Назначаем группе уровень Member на сущность через UpdateAccessGroupRights
+    3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_RIGHTS_UPDATED
+    4. Проверяем data: groupId, groupName, kind, kindName, level
+    "
+"passed","Wed Aug 12 12:51:44 UTC 2026","Wed Aug 12 12:51:45 UTC 2026","913","History Service","Access Rights","","","","ACCESS_GROUP_RIGHTS_UPDATED — изменение прав группы на Board, проверка через GetHistory спейса","
+    Сценарий: изменение уровня доступа группы на сущность (Space/Project/Board).
+
+    Шаги:
+    1. Создаём группу доступа в спейсе
+    2. Назначаем группе уровень Member на сущность через UpdateAccessGroupRights
+    3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_RIGHTS_UPDATED
+    4. Проверяем data: groupId, groupName, kind, kindName, level
+    "
+"passed","Wed Aug 12 12:51:52 UTC 2026","Wed Aug 12 12:51:56 UTC 2026","4021","History Service","Space events","Team","","","SPACE_INVITED → SPACE_INVITE_ACCEPTED → SPACE_USER_DEACTIVATED → SPACE_USER_REACTIVATED","
+    Полный жизненный цикл участника space:
+    приглашение → принятие → деактивация → реактивация.
+    "
+"passed","Wed Aug 12 12:51:59 UTC 2026","Wed Aug 12 12:52:01 UTC 2026","1650","History Service","Space events","Team","","","SPACE_INVITE_DECLINED event","
+    При отклонении инвайта приглашённым пользователем генерируется событие SPACE_INVITE_DECLINED.
+    data содержит email отклонившего.
+    "
+"passed","Wed Aug 12 12:51:43 UTC 2026","Wed Aug 12 12:51:44 UTC 2026","956","History Service","Access Rights","","","","ACCESS_GROUP_RIGHTS_UPDATED — изменение прав группы на Project, проверка через GetHistory спейса","
+    Сценарий: изменение уровня доступа группы на сущность (Space/Project/Board).
+
+    Шаги:
+    1. Создаём группу доступа в спейсе
+    2. Назначаем группе уровень Member на сущность через UpdateAccessGroupRights
+    3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_RIGHTS_UPDATED
+    4. Проверяем data: groupId, groupName, kind, kindName, level
+    "
+"passed","Wed Aug 12 12:51:45 UTC 2026","Wed Aug 12 12:51:46 UTC 2026","876","History Service","Space events","Access Group","","","ACCESS_GROUP_UPDATED — обновление name группы, проверка через GetHistory спейса","
+    Сценарий: обновление имени или описания группы.
+
+    Шаги:
+    1. Создаём группу
+    2. Обновляем поле (name или description) через UpdateAccessGroup
+    3. Проверяем через GetHistory что появилось событие ACCESS_GROUP_UPDATED
+    4. Проверяем data: groupId, name (актуальное имя после обновления)
+    "
