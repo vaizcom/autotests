@@ -4,51 +4,41 @@ import pytest
 from test_backend.data.endpoints.Task.task_endpoints import duplicate_task_endpoint, delete_task_endpoint
 from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
-pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
+pytestmark = [pytest.mark.backend]
+
+_TASK_NAME = "Temp task for history events"
 
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.title("Task Duplicated event")
-def test_task_duplicated_history_event(owner_client, main_space, temp_board_in_main, temp_task_on_temp_board):
+@allure.title("TASK_DUPLICATED event")
+def test_task_duplicated_history_event(main_client, space_for_history, board_for_history, temp_task):
     """
     Проверяем генерацию события при дублировании задачи на ту же доску:
-    (!! апи позволяет передать любой boardId, фронт только текущую доску, заложено на будущее (проверены права доступа tests Duplicate Task))
     TASK_DUPLICATED (в НОВОЙ скопированной задаче)
     """
-    task_id = temp_task_on_temp_board
+    space_id = space_for_history["space_id"]
+    board_id = board_for_history["board_id"]
+    task_id = temp_task
 
-    with allure.step("1. Дублируем задачу на ту же доску -> ожидаем TASK_DUPLICATED"):
-        resp = owner_client.post(
-            **duplicate_task_endpoint(
-                space_id=main_space,
-                task_id=task_id,
-                board_id=temp_board_in_main  # апи позволяет передать любой boardId, фронт только текущую доску
-            )
+    with allure.step("1. Дублируем задачу на ту же доску"):
+        resp = main_client.post(
+            **duplicate_task_endpoint(space_id=space_id, task_id=task_id, board_id=board_id)
         )
         assert resp.status_code == 200, f"Ошибка при дублировании задачи: {resp.text}"
-
-        # Получаем ID новой (сдублированной) задачи, чтобы потом её удалить
         duplicated_task_id = resp.json()['payload']['task']['_id']
 
     try:
-        with allure.step("1.1 Проверяем историю НОВОЙ задачи (что её сдублировали)"):
-            # Запрашиваем историю оригинала
+        with allure.step("Проверяем событие TASK_DUPLICATED у новой задачи: получено и содержит верные данные (_id, sourceId, sourceName)"):
             assert_get_history_event(
-                client=owner_client,
-                space_id=main_space,
+                client=main_client,
+                space_id=space_id,
                 kind="Task",
-                kind_id=duplicated_task_id,  # Смотрим историю сдублированной задачи
+                kind_id=duplicated_task_id,
                 expected_event_key="TASK_DUPLICATED",
-                # Ожидаем увидеть ID оригинальной задачи в логах новой.
-                expected_data={"sourceId": task_id}
+                expected_data={"_id": duplicated_task_id, "sourceId": task_id, "sourceName": _TASK_NAME},
             )
 
     finally:
-        with allure.step("Teardown: Удаляем сдублированную задачу"):
-            owner_client.post(
-                **delete_task_endpoint(
-                    space_id=main_space,
-                    task_id=duplicated_task_id
-                )
-            )
+        with allure.step("Teardown: удаляем сдублированную задачу"):
+            main_client.post(**delete_task_endpoint(space_id=space_id, task_id=duplicated_task_id))

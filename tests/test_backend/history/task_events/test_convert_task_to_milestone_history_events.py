@@ -6,35 +6,35 @@ from test_backend.data.endpoints.Task.task_endpoints import convert_task_to_mile
 from test_backend.data.endpoints.milestone.milestones_endpoints import archive_milestone_endpoint
 from test_backend.data.endpoints.History.history_utils import assert_get_history_event
 
-pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="APP-5670: рефакторинг history")]
+pytestmark = [pytest.mark.backend]
 
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.title("Convert Task to Milestone events")
-def test_convert_task_to_milestone_history_events(owner_client, main_space, main_board, temp_task_on_temp_board):
+def test_convert_task_to_milestone_history_events(main_client, space_for_history, board_for_history, temp_task):
     """
     Проверяем генерацию событий при конвертации задачи + сабтаски в Milestone:
 
-    Ожидаемые события в истории нового Milestone:
-      - MILESTONE_CREATED_FROM_TASK (в истории нового майлстоуна)
-      - TASK_ATTACHED_INTO_MILESTONE (подзадача автоматически прикреплена к майлстоуну)
+    В истории нового Milestone:
+      - MILESTONE_CREATED_FROM_TASK
+      - TASK_ATTACHED_INTO_MILESTONE (подзадача автоматически прикреплена)
 
-    Ожидаемые события в истории Подзадачи:
-      - PARENT_TASK_CONVERTED_TO_MILESTONE (в истории подзадачи)
+    В истории Подзадачи:
+      - PARENT_TASK_CONVERTED_TO_MILESTONE
       - TASK_DETACHED_TO_PARENT (отвязка от исчезнувшей родительской задачи)
       - TASK_ATTACHED_TO_MILESTONE (привязка к новому майлстоуну)
     """
-    parent_task_id = temp_task_on_temp_board
+    space_id = space_for_history["space_id"]
+    board_id = board_for_history["board_id"]
+    parent_task_id = temp_task
     milestone_id = None
 
-    with allure.step("Setup: Создаем подзадачу для родительской задачи"):
-        resp = owner_client.post(
+    with allure.step("Setup: создаем подзадачу для родительской задачи"):
+        resp = main_client.post(
             **create_task_endpoint(
-                space_id=main_space,
-                board=main_board,
-                name="Subtask for conversion test",
-                parent_task=parent_task_id
+                space_id=space_id, board=board_id,
+                name="Subtask for conversion test", parent_task=parent_task_id
             )
         )
         assert resp.status_code == 200, f"Ошибка создания подзадачи: {resp.text}"
@@ -42,73 +42,55 @@ def test_convert_task_to_milestone_history_events(owner_client, main_space, main
 
     try:
         with allure.step("1. Конвертируем родительскую задачу в Майлстоун"):
-            convert_resp = owner_client.post(
-                **convert_task_to_milestone_endpoint(
-                    space_id=main_space,
-                    task_id=parent_task_id
-                )
+            convert_resp = main_client.post(
+                **convert_task_to_milestone_endpoint(space_id=space_id, task_id=parent_task_id)
             )
             assert convert_resp.status_code == 200, f"Ошибка при конвертации: {convert_resp.text}"
-
-            # Получаем ID созданного майлстоуна
             milestone_id = convert_resp.json()['payload']['milestone']['_id']
 
-        with allure.step("1.1 Проверяем историю нового Майлстоуна -> ожидаем MILESTONE_CREATED_FROM_TASK"):
+        with allure.step("Проверяем событие MILESTONE_CREATED_FROM_TASK у майлстоуна: получено и содержит верные данные (_id)"):
             assert_get_history_event(
-                client=owner_client,
-                space_id=main_space,
-                kind="Milestone",
-                kind_id=milestone_id,
+                client=main_client, space_id=space_id,
+                kind="Milestone", kind_id=milestone_id,
                 expected_event_key="MILESTONE_CREATED_FROM_TASK",
                 expected_data={"_id": parent_task_id}
             )
 
-        with allure.step("1.2 Проверяем каскадные события в истории Подзадачи"):
-            with allure.step("A) Задача узнала о конвертации родителя"):
+        with allure.step("Проверяем каскадные события в истории подзадачи"):
+            with allure.step("Проверяем событие PARENT_TASK_CONVERTED_TO_MILESTONE: получено и содержит верные данные (_id)"):
                 assert_get_history_event(
-                    client=owner_client,
-                    space_id=main_space,
-                    kind="Task",
-                    kind_id=subtask_id,
+                    client=main_client, space_id=space_id,
+                    kind="Task", kind_id=subtask_id,
                     expected_event_key="PARENT_TASK_CONVERTED_TO_MILESTONE",
                     expected_data={"_id": parent_task_id}
                 )
 
-            with allure.step("B) Задача была автоматически отвязана от старого родителя"):
+            with allure.step("Проверяем событие TASK_DETACHED_TO_PARENT: получено и содержит верные данные (_id)"):
                 assert_get_history_event(
-                    client=owner_client,
-                    space_id=main_space,
-                    kind="Task",
-                    kind_id=subtask_id,
+                    client=main_client, space_id=space_id,
+                    kind="Task", kind_id=subtask_id,
                     expected_event_key="TASK_DETACHED_TO_PARENT",
                     expected_data={"_id": parent_task_id}
                 )
 
-            with allure.step("C) Задача была автоматически привязана к новому майлстоуну"):
+            with allure.step("Проверяем событие TASK_ATTACHED_TO_MILESTONE: получено и содержит верные данные (milestoneId)"):
                 assert_get_history_event(
-                    client=owner_client,
-                    space_id=main_space,
-                    kind="Task",
-                    kind_id=subtask_id,
+                    client=main_client, space_id=space_id,
+                    kind="Task", kind_id=subtask_id,
                     expected_event_key="TASK_ATTACHED_TO_MILESTONE",
-                    # Привязка к майлстоуну пишется с указанием ID майлстоуна
-                    # (как мы видели в тесте `test_task_milestones_history_events`)
-                    expected_data={"_id": milestone_id}
+                    expected_data={"milestoneId": milestone_id}
                 )
 
-        with allure.step("1.3 Проверяем каскадное событие в самом Майлстоуне (что подзадача к нему прикрепилась)"):
+        with allure.step("Проверяем событие TASK_ATTACHED_INTO_MILESTONE у майлстоуна: получено и содержит верные данные (milestoneId, taskName)"):
             assert_get_history_event(
-                client=owner_client,
-                space_id=main_space,
-                kind="Milestone",
-                kind_id=milestone_id,
+                client=main_client, space_id=space_id,
+                kind="Milestone", kind_id=milestone_id,
                 expected_event_key="TASK_ATTACHED_INTO_MILESTONE",
-                # В майлстоуне должен быть записан ID подзадачи, которая стала его частью
-                expected_data={"_id": subtask_id}
+                expected_data={"milestoneId": milestone_id, "taskName": "Subtask for conversion test"},
             )
 
     finally:
-        with allure.step("Teardown: Удаляем подзадачу и архивируем майлстоун"):
-            owner_client.post(**delete_task_endpoint(space_id=main_space, task_id=subtask_id))
+        with allure.step("Teardown: удаляем подзадачу и архивируем майлстоун"):
+            main_client.post(**delete_task_endpoint(space_id=space_id, task_id=subtask_id))
             if milestone_id:
-                owner_client.post(**archive_milestone_endpoint(space_id=main_space, milestone_id=milestone_id))
+                main_client.post(**archive_milestone_endpoint(space_id=space_id, milestone_id=milestone_id))
