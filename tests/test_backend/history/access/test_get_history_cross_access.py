@@ -207,6 +207,18 @@ def test_history_hides_private_board_events(
         expected_event_key = "BOARD_CREATED"
 
     try:
+        if entity in ("Task", "Milestone"):
+            with allure.step(f"Precondition: member_client НЕ имеет прямого доступа к {entity}"):
+                pre_resp = member_client.post(
+                    **get_history_endpoint(
+                        space_id=main_space, kind=entity, kind_id=entity_id,
+                    )
+                )
+                assert pre_resp.status_code == 403, (
+                    f"Precondition failed: member_client имеет доступ к {entity} "
+                    f"на приватной борде (ожидали 403, получили {pre_resp.status_code})"
+                )
+
         with allure.step(f"Owner видит {expected_event_key} в {kind} history"):
             assert_get_history_event(
                 client=owner_client,
@@ -319,6 +331,19 @@ def test_space_history_hides_other_project_events(
         expected_event_key = "PROJECT_CREATED"
 
     try:
+        if entity in ("Task", "Milestone", "Project"):
+            check_kind = entity
+            with allure.step(f"Precondition: project_client НЕ имеет прямого доступа к {entity}"):
+                pre_resp = client_with_access_only_in_project.post(
+                    **get_history_endpoint(
+                        space_id=main_space, kind=check_kind, kind_id=entity_id,
+                    )
+                )
+                assert pre_resp.status_code == 403, (
+                    f"Precondition failed: project_client имеет доступ к {entity} "
+                    f"в project_2 (ожидали 403, получили {pre_resp.status_code})"
+                )
+
         with allure.step(f"Owner видит {expected_event_key} в Space history"):
             assert_get_history_event(
                 client=owner_client,
