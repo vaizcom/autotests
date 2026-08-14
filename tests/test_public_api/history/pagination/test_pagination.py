@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.public_api]
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Positive: Pagination")
+@allure.sub_suite("Pagination: Positive")
 def test_public_history_limit(public_client, public_space_id):
     """limit ограничивает количество items в ответе."""
     allure.dynamic.title("limit=5 возвращает ровно 5 items и hasMore=true")
@@ -38,7 +38,7 @@ def test_public_history_limit(public_client, public_space_id):
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Positive: Pagination")
+@allure.sub_suite("Pagination: Positive")
 def test_public_history_next_cursor(public_client, public_space_id):
     """nextCursor возвращает следующую страницу без пересечений с предыдущей."""
     allure.dynamic.title("nextCursor возвращает следующую страницу без дубликатов")
@@ -76,7 +76,7 @@ def test_public_history_next_cursor(public_client, public_space_id):
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Positive: Pagination")
+@allure.sub_suite("Pagination: Positive")
 def test_public_history_limit_exceeds_total(public_client, public_space_id):
     """limit больше общего количества событий — возвращает все items и hasMore=false."""
     allure.dynamic.title("limit=1000 (больше всех событий) — hasMore=false, все items")
@@ -101,7 +101,7 @@ def test_public_history_limit_exceeds_total(public_client, public_space_id):
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Positive: Pagination")
+@allure.sub_suite("Pagination: Positive")
 def test_public_history_limit_one(public_client, public_space_id):
     """limit=1 возвращает ровно 1 item."""
     allure.dynamic.title("limit=1 возвращает ровно 1 item")
@@ -125,7 +125,7 @@ def test_public_history_limit_one(public_client, public_space_id):
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Negative: Pagination")
+@allure.sub_suite("Pagination: Negative")
 @pytest.mark.parametrize("limit_value, expected_code", [
     (0,  "limit must be a positive number"),
     (-1, "limit must be a positive number"),

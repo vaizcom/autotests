@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.public_api]
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Negative: Rate Limit")
+@allure.sub_suite("Rate Limit")
 def test_public_history_rate_limit(public_client_no_retry, public_space_id):
     """Множественные запросы подряд без пауз вызывают 429 Too Many Requests."""
     allure.dynamic.title("Быстрые последовательные запросы — 429 Rate Limit")
