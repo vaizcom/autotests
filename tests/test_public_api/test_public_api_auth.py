@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.public_api]
 
 
 @allure.parent_suite("Public API")
-@allure.suite("Авторизация")
+@allure.suite("Authorization")
 @allure.sub_suite("Negative")
 @allure.title("Запрос без токена авторизации возвращает 401")
 def test_public_api_no_token(public_space_id):
@@ -27,7 +27,7 @@ def test_public_api_no_token(public_space_id):
 
 
 @allure.parent_suite("Public API")
-@allure.suite("Авторизация")
+@allure.suite("Authorization")
 @allure.sub_suite("Negative")
 @allure.title("Запрос с невалидным токеном возвращает 401")
 def test_public_api_invalid_token(public_space_id):
