@@ -6,8 +6,8 @@ pytestmark = [pytest.mark.public_api]
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Negative: Invalid values")
-@allure.title("Невалидный формат spaceId возвращает 400")
+@allure.sub_suite("Invalid Values")
+@allure.title("[Negative] невалидный формат spaceId → 400")
 def test_public_history_invalid_space_id_format(public_client, public_space_id):
     """
     spaceId должен быть валидным ObjectId. Невалидный формат возвращает 400.
@@ -29,8 +29,8 @@ def test_public_history_invalid_space_id_format(public_client, public_space_id):
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Negative: Invalid values")
-@allure.title("Невалидный формат kindId возвращает 400")
+@allure.sub_suite("Invalid Values")
+@allure.title("[Negative] невалидный формат kindId → 400")
 def test_public_history_invalid_kind_id_format(public_client, public_space_id):
     """
     kindId должен быть валидным ObjectId. Невалидный формат возвращает 400.
@@ -52,7 +52,7 @@ def test_public_history_invalid_kind_id_format(public_client, public_space_id):
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Negative: Invalid values")
+@allure.sub_suite("Invalid Values")
 @pytest.mark.parametrize("invalid_kind, case_id", [
     ("Board", "unsupported_kind_Board"),
     ("space", "lowercase_space"),
@@ -64,7 +64,7 @@ def test_public_history_invalid_kind(public_client, public_space_id, invalid_kin
     kind должен быть одним из допустимых значений enum.
     Любое другое значение возвращает 400.
     """
-    allure.dynamic.title(f"Невалидное значение kind='{invalid_kind}' возвращает 400 ({case_id})")
+    allure.dynamic.title(f"[Negative] kind='{invalid_kind}' → 400 ({case_id})")
     with allure.step(f"Отправляем запрос с kind='{invalid_kind}'"):
         resp = public_client.get(
             "/public/v1/history",

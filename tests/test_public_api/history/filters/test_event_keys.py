@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.public_api]
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Filters: Positive")
+@allure.sub_suite("Event Keys")
 def test_public_history_event_keys_single(public_client, public_space_id):
     """eventKeys с одним значением фильтрует только указанный тип событий."""
     allure.dynamic.title("eventKeys=TASK_CREATED — только события TASK_CREATED")
@@ -36,7 +36,7 @@ def test_public_history_event_keys_single(public_client, public_space_id):
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Filters: Positive")
+@allure.sub_suite("Event Keys")
 def test_public_history_event_keys_multiple(public_client, public_space_id):
     """eventKeys с несколькими значениями фильтрует по всем указанным типам."""
     allure.dynamic.title("eventKeys=[TASK_CREATED, PROJECT_CREATED] — оба типа в ответе")
@@ -69,10 +69,10 @@ def test_public_history_event_keys_multiple(public_client, public_space_id):
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Filters: Negative")
+@allure.sub_suite("Event Keys")
 def test_public_history_event_keys_invalid(public_client, public_space_id):
     """Невалидный eventKeys возвращает 400."""
-    allure.dynamic.title("eventKeys=task_created (lowercase) — 400 (InvalidKind)")
+    allure.dynamic.title("[Negative] eventKeys=task_created (lowercase) → 400 (InvalidKind)")
 
     with allure.step("Запрашиваем с eventKeys в нижнем регистре"):
         resp = public_client.get(

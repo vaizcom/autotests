@@ -6,7 +6,7 @@ pytestmark = [pytest.mark.public_api]
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Negative: Missing params")
+@allure.sub_suite("Missing Params")
 @pytest.mark.parametrize("missing_param, expected_field_code", [
     ("spaceId", "IncorrectId"),
     ("kind",    "InvalidKind"),
@@ -16,7 +16,7 @@ def test_public_history_missing_required_params(public_client, public_space_id, 
     """
     При отсутствии любого обязательного параметра (spaceId, kind, kindId) возвращается 400.
     """
-    allure.dynamic.title(f"Запрос без обязательного параметра '{missing_param}' возвращает 400 ({expected_field_code})")
+    allure.dynamic.title(f"[Negative] без '{missing_param}' → 400 ({expected_field_code})")
 
     with allure.step(f"Формируем запрос без параметра '{missing_param}'"):
         params = {"spaceId": public_space_id, "kind": "Space", "kindId": public_space_id}

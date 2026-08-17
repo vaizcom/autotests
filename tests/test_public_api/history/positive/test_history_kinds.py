@@ -8,13 +8,13 @@ pytestmark = [pytest.mark.public_api]
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Positive")
+@allure.sub_suite("History Kinds")
 @pytest.mark.parametrize("kind, kind_id_fixture", [
     ("Space",     "public_space_id"),
-    ("Project",   "public_project_id"),
-    ("Task",      "public_task_id"),
-    ("Milestone", "public_milestone_id"),
-    ("Document",  "public_document_id"),
+    ("Project",   "demo_project_id"),
+    ("Task",      "demo_task_id"),
+    ("Milestone", "demo_milestone_id"),
+    ("Document",  "demo_document_id"),
 ], ids=["Space", "Project", "Task", "Milestone", "Document"])
 def test_public_history_kind_returns_200(request, public_client, public_space_id, kind, kind_id_fixture):
     """

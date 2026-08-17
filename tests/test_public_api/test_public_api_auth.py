@@ -9,8 +9,8 @@ pytestmark = [pytest.mark.public_api]
 
 @allure.parent_suite("Public API")
 @allure.suite("Authorization")
-@allure.sub_suite("Negative")
-@allure.title("Запрос без токена авторизации возвращает 401")
+@allure.sub_suite("Auth Errors")
+@allure.title("[Negative] запрос без токена → 401")
 def test_public_api_no_token(public_space_id):
     """
     Проверяем что без Authorization header любой эндпоинт публичного API возвращает 401.
@@ -28,8 +28,8 @@ def test_public_api_no_token(public_space_id):
 
 @allure.parent_suite("Public API")
 @allure.suite("Authorization")
-@allure.sub_suite("Negative")
-@allure.title("Запрос с невалидным токеном возвращает 401")
+@allure.sub_suite("Auth Errors")
+@allure.title("[Negative] невалидный токен → 401")
 def test_public_api_invalid_token(public_space_id):
     """
     Проверяем что с некорректным токеном любой эндпоинт публичного API возвращает 401.

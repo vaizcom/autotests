@@ -11,8 +11,8 @@ pytestmark = [pytest.mark.public_api]
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Negative: несуществующий spaceId")
-@allure.title("Несуществующий spaceId возвращает ValidationErrors/IncorrectId")
+@allure.sub_suite("Nonexistent IDs")
+@allure.title("[Negative] несуществующий spaceId → ValidationErrors/IncorrectId")
 def test_public_history_nonexistent_space_id(public_client, public_space_id):
     """
     Запрос с несуществующим spaceId возвращает 200 + ValidationErrors/IncorrectId.
@@ -43,8 +43,8 @@ def test_public_history_nonexistent_space_id(public_client, public_space_id):
 
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Negative: чужой spaceId")
-@allure.title("Чужой spaceId возвращает ValidationErrors/IncorrectId")
+@allure.sub_suite("Nonexistent IDs")
+@allure.title("[Negative] чужой spaceId → ValidationErrors/IncorrectId")
 def test_public_history_foreign_space_id(public_client, public_space_id):
     """
     Запрос к space без доступа возвращает 200 + ValidationErrors/IncorrectId.
@@ -77,8 +77,8 @@ def test_public_history_foreign_space_id(public_client, public_space_id):
 # Ожидаемое поведение: Space/Project → 403, Task/Document/Milestone → 400
 @allure.parent_suite("Public API")
 @allure.suite("History")
-@allure.sub_suite("Negative: несуществующий kindId")
-@allure.title("Несуществующий kindId для kind='{kind}' возвращает 500 (BUG)")
+@allure.sub_suite("Nonexistent IDs")
+@allure.title("[Negative] несуществующий kindId kind='{kind}' → 500 (BUG)")
 @pytest.mark.xfail(reason="BUG: сервер возвращает 500 вместо корректного кода ошибки", strict=True)
 @pytest.mark.parametrize("kind", ["Space", "Project", "Task", "Document", "Milestone"],
                          ids=["Space", "Project", "Task", "Document", "Milestone"])
