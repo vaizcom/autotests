@@ -98,16 +98,16 @@ def test_get_history_invalid_kind_id(main_client, main_space, kind_id_value, cas
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Validation")
 @allure.sub_suite("Negative: несуществующая сущность")
-@pytest.mark.parametrize("kind,expected_status", [
-    ("Space",     403),
-    ("Project",   403),
-    ("Task",      400),
-    ("Document",  400),
-    ("Milestone", 400),
+@pytest.mark.parametrize("kind,expected_status,expected_error_code", [
+    ("Space",     403, "AccessDenied"),
+    ("Project",   403, "AccessDenied"),
+    ("Task",      400, "NotFound"),
+    ("Document",  400, "NotFound"),
+    ("Milestone", 400, "NotFound"),
 ], ids=["space", "project", "task", "document", "milestone"])
-def test_get_history_nonexistent_entity(main_client, main_space, kind, expected_status):
+def test_get_history_nonexistent_entity(main_client, main_space, kind, expected_status, expected_error_code):
     """Валидный kind + валидный формат kindId, но несуществующая сущность."""
-    allure.dynamic.title(f"GetHistory: kind='{kind}', kindId несуществующий → {expected_status} ({'Forbidden' if expected_status == 403 else 'Bad Request'})")
+    allure.dynamic.title(f"GetHistory: kind='{kind}', kindId несуществующий → {expected_status} ({expected_error_code})")
 
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}', kindId='{_VALID_MONGO_ID}'"):
         resp = main_client.post(
@@ -116,5 +116,6 @@ def test_get_history_nonexistent_entity(main_client, main_space, kind, expected_
             headers={"Content-Type": "application/json", "Current-Space-Id": main_space},
         )
 
-    with allure.step(f"Получаем {expected_status} — сущность не существует"):
-        assert resp.status_code == expected_status, f"Ожидали {expected_status} ({'Forbidden' if expected_status == 403 else 'Bad Request'}), получили: {short_resp(resp)}"
+    with allure.step(f"Получаем {expected_status} ({expected_error_code}) — сущность не существует"):
+        assert resp.status_code == expected_status, f"Ожидали {expected_status} ({expected_error_code}), получили: {short_resp(resp)}"
+        assert resp.json()["error"]["code"] == expected_error_code, f"Ожидали error.code='{expected_error_code}', получили: {short_resp(resp)}"
