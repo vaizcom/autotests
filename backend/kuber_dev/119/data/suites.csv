@@ -1,0 +1,120 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Mon Aug 17 11:30:54 UTC 2026","Mon Aug 17 11:30:54 UTC 2026","169","History Service","GetHistory Validation","Negative: несуществующая сущность","","","GetHistory: kind='Milestone', kindId несуществующий → 400 (NotFound)","Валидный kind + валидный формат kindId, но несуществующая сущность."
+"passed","Mon Aug 17 11:30:51 UTC 2026","Mon Aug 17 11:30:52 UTC 2026","598","History Service","GetHistory Access","Cross access: Cross project history — утечка через Space history","","","Space history: Project из чужого проекта НЕ видны project_client","
+    client_with_access_only_in_project имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Создаём сущность в project_2 и проверяем:
+    - owner видит событие в Space history
+    - project_client НЕ видит событие в Space history
+    "
+"passed","Mon Aug 17 11:30:36 UTC 2026","Mon Aug 17 11:30:36 UTC 2026","597","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Проджект-документ проекта_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"skipped","Mon Aug 17 11:30:48 UTC 2026","Mon Aug 17 11:30:48 UTC 2026","197","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Space history: Milestone от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"passed","Mon Aug 17 11:30:53 UTC 2026","Mon Aug 17 11:30:53 UTC 2026","162","History Service","GetHistory Validation","Negative: невалидный kindId","","","GetHistory: kindId = 'abc' (не MongoId) → 400 (InvalidForm)","Невалидное значение kindId должно вернуть 400 (InvalidForm)."
+"passed","Mon Aug 17 11:30:52 UTC 2026","Mon Aug 17 11:30:52 UTC 2026","158","History Service","GetHistory Validation","Negative: невалидный kind","","","GetHistory: kind = произвольная строка → 400 (InvalidForm)","Невалидное значение kind должно вернуть 400 (InvalidForm)."
+"skipped","Mon Aug 17 11:30:50 UTC 2026","Mon Aug 17 11:30:51 UTC 2026","185","History Service","GetHistory Access","Cross access: Cross project history — утечка через Space history","","","Space history: Milestone из чужого проекта НЕ видны project_client","
+    client_with_access_only_in_project имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Создаём сущность в project_2 и проверяем:
+    - owner видит событие в Space history
+    - project_client НЕ видит событие в Space history
+    "
+"passed","Mon Aug 17 11:30:52 UTC 2026","Mon Aug 17 11:30:52 UTC 2026","162","History Service","GetHistory Validation","Negative: невалидный kind","","","GetHistory: kind='Board' — не в HISTORY_KINDS → 400 (Bad Request)","kind есть в EKind, но исключён из HISTORY_KINDS — историю для них через GetHistory запросить нельзя,
+    должен вернуть 400 (Bad Request)."
+"passed","Mon Aug 17 11:30:53 UTC 2026","Mon Aug 17 11:30:53 UTC 2026","163","History Service","GetHistory Validation","Negative: несуществующая сущность","","","GetHistory: kind='Task', kindId несуществующий → 400 (NotFound)","Валидный kind + валидный формат kindId, но несуществующая сущность."
+"skipped","Mon Aug 17 11:30:48 UTC 2026","Mon Aug 17 11:30:49 UTC 2026","441","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Project history: Board от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"passed","Mon Aug 17 11:30:52 UTC 2026","Mon Aug 17 11:30:52 UTC 2026","168","History Service","GetHistory Validation","Negative: невалидный kind","","","GetHistory: kind = пустая строка → 400 (InvalidForm)","Невалидное значение kind должно вернуть 400 (InvalidForm)."
+"passed","Mon Aug 17 11:30:43 UTC 2026","Mon Aug 17 11:30:44 UTC 2026","605","History Service","GetHistory Access","Cross access: Cross space — прямой доступ → 403","","","GetHistory: main_client → foreign_space → 403 (Forbidden)","
+    Кросс-спейс изоляция: main_client находится в main_space,
+    но НЕ в foreign_space. Запрос истории foreign_space
+    через свой Current-Space-Id не должен вернуть 200.
+    "
+"passed","Mon Aug 17 11:30:52 UTC 2026","Mon Aug 17 11:30:52 UTC 2026","166","History Service","GetHistory Validation","Negative: невалидный kind","","","GetHistory: kind отсутствует → 400 (InvalidForm)","Невалидное значение kind должно вернуть 400 (InvalidForm)."
+"passed","Mon Aug 17 11:30:22 UTC 2026","Mon Aug 17 11:30:30 UTC 2026","8290","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Кросс_проект_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Mon Aug 17 11:30:51 UTC 2026","Mon Aug 17 11:30:51 UTC 2026","441","History Service","GetHistory Access","Cross access: Cross project history — утечка через Space history","","","Space history: Board из чужого проекта НЕ видны project_client","
+    client_with_access_only_in_project имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Создаём сущность в project_2 и проверяем:
+    - owner видит событие в Space history
+    - project_client НЕ видит событие в Space history
+    "
+"passed","Mon Aug 17 11:30:53 UTC 2026","Mon Aug 17 11:30:53 UTC 2026","159","History Service","GetHistory Validation","Negative: невалидный kindId","","","GetHistory: kindId отсутствует → 400 (InvalidForm)","Невалидное значение kindId должно вернуть 400 (InvalidForm)."
+"passed","Mon Aug 17 11:30:39 UTC 2026","Mon Aug 17 11:30:40 UTC 2026","1516","History Service","GetHistory Access","Cross access: Cross board — прямой доступ → 403","","","GetHistory: member_client → Задача на приватной борде → 403 (Forbidden)","
+    Кросс-борд изоляция: member_client имеет доступ к main_project,
+    но НЕ к приватной борде (temp_board_in_main), созданной owner_client.
+    Задачи и майлстоуны на этой борде недоступны → 403 (Forbidden).
+    "
+"passed","Mon Aug 17 11:30:41 UTC 2026","Mon Aug 17 11:30:41 UTC 2026","540","History Service","GetHistory Access","Cross access: Cross board — прямой доступ → 403","","","GetHistory: member_client → Майлстоун на приватной борде → 403 (Forbidden)","
+    Кросс-борд изоляция: member_client имеет доступ к main_project,
+    но НЕ к приватной борде (temp_board_in_main), созданной owner_client.
+    Задачи и майлстоуны на этой борде недоступны → 403 (Forbidden).
+    "
+"passed","Mon Aug 17 11:30:34 UTC 2026","Mon Aug 17 11:30:35 UTC 2026","715","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Майлстоун в проекте_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Mon Aug 17 11:30:52 UTC 2026","Mon Aug 17 11:30:53 UTC 2026","163","History Service","GetHistory Validation","Negative: невалидный kind","","","GetHistory: kind='Member' — не в HISTORY_KINDS → 400 (Bad Request)","kind есть в EKind, но исключён из HISTORY_KINDS — историю для них через GetHistory запросить нельзя,
+    должен вернуть 400 (Bad Request)."
+"passed","Mon Aug 17 11:30:53 UTC 2026","Mon Aug 17 11:30:54 UTC 2026","173","History Service","GetHistory Validation","Negative: несуществующая сущность","","","GetHistory: kind='Document', kindId несуществующий → 400 (NotFound)","Валидный kind + валидный формат kindId, но несуществующая сущность."
+"skipped","Mon Aug 17 11:30:48 UTC 2026","Mon Aug 17 11:30:48 UTC 2026","162","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Project history: Milestone от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"passed","Mon Aug 17 11:30:53 UTC 2026","Mon Aug 17 11:30:53 UTC 2026","160","History Service","GetHistory Validation","Negative: несуществующая сущность","","","GetHistory: kind='Space', kindId несуществующий → 403 (AccessDenied)","Валидный kind + валидный формат kindId, но несуществующая сущность."
+"passed","Mon Aug 17 11:30:37 UTC 2026","Mon Aug 17 11:30:37 UTC 2026","750","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Персональный проджект-документ_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"skipped","Mon Aug 17 11:30:48 UTC 2026","Mon Aug 17 11:30:48 UTC 2026","409","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Space history: Board от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"skipped","Mon Aug 17 11:30:45 UTC 2026","Mon Aug 17 11:30:48 UTC 2026","2434","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Project history: Task от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"passed","Mon Aug 17 11:30:30 UTC 2026","Mon Aug 17 11:30:32 UTC 2026","1584","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Задача в проекте_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Mon Aug 17 11:30:53 UTC 2026","Mon Aug 17 11:30:53 UTC 2026","163","History Service","GetHistory Validation","Negative: несуществующая сущность","","","GetHistory: kind='Project', kindId несуществующий → 403 (AccessDenied)","Валидный kind + валидный формат kindId, но несуществующая сущность."
+"skipped","Mon Aug 17 11:30:44 UTC 2026","Mon Aug 17 11:30:45 UTC 2026","1592","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Space history: Task от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"passed","Mon Aug 17 11:30:49 UTC 2026","Mon Aug 17 11:30:50 UTC 2026","1538","History Service","GetHistory Access","Cross access: Cross project history — утечка через Space history","","","Space history: Task из чужого проекта НЕ видны project_client","
+    client_with_access_only_in_project имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Создаём сущность в project_2 и проверяем:
+    - owner видит событие в Space history
+    - project_client НЕ видит событие в Space history
+    "
+"passed","Mon Aug 17 11:30:38 UTC 2026","Mon Aug 17 11:30:38 UTC 2026","429","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Персональный спейс-документ → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
