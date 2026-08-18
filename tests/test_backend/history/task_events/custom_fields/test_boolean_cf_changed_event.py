@@ -17,10 +17,10 @@ _TASK_NAME = "Temp task for history events"
     ids=["Task", "Project", "Space"])
 def test_boolean_cf_toggle_on_event(main_client, space_for_history, project_for_history, temp_task, boolean_custom_field, kind):
     """
-    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Boolean поля Off → On.
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Checkbox поля Off → On.
     Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
-    Boolean поле по умолчанию Off. При установке value=True переключается в On.
-    В valueText приходит "On".
+    API тип поля "Checkbox" (в UI — Boolean). По умолчанию Off.
+    При установке value=True переключается в On. В valueText приходит "On".
     """
     space_id = space_for_history["space_id"]
     task_id = temp_task
@@ -57,7 +57,7 @@ def test_boolean_cf_toggle_on_event(main_client, space_for_history, project_for_
     with allure.step("Метаданные поля: fieldId, fieldName, fieldType корректны"):
         assert data["fieldId"] == field_id, f"Неверный fieldId: {data['fieldId']}"
         assert data["fieldName"] == field_name, f"Неверный fieldName: {data['fieldName']}"
-        assert data["fieldType"] == "Boolean", f"Неверный fieldType: {data['fieldType']}"
+        assert data["fieldType"] == "Checkbox", f"Неверный fieldType: {data['fieldType']}"
 
     with allure.step("Значения: valueText = 'On', isCleared = False"):
         assert data["isCleared"] is False, f"isCleared должен быть False: {data['isCleared']}"
@@ -76,8 +76,9 @@ def test_boolean_cf_toggle_on_event(main_client, space_for_history, project_for_
 @allure.title("[Boolean] переключение On → Off (GetHistory kind=Task)")
 def test_boolean_cf_toggle_off_event(main_client, space_for_history, temp_task, boolean_custom_field):
     """
-    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Boolean поля On → Off.
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Checkbox поля On → Off.
     Проверяем через GetHistory с kind=Task.
+    API тип поля "Checkbox" (в UI — Boolean).
     Устанавливаем True (On), затем False (Off) — событие должно содержать
     valueText = "Off" и oldValueText = "On".
     Оба события имеют isCleared=False, поэтому используем min_count=2.
@@ -125,7 +126,7 @@ def test_boolean_cf_toggle_off_event(main_client, space_for_history, temp_task, 
     with allure.step("Метаданные поля: fieldId, fieldName, fieldType корректны"):
         assert data["fieldId"] == field_id, f"Неверный fieldId: {data['fieldId']}"
         assert data["fieldName"] == field_name, f"Неверный fieldName: {data['fieldName']}"
-        assert data["fieldType"] == "Boolean", f"Неверный fieldType: {data['fieldType']}"
+        assert data["fieldType"] == "Checkbox", f"Неверный fieldType: {data['fieldType']}"
 
     with allure.step("valueText = 'Off', oldValueText = 'On', isCleared = False"):
         assert data["isCleared"] is False, f"isCleared должен быть False: {data['isCleared']}"

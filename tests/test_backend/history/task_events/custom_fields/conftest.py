@@ -40,15 +40,15 @@ def date_custom_field(main_client, space_for_history, board_for_history):
 
 @pytest.fixture(scope="session")
 def boolean_custom_field(main_client, space_for_history, board_for_history):
-    """Boolean custom field на board_for_history для тестов CUSTOM_FIELD_CHANGED.
-    Создаёт определение поля на борде (без значения) — значение устанавливается
-    на конкретной задаче через edit_task_custom_field_endpoint."""
+    """Checkbox custom field на board_for_history для тестов CUSTOM_FIELD_CHANGED.
+    API тип "Checkbox" (в UI — Boolean). Создаёт определение поля на борде (без значения) —
+    значение устанавливается на конкретной задаче через edit_task_custom_field_endpoint."""
     space_id = space_for_history["space_id"]
     board_id = board_for_history["board_id"]
     field_name = "cf_history_boolean"
-    with allure.step(f"Setup: создаём Boolean custom field '{field_name}'"):
+    with allure.step(f"Setup: создаём Checkbox custom field '{field_name}'"):
         resp = main_client.post(**create_board_custom_field_endpoint(
-            board_id=board_id, space_id=space_id, name=field_name, type="Boolean",
+            board_id=board_id, space_id=space_id, name=field_name, type="Checkbox",
         ))
         assert resp.status_code == 200, f"Setup: не удалось создать custom field: {resp.text}"
         field_id = resp.json()["payload"]["customField"]["_id"]
