@@ -11,7 +11,7 @@ _TASK_NAME = "Temp task for history events"
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("Custom Fields Changed")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
@@ -72,7 +72,7 @@ def test_number_cf_set_event(main_client, space_for_history, project_for_history
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("Custom Fields Changed")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
 @allure.title("[Number] очистка значения (GetHistory kind=Task)")
 def test_number_cf_clear_event(main_client, space_for_history, temp_task, number_custom_field):
     """
