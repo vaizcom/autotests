@@ -11,7 +11,7 @@ _TASK_NAME = "Temp task for history events"
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("Custom Fields")
+@allure.sub_suite("Custom Fields Changed")
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
@@ -34,7 +34,7 @@ def test_number_cf_set_event(main_client, space_for_history, project_for_history
     else:
         kind_id = space_id
 
-    allure.dynamic.title(f"CUSTOM_FIELD_CHANGED: установка значения Number поля (GetHistory kind={kind})")
+    allure.dynamic.title(f"[Number] установка значения (GetHistory kind={kind})")
 
     with allure.step(f"Устанавливаем значение Number поля '{field_name}' = {new_value}"):
         resp = main_client.post(**edit_task_custom_field_endpoint(
@@ -72,8 +72,8 @@ def test_number_cf_set_event(main_client, space_for_history, project_for_history
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("Custom Fields")
-@allure.title("CUSTOM_FIELD_CHANGED: очистка значения Number поля (GetHistory kind=Task)")
+@allure.sub_suite("Custom Fields Changed")
+@allure.title("[Number] очистка значения (GetHistory kind=Task)")
 def test_number_cf_clear_event(main_client, space_for_history, temp_task, number_custom_field):
     """
     Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке значения Number поля.

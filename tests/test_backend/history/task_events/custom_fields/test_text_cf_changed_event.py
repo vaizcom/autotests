@@ -13,7 +13,7 @@ _TASK_NAME = "Temp task for history events"
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("Custom Fields")
+@allure.sub_suite("Custom Fields Changed")
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
@@ -37,7 +37,7 @@ def test_custom_field_set_event(main_client, space_for_history, project_for_hist
     else:
         kind_id = space_id
 
-    allure.dynamic.title(f"CUSTOM_FIELD_CHANGED: установка значения Text поля (GetHistory kind={kind})")
+    allure.dynamic.title(f"[Text] установка значения (GetHistory kind={kind})")
 
     with allure.step(f"Устанавливаем значение Text поля '{field_name}' = '{new_value}'"):
         resp = main_client.post(**edit_task_custom_field_endpoint(
@@ -75,8 +75,8 @@ def test_custom_field_set_event(main_client, space_for_history, project_for_hist
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("Custom Fields")
-@allure.title("CUSTOM_FIELD_CHANGED: очистка значения Text поля (GetHistory kind=Task)")
+@allure.sub_suite("Custom Fields Changed")
+@allure.title("[Text] очистка значения (GetHistory kind=Task)")
 def test_custom_field_clear_event(main_client, space_for_history, temp_task, text_custom_field):
     """
     Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке значения Text поля.
