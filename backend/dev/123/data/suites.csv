@@ -1,0 +1,125 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"failed","Tue Aug 18 13:12:58 UTC 2026","Tue Aug 18 13:12:58 UTC 2026","1","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","test_custom_field_set_event[Space]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Text кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Событие должно содержать метаданные поля (fieldId, fieldName, fieldType),
+    новое значение (valueText) и флаг isCleared=False.
+    "
+"failed","Tue Aug 18 13:12:38 UTC 2026","Tue Aug 18 13:12:38 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","test_custom_field_set_event[Task]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Text кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Событие должно содержать метаданные поля (fieldId, fieldName, fieldType),
+    новое значение (valueText) и флаг isCleared=False.
+    "
+"passed","Tue Aug 18 13:11:23 UTC 2026","Tue Aug 18 13:11:34 UTC 2026","10797","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Date] изменение диапазона дат (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении диапазона дат.
+    Проверяем через GetHistory с kind=Task.
+    Устанавливаем range, затем меняем на другой — событие должно содержать
+    oldValueText с предыдущим значением и valueText с новым.
+    "
+"passed","Tue Aug 18 13:10:53 UTC 2026","Tue Aug 18 13:11:04 UTC 2026","11036","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Date] изменение одиночной даты (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении одиночной даты.
+    Проверяем через GetHistory с kind=Task.
+    Устанавливаем дату, затем меняем на другую — событие должно содержать
+    oldValueText с предыдущим значением и valueText с новым.
+    "
+"passed","Tue Aug 18 13:11:47 UTC 2026","Tue Aug 18 13:11:53 UTC 2026","5404","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Number] установка значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Number кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как строка (""42""), в data приходит в valueText.
+    "
+"failed","Tue Aug 18 13:12:48 UTC 2026","Tue Aug 18 13:12:48 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","test_custom_field_set_event[Project]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Text кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Событие должно содержать метаданные поля (fieldId, fieldName, fieldType),
+    новое значение (valueText) и флаг isCleared=False.
+    "
+"failed","Tue Aug 18 13:12:28 UTC 2026","Tue Aug 18 13:12:28 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Number] очистка значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке значения Number поля.
+    После установки значения ожидаем записи события, затем очищаем поле и проверяем,
+    что записалось новое событие с isCleared=True, а oldValueText содержит предыдущее значение.
+    "
+"passed","Tue Aug 18 13:11:53 UTC 2026","Tue Aug 18 13:11:59 UTC 2026","5570","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Number] установка значения (GetHistory kind=Project)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Number кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как строка (""42""), в data приходит в valueText.
+    "
+"passed","Tue Aug 18 13:10:33 UTC 2026","Tue Aug 18 13:10:39 UTC 2026","5566","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Date] установка одиночной даты (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке одиночной даты (Single Date).
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API Date поля принимает массив [start, end]:
+    - Single Date: [null, ISO-дата] — только конечная дата.
+    - Date Range: [ISO-start, ISO-end] — обе даты заполнены.
+    В valueText дата приходит в формате ""Month DD, YYYY"" (например, ""August 23, 2026"").
+    "
+"passed","Tue Aug 18 13:10:46 UTC 2026","Tue Aug 18 13:10:52 UTC 2026","5536","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Date] установка одиночной даты (GetHistory kind=Space)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке одиночной даты (Single Date).
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API Date поля принимает массив [start, end]:
+    - Single Date: [null, ISO-дата] — только конечная дата.
+    - Date Range: [ISO-start, ISO-end] — обе даты заполнены.
+    В valueText дата приходит в формате ""Month DD, YYYY"" (например, ""August 23, 2026"").
+    "
+"passed","Tue Aug 18 13:10:07 UTC 2026","Tue Aug 18 13:10:12 UTC 2026","5393","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Boolean] переключение Off → On (GetHistory kind=Project)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Checkbox поля Off → On.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API тип поля ""Checkbox"" (в UI — Boolean). По умолчанию Off.
+    При установке value=True переключается в On. В valueText приходит ""On"".
+    "
+"passed","Tue Aug 18 13:11:17 UTC 2026","Tue Aug 18 13:11:22 UTC 2026","5420","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Date] установка диапазона дат (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке диапазона дат (Date Range).
+    Проверяем через GetHistory с kind=Task.
+    Значение передаётся как массив [ISO-start, ISO-end].
+    В valueText приходит в формате ""Month DD, YYYY → Month DD, YYYY"".
+    "
+"passed","Tue Aug 18 13:12:00 UTC 2026","Tue Aug 18 13:12:06 UTC 2026","5635","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Number] установка значения (GetHistory kind=Space)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Number кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как строка (""42""), в data приходит в valueText.
+    "
+"passed","Tue Aug 18 13:10:13 UTC 2026","Tue Aug 18 13:10:20 UTC 2026","6244","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Boolean] переключение Off → On (GetHistory kind=Space)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Checkbox поля Off → On.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API тип поля ""Checkbox"" (в UI — Boolean). По умолчанию Off.
+    При установке value=True переключается в On. В valueText приходит ""On"".
+    "
+"passed","Tue Aug 18 13:11:05 UTC 2026","Tue Aug 18 13:11:16 UTC 2026","10945","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Date] очистка одиночной даты (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке одиночной даты.
+    Проверяем через GetHistory с kind=Task.
+    Очистка выполняется через value="""" (также работает [None, None], но [] — ошибка валидации).
+    После очистки событие должно содержать isCleared=True и oldValueText с предыдущим значением.
+    "
+"passed","Tue Aug 18 13:10:21 UTC 2026","Tue Aug 18 13:10:32 UTC 2026","11139","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Boolean] переключение On → Off (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Checkbox поля On → Off.
+    Проверяем через GetHistory с kind=Task.
+    API тип поля ""Checkbox"" (в UI — Boolean).
+    Устанавливаем True (On), затем False (Off) — событие должно содержать
+    valueText = ""Off"" и oldValueText = ""On"".
+    Оба события имеют isCleared=False, поэтому используем min_count=2.
+    "
+"failed","Tue Aug 18 13:13:09 UTC 2026","Tue Aug 18 13:13:09 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Text] очистка значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке значения Text поля.
+    После установки значения ожидаем записи события, затем очищаем поле и проверяем,
+    что записалось новое событие с isCleared=True, а oldValueText содержит предыдущее значение.
+    "
+"passed","Tue Aug 18 13:10:00 UTC 2026","Tue Aug 18 13:10:06 UTC 2026","6331","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Boolean] переключение Off → On (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Checkbox поля Off → On.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API тип поля ""Checkbox"" (в UI — Boolean). По умолчанию Off.
+    При установке value=True переключается в On. В valueText приходит ""On"".
+    "
+"passed","Tue Aug 18 13:11:35 UTC 2026","Tue Aug 18 13:11:46 UTC 2026","11183","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Date] очистка диапазона дат (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке диапазона дат.
+    Проверяем через GetHistory с kind=Task.
+    Очистка выполняется через value="""" (также работает [None, None], но [] — ошибка валидации).
+    После очистки событие должно содержать isCleared=True и oldValueText
+    с предыдущим значением в формате range.
+    "
+"passed","Tue Aug 18 13:10:40 UTC 2026","Tue Aug 18 13:10:45 UTC 2026","5470","History Service","Task History","CUSTOM_FIELD_CHANGED events","","","[Date] установка одиночной даты (GetHistory kind=Project)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке одиночной даты (Single Date).
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API Date поля принимает массив [start, end]:
+    - Single Date: [null, ISO-дата] — только конечная дата.
+    - Date Range: [ISO-start, ISO-end] — обе даты заполнены.
+    В valueText дата приходит в формате ""Month DD, YYYY"" (например, ""August 23, 2026"").
+    "
