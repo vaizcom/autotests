@@ -1,3 +1,5 @@
+import time
+
 import allure
 import pytest
 
@@ -17,9 +19,18 @@ def temp_task(main_client, space_for_history, board_for_history):
     space_id = space_for_history["space_id"]
     board_id = board_for_history["board_id"]
     with allure.step("Setup: создаём временную задачу"):
-        resp = main_client.post(**create_task_endpoint(
-            space_id=space_id, board=board_id, name="Temp task for history events"
-        ))
+        # Ретрай на случай MemberDidNotFound — в CI мембер может быть ещё не проиндексирован
+        for attempt in range(5):
+            resp = main_client.post(**create_task_endpoint(
+                space_id=space_id, board=board_id, name="Temp task for history events"
+            ))
+            if resp.status_code == 200:
+                break
+            error_code = resp.json().get("error", {}).get("code", "")
+            if error_code == "MemberDidNotFound" and attempt < 4:
+                time.sleep(2)
+                continue
+            break
         assert resp.status_code == 200, f"Setup: не удалось создать задачу: {resp.text}"
         task_id = resp.json()["payload"]["task"]["_id"]
 
