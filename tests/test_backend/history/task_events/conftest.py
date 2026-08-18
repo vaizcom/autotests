@@ -63,6 +63,7 @@ def second_board(main_client, space_for_history, project_for_history):
     yield resp.json()["payload"]["board"]["_id"]
 
 
+
 @pytest.fixture(scope="session")
 def history_members(main_client, space_for_history, manager_in_space):
     """Словарь member_id участников space_for_history по ролям."""

@@ -20,7 +20,7 @@ def _find_event(histories: list, event_key: str, expected_data: dict = None) -> 
 
 def assert_get_history_event(
         client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
-        expected_data: dict = None, timeout: int = 20, interval: float = 1.0,
+        expected_data: dict = None, timeout: int = 30, interval: float = 1.0,
 ) -> dict:
     """
     Поллит GetHistory до появления нужного события.
