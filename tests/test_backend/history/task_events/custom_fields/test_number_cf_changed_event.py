@@ -73,6 +73,49 @@ def test_number_cf_set_event(main_client, space_for_history, project_for_history
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@pytest.mark.parametrize("value", [
+    "-5",
+    "3.14",
+], ids=["negative", "decimal"])
+def test_number_cf_special_values(main_client, space_for_history, temp_task, number_custom_field, value):
+    """
+    Проверяем корректную запись отрицательных и дробных чисел в valueText.
+    Проверяем через GetHistory с kind=Task.
+    Значение передаётся как строка ("-5", "3.14").
+    """
+    space_id = space_for_history["space_id"]
+    task_id = temp_task
+    field_id = number_custom_field["field_id"]
+
+    allure.dynamic.title(f"[Number] спецзначение: {value} (GetHistory kind=Task)")
+
+    with allure.step(f"Устанавливаем значение Number поля = {value}"):
+        resp = main_client.post(**edit_task_custom_field_endpoint(
+            space_id=space_id, task_id=task_id, field_id=field_id, value=value,
+        ))
+        assert resp.status_code == 200, f"Ошибка при установке кастомного поля: {resp.text}"
+
+    with allure.step("Проверяем событие CUSTOM_FIELD_CHANGED через GetHistory kind=Task"):
+        event = assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Task",
+            kind_id=task_id,
+            expected_event_key="CUSTOM_FIELD_CHANGED",
+            expected_data={"_id": task_id, "fieldId": field_id, "isCleared": False},
+        )
+
+    data = event["data"]
+
+    with allure.step(f"valueText = '{value}', значение сохранено корректно"):
+        assert data["valueText"] == value, \
+            f"Неверный valueText. Ожидалось: '{value}', получено: '{data['valueText']}'"
+        assert data["isCleared"] is False, f"isCleared должен быть False: {data['isCleared']}"
+
+
+@allure.parent_suite("History Service")
+@allure.suite("Task History")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
 @allure.title("[Number] очистка значения (GetHistory kind=Task)")
 def test_number_cf_clear_event(main_client, space_for_history, temp_task, number_custom_field):
     """
