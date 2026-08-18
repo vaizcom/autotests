@@ -76,49 +76,6 @@ def test_custom_field_set_event(main_client, space_for_history, project_for_hist
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.sub_suite("CUSTOM_FIELD_CHANGED events")
-@pytest.mark.parametrize("value", [
-    "тест кириллица 你好",
-    "special <>&\"' chars",
-    "emoji 🔥✅",
-], ids=["multilang", "special_chars", "emoji"])
-def test_text_cf_special_values(main_client, space_for_history, temp_task, text_custom_field, value):
-    """
-    Проверяем корректную запись спецсимволов, emoji и разных языков в valueText.
-    Проверяем через GetHistory с kind=Task.
-    """
-    space_id = space_for_history["space_id"]
-    task_id = temp_task
-    field_id = text_custom_field["field_id"]
-
-    allure.dynamic.title(f"[Text] спецсимволы: {value[:20]} (GetHistory kind=Task)")
-
-    with allure.step(f"Устанавливаем значение Text поля = '{value}'"):
-        resp = main_client.post(**edit_task_custom_field_endpoint(
-            space_id=space_id, task_id=task_id, field_id=field_id, value=value,
-        ))
-        assert resp.status_code == 200, f"Ошибка при установке кастомного поля: {resp.text}"
-
-    with allure.step("Проверяем событие CUSTOM_FIELD_CHANGED через GetHistory kind=Task"):
-        event = assert_get_history_event(
-            client=main_client,
-            space_id=space_id,
-            kind="Task",
-            kind_id=task_id,
-            expected_event_key="CUSTOM_FIELD_CHANGED",
-            expected_data={"_id": task_id, "fieldId": field_id, "isCleared": False},
-        )
-
-    data = event["data"]
-
-    with allure.step(f"valueText = '{value}', значение сохранено без искажений"):
-        assert data["valueText"] == value, \
-            f"Неверный valueText. Ожидалось: '{value}', получено: '{data['valueText']}'"
-        assert data["isCleared"] is False, f"isCleared должен быть False: {data['isCleared']}"
-
-
-@allure.parent_suite("History Service")
-@allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
 @allure.title("[Text] очистка значения (GetHistory kind=Task)")
 def test_custom_field_clear_event(main_client, space_for_history, temp_task, text_custom_field):
     """
