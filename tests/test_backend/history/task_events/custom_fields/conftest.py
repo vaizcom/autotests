@@ -108,6 +108,43 @@ def estimation_custom_field(main_client, space_for_history, board_for_history):
 
 
 @pytest.fixture(scope="session")
+def select_custom_field(main_client, space_for_history, board_for_history):
+    """Select custom field с тремя опциями на board_for_history.
+    Значение — массив option ID. В valueText приходят названия через ', '."""
+    from config.generators import generate_object_id
+    space_id = space_for_history["space_id"]
+    board_id = board_for_history["board_id"]
+    field_name = "cf_history_select"
+    opt_a = generate_object_id()
+    opt_b = generate_object_id()
+    opt_c = generate_object_id()
+    options = [
+        {"_id": opt_a, "title": "Alpha", "color": "red"},
+        {"_id": opt_b, "title": "Beta", "color": "blue"},
+        {"_id": opt_c, "title": "Gamma", "color": "green"},
+    ]
+    with allure.step(f"Setup: создаём Select custom field '{field_name}' с 3 опциями"):
+        for attempt in range(5):
+            resp = main_client.post(**create_board_custom_field_endpoint(
+                board_id=board_id, space_id=space_id, name=field_name, type="Select",
+                options=options,
+            ))
+            if resp.status_code == 200:
+                break
+            error_code = resp.json().get("error", {}).get("code", "")
+            if error_code in _RETRYABLE_ERRORS and attempt < 4:
+                time.sleep(2)
+                continue
+            break
+        assert resp.status_code == 200, f"Setup: не удалось создать custom field: {resp.text}"
+        field_id = resp.json()["payload"]["customField"]["_id"]
+    yield {
+        "field_id": field_id, "field_name": field_name,
+        "opt_a": opt_a, "opt_b": opt_b, "opt_c": opt_c,
+    }
+
+
+@pytest.fixture(scope="session")
 def number_custom_field(main_client, space_for_history, board_for_history):
     """Number custom field на board_for_history для тестов CUSTOM_FIELD_CHANGED.
     Создаёт определение поля на борде (без значения) — значение устанавливается
