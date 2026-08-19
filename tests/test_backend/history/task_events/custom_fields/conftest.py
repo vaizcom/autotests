@@ -4,6 +4,7 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.Board.board_endpoints import create_board_custom_field_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
 
 _RETRYABLE_ERRORS = ("AccessDenied", "MemberDidNotFound")
 
@@ -157,6 +158,49 @@ def url_custom_field(main_client, space_for_history, board_for_history):
         )
         field_id = resp.json()["payload"]["customField"]["_id"]
     yield {"field_id": field_id, "field_name": field_name}
+
+
+@pytest.fixture(scope="session")
+def task_relations_custom_field(main_client, space_for_history, board_for_history):
+    """TaskRelations custom field на board_for_history для тестов CUSTOM_FIELD_CHANGED.
+    Значение — массив task ID. Очистка через пустой массив []."""
+    space_id = space_for_history["space_id"]
+    board_id = board_for_history["board_id"]
+    field_name = "cf_history_task_relations"
+    with allure.step(f"Setup: создаём TaskRelations custom field '{field_name}'"):
+        resp = _create_custom_field_with_retry(
+            main_client, board_id, space_id, field_name, "TaskRelations",
+        )
+        field_id = resp.json()["payload"]["customField"]["_id"]
+    yield {"field_id": field_id, "field_name": field_name}
+
+
+@pytest.fixture
+def linked_tasks(main_client, space_for_history, board_for_history):
+    """Две задачи для линковки через TaskRelations CF. Удаляются после теста."""
+    space_id = space_for_history["space_id"]
+    board_id = board_for_history["board_id"]
+    tasks = []
+    for name in ("Linked task A", "Linked task B"):
+        for attempt in range(5):
+            resp = main_client.post(**create_task_endpoint(
+                space_id=space_id, board=board_id, name=name,
+            ))
+            if resp.status_code == 200:
+                break
+            error_code = resp.json().get("error", {}).get("code", "")
+            if error_code == "MemberDidNotFound" and attempt < 4:
+                time.sleep(2)
+                continue
+            break
+        assert resp.status_code == 200, f"Setup: не удалось создать '{name}': {resp.text}"
+        task = resp.json()["payload"]["task"]
+        tasks.append({"task_id": task["_id"], "name": name})
+
+    yield tasks
+
+    for t in tasks:
+        main_client.post(**delete_task_endpoint(space_id=space_id, task_id=t["task_id"]))
 
 
 @pytest.fixture(scope="session")
