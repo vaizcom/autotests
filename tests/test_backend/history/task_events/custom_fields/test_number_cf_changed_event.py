@@ -73,6 +73,98 @@ def test_number_cf_set_event(main_client, space_for_history, project_for_history
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.title("[Number] изменение значения (GetHistory kind=Task)")
+def test_number_cf_change_event(main_client, space_for_history, temp_task, number_custom_field):
+    """
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении числового значения.
+    Устанавливаем 42, затем меняем на 100.
+    Оба события имеют isCleared=False, используем min_count=2.
+    """
+    space_id = space_for_history["space_id"]
+    task_id = temp_task
+    field_id = number_custom_field["field_id"]
+
+    with allure.step("Устанавливаем значение 42"):
+        resp = main_client.post(**edit_task_custom_field_endpoint(
+            space_id=space_id, task_id=task_id, field_id=field_id, value="42",
+        ))
+        assert resp.status_code == 200, f"Ошибка при установке: {resp.text}"
+
+    with allure.step("Ожидаем событие установки (isCleared=False)"):
+        assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Task",
+            kind_id=task_id,
+            expected_event_key="CUSTOM_FIELD_CHANGED",
+            expected_data={"_id": task_id, "fieldId": field_id, "isCleared": False},
+        )
+
+    with allure.step("Меняем значение на 100"):
+        resp = main_client.post(**edit_task_custom_field_endpoint(
+            space_id=space_id, task_id=task_id, field_id=field_id, value="100",
+        ))
+        assert resp.status_code == 200, f"Ошибка при изменении: {resp.text}"
+
+    with allure.step("Проверяем событие изменения (min_count=2)"):
+        event = assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Task",
+            kind_id=task_id,
+            expected_event_key="CUSTOM_FIELD_CHANGED",
+            expected_data={"_id": task_id, "fieldId": field_id, "isCleared": False},
+            min_count=2,
+        )
+
+    data = event["data"]
+
+    with allure.step("valueText = '100', oldValueText = '42'"):
+        assert data["valueText"] == "100", \
+            f"Неверный valueText. Ожидалось: '100', получено: '{data.get('valueText')}'"
+        assert data["oldValueText"] == "42", \
+            f"Неверный oldValueText. Ожидалось: '42', получено: '{data.get('oldValueText')}'"
+        assert data["isCleared"] is False
+
+
+@allure.parent_suite("History Service")
+@allure.suite("Task History")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.title("[Number] значение 0 отличается от пустого (GetHistory kind=Task)")
+def test_number_cf_zero_event(main_client, space_for_history, temp_task, number_custom_field):
+    """
+    Проверяем что установка значения 0 генерирует событие с isCleared=False.
+    Ноль — валидное числовое значение, не очистка поля.
+    """
+    space_id = space_for_history["space_id"]
+    task_id = temp_task
+    field_id = number_custom_field["field_id"]
+
+    with allure.step("Устанавливаем значение 0"):
+        resp = main_client.post(**edit_task_custom_field_endpoint(
+            space_id=space_id, task_id=task_id, field_id=field_id, value="0",
+        ))
+        assert resp.status_code == 200, f"Ошибка при установке: {resp.text}"
+
+    with allure.step("Проверяем событие: isCleared=False, valueText='0'"):
+        event = assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Task",
+            kind_id=task_id,
+            expected_event_key="CUSTOM_FIELD_CHANGED",
+            expected_data={"_id": task_id, "fieldId": field_id, "isCleared": False},
+        )
+
+    data = event["data"]
+    assert data["isCleared"] is False, f"0 не должен считаться очисткой: isCleared={data['isCleared']}"
+    assert data["valueText"] == "0", \
+        f"Неверный valueText. Ожидалось: '0', получено: '{data.get('valueText')}'"
+
+
+@allure.parent_suite("History Service")
+@allure.suite("Task History")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
 @allure.title("[Number] очистка значения (GetHistory kind=Task)")
 def test_number_cf_clear_event(main_client, space_for_history, temp_task, number_custom_field):
     """

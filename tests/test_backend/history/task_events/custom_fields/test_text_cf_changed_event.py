@@ -76,6 +76,100 @@ def test_custom_field_set_event(main_client, space_for_history, project_for_hist
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
 @allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.title("[Text] изменение значения (GetHistory kind=Task)")
+def test_custom_field_change_event(main_client, space_for_history, temp_task, text_custom_field):
+    """
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении значения Text поля.
+    Устанавливаем первое значение, затем меняем на другое.
+    Оба события имеют isCleared=False, поэтому используем min_count=2.
+    """
+    space_id = space_for_history["space_id"]
+    task_id = temp_task
+    field_id = text_custom_field["field_id"]
+    first_value = f"autotest-{uuid.uuid4().hex[:8]}"
+    second_value = f"autotest-{uuid.uuid4().hex[:8]}"
+
+    with allure.step(f"Устанавливаем первое значение '{first_value}'"):
+        resp = main_client.post(**edit_task_custom_field_endpoint(
+            space_id=space_id, task_id=task_id, field_id=field_id, value=first_value,
+        ))
+        assert resp.status_code == 200, f"Ошибка при установке: {resp.text}"
+
+    with allure.step("Ожидаем событие установки (isCleared=False)"):
+        assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Task",
+            kind_id=task_id,
+            expected_event_key="CUSTOM_FIELD_CHANGED",
+            expected_data={"_id": task_id, "fieldId": field_id, "isCleared": False},
+        )
+
+    with allure.step(f"Меняем значение на '{second_value}'"):
+        resp = main_client.post(**edit_task_custom_field_endpoint(
+            space_id=space_id, task_id=task_id, field_id=field_id, value=second_value,
+        ))
+        assert resp.status_code == 200, f"Ошибка при изменении: {resp.text}"
+
+    with allure.step("Проверяем событие изменения (min_count=2)"):
+        event = assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Task",
+            kind_id=task_id,
+            expected_event_key="CUSTOM_FIELD_CHANGED",
+            expected_data={"_id": task_id, "fieldId": field_id, "isCleared": False},
+            min_count=2,
+        )
+
+    data = event["data"]
+
+    with allure.step(f"valueText = '{second_value}', oldValueText = '{first_value}'"):
+        assert data["valueText"] == second_value, \
+            f"Неверный valueText. Ожидалось: '{second_value}', получено: '{data.get('valueText')}'"
+        assert data["oldValueText"] == first_value, \
+            f"Неверный oldValueText. Ожидалось: '{first_value}', получено: '{data.get('oldValueText')}'"
+        assert data["isCleared"] is False
+
+
+@allure.parent_suite("History Service")
+@allure.suite("Task History")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.title("[Text] спецсимволы и emoji (GetHistory kind=Task)")
+def test_custom_field_special_chars_event(main_client, space_for_history, temp_task, text_custom_field):
+    """
+    Проверяем что спецсимволы, HTML-сущности и emoji корректно сохраняются
+    в valueText без экранирования и обрезки.
+    """
+    space_id = space_for_history["space_id"]
+    task_id = temp_task
+    field_id = text_custom_field["field_id"]
+    special_value = "<script>alert('xss')</script> & \"quotes\" 🚀✅"
+
+    with allure.step(f"Устанавливаем значение со спецсимволами и emoji"):
+        resp = main_client.post(**edit_task_custom_field_endpoint(
+            space_id=space_id, task_id=task_id, field_id=field_id, value=special_value,
+        ))
+        assert resp.status_code == 200, f"Ошибка при установке: {resp.text}"
+
+    with allure.step("Проверяем событие CUSTOM_FIELD_CHANGED"):
+        event = assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Task",
+            kind_id=task_id,
+            expected_event_key="CUSTOM_FIELD_CHANGED",
+            expected_data={"_id": task_id, "fieldId": field_id, "isCleared": False},
+        )
+
+    with allure.step("valueText содержит исходную строку без экранирования"):
+        assert event["data"]["valueText"] == special_value, \
+            f"valueText не совпадает. Ожидалось: {special_value!r}, получено: {event['data']['valueText']!r}"
+
+
+@allure.parent_suite("History Service")
+@allure.suite("Task History")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
 @allure.title("[Text] очистка значения (GetHistory kind=Task)")
 def test_custom_field_clear_event(main_client, space_for_history, temp_task, text_custom_field):
     """
