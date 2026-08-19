@@ -1,0 +1,450 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Wed Aug 19 11:25:34 UTC 2026","Wed Aug 19 11:25:40 UTC 2026","5637","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Date] установка диапазона дат (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке диапазона дат (Date Range).
+    Проверяем через GetHistory с kind=Task.
+    Значение передаётся как массив [ISO-start, ISO-end].
+    В valueText приходит в формате ""Month DD, YYYY → Month DD, YYYY"".
+    "
+"passed","Wed Aug 19 11:27:48 UTC 2026","Wed Aug 19 11:27:54 UTC 2026","5624","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Number] установка значения (GetHistory kind=Project)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Number кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как строка (""42""), в data приходит в valueText.
+    "
+"failed","Wed Aug 19 11:34:47 UTC 2026","Wed Aug 19 11:34:47 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","test_task_relations_cf_set_event[Project]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при добавлении связанной задачи.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение — массив из одного task ID.
+    "
+"failed","Wed Aug 19 11:45:50 UTC 2026","Wed Aug 19 11:45:50 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Url] ссылка с query params и спецсимволами (GetHistory kind=Task)","
+    Проверяем что ссылка с query params, фрагментом и спецсимволами
+    корректно сохраняется в valueText без обрезки и экранирования.
+    "
+"passed","Wed Aug 19 11:23:21 UTC 2026","Wed Aug 19 11:23:22 UTC 2026","598","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Майлстоун в проекте_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Wed Aug 19 11:26:37 UTC 2026","Wed Aug 19 11:26:48 UTC 2026","10827","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Estimation] очистка значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке Estimation поля.
+    Проверяем через GetHistory с kind=Task.
+    Устанавливаем значение, затем очищаем (value="""").
+    Событие должно содержать isCleared=True и oldValueText с предыдущим значением.
+    Примечание: через API очистка работает корректно (200, isCleared=true).
+    На фронте есть баг — поле не очищается визуально.
+    "
+"failed","Wed Aug 19 11:31:49 UTC 2026","Wed Aug 19 11:31:49 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Select] изменение одного значения на несколько (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при смене одного option на несколько.
+    Проверяем через GetHistory с kind=Task.
+    Выбираем Alpha, затем меняем на [Alpha, Beta] — событие содержит
+    valueText = ""Alpha, Beta"" и oldValueText = ""Alpha"".
+    "
+"passed","Wed Aug 19 11:26:58 UTC 2026","Wed Aug 19 11:27:03 UTC 2026","5650","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Member] назначение мембера (GetHistory kind=Project)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при назначении мембера в Member поле.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как массив member ID: [member_id].
+    В valueText приходит fullName мембера, в memberIds — массив назначенных ID.
+    "
+"passed","Wed Aug 19 11:26:51 UTC 2026","Wed Aug 19 11:26:57 UTC 2026","5401","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Member] назначение мембера (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при назначении мембера в Member поле.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как массив member ID: [member_id].
+    В valueText приходит fullName мембера, в memberIds — массив назначенных ID.
+    "
+"passed","Wed Aug 19 11:25:10 UTC 2026","Wed Aug 19 11:25:21 UTC 2026","10931","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Date] изменение одиночной даты (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении одиночной даты.
+    Проверяем через GetHistory с kind=Task.
+    Устанавливаем дату, затем меняем на другую — событие должно содержать
+    oldValueText с предыдущим значением и valueText с новым.
+    "
+"passed","Wed Aug 19 11:27:55 UTC 2026","Wed Aug 19 11:28:01 UTC 2026","5659","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Number] установка значения (GetHistory kind=Space)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Number кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как строка (""42""), в data приходит в valueText.
+    "
+"failed","Wed Aug 19 11:43:19 UTC 2026","Wed Aug 19 11:43:19 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","test_url_cf_set_event[Project]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при добавлении ссылки в Url поле.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    "
+"passed","Wed Aug 19 11:25:53 UTC 2026","Wed Aug 19 11:26:04 UTC 2026","10968","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Date] очистка диапазона дат (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке диапазона дат.
+    Проверяем через GetHistory с kind=Task.
+    Очистка выполняется через value="""" (также работает [None, None], но [] — ошибка валидации).
+    После очистки событие должно содержать isCleared=True и oldValueText
+    с предыдущим значением в формате range.
+    "
+"passed","Wed Aug 19 11:27:12 UTC 2026","Wed Aug 19 11:27:17 UTC 2026","5460","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Member] назначение нескольких мемберов (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при назначении нескольких мемберов.
+    Проверяем через GetHistory с kind=Task.
+    Значение передаётся как массив из двух member ID: [main_id, manager_id].
+    В memberIds приходит массив обоих ID, valueText содержит имена через запятую.
+    "
+"passed","Wed Aug 19 11:24:06 UTC 2026","Wed Aug 19 11:24:12 UTC 2026","5585","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Boolean] переключение Off → On (GetHistory kind=Project)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Checkbox поля Off → On.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API тип поля ""Checkbox"" (в UI — Boolean). По умолчанию Off.
+    При установке value=True переключается в On. В valueText приходит ""On"".
+    "
+"skipped","Wed Aug 19 11:23:37 UTC 2026","Wed Aug 19 11:23:38 UTC 2026","429","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Project history: Board от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"failed","Wed Aug 19 11:31:02 UTC 2026","Wed Aug 19 11:31:02 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Select] выбор нескольких значений (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при выборе нескольких опций.
+    Проверяем через GetHistory с kind=Task.
+    Значение — массив из нескольких option ID.
+    В valueText приходят названия опций через запятую: ""Alpha, Beta, Gamma"".
+    "
+"passed","Wed Aug 19 11:25:03 UTC 2026","Wed Aug 19 11:25:09 UTC 2026","5606","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Date] установка одиночной даты (GetHistory kind=Space)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке одиночной даты (Single Date).
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API Date поля принимает массив [start, end]:
+    - Single Date: [null, ISO-дата] — только конечная дата.
+    - Date Range: [ISO-start, ISO-end] — обе даты заполнены.
+    В valueText дата приходит в формате ""Month DD, YYYY"" (например, ""August 23, 2026"").
+    "
+"failed","Wed Aug 19 11:36:40 UTC 2026","Wed Aug 19 11:36:40 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[TaskRelations] удаление связанной задачи (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при удалении связи.
+    Привязываем задачу, затем очищаем (value=[]).
+    Событие содержит isCleared=True и oldValueText.
+    "
+"passed","Wed Aug 19 11:26:25 UTC 2026","Wed Aug 19 11:26:36 UTC 2026","10767","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Estimation] изменение значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении Estimation поля.
+    Проверяем через GetHistory с kind=Task.
+    Устанавливаем P1W, затем меняем на PT5H30M — событие должно содержать
+    valueText с новым значением и oldValueText с предыдущим.
+    Оба события имеют isCleared=False, поэтому используем min_count=2.
+    "
+"passed","Wed Aug 19 11:24:20 UTC 2026","Wed Aug 19 11:24:30 UTC 2026","10798","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Boolean] переключение On → Off (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Checkbox поля On → Off.
+    Проверяем через GetHistory с kind=Task.
+    API тип поля ""Checkbox"" (в UI — Boolean).
+    Устанавливаем True (On), затем False (Off) — событие должно содержать
+    valueText = ""Off"" и oldValueText = ""On"".
+    Оба события имеют isCleared=False, поэтому используем min_count=2.
+    "
+"failed","Wed Aug 19 11:38:04 UTC 2026","Wed Aug 19 11:38:04 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","test_text_cf_set_event[Task]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Text кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Событие должно содержать метаданные поля (fieldId, fieldName, fieldType),
+    новое значение (valueText) и флаг isCleared=False.
+    "
+"failed","Wed Aug 19 11:34:09 UTC 2026","Wed Aug 19 11:34:09 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","test_task_relations_cf_set_event[Task]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при добавлении связанной задачи.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение — массив из одного task ID.
+    "
+"passed","Wed Aug 19 11:23:23 UTC 2026","Wed Aug 19 11:23:24 UTC 2026","794","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Персональный проджект-документ_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"failed","Wed Aug 19 11:37:18 UTC 2026","Wed Aug 19 11:37:18 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[TaskRelations] событие сохраняется после удаления связанной задачи","
+    Проверяем что событие CUSTOM_FIELD_CHANGED остаётся в истории
+    после удаления связанной задачи. Данные события не должны измениться.
+    "
+"passed","Wed Aug 19 11:23:22 UTC 2026","Wed Aug 19 11:23:23 UTC 2026","579","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Проджект-документ проекта_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Wed Aug 19 11:23:41 UTC 2026","Wed Aug 19 11:23:41 UTC 2026","489","History Service","GetHistory Access","Cross access: Cross project history — утечка через Space history","","","Space history: Board из чужого проекта НЕ видны project_client","
+    client_with_access_only_in_project имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Создаём сущность в project_2 и проверяем:
+    - owner видит событие в Space history
+    - project_client НЕ видит событие в Space history
+    "
+"failed","Wed Aug 19 11:29:29 UTC 2026","Wed Aug 19 11:29:29 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Select] изменение одного option на другой (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при смене option в Select поле.
+    Проверяем через GetHistory с kind=Task.
+    Выбираем Alpha, затем меняем на Beta — событие содержит
+    valueText = ""Beta"" и oldValueText = ""Alpha"".
+    Оба события имеют isCleared=False, поэтому используем min_count=2.
+    "
+"passed","Wed Aug 19 11:24:57 UTC 2026","Wed Aug 19 11:25:02 UTC 2026","5668","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Date] установка одиночной даты (GetHistory kind=Project)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке одиночной даты (Single Date).
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API Date поля принимает массив [start, end]:
+    - Single Date: [null, ISO-дата] — только конечная дата.
+    - Date Range: [ISO-start, ISO-end] — обе даты заполнены.
+    В valueText дата приходит в формате ""Month DD, YYYY"" (например, ""August 23, 2026"").
+    "
+"passed","Wed Aug 19 11:27:30 UTC 2026","Wed Aug 19 11:27:41 UTC 2026","10755","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Member] очистка мембера (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке Member поля.
+    Проверяем через GetHistory с kind=Task.
+    Назначаем мембера, затем очищаем поле (value=[]).
+    Событие должно содержать isCleared=True и oldValueText с именем предыдущего мембера.
+    "
+"failed","Wed Aug 19 11:41:07 UTC 2026","Wed Aug 19 11:41:07 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Text] спецсимволы и emoji (GetHistory kind=Task)","
+    Проверяем что спецсимволы, HTML-сущности и emoji корректно сохраняются
+    в valueText без экранирования и обрезки.
+    "
+"failed","Wed Aug 19 11:44:34 UTC 2026","Wed Aug 19 11:44:34 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Url] изменение ссылки (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении ссылки.
+    Устанавливаем первую ссылку, затем меняем на другую.
+    Оба события имеют isCleared=False, поэтому используем min_count=2.
+    "
+"failed","Wed Aug 19 11:40:21 UTC 2026","Wed Aug 19 11:40:21 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Text] изменение значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении значения Text поля.
+    Устанавливаем первое значение, затем меняем на другое.
+    Оба события имеют isCleared=False, поэтому используем min_count=2.
+    "
+"failed","Wed Aug 19 11:35:24 UTC 2026","Wed Aug 19 11:35:24 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","test_task_relations_cf_set_event[Space]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при добавлении связанной задачи.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение — массив из одного task ID.
+    "
+"passed","Wed Aug 19 11:23:27 UTC 2026","Wed Aug 19 11:23:28 UTC 2026","1091","History Service","GetHistory Access","Cross access: Cross board — прямой доступ → 403","","","GetHistory: member_client → Майлстоун на приватной борде → 403 (Forbidden)","
+    Кросс-борд изоляция: member_client имеет доступ к main_project,
+    но НЕ к приватной борде (temp_board_in_main), созданной owner_client.
+    Задачи и майлстоуны на этой борде недоступны → 403 (Forbidden).
+    "
+"failed","Wed Aug 19 11:32:36 UTC 2026","Wed Aug 19 11:32:36 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Select] изменение нескольких значений на одно (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при смене нескольких опций на одну.
+    Проверяем через GetHistory с kind=Task.
+    Выбираем [Alpha, Beta, Gamma], затем меняем на [Gamma] — событие содержит
+    valueText = ""Gamma"" и oldValueText = ""Alpha, Beta, Gamma"".
+    "
+"passed","Wed Aug 19 11:26:05 UTC 2026","Wed Aug 19 11:26:11 UTC 2026","5414","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Estimation] установка значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке Estimation поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся в формате ISO 8601 Duration (""P1W2DT3H"").
+    В valueText приходит человекочитаемый формат (""1w 2d 3h"").
+    "
+"passed","Wed Aug 19 11:23:30 UTC 2026","Wed Aug 19 11:23:31 UTC 2026","762","History Service","GetHistory Access","Cross access: Cross space — прямой доступ → 403","","","GetHistory: main_client → foreign_space → 403 (Forbidden)","
+    Кросс-спейс изоляция: main_client находится в main_space,
+    но НЕ в foreign_space. Запрос истории foreign_space
+    через свой Current-Space-Id не должен вернуть 200.
+    "
+"skipped","Wed Aug 19 11:23:42 UTC 2026","Wed Aug 19 11:23:49 UTC 2026","7345","History Service","GetHistory Access","Cross access: CUSTOM_FIELD_CHANGED — утечка через Space/Project history","","","Space history: CUSTOM_FIELD_CHANGED от приватной борды НЕ виден member_client","
+    Owner создаёт CF на приватной борде, задаёт значение на задаче.
+    member_client (доступ к проекту, но НЕ к борде) не должен видеть
+    CUSTOM_FIELD_CHANGED в Space/Project history.
+    "
+"failed","Wed Aug 19 11:41:54 UTC 2026","Wed Aug 19 11:41:54 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Text] очистка значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке значения Text поля.
+    После установки значения ожидаем записи события, затем очищаем поле и проверяем,
+    что записалось новое событие с isCleared=True, а oldValueText содержит предыдущее значение.
+    "
+"broken","Wed Aug 19 11:39:34 UTC 2026","Wed Aug 19 11:39:34 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","test_text_cf_set_event[Space]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Text кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Событие должно содержать метаданные поля (fieldId, fieldName, fieldType),
+    новое значение (valueText) и флаг isCleared=False.
+    "
+"passed","Wed Aug 19 11:24:50 UTC 2026","Wed Aug 19 11:24:56 UTC 2026","5513","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Date] установка одиночной даты (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке одиночной даты (Single Date).
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API Date поля принимает массив [start, end]:
+    - Single Date: [null, ISO-дата] — только конечная дата.
+    - Date Range: [ISO-start, ISO-end] — обе даты заполнены.
+    В valueText дата приходит в формате ""Month DD, YYYY"" (например, ""August 23, 2026"").
+    "
+"passed","Wed Aug 19 11:24:38 UTC 2026","Wed Aug 19 11:24:49 UTC 2026","11052","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[General] дублирование задачи с CF не дублирует CUSTOM_FIELD_CHANGED","
+    Проверяем что при дублировании задачи с заполненным кастомным полем
+    в истории дубля НЕ появляется CUSTOM_FIELD_CHANGED.
+    Значения CF копируются, но это не отдельное действие пользователя.
+    "
+"failed","Wed Aug 19 11:30:16 UTC 2026","Wed Aug 19 11:30:16 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Select] очистка выбранного option (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке Select поля.
+    Проверяем через GetHistory с kind=Task.
+    Выбираем опцию, затем очищаем (value=[]).
+    Событие содержит isCleared=True и oldValueText с названием предыдущей опции.
+    "
+"failed","Wed Aug 19 11:33:22 UTC 2026","Wed Aug 19 11:33:22 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Select] переименование option: старое событие хранит 'Alpha', новое — 'AlphaRenamed'","
+    Проверяем корректность valueText в истории после переименования опции:
+    1. Выбираем 'Alpha' → событие с valueText='Alpha'
+    2. Переименовываем опцию Alpha → AlphaRenamed через EditBoardCustomField
+    3. Старое событие сохраняет valueText='Alpha' (название на момент действия)
+    4. Очищаем поле и заново выбираем переименованную опцию
+    5. Новое событие приходит с valueText='AlphaRenamed' (актуальное название)
+    "
+"passed","Wed Aug 19 11:23:39 UTC 2026","Wed Aug 19 11:23:41 UTC 2026","1214","History Service","GetHistory Access","Cross access: Cross project history — утечка через Space history","","","Space history: Milestone из чужого проекта НЕ видны project_client","
+    client_with_access_only_in_project имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Создаём сущность в project_2 и проверяем:
+    - owner видит событие в Space history
+    - project_client НЕ видит событие в Space history
+    "
+"passed","Wed Aug 19 11:25:41 UTC 2026","Wed Aug 19 11:25:52 UTC 2026","10869","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Date] изменение диапазона дат (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении диапазона дат.
+    Проверяем через GetHistory с kind=Task.
+    Устанавливаем range, затем меняем на другой — событие должно содержать
+    oldValueText с предыдущим значением и valueText с новым.
+    "
+"passed","Wed Aug 19 11:23:41 UTC 2026","Wed Aug 19 11:23:42 UTC 2026","655","History Service","GetHistory Access","Cross access: Cross project history — утечка через Space history","","","Space history: Project из чужого проекта НЕ видны project_client","
+    client_with_access_only_in_project имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Создаём сущность в project_2 и проверяем:
+    - owner видит событие в Space history
+    - project_client НЕ видит событие в Space history
+    "
+"passed","Wed Aug 19 11:27:18 UTC 2026","Wed Aug 19 11:27:29 UTC 2026","10823","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Member] смена мембера (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при смене мембера в Member поле.
+    Проверяем через GetHistory с kind=Task.
+    Назначаем main, затем меняем на manager — событие должно содержать
+    valueText с именем нового мембера и oldValueText с именем предыдущего.
+    Оба события имеют isCleared=False, поэтому используем min_count=2.
+    "
+"passed","Wed Aug 19 11:23:24 UTC 2026","Wed Aug 19 11:23:24 UTC 2026","431","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Персональный спейс-документ → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Wed Aug 19 11:28:02 UTC 2026","Wed Aug 19 11:28:13 UTC 2026","10923","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Number] изменение значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении числового значения.
+    Устанавливаем 42, затем меняем на 100.
+    Оба события имеют isCleared=False, используем min_count=2.
+    "
+"failed","Wed Aug 19 11:36:02 UTC 2026","Wed Aug 19 11:36:02 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[TaskRelations] замена связанной задачи (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при замене связанной задачи.
+    Привязываем задачу A, затем меняем на задачу B.
+    Оба события имеют isCleared=False, используем min_count=2.
+    "
+"passed","Wed Aug 19 11:28:45 UTC 2026","Wed Aug 19 11:28:51 UTC 2026","5710","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Select] выбор одного значения (GetHistory kind=Space)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при выборе одного option в Select поле.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как массив option ID: [opt_id].
+    В valueText приходит title выбранной опции.
+    "
+"passed","Wed Aug 19 11:25:22 UTC 2026","Wed Aug 19 11:25:33 UTC 2026","10962","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Date] очистка одиночной даты (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке одиночной даты.
+    Проверяем через GetHistory с kind=Task.
+    Очистка выполняется через value="""" (также работает [None, None], но [] — ошибка валидации).
+    После очистки событие должно содержать isCleared=True и oldValueText с предыдущим значением.
+    "
+"passed","Wed Aug 19 11:28:38 UTC 2026","Wed Aug 19 11:28:44 UTC 2026","5657","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Select] выбор одного значения (GetHistory kind=Project)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при выборе одного option в Select поле.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как массив option ID: [opt_id].
+    В valueText приходит title выбранной опции.
+    "
+"passed","Wed Aug 19 11:23:38 UTC 2026","Wed Aug 19 11:23:39 UTC 2026","1643","History Service","GetHistory Access","Cross access: Cross project history — утечка через Space history","","","Space history: Task из чужого проекта НЕ видны project_client","
+    client_with_access_only_in_project имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Создаём сущность в project_2 и проверяем:
+    - owner видит событие в Space history
+    - project_client НЕ видит событие в Space history
+    "
+"passed","Wed Aug 19 11:24:13 UTC 2026","Wed Aug 19 11:24:19 UTC 2026","5602","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Boolean] переключение Off → On (GetHistory kind=Space)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Checkbox поля Off → On.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API тип поля ""Checkbox"" (в UI — Boolean). По умолчанию Off.
+    При установке value=True переключается в On. В valueText приходит ""On"".
+    "
+"passed","Wed Aug 19 11:26:18 UTC 2026","Wed Aug 19 11:26:24 UTC 2026","5899","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Estimation] установка значения (GetHistory kind=Space)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке Estimation поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся в формате ISO 8601 Duration (""P1W2DT3H"").
+    В valueText приходит человекочитаемый формат (""1w 2d 3h"").
+    "
+"failed","Wed Aug 19 11:38:52 UTC 2026","Wed Aug 19 11:38:52 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","test_text_cf_set_event[Project]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Text кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Событие должно содержать метаданные поля (fieldId, fieldName, fieldType),
+    новое значение (valueText) и флаг isCleared=False.
+    "
+"passed","Wed Aug 19 11:23:08 UTC 2026","Wed Aug 19 11:23:19 UTC 2026","10430","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Кросс_проект_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Wed Aug 19 11:28:32 UTC 2026","Wed Aug 19 11:28:37 UTC 2026","5463","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Select] выбор одного значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при выборе одного option в Select поле.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как массив option ID: [opt_id].
+    В valueText приходит title выбранной опции.
+    "
+"skipped","Wed Aug 19 11:23:31 UTC 2026","Wed Aug 19 11:23:33 UTC 2026","1581","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Space history: Task от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"skipped","Wed Aug 19 11:23:49 UTC 2026","Wed Aug 19 11:23:56 UTC 2026","6770","History Service","GetHistory Access","Cross access: CUSTOM_FIELD_CHANGED — утечка через Space/Project history","","","Project history: CUSTOM_FIELD_CHANGED от приватной борды НЕ виден member_client","
+    Owner создаёт CF на приватной борде, задаёт значение на задаче.
+    member_client (доступ к проекту, но НЕ к борде) не должен видеть
+    CUSTOM_FIELD_CHANGED в Space/Project history.
+    "
+"passed","Wed Aug 19 11:28:13 UTC 2026","Wed Aug 19 11:28:19 UTC 2026","5551","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Number] значение 0 отличается от пустого (GetHistory kind=Task)","
+    Проверяем что установка значения 0 генерирует событие с isCleared=False.
+    Ноль — валидное числовое значение, не очистка поля.
+    "
+"skipped","Wed Aug 19 11:23:37 UTC 2026","Wed Aug 19 11:23:37 UTC 2026","588","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Space history: Board от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"passed","Wed Aug 19 11:23:19 UTC 2026","Wed Aug 19 11:23:21 UTC 2026","1906","History Service","GetHistory Access","Cross access: Cross project — прямой доступ → 403","","","GetHistory: project_client → Задача в проекте_2 → 403 (Forbidden)","
+    Кросс-проект изоляция: project_client имеет доступ к main_project,
+    но НЕ к temp_main_project_2. Все сущности project_2 должны вернуть 403 (Forbidden).
+    "
+"passed","Wed Aug 19 11:24:32 UTC 2026","Wed Aug 19 11:24:37 UTC 2026","5232","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[General] создание задачи без CF не генерирует CUSTOM_FIELD_CHANGED","
+    Проверяем что создание задачи без заполнения кастомных полей
+    не генерирует событий CUSTOM_FIELD_CHANGED.
+    CF-поле существует на борде, но значение не задано.
+    "
+"failed","Wed Aug 19 11:45:12 UTC 2026","Wed Aug 19 11:45:12 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Url] удаление ссылки (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при удалении ссылки.
+    Устанавливаем значение, затем очищаем (value="""").
+    Событие содержит isCleared=True и oldValueText с предыдущей ссылкой.
+    "
+"failed","Wed Aug 19 11:42:41 UTC 2026","Wed Aug 19 11:42:41 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","test_url_cf_set_event[Task]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при добавлении ссылки в Url поле.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    "
+"skipped","Wed Aug 19 11:23:34 UTC 2026","Wed Aug 19 11:23:36 UTC 2026","1252","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Space history: Milestone от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"passed","Wed Aug 19 11:26:12 UTC 2026","Wed Aug 19 11:26:17 UTC 2026","5604","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Estimation] установка значения (GetHistory kind=Project)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке Estimation поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся в формате ISO 8601 Duration (""P1W2DT3H"").
+    В valueText приходит человекочитаемый формат (""1w 2d 3h"").
+    "
+"passed","Wed Aug 19 11:23:59 UTC 2026","Wed Aug 19 11:24:05 UTC 2026","5823","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Boolean] переключение Off → On (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при переключении Checkbox поля Off → On.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    API тип поля ""Checkbox"" (в UI — Boolean). По умолчанию Off.
+    При установке value=True переключается в On. В valueText приходит ""On"".
+    "
+"passed","Wed Aug 19 11:23:25 UTC 2026","Wed Aug 19 11:23:27 UTC 2026","1440","History Service","GetHistory Access","Cross access: Cross board — прямой доступ → 403","","","GetHistory: member_client → Задача на приватной борде → 403 (Forbidden)","
+    Кросс-борд изоляция: member_client имеет доступ к main_project,
+    но НЕ к приватной борде (temp_board_in_main), созданной owner_client.
+    Задачи и майлстоуны на этой борде недоступны → 403 (Forbidden).
+    "
+"passed","Wed Aug 19 11:27:42 UTC 2026","Wed Aug 19 11:27:47 UTC 2026","5475","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Number] установка значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Number кастомного поля.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как строка (""42""), в data приходит в valueText.
+    "
+"failed","Wed Aug 19 11:43:56 UTC 2026","Wed Aug 19 11:43:56 UTC 2026","0","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","test_url_cf_set_event[Space]","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при добавлении ссылки в Url поле.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    "
+"passed","Wed Aug 19 11:27:04 UTC 2026","Wed Aug 19 11:27:10 UTC 2026","6046","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Member] назначение мембера (GetHistory kind=Space)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при назначении мембера в Member поле.
+    Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
+    Значение передаётся как массив member ID: [member_id].
+    В valueText приходит fullName мембера, в memberIds — массив назначенных ID.
+    "
+"passed","Wed Aug 19 11:28:20 UTC 2026","Wed Aug 19 11:28:31 UTC 2026","10787","History Service","Task History","CUSTOM_FIELD_CHANGED events (APP-3813)","","","[Number] очистка значения (GetHistory kind=Task)","
+    Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке значения Number поля.
+    После установки значения ожидаем записи события, затем очищаем поле и проверяем,
+    что записалось новое событие с isCleared=True, а oldValueText содержит предыдущее значение.
+    "
+"skipped","Wed Aug 19 11:23:33 UTC 2026","Wed Aug 19 11:23:34 UTC 2026","1584","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Project history: Task от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
+"skipped","Wed Aug 19 11:23:36 UTC 2026","Wed Aug 19 11:23:37 UTC 2026","1214","History Service","GetHistory Access","Cross access: Cross board history — утечка через Space/Project history","","","Project history: Milestone от приватной борды НЕ видны member_client","
+    member_client имеет доступ к main_project, но НЕ к temp_board_in_main.
+    Создаём сущность (Task/Milestone) на приватной борде или используем
+    существующую борду и проверяем:
+    - owner видит событие в Space/Project history
+    - member НЕ видит событие в Space/Project history
+    "
