@@ -9,7 +9,7 @@ from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
 _RETRYABLE_ERRORS = ("AccessDenied", "MemberDidNotFound")
 
 
-def _create_custom_field_with_retry(client, board_id, space_id, name, cf_type, retries=5, delay=2):
+def _create_custom_field_with_retry(client, board_id, space_id, name, cf_type, retries=10, delay=3):
     """Создаёт кастомное поле с ретраем на AccessDenied/MemberDidNotFound.
     В CI права могут быть ещё не проиндексированы сразу после создания борды."""
     for attempt in range(retries):
@@ -125,7 +125,7 @@ def select_custom_field(main_client, space_for_history, board_for_history):
         {"_id": opt_c, "title": "Gamma", "color": "green"},
     ]
     with allure.step(f"Setup: создаём Select custom field '{field_name}' с 3 опциями"):
-        for attempt in range(5):
+        for attempt in range(10):
             resp = main_client.post(**create_board_custom_field_endpoint(
                 board_id=board_id, space_id=space_id, name=field_name, type="Select",
                 options=options,
@@ -133,8 +133,8 @@ def select_custom_field(main_client, space_for_history, board_for_history):
             if resp.status_code == 200:
                 break
             error_code = resp.json().get("error", {}).get("code", "")
-            if error_code in _RETRYABLE_ERRORS and attempt < 4:
-                time.sleep(2)
+            if error_code in _RETRYABLE_ERRORS and attempt < 9:
+                time.sleep(3)
                 continue
             break
         assert resp.status_code == 200, f"Setup: не удалось создать custom field: {resp.text}"

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 import allure
 import pytest
@@ -17,7 +18,7 @@ _TASK_NAME = "Temp task for history events"
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
-def test_text_cf_set_event(main_client, space_for_history, project_for_history, temp_task, text_custom_field, kind):
+def test_text_cf_set_event(main_client, space_for_history, project_for_history, temp_task, text_custom_field, history_members, kind):
     """
     Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Text кастомного поля.
     Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
@@ -71,6 +72,16 @@ def test_text_cf_set_event(main_client, space_for_history, project_for_history, 
         assert data["_id"] == task_id, f"Неверный _id задачи: {data['_id']}"
         assert data["name"] == _TASK_NAME, f"Неверный name задачи: {data['name']}"
         assert isinstance(data.get("hrid"), str) and data["hrid"], "hrid должен быть непустой строкой"
+
+    with allure.step("creatorId совпадает с текущим пользователем"):
+        assert event["creatorId"] in history_members["main"], \
+            f"creatorId={event['creatorId']} не в {history_members['main']}"
+
+    with allure.step("createdAt — недавний таймстамп (менее 60 секунд)"):
+        created_at = datetime.fromisoformat(event["createdAt"].replace("Z", "+00:00"))
+        now = datetime.now(timezone.utc)
+        diff = abs((now - created_at).total_seconds())
+        assert diff < 60, f"createdAt слишком далеко от текущего времени: {diff:.1f}с"
 
 
 @allure.parent_suite("History Service")

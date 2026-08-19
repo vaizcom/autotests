@@ -1,3 +1,5 @@
+import time
+
 import allure
 import pytest
 
@@ -8,6 +10,7 @@ from test_backend.data.endpoints.Task.task_endpoints import (
 from test_backend.data.endpoints.History.history_utils import (
     assert_get_history_event,
     assert_get_history_no_event,
+    assert_history_event_count,
 )
 
 pytestmark = [pytest.mark.backend]
@@ -147,3 +150,54 @@ def test_multiple_same_type_cf_distinguishable(
             f"Неверный valueText CF-1: {event_1['data']['valueText']}"
         assert event_2["data"]["valueText"] == "value from field 2", \
             f"Неверный valueText CF-2: {event_2['data']['valueText']}"
+
+
+@allure.parent_suite("History Service")
+@allure.suite("Task History")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
+@allure.title("[General] повторная установка того же значения не создаёт дубль события")
+def test_cf_changed_no_duplicate_on_same_value(
+    main_client, space_for_history, temp_task, text_custom_field,
+):
+    """
+    Устанавливаем Text CF = "idempotent value", ждём события.
+    Затем устанавливаем то же значение повторно.
+    Проверяем что второе событие НЕ появилось — количество CUSTOM_FIELD_CHANGED = 1.
+    """
+    space_id = space_for_history["space_id"]
+    task_id = temp_task
+    field_id = text_custom_field["field_id"]
+    value = "idempotent value"
+
+    with allure.step(f"Устанавливаем Text CF = '{value}'"):
+        resp = main_client.post(**edit_task_custom_field_endpoint(
+            space_id=space_id, task_id=task_id, field_id=field_id, value=value,
+        ))
+        assert resp.status_code == 200, f"Ошибка при установке CF: {resp.text}"
+
+    with allure.step("Ожидаем событие CUSTOM_FIELD_CHANGED"):
+        assert_get_history_event(
+            client=main_client,
+            space_id=space_id,
+            kind="Task",
+            kind_id=task_id,
+            expected_event_key="CUSTOM_FIELD_CHANGED",
+            expected_data={"_id": task_id, "fieldId": field_id, "isCleared": False},
+        )
+
+    with allure.step(f"Повторно устанавливаем то же значение '{value}'"):
+        resp = main_client.post(**edit_task_custom_field_endpoint(
+            space_id=space_id, task_id=task_id, field_id=field_id, value=value,
+        ))
+        assert resp.status_code == 200, f"Ошибка при повторной установке CF: {resp.text}"
+
+    with allure.step("Ждём 5 секунд и проверяем что событие не задублировалось"):
+        time.sleep(5)
+        assert_history_event_count(
+            client=main_client,
+            space_id=space_id,
+            kind="Task",
+            kind_id=task_id,
+            event_key="CUSTOM_FIELD_CHANGED",
+            expected_count=1,
+        )
