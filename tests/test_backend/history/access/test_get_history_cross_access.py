@@ -192,6 +192,7 @@ def test_history_hides_private_board_events(
             create_resp = owner_client.post(
                 **create_milestone_endpoint(
                     space_id=main_space, board=temp_board_in_main, name=entity_name,
+                    project=main_project,
                 )
             )
             assert create_resp.status_code == 200, f"Ошибка создания майлстоуна: {short_resp(create_resp)}"
@@ -266,10 +267,7 @@ def test_history_hides_private_board_events(
 @allure.sub_suite("Cross access: Cross project history — утечка через Space history")
 @pytest.mark.parametrize("entity", [
     "Task",
-    pytest.param("Milestone", marks=pytest.mark.xfail(
-        reason="BUG: Space history не фильтрует MILESTONE_CREATED по доступу к проекту",
-        strict=True,
-    )),
+    "Milestone",
     "Board",
     "Project",
 ], ids=["Task", "Milestone", "Board", "Project"])
@@ -311,6 +309,7 @@ def test_space_history_hides_other_project_events(
             create_resp = owner_client.post(
                 **create_milestone_endpoint(
                     space_id=main_space, board=temp_board_in_project_2, name=entity_name,
+                    project=temp_main_project_2,
                 )
             )
             assert create_resp.status_code == 200, f"Ошибка создания майлстоуна: {short_resp(create_resp)}"
