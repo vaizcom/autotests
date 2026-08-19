@@ -17,7 +17,7 @@ _TASK_NAME = "Temp task for history events"
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
-def test_custom_field_set_event(main_client, space_for_history, project_for_history, temp_task, text_custom_field, kind):
+def test_text_cf_set_event(main_client, space_for_history, project_for_history, temp_task, text_custom_field, kind):
     """
     Проверяем генерацию события CUSTOM_FIELD_CHANGED при установке значения Text кастомного поля.
     Проверяем через GetHistory с kind=Task, kind=Project и kind=Space.
@@ -77,7 +77,7 @@ def test_custom_field_set_event(main_client, space_for_history, project_for_hist
 @allure.suite("Task History")
 @allure.sub_suite("CUSTOM_FIELD_CHANGED events")
 @allure.title("[Text] изменение значения (GetHistory kind=Task)")
-def test_custom_field_change_event(main_client, space_for_history, temp_task, text_custom_field):
+def test_text_cf_change_event(main_client, space_for_history, temp_task, text_custom_field):
     """
     Проверяем генерацию события CUSTOM_FIELD_CHANGED при изменении значения Text поля.
     Устанавливаем первое значение, затем меняем на другое.
@@ -136,7 +136,7 @@ def test_custom_field_change_event(main_client, space_for_history, temp_task, te
 @allure.suite("Task History")
 @allure.sub_suite("CUSTOM_FIELD_CHANGED events")
 @allure.title("[Text] спецсимволы и emoji (GetHistory kind=Task)")
-def test_custom_field_special_chars_event(main_client, space_for_history, temp_task, text_custom_field):
+def test_text_cf_special_chars_event(main_client, space_for_history, temp_task, text_custom_field):
     """
     Проверяем что спецсимволы, HTML-сущности и emoji корректно сохраняются
     в valueText без экранирования и обрезки.
@@ -171,7 +171,7 @@ def test_custom_field_special_chars_event(main_client, space_for_history, temp_t
 @allure.suite("Task History")
 @allure.sub_suite("CUSTOM_FIELD_CHANGED events")
 @allure.title("[Text] очистка значения (GetHistory kind=Task)")
-def test_custom_field_clear_event(main_client, space_for_history, temp_task, text_custom_field):
+def test_text_cf_clear_event(main_client, space_for_history, temp_task, text_custom_field):
     """
     Проверяем генерацию события CUSTOM_FIELD_CHANGED при очистке значения Text поля.
     После установки значения ожидаем записи события, затем очищаем поле и проверяем,
