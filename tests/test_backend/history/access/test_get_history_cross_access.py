@@ -2,9 +2,12 @@ import allure
 import pytest
 
 from core.response_utils import short_resp
+from test_backend.data.endpoints.Board.board_endpoints import create_board_custom_field_endpoint
 from test_backend.data.endpoints.History.get_history_endpoint import get_history_endpoint
 from test_backend.data.endpoints.History.history_utils import assert_get_history_event
-from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import (
+    create_task_endpoint, delete_task_endpoint, edit_task_custom_field_endpoint,
+)
 from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint, archive_milestone_endpoint
 
 pytestmark = [pytest.mark.backend]
@@ -377,3 +380,99 @@ def test_space_history_hides_other_project_events(
         if cleanup:
             with allure.step(f"Teardown: удаляем {entity}"):
                 cleanup()
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 6. Кросс-борд утечка CUSTOM_FIELD_CHANGED: member_client имеет доступ
+#    к main_project, но НЕ к приватной борде. Событие CUSTOM_FIELD_CHANGED
+#    НЕ должно попадать в Space/Project history для member_client.
+# ──────────────────────────────────────────────────────────────────────────────
+
+@allure.parent_suite("History Service")
+@allure.suite("GetHistory Access")
+@allure.sub_suite("Cross access: CUSTOM_FIELD_CHANGED — утечка через Space/Project history")
+@pytest.mark.xfail(
+    reason="BUG: Space/Project history не фильтрует CUSTOM_FIELD_CHANGED по доступу к борде — "
+           "member_client видит события с приватной борды",
+    strict=True,
+)
+@pytest.mark.parametrize("kind, kind_id_fixture", [
+    ("Space",   "main_space"),
+    ("Project", "main_project"),
+], ids=["Space_history", "Project_history"])
+def test_history_hides_private_board_cf_changed_events(
+    owner_client, member_client, main_space, main_project,
+    temp_board_in_main, kind, kind_id_fixture, request,
+):
+    """
+    Owner создаёт CF на приватной борде, задаёт значение на задаче.
+    member_client (доступ к проекту, но НЕ к борде) не должен видеть
+    CUSTOM_FIELD_CHANGED в Space/Project history.
+    """
+    kind_id = request.getfixturevalue(kind_id_fixture)
+    allure.dynamic.title(
+        f"{kind} history: CUSTOM_FIELD_CHANGED от приватной борды НЕ виден member_client"
+    )
+
+    task_id = None
+    try:
+        with allure.step("Owner создаёт Text CF на приватной борде"):
+            cf_resp = owner_client.post(**create_board_custom_field_endpoint(
+                board_id=temp_board_in_main, space_id=main_space,
+                name=f"cf_leak_{kind.lower()}", type="Text",
+            ))
+            assert cf_resp.status_code == 200, f"Ошибка создания CF: {short_resp(cf_resp)}"
+            field_id = cf_resp.json()["payload"]["customField"]["_id"]
+
+        with allure.step("Owner создаёт задачу на приватной борде"):
+            task_resp = owner_client.post(**create_task_endpoint(
+                space_id=main_space, board=temp_board_in_main,
+                name="CF leak test task",
+            ))
+            assert task_resp.status_code == 200, f"Ошибка создания задачи: {short_resp(task_resp)}"
+            task_id = task_resp.json()["payload"]["task"]["_id"]
+
+        with allure.step("Owner устанавливает значение CF"):
+            edit_resp = owner_client.post(**edit_task_custom_field_endpoint(
+                space_id=main_space, task_id=task_id,
+                field_id=field_id, value="secret value",
+            ))
+            assert edit_resp.status_code == 200, f"Ошибка установки CF: {short_resp(edit_resp)}"
+
+        with allure.step("Owner видит CUSTOM_FIELD_CHANGED в истории"):
+            assert_get_history_event(
+                client=owner_client,
+                space_id=main_space,
+                kind=kind,
+                kind_id=kind_id,
+                expected_event_key="CUSTOM_FIELD_CHANGED",
+                expected_data={"_id": task_id, "fieldId": field_id},
+            )
+
+        with allure.step(f"member_client запрашивает {kind} history"):
+            resp = member_client.post(
+                **get_history_endpoint(
+                    space_id=main_space, kind=kind, kind_id=kind_id,
+                )
+            )
+            assert resp.status_code == 200, f"Ожидали 200: {short_resp(resp)}"
+
+        items = resp.json().get("payload", {}).get("items", [])
+
+        with allure.step("CUSTOM_FIELD_CHANGED от приватной борды отсутствует у member_client"):
+            leaked = [
+                item for item in items
+                if item.get("key") == "CUSTOM_FIELD_CHANGED"
+                and item.get("data", {}).get("_id") == task_id
+            ]
+            assert len(leaked) == 0, (
+                f"Утечка: CUSTOM_FIELD_CHANGED с task_id={task_id} видно member_client "
+                f"в {kind} history, хотя доступа к борде нет.\n"
+                f"Leaked events: {leaked}"
+            )
+    finally:
+        if task_id:
+            with allure.step("Teardown: удаляем задачу"):
+                owner_client.post(**delete_task_endpoint(
+                    space_id=main_space, task_id=task_id,
+                ))
