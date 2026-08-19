@@ -92,6 +92,22 @@ def member_custom_field(main_client, space_for_history, board_for_history):
 
 
 @pytest.fixture(scope="session")
+def estimation_custom_field(main_client, space_for_history, board_for_history):
+    """Estimation custom field на board_for_history для тестов CUSTOM_FIELD_CHANGED.
+    Значение — ISO 8601 Duration (например "P1W", "PT5H30M").
+    В valueText приходит человекочитаемый формат ("1w", "5h 30m")."""
+    space_id = space_for_history["space_id"]
+    board_id = board_for_history["board_id"]
+    field_name = "cf_history_estimation"
+    with allure.step(f"Setup: создаём Estimation custom field '{field_name}'"):
+        resp = _create_custom_field_with_retry(
+            main_client, board_id, space_id, field_name, "Estimation",
+        )
+        field_id = resp.json()["payload"]["customField"]["_id"]
+    yield {"field_id": field_id, "field_name": field_name}
+
+
+@pytest.fixture(scope="session")
 def number_custom_field(main_client, space_for_history, board_for_history):
     """Number custom field на board_for_history для тестов CUSTOM_FIELD_CHANGED.
     Создаёт определение поля на борде (без значения) — значение устанавливается
