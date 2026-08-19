@@ -28,7 +28,7 @@ def _expected_date_text(iso_str):
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
@@ -93,7 +93,7 @@ def test_date_cf_set_single_event(main_client, space_for_history, project_for_hi
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Date] изменение одиночной даты (GetHistory kind=Task)")
 def test_date_cf_change_single_event(main_client, space_for_history, temp_task, date_custom_field):
     """
@@ -168,7 +168,7 @@ def test_date_cf_change_single_event(main_client, space_for_history, temp_task, 
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Date] очистка одиночной даты (GetHistory kind=Task)")
 def test_date_cf_clear_single_event(main_client, space_for_history, temp_task, date_custom_field):
     """
@@ -241,7 +241,7 @@ def test_date_cf_clear_single_event(main_client, space_for_history, temp_task, d
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Date] установка диапазона дат (GetHistory kind=Task)")
 def test_date_cf_set_range_event(main_client, space_for_history, temp_task, date_custom_field):
     """
@@ -298,7 +298,7 @@ def test_date_cf_set_range_event(main_client, space_for_history, temp_task, date
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Date] изменение диапазона дат (GetHistory kind=Task)")
 def test_date_cf_change_range_event(main_client, space_for_history, temp_task, date_custom_field):
     """
@@ -381,7 +381,7 @@ def test_date_cf_change_range_event(main_client, space_for_history, temp_task, d
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Date] очистка диапазона дат (GetHistory kind=Task)")
 def test_date_cf_clear_range_event(main_client, space_for_history, temp_task, date_custom_field):
     """

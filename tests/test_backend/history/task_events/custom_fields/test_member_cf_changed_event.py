@@ -11,7 +11,7 @@ _TASK_NAME = "Temp task for history events"
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
@@ -74,7 +74,7 @@ def test_member_cf_set_event(main_client, space_for_history, project_for_history
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Member] назначение нескольких мемберов (GetHistory kind=Task)")
 def test_member_cf_set_multiple_event(main_client, space_for_history, temp_task, member_custom_field, history_members):
     """
@@ -130,7 +130,7 @@ def test_member_cf_set_multiple_event(main_client, space_for_history, temp_task,
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Member] смена мембера (GetHistory kind=Task)")
 def test_member_cf_change_event(main_client, space_for_history, temp_task, member_custom_field, history_members):
     """
@@ -202,7 +202,7 @@ def test_member_cf_change_event(main_client, space_for_history, temp_task, membe
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Member] очистка мембера (GetHistory kind=Task)")
 def test_member_cf_clear_event(main_client, space_for_history, temp_task, member_custom_field, history_members):
     """

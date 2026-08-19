@@ -14,7 +14,7 @@ _TASK_NAME = "Temp task for history events"
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
@@ -74,7 +74,7 @@ def test_url_cf_set_event(main_client, space_for_history, project_for_history, t
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Url] изменение ссылки (GetHistory kind=Task)")
 def test_url_cf_change_event(main_client, space_for_history, temp_task, url_custom_field):
     """
@@ -133,7 +133,7 @@ def test_url_cf_change_event(main_client, space_for_history, temp_task, url_cust
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Url] удаление ссылки (GetHistory kind=Task)")
 def test_url_cf_clear_event(main_client, space_for_history, temp_task, url_custom_field):
     """
@@ -196,7 +196,7 @@ def test_url_cf_clear_event(main_client, space_for_history, temp_task, url_custo
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Url] ссылка с query params и спецсимволами (GetHistory kind=Task)")
 def test_url_cf_special_chars_event(main_client, space_for_history, temp_task, url_custom_field):
     """

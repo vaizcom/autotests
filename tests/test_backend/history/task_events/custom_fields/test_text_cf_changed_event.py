@@ -13,7 +13,7 @@ _TASK_NAME = "Temp task for history events"
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
@@ -75,7 +75,7 @@ def test_text_cf_set_event(main_client, space_for_history, project_for_history, 
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Text] изменение значения (GetHistory kind=Task)")
 def test_text_cf_change_event(main_client, space_for_history, temp_task, text_custom_field):
     """
@@ -134,7 +134,7 @@ def test_text_cf_change_event(main_client, space_for_history, temp_task, text_cu
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Text] спецсимволы и emoji (GetHistory kind=Task)")
 def test_text_cf_special_chars_event(main_client, space_for_history, temp_task, text_custom_field):
     """
@@ -169,7 +169,7 @@ def test_text_cf_special_chars_event(main_client, space_for_history, temp_task, 
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Text] очистка значения (GetHistory kind=Task)")
 def test_text_cf_clear_event(main_client, space_for_history, temp_task, text_custom_field):
     """

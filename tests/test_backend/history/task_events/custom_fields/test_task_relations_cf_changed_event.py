@@ -17,7 +17,7 @@ _TASK_NAME = "Temp task for history events"
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
@@ -79,7 +79,7 @@ def test_task_relations_cf_set_event(main_client, space_for_history, project_for
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[TaskRelations] замена связанной задачи (GetHistory kind=Task)")
 def test_task_relations_cf_change_event(main_client, space_for_history, temp_task, task_relations_custom_field, linked_tasks):
     """
@@ -138,7 +138,7 @@ def test_task_relations_cf_change_event(main_client, space_for_history, temp_tas
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[TaskRelations] удаление связанной задачи (GetHistory kind=Task)")
 def test_task_relations_cf_clear_event(main_client, space_for_history, temp_task, task_relations_custom_field, linked_tasks):
     """
@@ -202,7 +202,7 @@ def test_task_relations_cf_clear_event(main_client, space_for_history, temp_task
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[TaskRelations] событие сохраняется после удаления связанной задачи")
 def test_task_relations_cf_event_persists_after_deletion(main_client, space_for_history, temp_task, task_relations_custom_field, linked_tasks):
     """

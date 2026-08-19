@@ -15,7 +15,7 @@ _TASK_NAME = "Temp task for history events"
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
@@ -77,7 +77,7 @@ def test_select_cf_set_single_event(main_client, space_for_history, project_for_
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Select] изменение одного option на другой (GetHistory kind=Task)")
 def test_select_cf_change_single_event(main_client, space_for_history, temp_task, select_custom_field):
     """
@@ -138,7 +138,7 @@ def test_select_cf_change_single_event(main_client, space_for_history, temp_task
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Select] очистка выбранного option (GetHistory kind=Task)")
 def test_select_cf_clear_event(main_client, space_for_history, temp_task, select_custom_field):
     """
@@ -202,7 +202,7 @@ def test_select_cf_clear_event(main_client, space_for_history, temp_task, select
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Select] выбор нескольких значений (GetHistory kind=Task)")
 def test_select_cf_set_multiple_event(main_client, space_for_history, temp_task, select_custom_field):
     """
@@ -247,7 +247,7 @@ def test_select_cf_set_multiple_event(main_client, space_for_history, temp_task,
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Select] изменение одного значения на несколько (GetHistory kind=Task)")
 def test_select_cf_single_to_multiple_event(main_client, space_for_history, temp_task, select_custom_field):
     """
@@ -306,7 +306,7 @@ def test_select_cf_single_to_multiple_event(main_client, space_for_history, temp
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Select] изменение нескольких значений на одно (GetHistory kind=Task)")
 def test_select_cf_multiple_to_single_event(main_client, space_for_history, temp_task, select_custom_field):
     """
@@ -369,7 +369,7 @@ def test_select_cf_multiple_to_single_event(main_client, space_for_history, temp
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Select] переименование option: старое событие хранит 'Alpha', новое — 'AlphaRenamed'")
 def test_select_cf_rename_option_history(main_client, space_for_history, board_for_history, temp_task, select_custom_field):
     """

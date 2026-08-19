@@ -11,7 +11,7 @@ _TASK_NAME = "Temp task for history events"
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @pytest.mark.parametrize("kind",
     ["Task", "Project", "Space"],
     ids=["Task", "Project", "Space"])
@@ -72,7 +72,7 @@ def test_boolean_cf_toggle_on_event(main_client, space_for_history, project_for_
 
 @allure.parent_suite("History Service")
 @allure.suite("Task History")
-@allure.sub_suite("CUSTOM_FIELD_CHANGED events")
+@allure.sub_suite("CUSTOM_FIELD_CHANGED events (APP-3813)")
 @allure.title("[Boolean] переключение On → Off (GetHistory kind=Task)")
 def test_boolean_cf_toggle_off_event(main_client, space_for_history, temp_task, boolean_custom_field):
     """
