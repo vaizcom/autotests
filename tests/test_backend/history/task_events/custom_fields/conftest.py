@@ -204,6 +204,20 @@ def linked_tasks(main_client, space_for_history, board_for_history):
 
 
 @pytest.fixture(scope="session")
+def text_custom_field_2(main_client, space_for_history, board_for_history):
+    """Второй Text CF на board_for_history — для теста различимости одинаковых типов."""
+    space_id = space_for_history["space_id"]
+    board_id = board_for_history["board_id"]
+    field_name = "cf_history_text_2"
+    with allure.step(f"Setup: создаём второй Text custom field '{field_name}'"):
+        resp = _create_custom_field_with_retry(
+            main_client, board_id, space_id, field_name, "Text",
+        )
+        field_id = resp.json()["payload"]["customField"]["_id"]
+    yield {"field_id": field_id, "field_name": field_name}
+
+
+@pytest.fixture(scope="session")
 def number_custom_field(main_client, space_for_history, board_for_history):
     """Number custom field на board_for_history для тестов CUSTOM_FIELD_CHANGED.
     Создаёт определение поля на борде (без значения) — значение устанавливается
