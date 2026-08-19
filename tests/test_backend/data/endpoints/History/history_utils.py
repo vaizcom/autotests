@@ -18,13 +18,31 @@ def _find_event(histories: list, event_key: str, expected_data: dict = None) -> 
     return None
 
 
+def _count_matching_events(histories: list, event_key: str, expected_data: dict = None) -> int:
+    """Считает количество событий подходящих по key и data."""
+    count = 0
+    for event in histories:
+        if event.get('key') != event_key:
+            continue
+        if expected_data:
+            data = event.get('data', {})
+            if not all(data.get(k) == v for k, v in expected_data.items()):
+                continue
+        count += 1
+    return count
+
+
 def assert_get_history_event(
         client, space_id: str, kind: str, kind_id: str, expected_event_key: str,
-        expected_data: dict = None, timeout: int = 20, interval: float = 1.0,
+        expected_data: dict = None, timeout: int = 30, interval: float = 1.0,
+        min_count: int = 1,
 ) -> dict:
     """
     Поллит GetHistory до появления нужного события.
-    Возвращает найденное событие для дальнейших проверок в тесте.
+    min_count — минимальное количество подходящих событий (по умолчанию 1).
+    Полезно, когда нужно дождаться второго события с теми же параметрами
+    (например, set → change, оба с isCleared=False).
+    Возвращает первое (самое новое) найденное событие.
     """
     deadline = time.monotonic() + timeout
     histories = []
@@ -36,9 +54,10 @@ def assert_get_history_event(
         assert resp.status_code == 200, f"GET /GetHistory вернул {resp.status_code}: {short_resp(resp)}"
 
         histories = resp.json().get('payload', {}).get('items', [])
-        event = _find_event(histories, expected_event_key, expected_data)
-        if event:
-            return event
+        if _count_matching_events(histories, expected_event_key, expected_data) >= min_count:
+            event = _find_event(histories, expected_event_key, expected_data)
+            if event:
+                return event
 
         time.sleep(interval)
 

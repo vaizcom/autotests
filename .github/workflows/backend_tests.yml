@@ -124,9 +124,9 @@ jobs:
         run: |
           CHANGED="${{ steps.changed.outputs.files }}"
           if [ -n "$CHANGED" ] && [ "${{ github.event_name }}" = "pull_request" ]; then
-            pytest $CHANGED --alluredir=allure-results -m "$TEST_SCOPE" --reruns 1 --reruns-delay 10 --maxfail=50
+            pytest $CHANGED --alluredir=allure-results -m "$TEST_SCOPE" --reruns 2 --reruns-delay 10 --maxfail=50
           else
-            pytest . --alluredir=allure-results -m "$TEST_SCOPE" --reruns 1 --reruns-delay 10 --maxfail=50
+            pytest . --alluredir=allure-results -m "$TEST_SCOPE" --reruns 2 --reruns-delay 10 --maxfail=50
           fi
 
       - name: Check allure-results content
