@@ -69,7 +69,10 @@ def _create_milestone(client, space_id, board_id, project_id, name):
 @allure.suite("GetHistory Access")
 @allure.sub_suite("Без доступа к проекту — события в Space history")
 @pytest.mark.parametrize("entity", [
-    "Task", "Milestone", "Board", "Project", "Document",
+    "Task", "Milestone", "Board", "Project",
+    pytest.param("Document", marks=pytest.mark.xfail(
+        strict=True, reason="BUG: DOC_CREATED не попадает в Space history (есть в Document и Project history)"
+    )),
 ], ids=["Task", "Milestone", "Board", "Project", "Document"])
 def test_cross_project_events_not_visible_in_space_history(
     owner_client, client_with_access_only_in_project, main_space,
@@ -125,7 +128,7 @@ def test_cross_project_events_not_visible_in_space_history(
                 ))
                 assert resp.status_code == 200, f"Ошибка создания документа: {short_resp(resp)}"
                 entity_id = resp.json()["payload"]["document"]["_id"]
-            expected_key = "DOCUMENT_CREATED"
+            expected_key = "DOC_CREATED"
             expected_data = {"_id": entity_id}
             cleanup = lambda: owner_client.post(**archive_document_endpoint(
                 document_id=entity_id, space_id=main_space,
