@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
-@allure.sub_suite("Access matrix: Space level")
+@allure.sub_suite("Access matrix")
 @pytest.mark.parametrize("kind,kind_id_fixture,entity,expected_status", [
     ("Space",     "main_space",                   "Space",             200),
     ("Document",  "main_space_doc",               "Space document",    200),
@@ -39,7 +39,8 @@ def test_get_history_space_only_access(
     if isinstance(kind_id, list):
         kind_id = kind_id[0]
 
-    allure.dynamic.title(f"GetHistory: space_only, {entity} → {expected_status} ({'OK' if expected_status == 200 else 'Forbidden'})")
+    sees = "видит" if expected_status == 200 else "не видит"
+    allure.dynamic.title(f"Клиент с доступом к Space: {sees} {entity} → {expected_status}")
 
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) от имени space_only client"):
         resp = client.post(
@@ -58,7 +59,7 @@ def test_get_history_space_only_access(
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
-@allure.sub_suite("Access matrix: Project level")
+@allure.sub_suite("Access matrix")
 @pytest.mark.parametrize("kind,kind_id_fixture,entity,expected_status", [
     ("Space",     "main_space",                   "Space",             200),
     ("Document",  "main_space_doc",               "Space document",    200),
@@ -85,7 +86,8 @@ def test_get_history_project_only_access(
     if isinstance(kind_id, list):
         kind_id = kind_id[0]
 
-    allure.dynamic.title(f"GetHistory: project_only, {entity} → {expected_status} ({'OK' if expected_status == 200 else 'Forbidden'})")
+    sees = "видит" if expected_status == 200 else "не видит"
+    allure.dynamic.title(f"Клиент с доступом к Project: {sees} {entity} → {expected_status}")
 
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) от имени project_only client"):
         resp = client.post(
@@ -104,7 +106,7 @@ def test_get_history_project_only_access(
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
-@allure.sub_suite("Access matrix: Personal document")
+@allure.sub_suite("Access matrix")
 @pytest.mark.parametrize("client_fixture,expected_status", [
     ("main_client",    200),
     ("owner_client",   403),
@@ -123,7 +125,8 @@ def test_get_history_personal_doc_access(
     client = request.getfixturevalue(client_fixture)
     kind_id = request.getfixturevalue("main_personal_doc")
 
-    allure.dynamic.title(f"GetHistory: {client_fixture}, Personal document → {expected_status} ({'OK' if expected_status == 200 else 'Forbidden'})")
+    sees = "видит" if expected_status == 200 else "не видит"
+    allure.dynamic.title(f"Персональный документ: {client_fixture} {sees} → {expected_status}")
 
     with allure.step(f"Отправляем POST /GetHistory: kind='Document' (Personal document) от имени {client_fixture}"):
         resp = client.post(
