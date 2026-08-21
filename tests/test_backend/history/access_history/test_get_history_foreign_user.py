@@ -29,6 +29,9 @@ def test_get_history_foreign_user(request, foreign_client, main_space, kind, kin
 
     allure.dynamic.title(f"Пользователь без доступа: {kind} → 400")
 
+    with allure.step("Участник: foreign_client (не является участником спейса)"):
+        pass
+
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' от имени foreign_client"):
         resp = foreign_client.post(
             path="/GetHistory",
@@ -50,6 +53,9 @@ def test_cross_space_direct_access_denied(main_client, main_space, foreign_space
     Запрос истории foreign_space → 403.
     """
     allure.dynamic.title("Запрос к спейсу без доступа → 403")
+
+    with allure.step("Участник: main_client (main_space — да, foreign_space — нет)"):
+        pass
 
     with allure.step("main_client запрашивает GetHistory kind='Space' для foreign_space"):
         resp = main_client.post(

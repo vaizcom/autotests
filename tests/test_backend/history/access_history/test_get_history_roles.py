@@ -35,6 +35,9 @@ def test_get_history_roles_with_access(
 
     allure.dynamic.title(f"{client_fixture}: доступ к {entity} → 200")
 
+    with allure.step(f"Участник: {client_fixture} (полный доступ к спейсу, проекту и борде)"):
+        pass
+
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) от имени {client_fixture}"):
         resp = client.post(
             path="/GetHistory",

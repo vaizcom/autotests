@@ -107,6 +107,9 @@ def test_cross_board_filter_bypass_denied(
         f"[APP-5921] {kind} history: фильтр boardIds с приватной бордой → 403"
     )
 
+    with allure.step("Участники: owner (полный доступ), member (проект — да, приватная борда — нет)"):
+        pass
+
     with allure.step("Precondition: owner видит события борды"):
         assert_get_history_event(
             client=owner_client,
@@ -160,6 +163,9 @@ def test_cross_board_events_not_visible(
     allure.dynamic.title(
         f"[APP-5921] {kind} history: событие {entity} с приватной борды не отображается"
     )
+
+    with allure.step("Участники: owner (полный доступ), member (проект — да, приватная борда — нет)"):
+        pass
 
     entity_id = None
     cleanup = None
@@ -280,6 +286,9 @@ def test_cross_board_access_revoke_and_restore(
     allure.dynamic.title(
         "[APP-5921] Space history: выдали доступ → видит, забрали → не видит, вернули → видит"
     )
+
+    with allure.step("Участники: owner (полный доступ), member (проект — да, борда — доступ меняется в ходе теста)"):
+        pass
 
     member_id = main_personal["member"][0]
     group_id = None

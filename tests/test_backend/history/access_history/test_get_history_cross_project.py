@@ -87,6 +87,9 @@ def test_cross_project_events_not_visible_in_space_history(
         f"Space history: событие {entity} из проекта без доступа не отображается"
     )
 
+    with allure.step("Участники: owner (полный доступ), project_client (project_1 — да, project_2 — нет)"):
+        pass
+
     entity_id = None
     cleanup = None
 

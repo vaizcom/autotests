@@ -42,6 +42,9 @@ def test_get_history_space_only_access(
     sees = "видит" if expected_status == 200 else "не видит"
     allure.dynamic.title(f"Клиент с доступом к Space: {sees} {entity} → {expected_status}")
 
+    with allure.step("Участник: space_only_client (спейс — да, проект — нет, борда — нет)"):
+        pass
+
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) от имени space_only client"):
         resp = client.post(
             path="/GetHistory",
@@ -89,6 +92,9 @@ def test_get_history_project_only_access(
     sees = "видит" if expected_status == 200 else "не видит"
     allure.dynamic.title(f"Клиент с доступом к Project: {sees} {entity} → {expected_status}")
 
+    with allure.step("Участник: project_only_client (спейс — да, проект — да, борда — нет)"):
+        pass
+
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) от имени project_only client"):
         resp = client.post(
             path="/GetHistory",
@@ -127,6 +133,9 @@ def test_get_history_personal_doc_access(
 
     sees = "видит" if expected_status == 200 else "не видит"
     allure.dynamic.title(f"Персональный документ: {client_fixture} {sees} → {expected_status}")
+
+    with allure.step(f"Участники: main_client (владелец документа), {client_fixture} (проверяемый)"):
+        pass
 
     with allure.step(f"Отправляем POST /GetHistory: kind='Document' (Personal document) от имени {client_fixture}"):
         resp = client.post(
