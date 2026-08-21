@@ -51,7 +51,7 @@ def test_access_group_rights_updated_event(
     }
     kind_id, kind_name = kind_map[rights_kind]
 
-    with allure.step("Создаём группу доступа"):
+    with allure.step("Создаём группу доступа (по дефолту уровень Guest)"):
         group_id, group_name = _create_group(
             main_client, space_id, name=f"rights_{rights_kind.lower()}_{uuid.uuid4().hex[:6]}",
         )

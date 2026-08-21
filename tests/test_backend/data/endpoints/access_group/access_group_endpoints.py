@@ -13,7 +13,21 @@ def get_access_group_endpoint(space_id: str, group_id: str):
 
 def get_access_groups_endpoint(space_id: str):
     """
-    Получение информации о группах доступа (GetAccessGroupsInputDto).
+    Получение всех групп доступа в спейсе (GetAccessGroupsInputDto).
+
+    Возвращает список всех accessGroup в спейсе. Бывают двух видов:
+      - Кастомные группы — созданные вручную через CreateAccessGroup.
+      - Персональные (selfAccessGroup) — создаются автоматически при
+        добавлении участника в спейс, по одной на каждого мембера.
+        В поле members такой группы — ровно один участник.
+
+    Флоу смены прав конкретного участника:
+      1. Вызвать GetAccessGroups → найти группу где members == [member_id]
+      2. Взять _id этой группы (это groupId)
+      3. Вызвать UpdateAccessGroupRights(groupId, kind, kindId, level)
+
+    Ответ: payload.accessGroups — список dict с полями:
+      _id, members, spaceAccesses, projectAccesses, boardAccesses, ...
     """
     return {
         "path": "/GetAccessGroups",
@@ -80,8 +94,15 @@ def update_access_group_endpoint(space_id: str, group_id: str, name: str = None,
 def update_access_group_rights_endpoint(space_id: str, group_id: str, kind: str, kind_id: str, level: str):
     """
     Обновление прав группы доступа на сущность (UpdateAccessGroupRightsInputDto).
+
+    Работает и с кастомными группами, и с персональными selfAccessGroup.
     kind: 'Space' | 'Project' | 'Board'
-    level: EAccessLevel ('Member', 'Manager', 'Owner', 'Guest', ...)
+    level: EAccessLevel ('Member', 'Manager', 'Owner', 'Guest', 'NoAccess')
+
+    Ограничения для selfAccessGroup:
+      - Нельзя менять права своей группы (OwnAccessChangeNotAllowed)
+      - Нельзя менять права создателя спейса (CreatorAccessChangeNotAllowed)
+      - Нельзя менять права Owner-уровня (GrandAccessChangeNotAllowed)
     """
     return {
         "path": "/UpdateAccessGroupRights",
