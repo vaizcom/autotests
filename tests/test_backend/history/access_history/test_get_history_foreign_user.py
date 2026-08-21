@@ -57,7 +57,7 @@ def test_cross_space_direct_access_denied(main_client, main_space, foreign_space
     with allure.step("Участник: main_client (main_space — да, foreign_space — нет)"):
         pass
 
-    with allure.step("main_client запрашивает GetHistory kind='Space' для foreign_space"):
+    with allure.step("main_client запрашивает GetHistory kind='Space' для foreign_space → 403"):
         resp = main_client.post(
             **get_history_endpoint(space_id=main_space, kind="Space", kind_id=foreign_space)
         )

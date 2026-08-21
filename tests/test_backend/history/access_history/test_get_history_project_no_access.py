@@ -1,5 +1,5 @@
 """
-Cross-project: security-проверки доступа к истории чужого проекта.
+Без доступа к проекту: security-проверки доступа к истории проекта без доступа.
 
 Условия: project_client имеет доступ к проекту_1, но НЕ к проекту_2.
 
@@ -71,7 +71,11 @@ def _create_milestone(client, space_id, board_id, project_id, name):
 @pytest.mark.parametrize("entity", [
     "Task", "Milestone", "Board", "Project",
     pytest.param("Document", marks=pytest.mark.xfail(
-        strict=True, reason="BUG: DOC_CREATED не попадает в Space history (есть в Document и Project history)"
+        strict=True,
+        reason="APP-5992: DOC_CREATED не записывается в Space history при создании документа в проекте "
+               "даже для пользователя с полным доступом. "
+               "Событие корректно пишется в Document и Project history. "
+               "После фикса тест станет XPASS — снять xfail."
     )),
 ], ids=["Task", "Milestone", "Board", "Project", "Document"])
 def test_cross_project_events_not_visible_in_space_history(
@@ -143,7 +147,7 @@ def test_cross_project_events_not_visible_in_space_history(
             expected_data = {"_id": entity_id}
 
         if entity in ("Task", "Milestone", "Project", "Document"):
-            with allure.step(f"Precondition: project_client НЕ имеет прямого доступа к {entity}"):
+            with allure.step(f"Precondition: project_client НЕ имеет прямого доступа к {entity} → 403"):
                 pre_resp = client_with_access_only_in_project.post(
                     **get_history_endpoint(space_id=main_space, kind=entity, kind_id=entity_id)
                 )
@@ -162,7 +166,7 @@ def test_cross_project_events_not_visible_in_space_history(
                 expected_data=expected_data,
             )
 
-        with allure.step("project_client запрашивает Space history"):
+        with allure.step("project_client запрашивает Space history → 200"):
             resp = client_with_access_only_in_project.post(
                 **get_history_endpoint(space_id=main_space, kind="Space", kind_id=main_space)
             )
