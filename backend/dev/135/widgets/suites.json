@@ -1,0 +1,1 @@
+{"total":2,"items":[{"uid":"504da7475e43cc20ed8009898fe7d0d2","name":"History Service","statistic":{"failed":0,"broken":0,"skipped":1,"passed":67,"unknown":0,"total":68}},{"uid":"18db606d8356541891d7a7854a05a74b","name":"Invite Service","statistic":{"failed":0,"broken":0,"skipped":0,"passed":13,"unknown":0,"total":13}}]}
