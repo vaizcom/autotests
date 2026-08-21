@@ -2,7 +2,7 @@ import allure
 import pytest
 
 from config.generators import generate_email
-from test_backend.data.endpoints.access_group.access_group_helpers import wait_for_member_access_group
+from test_backend.data.endpoints.access_group.access_group_helpers import get_member_access_group
 from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, remove_invite_endpoint
 
@@ -49,7 +49,7 @@ def test_invite_to_space_with_optional_params(second_main_client, second_space_i
         )
 
     with allure.step("Ожидание появления пользователя в списке групп доступа"):
-        target_group = wait_for_member_access_group(second_main_client, second_space_id, member_id)
+        target_group = get_member_access_group(second_main_client, second_space_id, member_id)
 
     with allure.step("Проверка сохранения необязательных параметров"):
         project_accesses = target_group.get("projectAccesses", {})
@@ -100,7 +100,7 @@ def test_invite_to_space_with_access_group(second_main_client, second_space_id, 
         )
 
     with allure.step("Ожидание добавления пользователя в целевую группу доступа"):
-        target_group = wait_for_member_access_group(
+        target_group = get_member_access_group(
             second_main_client, second_space_id, member_id, group_id=second_group_id
         )
 

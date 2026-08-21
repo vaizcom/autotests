@@ -21,7 +21,16 @@ def _create_group(client, space_id: str, name: str = None) -> tuple:
         description="history event test group",
     ))
     assert resp.status_code == 200, f"Ошибка создания группы: {resp.text}"
-    group_id = resp.json()["payload"]["accessGroup"]["_id"]
+    group = resp.json()["payload"]["accessGroup"]
+    group_id = group["_id"]
+
+    # По дефолту новая группа создаётся с уровнем Guest на спейс
+    space_accesses = group.get("spaceAccesses", {})
+    default_level = next(iter(space_accesses.values()), None) if space_accesses else None
+    assert default_level == "Guest", (
+        f"Дефолтный уровень новой группы изменился: ожидали Guest, получили {default_level}"
+    )
+
     return group_id, name
 
 
@@ -51,7 +60,7 @@ def test_access_group_rights_updated_event(
     }
     kind_id, kind_name = kind_map[rights_kind]
 
-    with allure.step("Создаём группу доступа"):
+    with allure.step("Создаём группу доступа (по дефолту уровень Guest)"):
         group_id, group_name = _create_group(
             main_client, space_id, name=f"rights_{rights_kind.lower()}_{uuid.uuid4().hex[:6]}",
         )

@@ -2,15 +2,17 @@ import pytest
 
 from config.generators import generate_date
 from core.response_utils import short_resp
+from test_backend.data.endpoints.access_group.access_group_endpoints import (
+    update_access_group_rights_endpoint,
+)
+from test_backend.data.endpoints.access_group.access_group_helpers import (
+    get_member_access_group,
+)
 from test_backend.data.endpoints.Board.board_endpoints import (
     get_boards_endpoint,
     delete_board_endpoint,
 )
 from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS, typesList
-from test_backend.data.endpoints.Document.document_endpoints import (
-    create_document_endpoint,
-    archive_document_endpoint,
-)
 from test_backend.data.endpoints.Project.project_endpoints import create_board_endpoint
 from test_backend.data.endpoints.Task.task_endpoints import (
     create_task_endpoint,
@@ -119,48 +121,43 @@ def temp_milestone_in_project_2(owner_client, main_space, temp_board_in_project_
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Документы в project_2 (для кросс-проект изоляции)
-# Спейс-док и персональный спейс-док уже покрыты в test_get_history_access_matrix
+# Задача на приватной борде (для dynamic_access теста)
 # ──────────────────────────────────────────────────────────────────────────────
 
-def _create_doc(client, kind, kind_id, space_id):
-    """Создаёт документ и возвращает ID."""
-    resp = client.post(**create_document_endpoint(kind=kind, kind_id=kind_id, space_id=space_id))
-    assert resp.status_code == 200, f"Ошибка создания документа (kind={kind}): {short_resp(resp)}"
-    return resp.json()["payload"]["document"]["_id"]
-
-
-def _archive_doc(client, doc_id, space_id):
-    """Архивирует документ (teardown)."""
-    resp = client.post(**archive_document_endpoint(document_id=doc_id, space_id=space_id))
-    if resp.status_code not in (200, 400, 404):
-        pytest.fail(f"Ошибка архивации документа: {short_resp(resp)}")
-
-
 @pytest.fixture
-def isolation_project_2_doc(owner_client, main_space, temp_main_project_2):
-    """Проджект-документ project_2: CreateDocument(kind='Project', kindId=temp_main_project_2)."""
-    doc_id = _create_doc(owner_client, "Project", temp_main_project_2, main_space)
-    yield doc_id
-    _archive_doc(owner_client, doc_id, main_space)
+def temp_task_on_private_board(owner_client, main_space, temp_board_in_main):
+    """Временная задача на приватной борде для теста динамического доступа."""
+    resp = owner_client.post(**create_task_endpoint(
+        space_id=main_space,
+        board=temp_board_in_main,
+        name="Task for dynamic access test",
+    ))
+    assert resp.status_code == 200, f"Ошибка создания задачи: {short_resp(resp)}"
+    task_id = resp.json()["payload"]["task"]["_id"]
+
+    yield task_id
+
+    del_resp = owner_client.post(**delete_task_endpoint(space_id=main_space, task_id=task_id))
+    if del_resp.status_code not in (200, 400, 404):
+        pytest.fail(f"Ошибка удаления задачи: {short_resp(del_resp)}")
 
 
-@pytest.fixture
-def isolation_project_2_member_doc(owner_client, main_space, main_personal):
-    """Персональный проджект-документ owner-а: CreateDocument(kind='Member', kindId=owner_member_id).
-    Перестраховка: вдруг бэкенд различает персональные доки по контексту проекта."""
-    owner_member_id = main_personal["owner"][0]
-    doc_id = _create_doc(owner_client, "Member", owner_member_id, main_space)
-    yield doc_id
-    _archive_doc(owner_client, doc_id, main_space)
+# ──────────────────────────────────────────────────────────────────────────────
+# Персональная access group member (для dynamic_access тестов)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@pytest.fixture(scope="session")
+def member_access_group_id(owner_client, main_space, main_personal):
+    """Возвращает groupId персональной (selfAccessGroup) member в main_space.
+
+    Каждый участник спейса имеет свою selfAccessGroup с уникальным groupId.
+    Через UpdateAccessGroupRights на этой группе можно выдавать/отзывать
+    доступ member к бордам и проектам без создания дополнительных групп.
+    """
+    member_id = main_personal["member"][0]
+    group = get_member_access_group(
+        client=owner_client, space_id=main_space, member_id=member_id,
+    )
+    return group["_id"]
 
 
-@pytest.fixture
-def isolation_space_member_doc(owner_client, main_space, main_personal):
-    """Персональный спейс-документ owner-а: CreateDocument(kind='Member', kindId=owner_member_id).
-    API-вызов идентичен isolation_project_2_member_doc, но проверяем отдельно
-    на случай различий в access check для спейс- vs проджект-контекста."""
-    owner_member_id = main_personal["owner"][0]
-    doc_id = _create_doc(owner_client, "Member", owner_member_id, main_space)
-    yield doc_id
-    _archive_doc(owner_client, doc_id, main_space)

@@ -1,7 +1,7 @@
 import pytest
 import allure
 
-from test_backend.data.endpoints.access_group.access_group_helpers import wait_for_member_access_group
+from test_backend.data.endpoints.access_group.access_group_helpers import get_member_access_group
 from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
 from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint
 
@@ -46,7 +46,7 @@ def test_invite_to_space(second_main_client, second_space_id, role):
 
     # 3. Прямой запрос прав доступа по полученному ID с универсальным поллингом
     with allure.step("Ожидание появления пользователя в списке групп доступа"):
-        target_id = wait_for_member_access_group(second_main_client, second_space_id, _id)
+        target_id = get_member_access_group(second_main_client, second_space_id, _id)
 
         # Базовые проверки структуры группы
     with allure.step("Базовые проверки структуры созданной группы"):

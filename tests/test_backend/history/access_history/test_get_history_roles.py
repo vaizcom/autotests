@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.backend]
 
 @allure.parent_suite("History Service")
 @allure.suite("GetHistory Access")
-@allure.sub_suite("Positive: GetHistory — доступ по ролям (имеют доступ на уровне спейса, проекта и борды.)")
+@allure.sub_suite("Доступ по ролям")
 @pytest.mark.parametrize("client_fixture", [
     "owner_client",
     "manager_client",
@@ -33,7 +33,10 @@ def test_get_history_roles_with_access(
     if isinstance(kind_id, list):
         kind_id = kind_id[0]
 
-    allure.dynamic.title(f"GetHistory: {client_fixture} → {entity} → 200 (OK)")
+    allure.dynamic.title(f"{client_fixture}: доступ к {entity} → 200")
+
+    with allure.step(f"Участник: {client_fixture} (полный доступ к спейсу, проекту и борде)"):
+        pass
 
     with allure.step(f"Отправляем POST /GetHistory: kind='{kind}' ({entity}) от имени {client_fixture}"):
         resp = client.post(
