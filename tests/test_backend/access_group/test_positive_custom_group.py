@@ -13,8 +13,8 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Access Group")
 @allure.suite("UpdateAccessGroupRights")
 @allure.sub_suite("Positive")
-@allure.title("Manager меняет права кастомной группы на Space (Guest → Member)")
-def test_update_custom_group_rights_on_space(manager_client, access_manager, access_space):
+@allure.title("Manager меняет права кастомной группы на Space (Guest → Member), Project и Board остаются без изменений")
+def test_update_custom_group_rights_on_space(manager_client, access_manager, access_space, access_project, access_board):
     """
     Кто: manager_client (Manager в access_space) — минимально необходимая роль.
     Что: меняет уровень кастомной группы на Space с Guest (дефолт при создании) на Member.
@@ -23,17 +23,26 @@ def test_update_custom_group_rights_on_space(manager_client, access_manager, acc
       - группа — кастомная, не selfGroup: запрет на смену своих прав не применяется
       - группа не принадлежит создателю спейса: запрет CreatorAccessChangeNotAllowed не применяется
       - выдаваемый уровень Member не превышает уровень Manager: запрет LackAccessChangeNotAllowed не применяется
-    Проверяем: до = Guest, после = Member, изменение подтверждается через GetAccessGroup.
+    Проверяем:
+      - до: Space = Guest, Project = NoAccess, Board = NoAccess
+      - после: Space = Member, Project остался NoAccess, Board остался NoAccess
     """
     space_id = access_space["space_id"]
+    project_id = access_project["project_id"]
+    board_id = access_board["board_id"]
     with allure.step("Setup: создаём новую кастомную группу"):
         group_id = create_custom_group(manager_client, space_id, "grp_space")
 
-    with allure.step("GetAccessGroup: проверяем начальный уровень группы на Space — ожидается Guest (дефолт при создании)"):
+    with allure.step("GetAccessGroup: проверяем начальные уровни — Space = Guest, Project = NoAccess, Board = NoAccess"):
         before_resp = manager_client.post(**get_access_group_endpoint(space_id=space_id, group_id=group_id))
         assert before_resp.status_code == 200, f"GetAccessGroup вернул {before_resp.status_code}: {before_resp.text}"
-        before_level = before_resp.json()["payload"]["accessGroup"]["spaceAccesses"].get(space_id)
-        assert before_level == "Guest", f"Ожидался Guest до обновления, получен '{before_level}'"
+        before_group = before_resp.json()["payload"]["accessGroup"]
+        assert before_group["spaceAccesses"].get(space_id) == "Guest", \
+            f"Ожидался Guest на Space до обновления, получен '{before_group['spaceAccesses'].get(space_id)}'"
+        assert before_group["projectAccesses"].get(project_id) is None, \
+            f"Ожидался NoAccess на Project до обновления, получен '{before_group['projectAccesses'].get(project_id)}'"
+        assert before_group["boardAccesses"].get(board_id) is None, \
+            f"Ожидался NoAccess на Board до обновления, получен '{before_group['boardAccesses'].get(board_id)}'"
 
     with allure.step("Меняем уровень кастомной группы на Space с Guest на Member"):
         resp = manager_client.post(**update_access_group_rights_endpoint(
@@ -44,16 +53,25 @@ def test_update_custom_group_rights_on_space(manager_client, access_manager, acc
     with allure.step("Статус ответа 200"):
         assert resp.status_code == 200, f"Ожидался 200, получен {resp.status_code}: {resp.text}"
 
-    with allure.step("Проверяем ответ: Space = Member"):
+    with allure.step("Проверяем ответ: Space = Member, Project остался NoAccess, Board остался NoAccess"):
         group = resp.json()["payload"]["accessGroup"]
         assert group["spaceAccesses"].get(space_id) == "Member", \
             f"Ожидался Member на Space, получен '{group['spaceAccesses'].get(space_id)}'"
+        assert group["projectAccesses"].get(project_id) is None, \
+            f"Ожидался NoAccess на Project (без изменений), получен '{group['projectAccesses'].get(project_id)}'"
+        assert group["boardAccesses"].get(board_id) is None, \
+            f"Ожидался NoAccess на Board (без изменений), получен '{group['boardAccesses'].get(board_id)}'"
 
-    with allure.step("GetAccessGroup подтверждает что изменение сохранилось в БД"):
+    with allure.step("GetAccessGroup подтверждает в БД: Space = Member, Project = NoAccess, Board = NoAccess"):
         after_resp = manager_client.post(**get_access_group_endpoint(space_id=space_id, group_id=group_id))
         assert after_resp.status_code == 200, f"GetAccessGroup вернул {after_resp.status_code}: {after_resp.text}"
-        after_level = after_resp.json()["payload"]["accessGroup"]["spaceAccesses"].get(space_id)
-        assert after_level == "Member", f"Ожидался Member после обновления, получен '{after_level}'"
+        after_group = after_resp.json()["payload"]["accessGroup"]
+        assert after_group["spaceAccesses"].get(space_id) == "Member", \
+            f"Ожидался Member на Space в БД, получен '{after_group['spaceAccesses'].get(space_id)}'"
+        assert after_group["projectAccesses"].get(project_id) is None, \
+            f"Ожидался NoAccess на Project в БД (без изменений), получен '{after_group['projectAccesses'].get(project_id)}'"
+        assert after_group["boardAccesses"].get(board_id) is None, \
+            f"Ожидался NoAccess на Board в БД (без изменений), получен '{after_group['boardAccesses'].get(board_id)}'"
 
 
 @allure.parent_suite("Access Group")
