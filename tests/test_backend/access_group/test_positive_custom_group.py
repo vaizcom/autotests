@@ -275,18 +275,92 @@ def test_upgrade_board_member_to_manager(manager_client, access_manager, access_
 @allure.parent_suite("Access Group")
 @allure.suite("UpdateAccessGroupRights")
 @allure.sub_suite("Positive")
-@allure.title("Отзыв прав на Project (Member → NoAccess) — ключ удаляется из map, Board и Space остаются без изменений")
+@allure.title("Повышение Project с Member до Manager — Board и Space остаются без изменений")
+def test_upgrade_project_member_to_manager(manager_client, access_manager, access_space, access_project, access_board):
+    """
+    Кто: manager_client (Manager в access_space) — минимально необходимая роль.
+    Что: повышает уровень кастомной группы на Project с Member до Manager.
+    Почему важно: при изменении уже существующего доступа на Project бэкенд не должен
+                  перезаписывать права соседних сущностей (Board) и родителя (Space).
+    Проверяем:
+      - Setup: Project = Member, Board = Member, Space = Guest
+      - до: Project = Member, Board = Member, Space = Guest
+      - после: Project = Manager, Board остался Member, Space остался Guest
+    """
+    space_id = access_space["space_id"]
+    project_id = access_project["project_id"]
+    board_id = access_board["board_id"]
+    with allure.step("Setup: создаём новую кастомную группу"):
+        group_id = create_custom_group(manager_client, space_id, "grp_project_upgrade")
+
+    with allure.step("Setup: выдаём группе Member на Project и Member на Board"):
+        setup_project = manager_client.post(**update_access_group_rights_endpoint(
+            space_id=space_id, group_id=group_id,
+            kind="Project", kind_id=project_id, level="Member",
+        ))
+        assert setup_project.status_code == 200, f"Setup: не удалось выдать Member на Project: {setup_project.text}"
+        setup_board = manager_client.post(**update_access_group_rights_endpoint(
+            space_id=space_id, group_id=group_id,
+            kind="Board", kind_id=board_id, level="Member",
+        ))
+        assert setup_board.status_code == 200, f"Setup: не удалось выдать Member на Board: {setup_board.text}"
+
+    with allure.step("GetAccessGroup: проверяем состояние перед тестом — Project = Member, Board = Member, Space = Guest"):
+        before_resp = manager_client.post(**get_access_group_endpoint(space_id=space_id, group_id=group_id))
+        assert before_resp.status_code == 200, f"GetAccessGroup вернул {before_resp.status_code}: {before_resp.text}"
+        before_group = before_resp.json()["payload"]["accessGroup"]
+        assert before_group["projectAccesses"].get(project_id) == "Member", \
+            f"Ожидался Member на Project до повышения, получен '{before_group['projectAccesses'].get(project_id)}'"
+        assert before_group["boardAccesses"].get(board_id) == "Member", \
+            f"Ожидался Member на Board до повышения, получен '{before_group['boardAccesses'].get(board_id)}'"
+        assert before_group["spaceAccesses"].get(space_id) == "Guest", \
+            f"Ожидался Guest на Space до повышения, получен '{before_group['spaceAccesses'].get(space_id)}'"
+
+    with allure.step("Повышаем уровень группы на Project с Member до Manager"):
+        resp = manager_client.post(**update_access_group_rights_endpoint(
+            space_id=space_id, group_id=group_id,
+            kind="Project", kind_id=project_id, level="Manager",
+        ))
+
+    with allure.step("Статус ответа 200"):
+        assert resp.status_code == 200, f"Ожидался 200, получен {resp.status_code}: {resp.text}"
+
+    with allure.step("Проверяем ответ: Project = Manager, Board остался Member, Space остался Guest"):
+        group = resp.json()["payload"]["accessGroup"]
+        assert group["projectAccesses"].get(project_id) == "Manager", \
+            f"Ожидался Manager на Project, получен '{group['projectAccesses'].get(project_id)}'"
+        assert group["boardAccesses"].get(board_id) == "Member", \
+            f"Ожидался Member на Board (без изменений), получен '{group['boardAccesses'].get(board_id)}'"
+        assert group["spaceAccesses"].get(space_id) == "Guest", \
+            f"Ожидался Guest на Space (без изменений), получен '{group['spaceAccesses'].get(space_id)}'"
+
+    with allure.step("GetAccessGroup подтверждает в БД: Project = Manager, Board = Member, Space = Guest"):
+        after_resp = manager_client.post(**get_access_group_endpoint(space_id=space_id, group_id=group_id))
+        assert after_resp.status_code == 200, f"GetAccessGroup вернул {after_resp.status_code}: {after_resp.text}"
+        after_group = after_resp.json()["payload"]["accessGroup"]
+        assert after_group["projectAccesses"].get(project_id) == "Manager", \
+            f"Ожидался Manager на Project в БД, получен '{after_group['projectAccesses'].get(project_id)}'"
+        assert after_group["boardAccesses"].get(board_id) == "Member", \
+            f"Ожидался Member на Board в БД (без изменений), получен '{after_group['boardAccesses'].get(board_id)}'"
+        assert after_group["spaceAccesses"].get(space_id) == "Guest", \
+            f"Ожидался Guest на Space в БД (без изменений), получен '{after_group['spaceAccesses'].get(space_id)}'"
+
+
+@allure.parent_suite("Access Group")
+@allure.suite("UpdateAccessGroupRights")
+@allure.sub_suite("Positive")
+@allure.title("Отзыв прав на Project (Member → NoAccess) каскадирует вниз на Board, Space остаётся без изменений")
 def test_revoke_project_rights(manager_client, access_manager, access_space, access_project, access_board):
     """
     Кто: manager_client (Manager в access_space) — минимально необходимая роль.
-    Что: выставляет NoAccess на Project для группы, у которой уже есть Member на Project.
+    Что: выставляет NoAccess на Project для группы, у которой есть Member на Project и Member на Board.
     Почему важно: NoAccess — это не просто уровень, а удаление ключа из map (.delete(kindId)).
-                  Проверяем что после выставления NoAccess ключ в projectAccesses отсутствует,
-                  а не равен строке "NoAccess".
+                  Отзыв прав на Project каскадируется вниз: Board-доступ тоже снимается.
+                  Это симметрично эскалации вверх при выдаче прав (Board → Project → Space).
     Проверяем:
-      - Setup: Project = Member, Board = NoAccess, Space = Guest
-      - до: Project = Member
-      - после: Project = NoAccess (ключ отсутствует в map), Board и Space без изменений
+      - Setup: Project = Member, Board = Member, Space = Guest
+      - до: Project = Member, Board = Member
+      - после: Project = NoAccess (ключ отсутствует), Board = NoAccess (ключ отсутствует), Space остался Guest
     """
     space_id = access_space["space_id"]
     project_id = access_project["project_id"]
@@ -294,25 +368,30 @@ def test_revoke_project_rights(manager_client, access_manager, access_space, acc
     with allure.step("Setup: создаём новую кастомную группу"):
         group_id = create_custom_group(manager_client, space_id, "grp_revoke")
 
-    with allure.step("Setup: выдаём группе Member на Project"):
-        setup_resp = manager_client.post(**update_access_group_rights_endpoint(
+    with allure.step("Setup: выдаём группе Member на Project и Member на Board"):
+        setup_project = manager_client.post(**update_access_group_rights_endpoint(
             space_id=space_id, group_id=group_id,
             kind="Project", kind_id=project_id, level="Member",
         ))
-        assert setup_resp.status_code == 200, f"Setup: не удалось выдать Member на Project: {setup_resp.text}"
+        assert setup_project.status_code == 200, f"Setup: не удалось выдать Member на Project: {setup_project.text}"
+        setup_board = manager_client.post(**update_access_group_rights_endpoint(
+            space_id=space_id, group_id=group_id,
+            kind="Board", kind_id=board_id, level="Member",
+        ))
+        assert setup_board.status_code == 200, f"Setup: не удалось выдать Member на Board: {setup_board.text}"
 
-    with allure.step("GetAccessGroup: проверяем состояние перед тестом — Project = Member, Board = NoAccess, Space = Guest"):
+    with allure.step("GetAccessGroup: проверяем состояние перед тестом — Project = Member, Board = Member, Space = Guest"):
         before_resp = manager_client.post(**get_access_group_endpoint(space_id=space_id, group_id=group_id))
         assert before_resp.status_code == 200, f"GetAccessGroup вернул {before_resp.status_code}: {before_resp.text}"
         before_group = before_resp.json()["payload"]["accessGroup"]
         assert before_group["projectAccesses"].get(project_id) == "Member", \
             f"Ожидался Member на Project до отзыва, получен '{before_group['projectAccesses'].get(project_id)}'"
-        assert before_group["boardAccesses"].get(board_id) is None, \
-            f"Ожидался NoAccess на Board до отзыва, получен '{before_group['boardAccesses'].get(board_id)}'"
+        assert before_group["boardAccesses"].get(board_id) == "Member", \
+            f"Ожидался Member на Board до отзыва, получен '{before_group['boardAccesses'].get(board_id)}'"
         assert before_group["spaceAccesses"].get(space_id) == "Guest", \
             f"Ожидался Guest на Space до отзыва, получен '{before_group['spaceAccesses'].get(space_id)}'"
 
-    with allure.step("Выставляем NoAccess на Project — отзываем права группы"):
+    with allure.step("Выставляем NoAccess на Project — отзываем права группы на Project"):
         resp = manager_client.post(**update_access_group_rights_endpoint(
             space_id=space_id, group_id=group_id,
             kind="Project", kind_id=project_id, level="NoAccess",
@@ -321,12 +400,12 @@ def test_revoke_project_rights(manager_client, access_manager, access_space, acc
     with allure.step("Статус ответа 200"):
         assert resp.status_code == 200, f"Ожидался 200, получен {resp.status_code}: {resp.text}"
 
-    with allure.step("Проверяем ответ: Project = NoAccess (ключ отсутствует в map), Board и Space без изменений"):
+    with allure.step("Проверяем ответ: Project = NoAccess (ключ отсутствует), Board = NoAccess (каскад вниз), Space остался Guest"):
         group = resp.json()["payload"]["accessGroup"]
         assert group["projectAccesses"].get(project_id) is None, \
             f"Ожидался NoAccess (отсутствие ключа) на Project, получен '{group['projectAccesses'].get(project_id)}'"
         assert group["boardAccesses"].get(board_id) is None, \
-            f"Ожидался NoAccess на Board (без изменений), получен '{group['boardAccesses'].get(board_id)}'"
+            f"Ожидался NoAccess (отсутствие ключа) на Board (каскад), получен '{group['boardAccesses'].get(board_id)}'"
         assert group["spaceAccesses"].get(space_id) == "Guest", \
             f"Ожидался Guest на Space (без изменений), получен '{group['spaceAccesses'].get(space_id)}'"
 
@@ -337,6 +416,6 @@ def test_revoke_project_rights(manager_client, access_manager, access_space, acc
         assert after_group["projectAccesses"].get(project_id) is None, \
             f"Ожидался NoAccess (отсутствие ключа) на Project в БД, получен '{after_group['projectAccesses'].get(project_id)}'"
         assert after_group["boardAccesses"].get(board_id) is None, \
-            f"Ожидался NoAccess на Board в БД (без изменений), получен '{after_group['boardAccesses'].get(board_id)}'"
+            f"Ожидался NoAccess (отсутствие ключа) на Board в БД (каскад), получен '{after_group['boardAccesses'].get(board_id)}'"
         assert after_group["spaceAccesses"].get(space_id) == "Guest", \
             f"Ожидался Guest на Space в БД (без изменений), получен '{after_group['spaceAccesses'].get(space_id)}'"
