@@ -16,7 +16,7 @@ pytestmark = [pytest.mark.backend]
 @allure.parent_suite("Access Group")
 @allure.suite("UpdateAccessGroupRights")
 @allure.sub_suite("Positive")
-@allure.title("Manager меняет права кастомной группы на Space (Guest → Member), Project и Board остаются без изменений")
+@allure.title("Выдача Member на Space (Guest → Member) — Project и Board остаются без изменений")
 def test_update_custom_group_rights_on_space(manager_client, access_manager, access_space, access_project, access_board):
     """
     Кто: manager_client (Manager в access_space) — минимально необходимая роль.
@@ -80,7 +80,7 @@ def test_update_custom_group_rights_on_space(manager_client, access_manager, acc
 @allure.parent_suite("Access Group")
 @allure.suite("UpdateAccessGroupRights")
 @allure.sub_suite("Positive")
-@allure.title("Manager меняет права кастомной группы на Project (NoAccess → Member), Board и Space остаются без изменений")
+@allure.title("Выдача Member на Project (NoAccess → Member) — Board и Space остаются без изменений")
 def test_update_custom_group_rights_on_project(manager_client, access_manager, access_space, access_project, access_board):
     """
     Кто: manager_client (Manager в access_space) — минимально необходимая роль.
@@ -209,17 +209,18 @@ def test_update_custom_group_rights_on_board(manager_client, access_manager, acc
 @allure.parent_suite("Access Group")
 @allure.suite("UpdateAccessGroupRights")
 @allure.sub_suite("Positive")
-@allure.title("Выдача Member на Board не эскалирует Project, если у него уже есть доступ (Member)")
+@allure.title("Выдача Member на Board не эскалирует Project (Guest) — остаётся без изменений")
 def test_board_grant_no_escalation_when_project_has_access(manager_client, access_manager, access_space, access_project, access_board):
     """
     Кто: manager_client (Manager в access_space) — минимально необходимая роль.
-    Что: выдаёт кастомной группе Member на Board, когда Project уже в Member.
-    Почему важно: эскалация срабатывает только если родитель в NoAccess.
-                  Если Project уже Member — эскалация не должна применяться.
+    Что: выдаёт кастомной группе Member на Board, когда Project уже в Guest.
+    Почему важно: эскалация срабатывает строго при NoAccess (отсутствие ключа).
+                  Guest — валидный уровень для Project и не является NoAccess,
+                  поэтому эскалация не должна повышать его до Member.
     Проверяем:
-      - Setup: Project = Member (явно), Board = NoAccess, Space = Guest
-      - до: Project = Member, Board = NoAccess
-      - после: Board = Member, Project остался Member (эскалация не сработала)
+      - Setup: Project = Guest (явно), Board = NoAccess, Space = Guest
+      - до: Project = Guest, Board = NoAccess
+      - после: Board = Member, Project остался Guest (эскалация не сработала)
     """
     space_id = access_space["space_id"]
     project_id = access_project["project_id"]
@@ -227,19 +228,19 @@ def test_board_grant_no_escalation_when_project_has_access(manager_client, acces
     with allure.step("Setup: создаём новую кастомную группу"):
         group_id = create_custom_group(manager_client, space_id, "grp_board_no_escalation")
 
-    with allure.step("Setup: выдаём группе Member на Project"):
+    with allure.step("Setup: выдаём группе Guest на Project"):
         setup_resp = manager_client.post(**update_access_group_rights_endpoint(
             space_id=space_id, group_id=group_id,
-            kind="Project", kind_id=project_id, level="Member",
+            kind="Project", kind_id=project_id, level="Guest",
         ))
-        assert setup_resp.status_code == 200, f"Setup: не удалось выдать Member на Project: {setup_resp.text}"
+        assert setup_resp.status_code == 200, f"Setup: не удалось выдать Guest на Project: {setup_resp.text}"
 
-    with allure.step("GetAccessGroup: проверяем состояние перед тестом — Project = Member, Board = NoAccess, Space = Guest"):
+    with allure.step("GetAccessGroup: проверяем состояние перед тестом — Project = Guest, Board = NoAccess, Space = Guest"):
         before_resp = manager_client.post(**get_access_group_endpoint(space_id=space_id, group_id=group_id))
         assert before_resp.status_code == 200, f"GetAccessGroup вернул {before_resp.status_code}: {before_resp.text}"
         before_group = before_resp.json()["payload"]["accessGroup"]
-        assert before_group["projectAccesses"].get(project_id) == "Member", \
-            f"Ожидался Member на Project до выдачи Board, получен '{before_group['projectAccesses'].get(project_id)}'"
+        assert before_group["projectAccesses"].get(project_id) == "Guest", \
+            f"Ожидался Guest на Project до выдачи Board, получен '{before_group['projectAccesses'].get(project_id)}'"
         assert before_group["boardAccesses"].get(board_id) is None, \
             f"Ожидался NoAccess на Board до выдачи, получен '{before_group['boardAccesses'].get(board_id)}'"
         assert before_group["spaceAccesses"].get(space_id) == "Guest", \
@@ -254,23 +255,23 @@ def test_board_grant_no_escalation_when_project_has_access(manager_client, acces
     with allure.step("Статус ответа 200"):
         assert resp.status_code == 200, f"Ожидался 200, получен {resp.status_code}: {resp.text}"
 
-    with allure.step("Проверяем ответ: Board = Member, Project остался Member (эскалация не сработала), Space остался Guest"):
+    with allure.step("Проверяем ответ: Board = Member, Project остался Guest (эскалация не сработала), Space остался Guest"):
         group = resp.json()["payload"]["accessGroup"]
         assert group["boardAccesses"].get(board_id) == "Member", \
             f"Ожидался Member на Board, получен '{group['boardAccesses'].get(board_id)}'"
-        assert group["projectAccesses"].get(project_id) == "Member", \
-            f"Ожидался Member на Project (без изменений), получен '{group['projectAccesses'].get(project_id)}'"
+        assert group["projectAccesses"].get(project_id) == "Guest", \
+            f"Ожидался Guest на Project (без изменений), получен '{group['projectAccesses'].get(project_id)}'"
         assert group["spaceAccesses"].get(space_id) == "Guest", \
             f"Ожидался Guest на Space (без изменений), получен '{group['spaceAccesses'].get(space_id)}'"
 
-    with allure.step("GetAccessGroup подтверждает в БД: Board = Member, Project = Member, Space = Guest"):
+    with allure.step("GetAccessGroup подтверждает в БД: Board = Member, Project = Guest, Space = Guest"):
         after_resp = manager_client.post(**get_access_group_endpoint(space_id=space_id, group_id=group_id))
         assert after_resp.status_code == 200, f"GetAccessGroup вернул {after_resp.status_code}: {after_resp.text}"
         after_group = after_resp.json()["payload"]["accessGroup"]
         assert after_group["boardAccesses"].get(board_id) == "Member", \
             f"Ожидался Member на Board в БД, получен '{after_group['boardAccesses'].get(board_id)}'"
-        assert after_group["projectAccesses"].get(project_id) == "Member", \
-            f"Ожидался Member на Project в БД (без изменений), получен '{after_group['projectAccesses'].get(project_id)}'"
+        assert after_group["projectAccesses"].get(project_id) == "Guest", \
+            f"Ожидался Guest на Project в БД (без изменений), получен '{after_group['projectAccesses'].get(project_id)}'"
         assert after_group["spaceAccesses"].get(space_id) == "Guest", \
             f"Ожидался Guest на Space в БД (без изменений), получен '{after_group['spaceAccesses'].get(space_id)}'"
 
@@ -278,7 +279,7 @@ def test_board_grant_no_escalation_when_project_has_access(manager_client, acces
 @allure.parent_suite("Access Group")
 @allure.suite("UpdateAccessGroupRights")
 @allure.sub_suite("Positive")
-@allure.title("Выдача Member на Board не понижает Project, если у него уже есть более высокий уровень (Manager)")
+@allure.title("Выдача Member на Board не понижает Project (Manager) — остаётся без изменений")
 def test_board_grant_no_escalation_downgrade(manager_client, access_manager, access_space, access_project, access_board):
     """
     Кто: manager_client (Manager в access_space) — минимально необходимая роль.
