@@ -120,7 +120,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 ../.venv
 env/
 venv/
@@ -178,5 +177,3 @@ test-results/
 # Debug TS для локальной отладки тестов
 .debug_ts
 
-# Claude Code
-CLAUDE.md

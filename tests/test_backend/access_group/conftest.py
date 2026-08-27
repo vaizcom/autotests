@@ -21,6 +21,8 @@ from test_backend.data.endpoints.Project.project_endpoints import (
 from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS, typesList as DEFAULT_TYPES_LIST
 from test_backend.data.endpoints.access_group.access_group_endpoints import (
     update_access_group_rights_endpoint,
+    create_access_group_endpoint,
+    set_access_group_member_endpoint,
 )
 from test_backend.data.endpoints.access_group.access_group_helpers import get_member_access_group
 from config.generators import generate_slug
@@ -193,6 +195,18 @@ def access_board(main_client, access_space, access_project):
 
 
 @pytest.fixture(scope="session")
+def access_owner(access_space, access_project):
+    """
+    Owner спейса (он же Creator спейса и проекта).
+
+    main_client создаёт access_space и access_project — автоматически получает
+    полный доступ как Owner/Creator. Фикстура явно фиксирует эту зависимость,
+    чтобы в тестах setup был прозрачным.
+    """
+    return True
+
+
+@pytest.fixture(scope="session")
 def access_manager(main_client, access_space, access_project, access_board):
     """
     Участник с ролью Manager в access_space с явным Manager-доступом на Project и Board.
@@ -253,3 +267,91 @@ def access_member_self_group_id(main_client, access_space, access_member):
     Manager меняет права Member на Project/Board.
     """
     return _get_self_group_id(main_client, access_space["space_id"], access_member["member_id"])
+
+
+@pytest.fixture(scope="session")
+def access_guest(main_client, access_space, access_project, access_board):
+    """
+    Участник с ролью Guest в access_space с явным Guest-доступом на Project и Board.
+
+    Используется в негативных сценариях — Guest не имеет права вызывать
+    UpdateAccessGroupRights, должен получать AccessDenied.
+
+    Возвращает: {"member_id": str, "email": str}
+    """
+    space_id = access_space["space_id"]
+    project_id = access_project["project_id"]
+    board_id = access_board["board_id"]
+    email = USERS["guest"]["email"]
+    password = USERS["guest"]["password"]
+
+    member_id = _invite_member_with_access(
+        main_client, space_id, project_id, board_id, email, password, "Guest",
+    )
+    yield {"member_id": member_id, "email": email}
+
+
+@pytest.fixture(scope="session")
+def access_guest_self_group_id(main_client, access_space, access_guest):
+    """
+    _id selfAccessGroup гостя в access_space.
+    """
+    return _get_self_group_id(main_client, access_space["space_id"], access_guest["member_id"])
+
+
+@pytest.fixture(scope="session")
+def access_no_project(main_client, access_space):
+    """
+    Участник с ролью Manager в access_space, но БЕЗ доступа к Project и Board.
+
+    Инвайтится только в спейс — selfGroup не получает явных прав на Project/Board.
+    Используется для проверки: роль в спейсе не даёт автоматического доступа к проекту.
+
+    Возвращает: {"member_id": str, "email": str}
+    """
+    space_id = access_space["space_id"]
+    email = USERS["owner"]["email"]
+    password = USERS["owner"]["password"]
+
+    with allure.step(f"Setup: инвайтим Manager без доступа к Project ({email})"):
+        member_id = _invite_and_get_member(main_client, space_id, email, password, "Manager")
+
+    yield {"member_id": member_id, "email": email}
+
+
+@pytest.fixture(scope="session")
+def access_no_project_self_group_id(main_client, access_space, access_no_project):
+    """
+    _id selfAccessGroup участника без доступа к Project.
+    """
+    return _get_self_group_id(main_client, access_space["space_id"], access_no_project["member_id"])
+
+
+@pytest.fixture(scope="session")
+def access_custom_group(main_client, access_space, access_manager, access_member, access_guest):
+    """
+    Кастомная группа доступа с участниками всех ролей.
+
+    Создаётся Owner (main_client). В группу добавляются Manager, Member, Guest.
+    Используется для проверки: кто из участников может менять права этой группы.
+
+    Возвращает: {"group_id": str, "name": str}
+    """
+    space_id = access_space["space_id"]
+    name = "_autotest_custom_group"
+
+    with allure.step(f"Setup: создаём кастомную группу '{name}'"):
+        resp = main_client.post(**create_access_group_endpoint(
+            space_id=space_id, name=name, description="Группа для тестов ролевого доступа",
+        ))
+        assert resp.status_code == 200, f"Setup: не удалось создать группу: {resp.text}"
+        group_id = resp.json()["payload"]["accessGroup"]["_id"]
+
+    for role, member_data in [("Manager", access_manager), ("Member", access_member), ("Guest", access_guest)]:
+        with allure.step(f"Setup: добавляем {role} в кастомную группу"):
+            resp = main_client.post(**set_access_group_member_endpoint(
+                space_id=space_id, member_id=member_data["member_id"], access_group_id=group_id,
+            ))
+            assert resp.status_code == 200, f"Setup: не удалось добавить {role} в группу: {resp.text}"
+
+    yield {"group_id": group_id, "name": name}
