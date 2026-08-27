@@ -36,9 +36,10 @@ def pytest_runtest_makereport(item, call):
     if report.failed and "429" in str(report.longrepr):
         _rate_limited = True
         if _rate_limit_retry_after is None:
-            from datetime import datetime, timedelta
-            retry_time = datetime.now() + timedelta(hours=1)
-            _rate_limit_retry_after = retry_time.strftime("%H:%M")
+            from datetime import datetime, timedelta, timezone
+            retry_utc = datetime.now(timezone.utc) + timedelta(hours=1)
+            retry_msk = retry_utc + timedelta(hours=3)
+            _rate_limit_retry_after = f"{retry_utc.strftime('%H:%M')} (UTC) / {retry_msk.strftime('%H:%M')} (MSK)"
         report.longrepr = str(report.longrepr) + f"\n\n>>> {_rate_limit_message()}"
 
 
