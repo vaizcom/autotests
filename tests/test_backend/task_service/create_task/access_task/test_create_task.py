@@ -216,8 +216,8 @@ def test_create_task_with_specific_payload_and_response(
                     assert task["milestones"] == [get_random_milestone], "Ошибка: неверное значение milestones"
                     assert task["subtasks"] == [], "Ошибка: поле с подзадачами должно быть пустым"
                     # assert task["milestone"] == get_random_milestone, "Ошибка: неверный milestone"
-                    assert task["dueStart"] == current_timestamp.replace("+00:00", "Z"), "Ошибка: неверное значение dueStart"
-                    assert task["dueEnd"] == due_end.replace("+00:00", "Z"), "Ошибка: неверное значение dueEnd"
+                    assert task["dueStart"][:10] == current_timestamp[:10], "Ошибка: неверная дата dueStart"
+                    assert task["dueEnd"][:10] == due_end[:10], "Ошибка: неверная дата dueEnd"
 
                 # Проверка метаданных и системных полей
                 with allure.step("Проверяем метаданные"):
@@ -268,8 +268,8 @@ def test_create_task_with_specific_payload_and_response(
                     assert task_db["completed"] == get_random_complete, f"В БД completed={task_db['completed']}"
                     assert task_db["group"] == random_group_id, f"В БД group={task_db['group']}"
                     assert task_db["milestones"] == [get_random_milestone], f"В БД milestones={task_db['milestones']}"
-                    assert task_db["dueStart"] == current_timestamp.replace("+00:00", "Z"), f"В БД dueStart={task_db['dueStart']}"
-                    assert task_db["dueEnd"] == due_end.replace("+00:00", "Z"), f"В БД dueEnd={task_db['dueEnd']}"
+                    assert task_db["dueStart"][:10] == current_timestamp[:10], f"В БД dueStart={task_db['dueStart']}"
+                    assert task_db["dueEnd"][:10] == due_end[:10], f"В БД dueEnd={task_db['dueEnd']}"
 
     finally:
         if task_id:

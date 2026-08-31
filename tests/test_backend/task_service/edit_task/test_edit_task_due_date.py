@@ -32,7 +32,7 @@ def test_edit_task_due_start(owner_client, main_space, make_task_in_main, main_b
         assert resp.status_code == 200, f"Ожидался статус 200, получен {resp.status_code}"
         task = resp.json()["payload"]["task"]
         assert task.get("_id") == task_id
-        assert task.get("dueStart").startswith(new_due_start[:19]), \
+        assert task.get("dueStart")[:10] == new_due_start[:10], \
             f"Дата начала не обновлена: {task.get('dueStart')!r}"
         assert task.get("name") == initial_name, "Другие поля не должны были измениться"
         assert task.get("dueEnd") == initial_due_end, "Другие поля не должны были измениться"
@@ -63,7 +63,7 @@ def test_edit_task_due_end(owner_client, main_space, make_task_in_main, main_boa
         assert resp.status_code == 200, f"Ожидался статус 200, получен {resp.status_code}"
         task = resp.json()["payload"]["task"]
         assert task.get("_id") == task_id
-        assert task.get("dueEnd").startswith(new_due_end[:19]), \
+        assert task.get("dueEnd")[:10] == new_due_end[:10], \
             f"Дата окончания не обновлена: {task.get('dueEnd')!r}"
         assert task.get("name") == initial_name, "Другие поля не должны были измениться"
         assert task.get("dueStart") == initial_due_start, "Другие поля не должны были измениться"

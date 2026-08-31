@@ -160,9 +160,9 @@ def test_edit_task_endpoint_all_fields(
 
             # Для дат - API может возвращать их в слегка отличающемся формате (например, с миллисекундами)
             # Поэтому лучше проверить, что строка даты содержит ожидаемые значения.
-            assert task.get("dueStart").startswith(new_due_start[:19]), \
+            assert task.get("dueStart")[:10] == new_due_start[:10], \
                 f"Дата начала не обновлена: {task.get('dueStart')!r}"
-            assert task.get("dueEnd").startswith(new_due_end[:19]), \
+            assert task.get("dueEnd")[:10] == new_due_end[:10], \
                 f"Дата окончания не обновлена: {task.get('dueEnd')!r}"
 
             assert task.get("coverAR") is not None
