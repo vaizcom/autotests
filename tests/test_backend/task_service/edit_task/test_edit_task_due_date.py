@@ -4,7 +4,7 @@ import allure
 import pytest
 
 from test_backend.data.endpoints.Task.assert_task_payload import assert_task_payload
-from test_backend.data.endpoints.Task.task_endpoints import edit_task_endpoint
+from test_backend.data.endpoints.Task.task_endpoints import edit_task_endpoint, get_task_endpoint
 from test_backend.task_service.utils import get_current_timestamp, get_due_end
 
 pytestmark = [pytest.mark.backend]
@@ -32,7 +32,7 @@ def test_edit_task_due_start(owner_client, main_space, make_task_in_main, main_b
         assert resp.status_code == 200, f"Ожидался статус 200, получен {resp.status_code}"
         task = resp.json()["payload"]["task"]
         assert task.get("_id") == task_id
-        assert task.get("dueStart").startswith(new_due_start[:19]), \
+        assert task.get("dueStart")[:10] == new_due_start[:10], \
             f"Дата начала не обновлена: {task.get('dueStart')!r}"
         assert task.get("name") == initial_name, "Другие поля не должны были измениться"
         assert task.get("dueEnd") == initial_due_end, "Другие поля не должны были измениться"
@@ -63,7 +63,7 @@ def test_edit_task_due_end(owner_client, main_space, make_task_in_main, main_boa
         assert resp.status_code == 200, f"Ожидался статус 200, получен {resp.status_code}"
         task = resp.json()["payload"]["task"]
         assert task.get("_id") == task_id
-        assert task.get("dueEnd").startswith(new_due_end[:19]), \
+        assert task.get("dueEnd")[:10] == new_due_end[:10], \
             f"Дата окончания не обновлена: {task.get('dueEnd')!r}"
         assert task.get("name") == initial_name, "Другие поля не должны были измениться"
         assert task.get("dueStart") == initial_due_start, "Другие поля не должны были измениться"
@@ -105,3 +105,48 @@ def test_edit_task_due_start_after_due_end_error(owner_client, main_space, make_
 
         assert expected_message_part in actual_message, \
             f"Ожидалось сообщение '{expected_message_part}', получено '{actual_message}'"
+
+
+@allure.parent_suite("Task Service")
+@allure.suite("Edit Task")
+@allure.sub_suite("Due date edit Task")
+@allure.title("Edit Task Due date: Нормализация времени (dueStart → 00:00:00, dueEnd → 23:59:59)")
+def test_due_date_time_normalization(owner_client, main_space, make_task_in_main):
+    """
+    Проверяет, что бэкенд нормализует время при установке дат:
+    - dueStart сбрасывается на начало дня (T00:00:00.000Z)
+    - dueEnd сбрасывается на конец дня (T23:59:59.999Z)
+    """
+    due_start = get_current_timestamp()
+    due_end = get_due_end()
+
+    with allure.step("Создаём задачу с произвольным временем в dueStart и dueEnd"):
+        task_data = make_task_in_main({
+            "name": "Task for date normalization check",
+            "due_start": due_start,
+            "due_end": due_end,
+        })
+        task_id = task_data["_id"]
+
+    with allure.step("Получаем задачу через GetTask"):
+        resp = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=task_id))
+        assert resp.status_code == 200, f"Ожидался статус 200, получен {resp.status_code}"
+        task = resp.json()["payload"]["task"]
+
+    with allure.step("Проверяем нормализацию dueStart → начало дня (00:00:00.000Z)"):
+        actual_start = task["dueStart"]
+        assert actual_start[:10] == due_start[:10], (
+            f"Дата dueStart не совпадает: ожидалось {due_start[:10]}, получено {actual_start[:10]}"
+        )
+        assert "T00:00:00.000Z" in actual_start, (
+            f"dueStart не нормализован на начало дня: {actual_start}"
+        )
+
+    with allure.step("Проверяем нормализацию dueEnd → конец дня (23:59:59.999Z)"):
+        actual_end = task["dueEnd"]
+        assert actual_end[:10] == due_end[:10], (
+            f"Дата dueEnd не совпадает: ожидалось {due_end[:10]}, получено {actual_end[:10]}"
+        )
+        assert "T23:59:59.999Z" in actual_end, (
+            f"dueEnd не нормализован на конец дня: {actual_end}"
+        )

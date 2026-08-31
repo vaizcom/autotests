@@ -44,8 +44,8 @@ def test_task_due_changed_event(main_client, space_for_history, board_for_histor
                 },
             )
 
-            # dueStart/dueEnd сравниваем по первым 19 символам (YYYY-MM-DDTHH:MM:SS) — таймзона может отличаться
-            assert event_data.get("data").get("dueStart")[:19] == due_start[:19], \
-                f"Неверная дата dueStart. Ожидалось: {due_start[:19]}, получено: {event_data.get('data').get('dueStart')[:19]}"
-            assert event_data.get("data").get("dueEnd")[:19] == due_end[:19], \
-                f"Неверная дата dueEnd. Ожидалось: {due_end[:19]}, получено: {event_data.get('data').get('dueEnd')[:19]}"
+            # dueStart/dueEnd сравниваем по дате (YYYY-MM-DD) — бэкенд нормализует время (dueStart → 00:00:00, dueEnd → 23:59:59)
+            assert event_data.get("data").get("dueStart")[:10] == due_start[:10], \
+                f"Неверная дата dueStart. Ожидалось: {due_start[:10]}, получено: {event_data.get('data').get('dueStart')[:10]}"
+            assert event_data.get("data").get("dueEnd")[:10] == due_end[:10], \
+                f"Неверная дата dueEnd. Ожидалось: {due_end[:10]}, получено: {event_data.get('data').get('dueEnd')[:10]}"

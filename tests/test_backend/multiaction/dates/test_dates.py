@@ -56,8 +56,8 @@ def test_set_due_end(owner_client, main_space, make_task_in_main):
             assert r.status_code == 200, r.text
             task = r.json()["payload"]["task"]
             assert task["dueEnd"] is not None, f"dueEnd не установлен у задачи {tid}"
-            assert task["dueEnd"].startswith(DUE_END_A[:19]), (
-                f"Задача {tid}: ожидали dueEnd начинающийся с {DUE_END_A[:19]}, получили {task['dueEnd']}"
+            assert task["dueEnd"].startswith(DUE_END_A[:10]), (
+                f"Задача {tid}: ожидали dueEnd начинающийся с {DUE_END_A[:10]}, получили {task['dueEnd']}"
             )
 
 
@@ -95,7 +95,7 @@ def test_set_due_start_only(owner_client, main_space, make_task_in_main):
             r = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=tid))
             assert r.status_code == 200, r.text
             task = r.json()["payload"]["task"]
-            assert task["dueStart"].startswith(DUE_START_A[:19]), (
+            assert task["dueStart"].startswith(DUE_START_A[:10]), (
                 f"Задача {tid}: dueStart не установлен, получили {task.get('dueStart')}"
             )
             assert task["dueEnd"] == original_due_ends[tid], (
@@ -137,10 +137,10 @@ def test_set_both_dates(owner_client, main_space, make_task_in_main):
             r = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=tid))
             assert r.status_code == 200, r.text
             task = r.json()["payload"]["task"]
-            assert task["dueStart"].startswith(DUE_START_A[:19]), (
+            assert task["dueStart"].startswith(DUE_START_A[:10]), (
                 f"Задача {tid}: dueStart не установлен, получили {task.get('dueStart')}"
             )
-            assert task["dueEnd"].startswith(DUE_END_A[:19]), (
+            assert task["dueEnd"].startswith(DUE_END_A[:10]), (
                 f"Задача {tid}: dueEnd не установлен, получили {task.get('dueEnd')}"
             )
 
@@ -276,11 +276,11 @@ def test_or_logic_due_start_matches_due_end_differs(owner_client, main_space, ma
         r = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=task_id))
         assert r.status_code == 200, r.text
         task = r.json()["payload"]["task"]
-        assert task["dueEnd"].startswith(DUE_END_B[:19]), (
-            f"dueEnd не обновился: ожидали {DUE_END_B[:19]}, получили {task['dueEnd']}"
+        assert task["dueEnd"].startswith(DUE_END_B[:10]), (
+            f"dueEnd не обновился: ожидали {DUE_END_B[:10]}, получили {task['dueEnd']}"
         )
-        assert task["dueStart"].startswith(DUE_START_A[:19]), (
-            f"dueStart изменился: ожидали {DUE_START_A[:19]}, получили {task['dueStart']}"
+        assert task["dueStart"].startswith(DUE_START_A[:10]), (
+            f"dueStart изменился: ожидали {DUE_START_A[:10]}, получили {task['dueStart']}"
         )
 
 
