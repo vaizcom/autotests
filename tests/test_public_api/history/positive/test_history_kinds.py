@@ -11,10 +11,10 @@ pytestmark = [pytest.mark.public_api]
 @allure.sub_suite("History Kinds")
 @pytest.mark.parametrize("kind, kind_id_fixture", [
     ("Space",     "public_space_id"),
-    pytest.param("Project",   "project_id",   marks=pytest.mark.xfail(reason="APP-5938: 500 для вручную созданных сущностей")),
-    pytest.param("Task",      "task_id",      marks=pytest.mark.xfail(reason="APP-5938: 500 для вручную созданных сущностей")),
-    pytest.param("Milestone", "milestone_id", marks=pytest.mark.xfail(reason="APP-5938: 500 для вручную созданных сущностей")),
-    pytest.param("Document",  "document_id",  marks=pytest.mark.xfail(reason="APP-5938: 500 для вручную созданных сущностей")),
+    ("Project",   "project_id"),
+    ("Task",      "task_id"),
+    ("Milestone", "milestone_id"),
+    ("Document",  "document_id"),
 ], ids=["Space", "Project", "Task", "Milestone", "Document"])
 def test_public_history_kind_returns_200(request, public_client, public_space_id, kind, kind_id_fixture):
     """

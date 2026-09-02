@@ -276,7 +276,6 @@ def test_public_history_date_range_end_only(public_client, public_space_id):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.xfail(reason="APP-5938: 500 для вручную созданных сущностей")
 def test_public_history_date_range_project_interval(public_client, public_space_id, project_id):
     """dateRange [start, end) для kind=Project."""
     allure.dynamic.title("[Project] dateRange [08-12, 08-14) — start включительно, end исключительно")
@@ -331,7 +330,6 @@ def test_public_history_date_range_project_interval(public_client, public_space_
 
 
 
-@pytest.mark.xfail(reason="APP-5938: 500 для вручную созданных сущностей")
 def test_public_history_date_range_project_start_only(public_client, public_space_id, project_id):
     """Только dateRangeStart для kind=Project — все items >= start."""
     allure.dynamic.title("[Project] dateRangeStart=08-14 — все items >= start")
@@ -363,7 +361,6 @@ def test_public_history_date_range_project_start_only(public_client, public_spac
 
 
 
-@pytest.mark.xfail(reason="APP-5938: 500 для вручную созданных сущностей")
 def test_public_history_date_range_project_end_only(public_client, public_space_id, project_id):
     """Только dateRangeEnd для kind=Project — все items < end."""
     allure.dynamic.title("[Project] dateRangeEnd=08-15 — все items < end")
