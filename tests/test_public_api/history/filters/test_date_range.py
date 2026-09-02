@@ -64,6 +64,10 @@ def test_public_history_date_range_equal(public_client, public_space_id, space_e
     и передаём start == end. Полуоткрытый интервал [start, end) с нулевой длиной
     не может захватить ни одного события — проверяем что API возвращает пустой items,
     а не все события за этот день (что было бы при закрытом интервале [start, end]).
+
+    Примечание: на фронте при выборе одного дня пользователь видит события,
+    потому что фронт отправляет start=00:00, end=23:59 (почти полные сутки).
+    Здесь мы проверяем поведение именно API при start == end.
     """
     first_date = datetime.fromisoformat(space_events[0].replace("Z", "+00:00"))
     same_day = first_date.replace(hour=0, minute=0, second=0, microsecond=0)
