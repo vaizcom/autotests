@@ -32,6 +32,20 @@ def document_id():
 
 
 @pytest.fixture(scope="session")
+def space_events(public_client, public_space_id):
+    """Загружает все события спейса и возвращает отсортированный список createdAt."""
+    time.sleep(1)
+    resp = public_client.get(
+        **public_history_endpoint(space_id=public_space_id, kind="Space", kind_id=public_space_id)
+    )
+    assert resp.status_code == 200, f"Не удалось загрузить события спейса: {resp.text}"
+    items = resp.json()["items"]
+    assert len(items) > 0, "У спейса нет событий — тесты dateRange невозможны"
+    dates = sorted(item["createdAt"] for item in items)
+    return dates
+
+
+@pytest.fixture(scope="session")
 def project_events(public_client, public_space_id):
     """Загружает все события проекта и возвращает отсортированный список createdAt."""
     time.sleep(1)
