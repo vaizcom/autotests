@@ -20,6 +20,10 @@ def public_history_endpoint(
     Публичный API истории. Использует query params (не JSON body).
     Пагинация курсорная: nextCursor (отсутствует — первая страница).
     Rate limit: 1 rps.
+
+    dateRangeStart/dateRangeEnd — фильтр по createdAt событий, полуоткрытый интервал [start, end).
+    Формат ISO 8601: "2026-08-14T09:03:00.000Z". Поддерживает точность до миллисекунд.
+    Не путать с dueStart/dueEnd задач — там бэкенд нормализует время (00:00:00 / 23:59:59).
     """
     params: Dict[str, Any] = {
         "spaceId": space_id,
