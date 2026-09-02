@@ -93,6 +93,46 @@ def test_public_history_date_range_equal(public_client, public_space_id, space_e
 
 
 
+def test_public_history_date_range_single_day(public_client, public_space_id, space_events):
+    """Выбор одного дня [00:00, 23:59:59.999) — сценарий фронта.
+
+    Фронт при выборе одного дня отправляет start=00:00, end=23:59.
+    Проверяем что API возвращает события за этот день,
+    и все createdAt попадают в границы выбранного дня.
+    """
+    # Берём день с реальными событиями
+    first_date = datetime.fromisoformat(space_events[0].replace("Z", "+00:00"))
+    day_start = first_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    day_end = day_start.replace(hour=23, minute=59, second=59, microsecond=999000)
+    start = day_start.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    end = day_end.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+
+    allure.dynamic.title(f"[Space] один день {start[:10]} [00:00, 23:59:59.999) — сценарий фронта")
+
+    with allure.step(f"Запрашиваем с dateRangeStart={start[:10]} 00:00, dateRangeEnd={end[:10]} 23:59"):
+        resp = public_client.get(
+            **public_history_endpoint(
+                space_id=public_space_id, kind="Space", kind_id=public_space_id,
+                date_range_start=start, date_range_end=end,
+            )
+        )
+
+    with allure.step("Статус 200"):
+        assert resp.status_code == 200, f"Ожидался 200: {resp.text}"
+
+    items = resp.json()["items"]
+
+    with allure.step("items не пустой — за этот день есть события"):
+        assert len(items) > 0, f"Ожидались события за {start[:10]}"
+
+    with allure.step("Все items имеют createdAt в пределах выбранного дня"):
+        for item in items:
+            assert item["createdAt"][:10] == start[:10], (
+                f"Событие за другой день: {item['createdAt']}, ожидался {start[:10]}"
+            )
+
+
+
 @pytest.mark.xfail(
     reason="BUG: сервер возвращает 200 вместо 400 при start > end — клиент не узнаёт об ошибке",
     strict=True,
