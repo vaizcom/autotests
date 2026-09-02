@@ -58,12 +58,13 @@ def test_public_history_date_range_empty(public_client, public_space_id):
 
 
 def test_public_history_date_range_equal(public_client, public_space_id, space_events):
-    """dateRangeStart == dateRangeEnd — нулевой интервал, пустой items.
+    """dateRangeStart == dateRangeEnd — нулевой интервал [day, day), items пустой.
 
-    API использует полуоткрытый интервал [start, end).
-    Когда start == end, условие start <= T < start невозможно — пустой результат корректен.
+    Берём день, в котором точно есть события (дата первого события спейса),
+    и передаём start == end. Полуоткрытый интервал [start, end) с нулевой длиной
+    не может захватить ни одного события — проверяем что API возвращает пустой items,
+    а не все события за этот день (что было бы при закрытом интервале [start, end]).
     """
-    # Берём дату реального события — гарантируем что дата не «пустая»
     first_date = datetime.fromisoformat(space_events[0].replace("Z", "+00:00"))
     same_day = first_date.replace(hour=0, minute=0, second=0, microsecond=0)
     same_day_str = same_day.strftime("%Y-%m-%dT%H:%M:%S.000Z")
