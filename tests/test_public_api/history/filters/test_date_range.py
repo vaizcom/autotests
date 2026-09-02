@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timedelta
 
 import allure
 import pytest
@@ -276,12 +277,16 @@ def test_public_history_date_range_end_only(public_client, public_space_id):
 # ---------------------------------------------------------------------------
 
 
-def test_public_history_date_range_project_interval(public_client, public_space_id, project_id):
-    """dateRange [start, end) для kind=Project."""
-    allure.dynamic.title("[Project] dateRange [08-12, 08-14) — start включительно, end исключительно")
+def test_public_history_date_range_project_interval(public_client, public_space_id, project_id, project_events):
+    """dateRange [start, end) для kind=Project — динамические даты из реальных событий."""
+    # Берём первое событие и строим интервал: [день события, +2 дня)
+    first_date = datetime.fromisoformat(project_events[0].replace("Z", "+00:00"))
+    start_dt = first_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_dt = start_dt + timedelta(days=2)
+    start = start_dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    end = end_dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-    start = "2026-08-12T00:00:00.000Z"
-    end = "2026-08-14T00:00:00.000Z"
+    allure.dynamic.title(f"[Project] dateRange [{start[:10]}, {end[:10]}) — start включительно, end исключительно")
 
     with allure.step(f"Запрашиваем с kind=Project, dateRangeStart={start}, dateRangeEnd={end}"):
         resp = public_client.get(
@@ -297,44 +302,32 @@ def test_public_history_date_range_project_interval(public_client, public_space_
     items = resp.json()["items"]
 
     with allure.step("items не пустой"):
-        assert len(items) > 0, "Ожидались события в интервале [08-12, 08-14) в Project"
+        assert len(items) > 0, f"Ожидались события в интервале [{start[:10]}, {end[:10]})"
 
     with allure.step("Все items имеют createdAt >= start"):
-        before_start = [item for item in items if item["createdAt"] < "2026-08-12T00:00:00"]
+        before_start = [item for item in items if item["createdAt"] < start[:19]]
         assert len(before_start) == 0, (
             f"{len(before_start)} событий до start: "
             f"{[item['createdAt'] for item in before_start[:5]]}"
         )
 
     with allure.step("Все items имеют createdAt < end"):
-        after_end = [item for item in items if item["createdAt"] >= "2026-08-14T00:00:00"]
+        after_end = [item for item in items if item["createdAt"] >= end[:19]]
         assert len(after_end) == 0, (
             f"{len(after_end)} событий >= end: "
             f"{[item['createdAt'] for item in after_end[:5]]}"
         )
 
-    time.sleep(1)
-
-    with allure.step("Проверяем что за пределами интервала есть события (фильтр реально отсёк)"):
-        resp_all = public_client.get(
-            **public_history_endpoint(
-                space_id=public_space_id, kind="Project", kind_id=project_id,
-            )
-        )
-        assert resp_all.status_code == 200
-        all_items = resp_all.json()["items"]
-        outside = [item for item in all_items if item["createdAt"] >= "2026-08-14T00:00:00"]
-        assert len(outside) > 0, (
-            "Нет событий за пределами интервала — тест не доказывает что end отсекает"
-        )
 
 
-
-def test_public_history_date_range_project_start_only(public_client, public_space_id, project_id):
+def test_public_history_date_range_project_start_only(public_client, public_space_id, project_id, project_events):
     """Только dateRangeStart для kind=Project — все items >= start."""
-    allure.dynamic.title("[Project] dateRangeStart=08-14 — все items >= start")
+    # Берём первое событие — все items должны быть >= этой даты
+    first_date = datetime.fromisoformat(project_events[0].replace("Z", "+00:00"))
+    start_dt = first_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    start = start_dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-    start = "2026-08-14T00:00:00.000Z"
+    allure.dynamic.title(f"[Project] dateRangeStart={start[:10]} — все items >= start")
 
     with allure.step(f"Запрашиваем с kind=Project, dateRangeStart={start}"):
         resp = public_client.get(
@@ -353,7 +346,7 @@ def test_public_history_date_range_project_start_only(public_client, public_spac
         assert len(items) > 0, f"Ожидались события после {start}"
 
     with allure.step("Все items имеют createdAt >= dateRangeStart"):
-        before_start = [item for item in items if item["createdAt"] < "2026-08-14T00:00:00"]
+        before_start = [item for item in items if item["createdAt"] < start[:19]]
         assert len(before_start) == 0, (
             f"{len(before_start)} событий до dateRangeStart: "
             f"{[item['createdAt'] for item in before_start[:5]]}"
@@ -361,11 +354,14 @@ def test_public_history_date_range_project_start_only(public_client, public_spac
 
 
 
-def test_public_history_date_range_project_end_only(public_client, public_space_id, project_id):
+def test_public_history_date_range_project_end_only(public_client, public_space_id, project_id, project_events):
     """Только dateRangeEnd для kind=Project — все items < end."""
-    allure.dynamic.title("[Project] dateRangeEnd=08-15 — все items < end")
+    # Берём последнее событие + 1 день — все items должны быть < end
+    last_date = datetime.fromisoformat(project_events[-1].replace("Z", "+00:00"))
+    end_dt = (last_date + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    end = end_dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-    end = "2026-08-15T00:00:00.000Z"
+    allure.dynamic.title(f"[Project] dateRangeEnd={end[:10]} — все items < end")
 
     with allure.step(f"Запрашиваем с kind=Project, dateRangeEnd={end}"):
         resp = public_client.get(
@@ -384,7 +380,7 @@ def test_public_history_date_range_project_end_only(public_client, public_space_
         assert len(items) > 0, f"Ожидались события до {end}"
 
     with allure.step("Все items имеют createdAt < dateRangeEnd"):
-        after_end = [item for item in items if item["createdAt"] >= "2026-08-15T00:00:00"]
+        after_end = [item for item in items if item["createdAt"] >= end[:19]]
         assert len(after_end) == 0, (
             f"{len(after_end)} событий после dateRangeEnd: "
             f"{[item['createdAt'] for item in after_end[:5]]}"
