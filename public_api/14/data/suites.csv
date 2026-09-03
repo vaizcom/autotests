@@ -1,0 +1,84 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"skipped","Thu Sep 03 12:51:11 UTC 2026","Thu Sep 03 12:51:11 UTC 2026","140","Public API","History","Date Range","","","[Space][Negative] dateRangeStart > dateRangeEnd → 400","dateRangeStart > dateRangeEnd — дата начала позже даты конца.
+
+    Сейчас сервер возвращает 200 + пустой items, но ожидается 400 —
+    клиент явно ошибся, лучше сообщить об этом чем молча вернуть пустоту.
+    "
+"passed","Thu Sep 03 12:51:32 UTC 2026","Thu Sep 03 12:51:32 UTC 2026","245","Public API","History","Date Range","","","[Project] dateRangeEnd=2026-09-04 — все items < end","Только dateRangeEnd для kind=Project — все items < end."
+"skipped","Thu Sep 03 12:51:22 UTC 2026","Thu Sep 03 12:51:23 UTC 2026","283","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='123' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Thu Sep 03 12:51:33 UTC 2026","Thu Sep 03 12:51:33 UTC 2026","240","Public API","History","History Kinds","","","GetHistory kind='Space' возвращает 200 и items (Space)","
+    Проверяем что GetHistory возвращает 200 и непустой items для каждого kind.
+    "
+"passed","Thu Sep 03 12:51:26 UTC 2026","Thu Sep 03 12:51:26 UTC 2026","243","Public API","History","Date Range","","","[Space] dateRangeEnd=2026-09-04 — все items < end","Только dateRangeEnd — все items < end.
+
+    Фильтрация по дню после последнего события.
+    "
+"passed","Thu Sep 03 12:51:35 UTC 2026","Thu Sep 03 12:51:36 UTC 2026","474","Public API","History","History Kinds","","","GetHistory kind='Task' возвращает 200 и items (Task)","
+    Проверяем что GetHistory возвращает 200 и непустой items для каждого kind.
+    "
+"skipped","Thu Sep 03 12:51:15 UTC 2026","Thu Sep 03 12:51:15 UTC 2026","147","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='10.08.2026' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Thu Sep 03 12:51:31 UTC 2026","Thu Sep 03 12:51:31 UTC 2026","147","Public API","History","Date Range","","","[Project] dateRangeStart=2026-08-25 — все items >= start","Только dateRangeStart для kind=Project — все items >= start."
+"passed","Thu Sep 03 12:51:38 UTC 2026","Thu Sep 03 12:51:38 UTC 2026","201","Public API","History","History Kinds","","","GetHistory kind='Document' возвращает 200 и items (Document)","
+    Проверяем что GetHistory возвращает 200 и непустой items для каждого kind.
+    "
+"passed","Thu Sep 03 12:51:08 UTC 2026","Thu Sep 03 12:51:09 UTC 2026","278","Public API","History","Date Range","","","[Space] dateRangeStart == dateRangeEnd (2026-08-25) — пустой items","dateRangeStart == dateRangeEnd — нулевой интервал [day, day), items пустой.
+
+    Берём день, в котором точно есть события (дата первого события спейса),
+    и передаём start == end. Полуоткрытый интервал [start, end) с нулевой длиной
+    не может захватить ни одного события — проверяем что API возвращает пустой items,
+    а не все события за этот день (что было бы при закрытом интервале [start, end]).
+
+    Примечание: на фронте при выборе одного дня пользователь видит события,
+    потому что фронт отправляет start=00:00, end=23:59 (почти полные сутки).
+    Здесь мы проверяем поведение именно API при start == end.
+    "
+"passed","Thu Sep 03 12:51:10 UTC 2026","Thu Sep 03 12:51:10 UTC 2026","474","Public API","History","Date Range","","","[Space] один день 2026-08-25 [00:00, 23:59:59.999) — сценарий фронта","Выбор одного дня [00:00, 23:59:59.999) — сценарий фронта.
+
+    Фронт при выборе одного дня отправляет start=00:00, end=23:59.
+    Проверяем что API возвращает события за этот день,
+    и все createdAt попадают в границы выбранного дня.
+    "
+"passed","Thu Sep 03 12:51:25 UTC 2026","Thu Sep 03 12:51:25 UTC 2026","235","Public API","History","Date Range","","","[Space] dateRangeStart=2026-08-25 — все items >= start","Только dateRangeStart — все items >= start.
+
+    Фильтрация по дню первого события.
+    "
+"passed","Thu Sep 03 12:51:14 UTC 2026","Thu Sep 03 12:51:14 UTC 2026","298","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"skipped","Thu Sep 03 12:51:16 UTC 2026","Thu Sep 03 12:51:17 UTC 2026","1315","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='08-10-2026' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Thu Sep 03 12:51:05 UTC 2026","Thu Sep 03 12:51:06 UTC 2026","1576","Public API","History","Date Range","","","[Space] dateRange за пределами данных — пустой items","dateRangeStart в будущем / dateRangeEnd в прошлом — пустой items."
+"passed","Thu Sep 03 12:51:24 UTC 2026","Thu Sep 03 12:51:24 UTC 2026","228","Public API","History","Date Range","","","[Space] dateRange [2026-08-25, 2026-08-27) — start включительно, end исключительно","dateRange [start, end) — items внутри интервала, нет items вне.
+
+    Фильтрация по дням — как на фронте, где пользователь выбирает даты без времени.
+    "
+"passed","Thu Sep 03 12:51:12 UTC 2026","Thu Sep 03 12:51:13 UTC 2026","148","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='not-a-date' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Thu Sep 03 12:51:37 UTC 2026","Thu Sep 03 12:51:37 UTC 2026","172","Public API","History","History Kinds","","","GetHistory kind='Milestone' возвращает 200 и items (Milestone)","
+    Проверяем что GetHistory возвращает 200 и непустой items для каждого kind.
+    "
+"skipped","Thu Sep 03 12:51:18 UTC 2026","Thu Sep 03 12:51:21 UTC 2026","2950","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='2026/08/10' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Thu Sep 03 12:51:34 UTC 2026","Thu Sep 03 12:51:34 UTC 2026","161","Public API","History","History Kinds","","","GetHistory kind='Project' возвращает 200 и items (Project)","
+    Проверяем что GetHistory возвращает 200 и непустой items для каждого kind.
+    "
+"passed","Thu Sep 03 12:51:29 UTC 2026","Thu Sep 03 12:51:30 UTC 2026","1124","Public API","History","Date Range","","","[Project] dateRange [2026-08-25, 2026-08-27) — start включительно, end исключительно","dateRange [start, end) для kind=Project — динамические даты из реальных событий."
