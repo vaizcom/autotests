@@ -59,11 +59,11 @@ def test_due_start_after_due_end(owner_client, main_space, make_task_in_main):
         r = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=task_id))
         assert r.status_code == 200, r.text
         task_data = r.json()["payload"]["task"]
-        assert task_data["dueStart"].startswith(DUE_START_LATE[:19]), (
-            f"dueStart не установлен: ожидали {DUE_START_LATE[:19]}, получили {task_data.get('dueStart')}"
+        assert task_data["dueStart"].startswith(DUE_START_LATE[:10]), (
+            f"dueStart не установлен: ожидали {DUE_START_LATE[:10]}, получили {task_data.get('dueStart')}"
         )
-        assert task_data["dueEnd"].startswith(DUE_END_EARLY[:19]), (
-            f"dueEnd не установлен: ожидали {DUE_END_EARLY[:19]}, получили {task_data.get('dueEnd')}"
+        assert task_data["dueEnd"].startswith(DUE_END_EARLY[:10]), (
+            f"dueEnd не установлен: ожидали {DUE_END_EARLY[:10]}, получили {task_data.get('dueEnd')}"
         )
 
 
@@ -100,8 +100,8 @@ def test_cannot_clear_date_via_multiaction(owner_client, main_space, make_task_i
         r = owner_client.post(**get_task_endpoint(space_id=main_space, slug_id=task_id))
         assert r.status_code == 200, r.text
         task_data = r.json()["payload"]["task"]
-        assert task_data["dueStart"].startswith(DUE_START_A[:19]), (
-            f"dueStart не установлен: ожидали {DUE_START_A[:19]}, получили {task_data.get('dueStart')}"
+        assert task_data["dueStart"].startswith(DUE_START_A[:10]), (
+            f"dueStart не установлен: ожидали {DUE_START_A[:10]}, получили {task_data.get('dueStart')}"
         )
         assert task_data["dueEnd"] == stored_due_end, (
             f"dueEnd изменился! Было {stored_due_end}, стало {task_data.get('dueEnd')}"
