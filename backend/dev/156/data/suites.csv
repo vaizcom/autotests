@@ -1,0 +1,11 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Fri Sep 04 13:13:32 UTC 2026","Fri Sep 04 13:13:35 UTC 2026","3066","Multiaction","Dates","Negative","","","Нельзя сбросить дату через multiaction","
+    Создаём задачу с dueEnd, затем вызываем multiaction без dueEnd (передаём только dueStart).
+    dueStart должен установиться, а dueEnd — остаться прежним.
+    "
+"passed","Fri Sep 04 13:13:30 UTC 2026","Fri Sep 04 13:13:31 UTC 2026","1071","Multiaction","Dates","Negative","","","dueStart позже dueEnd — валидации нет (internal API)","
+    Передаём dueStart позже dueEnd.
+    В EditTask это 400 InvalidForm, но multiaction — internal API,
+    валидация порядка дат не применяется (будет в public API).
+    Ожидаем 200 + success.
+    "

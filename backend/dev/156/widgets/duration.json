@@ -1,0 +1,1 @@
+[{"uid":"713a3d157733e09c","name":"Нельзя сбросить дату через multiaction","time":{"start":1788527612816,"stop":1788527615882,"duration":3066},"status":"passed","severity":"normal"},{"uid":"6dceebb55c09983a","name":"dueStart позже dueEnd — валидации нет (internal API)","time":{"start":1788527610771,"stop":1788527611842,"duration":1071},"status":"passed","severity":"normal"}]
