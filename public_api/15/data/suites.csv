@@ -1,0 +1,178 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"skipped","Fri Sep 04 12:05:29 UTC 2026","Fri Sep 04 12:05:29 UTC 2026","355","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='2026/08/10' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Fri Sep 04 12:06:21 UTC 2026","Fri Sep 04 12:06:21 UTC 2026","202","Public API","History","History Kinds","","","GetHistory kind='Milestone' возвращает 200 и items (Milestone)","
+    Проверяем что GetHistory возвращает 200 и непустой items для каждого kind.
+    "
+"passed","Fri Sep 04 12:05:45 UTC 2026","Fri Sep 04 12:05:45 UTC 2026","190","Public API","History","Event Keys","","","[Negative] eventKeys=task_created (lowercase) → 400 (InvalidKind)","Невалидный eventKeys возвращает 400."
+"passed","Fri Sep 04 12:05:37 UTC 2026","Fri Sep 04 12:05:38 UTC 2026","598","Public API","History","Date Range","","","[Project] dateRange [2026-08-25, 2026-08-27) — start включительно, end исключительно","dateRange [start, end) для kind=Project — динамические даты из реальных событий."
+"passed","Fri Sep 04 12:06:14 UTC 2026","Fri Sep 04 12:06:15 UTC 2026","812","Public API","History","Pagination","","","[Negative] limit=0 → 400 (limit must be a positive number)","Невалидный limit (0, отрицательный) возвращает 400."
+"passed","Fri Sep 04 12:05:55 UTC 2026","Fri Sep 04 12:05:56 UTC 2026","375","Public API","History","Missing Params","","","[Negative] без 'kind' → 400 (InvalidKind)","
+    При отсутствии любого обязательного параметра (spaceId, kind, kindId) возвращается 400.
+    "
+"passed","Fri Sep 04 12:05:58 UTC 2026","Fri Sep 04 12:05:58 UTC 2026","202","Public API","History","Nonexistent IDs","","","[Negative] несуществующий spaceId → ValidationErrors/IncorrectId","
+    Запрос с несуществующим spaceId возвращает 200 + ValidationErrors/IncorrectId.
+    TODO: уточнить после фикса — ожидается пустой items или другой код ошибки.
+    "
+"passed","Fri Sep 04 12:05:32 UTC 2026","Fri Sep 04 12:05:32 UTC 2026","369","Public API","History","Date Range","","","[Space] dateRange [2026-08-25, 2026-08-27) — start включительно, end исключительно","dateRange [start, end) — items внутри интервала, нет items вне.
+
+    Фильтрация по дням — как на фронте, где пользователь выбирает даты без времени.
+    "
+"passed","Fri Sep 04 12:06:13 UTC 2026","Fri Sep 04 12:06:13 UTC 2026","200","Public API","History","Pagination","","","limit=1 возвращает ровно 1 item","limit=1 возвращает ровно 1 item."
+"skipped","Fri Sep 04 12:06:06 UTC 2026","Fri Sep 04 12:06:06 UTC 2026","213","Public API","History","Nonexistent IDs","","","[Negative] несуществующий kindId kind='Milestone' → 500 (BUG)","
+    Запрос с несуществующим kindId для каждого вида сущности.
+    BUG: все kind возвращают 500 — сервер не обрабатывает случай несуществующей сущности.
+    Ожидаемое поведение после фикса: Space/Project → 403 AccessDenied, Task/Document/Milestone → 400 NotFound.
+    "
+"skipped","Fri Sep 04 12:05:28 UTC 2026","Fri Sep 04 12:05:28 UTC 2026","368","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='08-10-2026' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Fri Sep 04 12:05:54 UTC 2026","Fri Sep 04 12:05:54 UTC 2026","235","Public API","History","Missing Params","","","[Negative] без 'spaceId' → 400 (IncorrectId)","
+    При отсутствии любого обязательного параметра (spaceId, kind, kindId) возвращается 400.
+    "
+"passed","Fri Sep 04 12:05:25 UTC 2026","Fri Sep 04 12:05:26 UTC 2026","193","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Fri Sep 04 12:05:59 UTC 2026","Fri Sep 04 12:05:59 UTC 2026","193","Public API","History","Nonexistent IDs","","","[Negative] чужой spaceId → ValidationErrors/IncorrectId","
+    Запрос к space без доступа возвращает 200 + ValidationErrors/IncorrectId.
+    TODO: уточнить после фикса — ожидается пустой items или другой код ошибки.
+    "
+"passed","Fri Sep 04 12:05:33 UTC 2026","Fri Sep 04 12:05:34 UTC 2026","410","Public API","History","Date Range","","","[Space] dateRangeStart=2026-08-25 — все items >= start","Только dateRangeStart — все items >= start.
+
+    Фильтрация по дню первого события.
+    "
+"passed","Fri Sep 04 12:06:29 UTC 2026","Fri Sep 04 12:06:29 UTC 2026","210","Public API","Authorization","Auth Errors","","","[Negative] запрос без токена → 401","
+    Проверяем что без Authorization header любой эндпоинт публичного API возвращает 401.
+    "
+"passed","Fri Sep 04 12:06:27 UTC 2026","Fri Sep 04 12:06:28 UTC 2026","907","Public API","History","Rate Limit","","","Быстрые последовательные запросы — 429 Rate Limit","Rate limit публичного API — 1 запрос в секунду.
+    Отправляем до 20 запросов подряд без пауз через клиент без retry.
+    Ожидаем, что сервер вернёт 429 Too Many Requests на одном из запросов."
+"passed","Fri Sep 04 12:05:39 UTC 2026","Fri Sep 04 12:05:39 UTC 2026","427","Public API","History","Date Range","","","[Project] dateRangeStart=2026-08-25 — все items >= start","Только dateRangeStart для kind=Project — все items >= start."
+"passed","Fri Sep 04 12:05:20 UTC 2026","Fri Sep 04 12:05:21 UTC 2026","195","Public API","History","Date Range","","","[Space] dateRangeStart == dateRangeEnd (2026-08-25) — пустой items","dateRangeStart == dateRangeEnd — нулевой интервал [day, day), items пустой.
+
+    Берём день, в котором точно есть события (дата первого события спейса),
+    и передаём start == end. Полуоткрытый интервал [start, end) с нулевой длиной
+    не может захватить ни одного события — проверяем что API возвращает пустой items,
+    а не все события за этот день (что было бы при закрытом интервале [start, end]).
+
+    Примечание: на фронте при выборе одного дня пользователь видит события,
+    потому что фронт отправляет start=00:00, end=23:59 (почти полные сутки).
+    Здесь мы проверяем поведение именно API при start == end.
+    "
+"passed","Fri Sep 04 12:05:35 UTC 2026","Fri Sep 04 12:05:35 UTC 2026","352","Public API","History","Date Range","","","[Space] dateRangeEnd=2026-09-04 — все items < end","Только dateRangeEnd — все items < end.
+
+    Фильтрация по дню после последнего события.
+    "
+"skipped","Fri Sep 04 12:05:27 UTC 2026","Fri Sep 04 12:05:27 UTC 2026","197","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='10.08.2026' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Fri Sep 04 12:05:49 UTC 2026","Fri Sep 04 12:05:50 UTC 2026","189","Public API","History","Invalid Values","","","[Negative] kind='space' → 400 (lowercase_space)","
+    kind должен быть одним из допустимых значений enum.
+    Любое другое значение возвращает 400.
+    "
+"passed","Fri Sep 04 12:06:12 UTC 2026","Fri Sep 04 12:06:12 UTC 2026","378","Public API","History","Pagination","","","limit=1000 (больше всех событий) — hasMore=false, все items","limit больше общего количества событий — возвращает все items и hasMore=false."
+"passed","Fri Sep 04 12:05:47 UTC 2026","Fri Sep 04 12:05:47 UTC 2026","187","Public API","History","Invalid Values","","","[Negative] невалидный формат kindId → 400","
+    kindId должен быть валидным ObjectId. Невалидный формат возвращает 400.
+    "
+"skipped","Fri Sep 04 12:05:31 UTC 2026","Fri Sep 04 12:05:31 UTC 2026","366","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='123' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Fri Sep 04 12:06:22 UTC 2026","Fri Sep 04 12:06:22 UTC 2026","195","Public API","History","History Kinds","","","GetHistory kind='Document' возвращает 200 и items (Document)","
+    Проверяем что GetHistory возвращает 200 и непустой items для каждого kind.
+    "
+"skipped","Fri Sep 04 12:05:23 UTC 2026","Fri Sep 04 12:05:23 UTC 2026","198","Public API","History","Date Range","","","[Space][Negative] dateRangeStart > dateRangeEnd → 400","dateRangeStart > dateRangeEnd — дата начала позже даты конца.
+
+    Сейчас сервер возвращает 200 + пустой items, но ожидается 400 —
+    клиент явно ошибся, лучше сообщить об этом чем молча вернуть пустоту.
+    "
+"skipped","Fri Sep 04 12:06:04 UTC 2026","Fri Sep 04 12:06:05 UTC 2026","714","Public API","History","Nonexistent IDs","","","[Negative] несуществующий kindId kind='Document' → 500 (BUG)","
+    Запрос с несуществующим kindId для каждого вида сущности.
+    BUG: все kind возвращают 500 — сервер не обрабатывает случай несуществующей сущности.
+    Ожидаемое поведение после фикса: Space/Project → 403 AccessDenied, Task/Document/Milestone → 400 NotFound.
+    "
+"passed","Fri Sep 04 12:06:16 UTC 2026","Fri Sep 04 12:06:16 UTC 2026","237","Public API","History","Pagination","","","[Negative] limit=-1 → 400 (limit must be a positive number)","Невалидный limit (0, отрицательный) возвращает 400."
+"skipped","Fri Sep 04 12:06:00 UTC 2026","Fri Sep 04 12:06:01 UTC 2026","736","Public API","History","Nonexistent IDs","","","[Negative] несуществующий kindId kind='Space' → 500 (BUG)","
+    Запрос с несуществующим kindId для каждого вида сущности.
+    BUG: все kind возвращают 500 — сервер не обрабатывает случай несуществующей сущности.
+    Ожидаемое поведение после фикса: Space/Project → 403 AccessDenied, Task/Document/Milestone → 400 NotFound.
+    "
+"passed","Fri Sep 04 12:05:16 UTC 2026","Fri Sep 04 12:05:18 UTC 2026","1820","Public API","History","Date Range","","","[Space] dateRange за пределами данных — пустой items","dateRangeStart в будущем / dateRangeEnd в прошлом — пустой items."
+"passed","Fri Sep 04 12:05:42 UTC 2026","Fri Sep 04 12:05:42 UTC 2026","454","Public API","History","Event Keys","","","eventKeys=TASK_CREATED — только события TASK_CREATED","eventKeys с одним значением фильтрует только указанный тип событий."
+"passed","Fri Sep 04 12:05:57 UTC 2026","Fri Sep 04 12:05:57 UTC 2026","190","Public API","History","Missing Params","","","[Negative] без 'kindId' → 400 (IncorrectId)","
+    При отсутствии любого обязательного параметра (spaceId, kind, kindId) возвращается 400.
+    "
+"skipped","Fri Sep 04 12:06:03 UTC 2026","Fri Sep 04 12:06:03 UTC 2026","439","Public API","History","Nonexistent IDs","","","[Negative] несуществующий kindId kind='Task' → 500 (BUG)","
+    Запрос с несуществующим kindId для каждого вида сущности.
+    BUG: все kind возвращают 500 — сервер не обрабатывает случай несуществующей сущности.
+    Ожидаемое поведение после фикса: Space/Project → 403 AccessDenied, Task/Document/Milestone → 400 NotFound.
+    "
+"passed","Fri Sep 04 12:05:51 UTC 2026","Fri Sep 04 12:05:51 UTC 2026","188","Public API","History","Invalid Values","","","[Negative] kind='SPACE' → 400 (uppercase_SPACE)","
+    kind должен быть одним из допустимых значений enum.
+    Любое другое значение возвращает 400.
+    "
+"passed","Fri Sep 04 12:05:48 UTC 2026","Fri Sep 04 12:05:48 UTC 2026","197","Public API","History","Invalid Values","","","[Negative] kind='Board' → 400 (unsupported_kind_Board)","
+    kind должен быть одним из допустимых значений enum.
+    Любое другое значение возвращает 400.
+    "
+"passed","Fri Sep 04 12:05:46 UTC 2026","Fri Sep 04 12:05:46 UTC 2026","188","Public API","History","Invalid Values","","","[Negative] невалидный формат spaceId → 400","
+    spaceId должен быть валидным ObjectId. Невалидный формат возвращает 400.
+    "
+"passed","Fri Sep 04 12:06:20 UTC 2026","Fri Sep 04 12:06:20 UTC 2026","201","Public API","History","History Kinds","","","GetHistory kind='Task' возвращает 200 и items (Task)","
+    Проверяем что GetHistory возвращает 200 и непустой items для каждого kind.
+    "
+"skipped","Fri Sep 04 12:06:02 UTC 2026","Fri Sep 04 12:06:02 UTC 2026","194","Public API","History","Nonexistent IDs","","","[Negative] несуществующий kindId kind='Project' → 500 (BUG)","
+    Запрос с несуществующим kindId для каждого вида сущности.
+    BUG: все kind возвращают 500 — сервер не обрабатывает случай несуществующей сущности.
+    Ожидаемое поведение после фикса: Space/Project → 403 AccessDenied, Task/Document/Milestone → 400 NotFound.
+    "
+"passed","Fri Sep 04 12:05:24 UTC 2026","Fri Sep 04 12:05:24 UTC 2026","201","Public API","History","Date Range","","","[Space][Negative] dateRangeStart='not-a-date' → 400","Невалидный формат даты — 400.
+
+    API принимает только ISO 8601 (2026-08-14T00:00:00.000Z).
+    Другие форматы должны возвращать 400 ValidationErrors.
+    "
+"passed","Fri Sep 04 12:06:23 UTC 2026","Fri Sep 04 12:06:24 UTC 2026","665","Public API","History","Positive","","","Валидный запрос возвращает 200 и корректную структуру ответа","
+    Проверяем базовую доступность эндпоинта:
+    - статус 200
+    - тело содержит items (список) и page (hasMore + nextCursor при наличии)
+    "
+"passed","Fri Sep 04 12:06:25 UTC 2026","Fri Sep 04 12:06:26 UTC 2026","1180","Public API","History","Positive","","","Элементы items в ответе содержат обязательные поля","
+    Проверяем структуру элементов items в ответе:
+    - обязательные поля (_id, key, createdAt, type, data, creatorId) присутствуют в каждом элементе
+    - источник: интерфейс IHistory
+    "
+"passed","Fri Sep 04 12:05:43 UTC 2026","Fri Sep 04 12:05:44 UTC 2026","198","Public API","History","Event Keys","","","eventKeys=[TASK_CREATED, PROJECT_CREATED] — оба типа в ответе","eventKeys с несколькими значениями фильтрует по всем указанным типам."
+"passed","Fri Sep 04 12:05:22 UTC 2026","Fri Sep 04 12:05:22 UTC 2026","364","Public API","History","Date Range","","","[Space] один день 2026-08-25 [00:00, 23:59:59.999) — сценарий фронта","Выбор одного дня [00:00, 23:59:59.999) — сценарий фронта.
+
+    Фронт при выборе одного дня отправляет start=00:00, end=23:59.
+    Проверяем что API возвращает события за этот день,
+    и все createdAt попадают в границы выбранного дня.
+    "
+"passed","Fri Sep 04 12:06:09 UTC 2026","Fri Sep 04 12:06:11 UTC 2026","1911","Public API","History","Pagination","","","nextCursor возвращает следующую страницу без дубликатов","Курсорная пагинация: nextCursor — это число (offset от начала выборки).
+    При передаче nextCursor сервер возвращает items начиная с этой позиции.
+    Страницы не должны пересекаться — каждый item появляется только на одной странице."
+"passed","Fri Sep 04 12:05:52 UTC 2026","Fri Sep 04 12:05:53 UTC 2026","1081","Public API","History","Invalid Values","","","[Negative] kind='123' → 400 (numeric_123)","
+    kind должен быть одним из допустимых значений enum.
+    Любое другое значение возвращает 400.
+    "
+"passed","Fri Sep 04 12:05:40 UTC 2026","Fri Sep 04 12:05:41 UTC 2026","736","Public API","History","Date Range","","","[Project] dateRangeEnd=2026-09-04 — все items < end","Только dateRangeEnd для kind=Project — все items < end."
+"passed","Fri Sep 04 12:06:19 UTC 2026","Fri Sep 04 12:06:19 UTC 2026","194","Public API","History","History Kinds","","","GetHistory kind='Project' возвращает 200 и items (Project)","
+    Проверяем что GetHistory возвращает 200 и непустой items для каждого kind.
+    "
+"passed","Fri Sep 04 12:06:17 UTC 2026","Fri Sep 04 12:06:18 UTC 2026","368","Public API","History","History Kinds","","","GetHistory kind='Space' возвращает 200 и items (Space)","
+    Проверяем что GetHistory возвращает 200 и непустой items для каждого kind.
+    "
+"passed","Fri Sep 04 12:06:07 UTC 2026","Fri Sep 04 12:06:08 UTC 2026","204","Public API","History","Pagination","","","limit=5 возвращает ровно 5 items и hasMore=true","limit ограничивает количество items в ответе."
+"passed","Fri Sep 04 12:06:30 UTC 2026","Fri Sep 04 12:06:31 UTC 2026","200","Public API","Authorization","Auth Errors","","","[Negative] невалидный токен → 401","
+    Проверяем что с некорректным токеном любой эндпоинт публичного API возвращает 401.
+    "
