@@ -2,9 +2,9 @@ import allure
 import pytest
 
 from config.generators import generate_space_name
-from test_backend.data.endpoints.Space.space_endpoints import edit_space_endpoint
-from test_backend.data.endpoints.file.upload_avatar_endpoint import upload_avatar_endpoint, DUMMY_PNG_CONTENT
-from test_backend.data.endpoints.History.history_utils import assert_get_history_event
+from api.space.space_endpoints import edit_space_endpoint
+from api.file.upload_avatar_endpoint import upload_avatar_endpoint, DUMMY_PNG_CONTENT
+from api.history.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend]
 

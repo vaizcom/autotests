@@ -2,7 +2,7 @@ import allure
 import pytest
 
 from config.settings import USERS
-from test_backend.data.endpoints.invite.invite_endpoint import (
+from api.invite.invite_endpoint import (
     invite_to_space_endpoint,
     confirm_space_invite_endpoint,
     decline_space_invite_endpoint,
@@ -10,9 +10,9 @@ from test_backend.data.endpoints.invite.invite_endpoint import (
     deactivate_member_endpoint,
     reactivate_member_endpoint,
 )
-from test_backend.data.endpoints.Space.space_endpoints import get_spaces_endpoint
-from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_get_history_event
+from api.space.space_endpoints import get_spaces_endpoint
+from api.member.member_endpoints import get_space_members_endpoint
+from api.history.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend]
 

@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_field_endpoint
+from api.task.task_endpoints import edit_task_custom_field_endpoint
 from test_backend.task_service.conftest import _update_custom_field
 
 pytestmark = [pytest.mark.backend]

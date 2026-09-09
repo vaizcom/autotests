@@ -2,7 +2,7 @@ import pytest
 import allure
 
 from config.generators import generate_project_name, generate_slug
-from test_backend.data.endpoints.Project.project_endpoints import create_project_endpoint, archive_project_endpoint
+from api.project.project_endpoints import create_project_endpoint, archive_project_endpoint
 
 pytestmark = [pytest.mark.backend]
 

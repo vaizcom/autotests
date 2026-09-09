@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Space.space_endpoints import get_spaces_endpoint
+from api.space.space_endpoints import get_spaces_endpoint
 
 pytestmark = [pytest.mark.backend]
 

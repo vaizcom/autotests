@@ -1,4 +1,3 @@
-import time
 import base64
 import json
 
@@ -8,23 +7,15 @@ import requests
 from bson import ObjectId
 
 from config.settings import API_URL
-from test_backend.data.endpoints.Auth.auth_with_email_endpoint import auth_with_email_endpoint
-from test_backend.data.endpoints.Auth.verify_otp_endpoint import verify_otp_endpoint
+from api.auth.auth_with_email_endpoint import auth_with_email_endpoint
+from api.auth.verify_otp_endpoint import verify_otp_endpoint
 
 pytestmark = [pytest.mark.backend]
 
 
 def get_otp_from_mongo(db, temp_token):
-    """
-    Декодирует tempToken JWT, достаёт id и находит OTP в confirmtokens.
-
-    В браузере https://www.jwt.io/ вставить tempToken и получить id,
-    Этот id = _id записи в коллекции confirmtokens,
-    найти в монго по запросу {_id:ObjectId('id')} и извлеч otp_code
-    """
-
+    """Декодирует tempToken JWT, достаёт id и находит OTP в confirmtokens."""
     payload_part = temp_token.split('.')[1]
-    # Добавляем padding для base64
     payload_json = base64.urlsafe_b64decode(payload_part + '==')
     token_data = json.loads(payload_json)
     confirm_id = token_data['id']
@@ -39,21 +30,26 @@ def get_otp_from_mongo(db, temp_token):
 
 
 @allure.parent_suite("Auth Service")
-@allure.suite("New_Registration")
+@allure.suite("New_Login")
 @allure.sub_suite("AuthWithEmail + VerifyOtp")
-def test_register_via_auth_with_email(db):
+@pytest.mark.parametrize("email_case_func, title_suffix", [
+    (lambda s: s.lower(), "обычный email"),
+    (lambda s: s.upper(), "email в верхнем регистре")
+], ids=["lowercase", "uppercase"])
+def test_login_with_otp(db, email_case_func, title_suffix):
     """
-    Новый флоу регистрации: AuthWithEmail → OTP из Mongo → VerifyOtp.
+    Флоу логина через OTP: AuthWithEmail → OTP из Mongo → VerifyOtp.
+    Проверяет двухшаговую авторизацию для существующего пользователя без пароля.
     """
-    allure.dynamic.title("Register (AuthWithEmail): Успешная регистрация нового пользователя")
+    allure.dynamic.title(f"Login (OTP): Успешный логин ({title_suffix})")
 
     base_url = API_URL
-    timestamp = int(time.time())
-    new_email = f"autotest_{timestamp}@gmail.com"
+    raw_email = "tst_signin_otp@mailinator.com"
+    user_email = email_case_func(raw_email)
 
-    # --- Шаг 1: AuthWithEmail с новым email ---
-    with allure.step(f"Шаг 1: AuthWithEmail — новый email {new_email}"):
-        endpoint = auth_with_email_endpoint(email=new_email)
+    # --- Шаг 1: AuthWithEmail ---
+    with allure.step(f"Шаг 1: AuthWithEmail — определение типа авторизации ({user_email})"):
+        endpoint = auth_with_email_endpoint(email=user_email)
         url = f"{base_url.rstrip('/')}{endpoint['path']}"
 
         resp = requests.post(url, json=endpoint['json'], headers=endpoint['headers'])
@@ -67,12 +63,12 @@ def test_register_via_auth_with_email(db):
 
         payload = resp_json.get("payload", {})
         assert payload.get("needOTP") is True, \
-            f"Ожидался needOTP=true для нового email, получено: {payload}"
+            f"Ожидался needOTP=true для пользователя без пароля, получено: {payload}"
 
         temp_token = payload.get("tempToken")
         assert temp_token, "tempToken отсутствует в ответе AuthWithEmail"
 
-    # --- Шаг 2: достаём OTP из MongoDB ---
+    # --- Шаг 2: OTP из MongoDB ---
     with allure.step("Шаг 2: Получение OTP-кода из MongoDB"):
         otp_code = get_otp_from_mongo(db, temp_token)
 
@@ -87,10 +83,13 @@ def test_register_via_auth_with_email(db):
             f"VerifyOtp вернул {resp.status_code}. Ответ: {resp.text}"
 
         resp_json = resp.json()
+        assert resp_json.get("type") == "VerifyOtp", \
+            f"Ожидался type='VerifyOtp', получено: {resp_json.get('type')}"
+
         payload = resp_json.get("payload", {})
 
         auth_token = payload.get("authToken")
         assert auth_token, "authToken отсутствует в ответе VerifyOtp"
 
-        assert payload.get("newUser") is True, \
-            f"Ожидался newUser=true для нового пользователя, получено: {payload.get('newUser')}"
+        assert payload.get("newUser") is False, \
+            f"Ожидался newUser=false для существующего пользователя, получено: {payload.get('newUser')}"

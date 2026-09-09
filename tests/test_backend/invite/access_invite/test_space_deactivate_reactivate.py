@@ -2,8 +2,8 @@ import allure
 import pytest
 
 from config import settings
-from test_backend.data.endpoints.Space.space_endpoints import get_spaces_endpoint
-from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint, \
+from api.space.space_endpoints import get_spaces_endpoint
+from api.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint, \
     reactivate_member_endpoint, deactivate_member_endpoint
 
 pytestmark = [pytest.mark.backend]

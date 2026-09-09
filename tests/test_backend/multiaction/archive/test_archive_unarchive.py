@@ -1,13 +1,13 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.multiaction.multiaction_endpoints import (
+from api.multiaction.multiaction_endpoints import (
     multiple_archive_tasks_endpoint,
     multiple_unarchive_tasks_endpoint,
 )
-from test_backend.data.endpoints.multiaction.multiaction_asserts import assert_multiaction_response
-from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
-from test_backend.data.endpoints.archive.archive_task_endpoint import archive_task_endpoint
+from api.multiaction.multiaction_asserts import assert_multiaction_response
+from api.task.task_endpoints import get_task_endpoint
+from api.archive.archive_task_endpoint import archive_task_endpoint
 
 pytestmark = [pytest.mark.backend]
 

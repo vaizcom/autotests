@@ -1,9 +1,9 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
-from test_backend.data.endpoints.Comment.comment_endpoints import create_comment_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_get_history_event
+from api.task.task_endpoints import get_task_endpoint
+from api.comment.comment_endpoints import create_comment_endpoint
+from api.history.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend]
 

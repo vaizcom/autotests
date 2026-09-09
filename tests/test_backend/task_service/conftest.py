@@ -4,10 +4,12 @@ from typing import List
 
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint, \
+from api.task.task_endpoints import create_task_endpoint, delete_task_endpoint, \
     edit_task_custom_field_endpoint
-from test_backend.task_service.utils import get_client, create_task, get_random_type_id, get_random_group_id, \
-    get_current_timestamp, get_due_end, get_priority, get_assignee
+from test_backend.task_service.utils import get_client, create_task
+from api.board.board_helpers import get_random_group_id, get_random_type_id
+from api.member.member_helpers import get_assignee
+from config.generators import get_current_timestamp, get_due_end, get_priority
 
 
 @pytest.fixture

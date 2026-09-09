@@ -1,7 +1,7 @@
 import pytest
 
 from core.waiters import wait_until
-from test_backend.data.endpoints.access_group.access_group_endpoints import get_access_groups_endpoint
+from api.access_group.access_group_endpoints import get_access_groups_endpoint
 
 
 def get_member_access_group(client, space_id, member_id, group_id=None, timeout=10):

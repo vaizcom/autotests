@@ -2,7 +2,7 @@ import json
 import allure
 import pytest
 
-from test_backend.data.endpoints.Comment.comment_endpoints import create_comment_endpoint, get_comments_endpoint
+from api.comment.comment_endpoints import create_comment_endpoint, get_comments_endpoint
 
 pytestmark = [pytest.mark.backend]
 

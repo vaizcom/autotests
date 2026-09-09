@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 import allure
 import pytest
 
-from test_backend.data.endpoints.multiaction.multiaction_endpoints import multiple_edit_tasks_custom_field_endpoint
-from test_backend.data.endpoints.multiaction.multiaction_asserts import assert_multiaction_response
-from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint, edit_task_custom_field_endpoint
+from api.multiaction.multiaction_endpoints import multiple_edit_tasks_custom_field_endpoint
+from api.multiaction.multiaction_asserts import assert_multiaction_response
+from api.task.task_endpoints import get_task_endpoint, edit_task_custom_field_endpoint
 
 pytestmark = [pytest.mark.backend]
 

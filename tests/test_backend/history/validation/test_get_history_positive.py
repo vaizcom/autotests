@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.History.assert_history_payload import (
+from api.history.assert_history_payload import (
     assert_history_schema,
     assert_history_kind_fields,
     KIND_REQUIRED_FIELDS,
