@@ -48,6 +48,7 @@ def test_get_tasks_schema(owner_client, main_space, board_with_10000_tasks):
             "customFields": list,
             "followers": dict,
             "milestones": list,
+            "folders": dict,
         }
 
         nullable_fields = {

@@ -45,8 +45,8 @@ def generate_slug(min_len: int = 4, max_len: int = 8) -> str:
 
 def generate_email() -> str:
     """
-    Генерирует имя для Space, включающее текущую дату и время до секунд в человеко-читаемом формате.
-    Пример: space_2025-12-10_10-30-45
+    Генерирует уникальный email для инвайтов.
+    Пример: invite_2025-12-10_10-30-45@autotest.com
     """
     current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     return f"invite_{current_datetime}@autotest.com"
@@ -54,8 +54,8 @@ def generate_email() -> str:
 
 def generate_project_description() -> str:
     """
-    Генерирует уникальное description для Project.
-    Пример: project_abc123
+    Генерирует уникальное описание для Project.
+    Пример: description_12-10_10-30-45
     """
     current_datetime = datetime.datetime.now().strftime("%m-%d_%H-%M-%S")
     return f'description_{current_datetime}'
@@ -63,8 +63,8 @@ def generate_project_description() -> str:
 
 def generate_board_name(min_len: int = 1, max_len=MAX_BOARD_NAME_LENGTH):
     """
-    Генерирует уникальное имя для Project.
-    Пример: project_abc123
+    Генерирует случайное имя для Board из латинских букв.
+    Длина от min_len до max_len (по умолчанию MAX_BOARD_NAME_LENGTH).
     """
     length = random.randint(min_len, max_len)
     return ''.join(random.choices(string.ascii_letters, k=length))

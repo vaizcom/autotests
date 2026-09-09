@@ -21,11 +21,13 @@ def get_token(role: str = 'guest') -> str:
         headers=headers,
         json={"email": credentials['email']}
     )
-    assert resp.status_code == 200, f'AuthWithEmail failed ({resp.status_code}): {resp.text}'
+    if resp.status_code != 200:
+        raise RuntimeError(f'AuthWithEmail failed ({resp.status_code}): {resp.text}')
 
     payload = resp.json().get("payload", {})
     temp_token = payload.get("tempToken")
-    assert temp_token, f'tempToken отсутствует в ответе AuthWithEmail для {role}'
+    if not temp_token:
+        raise RuntimeError(f'tempToken отсутствует в ответе AuthWithEmail для {role}')
 
     # Шаг 2: VerifyPassword
     resp = requests.post(
@@ -33,10 +35,12 @@ def get_token(role: str = 'guest') -> str:
         headers=headers,
         json={"tempToken": temp_token, "password": credentials['password']}
     )
-    assert resp.status_code == 200, f'VerifyPassword failed ({resp.status_code}): {resp.text}'
+    if resp.status_code != 200:
+        raise RuntimeError(f'VerifyPassword failed ({resp.status_code}): {resp.text}')
 
     token = resp.json().get("payload", {}).get("authToken")
-    assert token, f'authToken отсутствует в ответе VerifyPassword для {role}'
+    if not token:
+        raise RuntimeError(f'authToken отсутствует в ответе VerifyPassword для {role}')
 
     _token_cache[role] = token
     return token

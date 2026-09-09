@@ -2,7 +2,7 @@ import allure
 import pytest
 import requests
 
-PUBLIC_API_BASE_URL = "https://api.vaiz.com"
+from config.settings import PUBLIC_API_BASE_URL
 
 pytestmark = [pytest.mark.public_api]
 

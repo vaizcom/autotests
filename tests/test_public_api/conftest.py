@@ -7,7 +7,8 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 
-PUBLIC_API_BASE_URL = "https://api.vaiz.com"
+from config.settings import PUBLIC_API_BASE_URL
+
 PUBLIC_API_PAT = os.getenv('PUBLIC_API_PAT')
 
 
