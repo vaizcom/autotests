@@ -48,6 +48,12 @@ API_URL = {
     'kuber_uat': 'https://vaiz-api-uat.vaiz.dev/v4',
 }[TEST_STAND_NAME]
 
+# Экспорт API_URL в CI — чтобы следующие шаги воркфлоу знали URL стенда.
+# CI вызывает `python -c "from config import settings"` до pytest (см. backend_tests.yml).
+if os.getenv('GITHUB_ENV'):
+    with open(os.getenv('GITHUB_ENV'), 'a') as f:
+        f.write(f'API_URL={API_URL}\n')
+
 PUBLIC_API_BASE_URL = os.getenv('PUBLIC_API_BASE_URL', 'https://api.vaiz.com')
 
 # ID тестовых сущностей для Public API

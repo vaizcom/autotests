@@ -6,8 +6,6 @@ import pytest
 import requests
 import urllib3
 
-from config.settings import API_URL
-
 
 # ---------------------------------------------------------------------------
 # Hooks
@@ -20,12 +18,6 @@ def pytest_configure(config):
     чтобы локальные отчёты не смешивались. В CI не применяется —
     там папку задаёт воркфлоу.
     """
-    # Экспорт API_URL в CI — чтобы следующие шаги воркфлоу знали URL стенда.
-    github_env = os.getenv("GITHUB_ENV")
-    if github_env:
-        with open(github_env, 'a') as f:
-            f.write(f'API_URL={API_URL}\n')
-
     if os.getenv("CI"):
         return
     if not getattr(config.option, "allure_report_dir", None):
