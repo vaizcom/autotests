@@ -106,7 +106,7 @@ def test_create_task_with_minimal_payload(request, main_space, main_board, clien
                         expected_task_keys = {
                             "name", "group", "board", "project", "parentTask", "priority", "completed",
                             "types", "assignees", "milestones", "subtasks", "dueStart", "dueEnd",
-                            "_id", "createdAt", "updatedAt", "document", "followers",
+                            "_id", "createdAt", "updatedAt", "document", "followers", "folders",
                             "hrid", "rightConnectors", "leftConnectors", "archiver", "archivedAt",
                             "completedAt", "deleter", "deletedAt", "customFields", "creator",
                         }
@@ -249,7 +249,7 @@ def test_create_task_with_specific_payload_and_response(
                         expected_task_keys = {
                             "name", "group", "board", "project", "parentTask", "priority", "completed",
                             "types", "assignees", "milestones", "subtasks", "dueStart", "dueEnd",
-                            "_id", "createdAt", "updatedAt", "document", "followers",
+                            "_id", "createdAt", "updatedAt", "document", "followers", "folders",
                             "hrid", "rightConnectors", "leftConnectors", "archiver", "archivedAt",
                             "completedAt", "deleter", "deletedAt", "customFields", "creator",
                             # "milestone"

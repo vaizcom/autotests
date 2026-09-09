@@ -1,0 +1,853 @@
+import base64
+import datetime
+import json as _json
+import os
+import random
+import time
+import uuid
+
+import allure
+import pytest
+import requests
+from bson import ObjectId
+
+from config import settings
+from config.generators import generate_date, generate_space_name, generate_project_name, generate_slug, \
+    generate_board_name
+from config.settings import (
+    API_URL, MAIN_SPACE_ID, MAIN_PROJECT_ID, MAIN_BOARD_ID,
+    BOARD_WITH_TASKS, SECOND_SPACE_ID, SECOND_PROJECT_ID, BOARD_FOR_TEST,
+    MAIN_PROJECT_2_ID, SECOND_BOARD_ID,
+)
+from core.client import APIClient
+from core.auth import get_token
+from core.response_utils import short_resp
+from test_backend.data.endpoints.Auth.auth_with_email_endpoint import auth_with_email_endpoint
+from test_backend.data.endpoints.Auth.verify_otp_endpoint import verify_otp_endpoint
+from test_backend.data.endpoints.Board.board_endpoints import (
+    get_board_endpoint,
+    get_boards_endpoint,
+    delete_board_endpoint,
+)
+from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS, typesList
+from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
+from test_backend.data.endpoints.Project.project_endpoints import (
+    create_project_endpoint,
+    create_board_endpoint,
+    get_project_endpoint,
+    get_projects_endpoint,
+    archive_project_endpoint,
+)
+from test_backend.data.endpoints.Space.space_endpoints import (
+    create_space_endpoint,
+    remove_space_endpoint,
+    get_space_endpoint,
+    get_spaces_endpoint,
+)
+from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, create_task_endpoint, \
+    delete_task_endpoint
+from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
+from test_backend.data.endpoints.access_group.access_group_endpoints import create_access_group_endpoint
+from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
+from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint, \
+    archive_milestone_endpoint
+
+
+# ---------------------------------------------------------------------------
+# Hooks
+# ---------------------------------------------------------------------------
+
+def pytest_collection_finish(session):
+    """Хук pytest: вызывается после сбора тестов, до их запуска.
+    Хук с health check — проверка стенда до запуска, а не таймауты на каждом тесте.
+
+    Выводит название стенда и API URL, затем проверяет доступность стенда.
+    Если стенд не отвечает или возвращает 5xx — сессия завершается сразу,
+    чтобы не ждать таймаутов на каждом тесте.
+    """
+    has_backend = any(item.get_closest_marker('backend') for item in session.items)
+    if has_backend:
+        print(f'\n🧪 Running on stand: {settings.TEST_STAND_NAME}')
+        print(f'🔗 API URL: {settings.API_URL}\n')
+
+        # Проверяем доступность стенда
+        try:
+            resp = requests.get(settings.API_URL, timeout=10)
+        except requests.exceptions.ConnectionError:
+            pytest.exit(f"Стенд недоступен ({settings.API_URL}) — ConnectionError", returncode=1)
+        except requests.exceptions.Timeout:
+            pytest.exit(f"Стенд недоступен ({settings.API_URL}) — Timeout", returncode=1)
+
+        if resp.status_code >= 500:
+            pytest.exit(f"Стенд отвечает ошибкой {resp.status_code} ({settings.API_URL})", returncode=1)
+
+
+# ---------------------------------------------------------------------------
+# Cleanup
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope='session', autouse=True)
+def cleanup_stale_test_spaces():
+    """
+    Safety-net: удаляет тестовые спейсы от предыдущих прогонов,
+    которые не были очищены из-за падений, таймаутов или аварийного завершения.
+    Запускается автоматически в начале каждой сессии.
+    Удаляет только спейсы с именем по паттерну space_YYYY-MM-DD_HH-MM-SS старше 2 часов.
+    """
+    import re
+
+    pattern = re.compile(r'^space_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})$')
+    cutoff = datetime.datetime.now() - datetime.timedelta(hours=2)
+
+    # Проверяем спейсы для каждого клиента, который создаёт временные спейсы
+    # main — temp_space, space_id_module, invite spaces
+    # owner — space_id_function
+    # second_main — invite second_space_id
+    for role in ('main', 'owner', 'second_main'):
+        try:
+            client = APIClient(base_url=API_URL, token=get_token(role))
+            resp = client.post(**get_spaces_endpoint())
+            if resp.status_code != 200:
+                continue
+
+            spaces = resp.json().get("payload", {}).get("spaces", [])
+            for space in spaces:
+                name = space.get("name", "")
+                match = pattern.match(name)
+                if not match:
+                    continue
+                try:
+                    created = datetime.datetime.strptime(match.group(1), "%Y-%m-%d_%H-%M-%S")
+                    if created < cutoff:
+                        client.post(**remove_space_endpoint(space_id=space["_id"]))
+                except ValueError:
+                    continue
+        except Exception:
+            continue
+
+
+# api_client = APIClient(base_url=API_URL, token=get_token('main'))
+# ---------------------------------------------------------------------------
+# Clients
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope='session')
+def main_client():
+    return APIClient(base_url=API_URL, token=get_token('main'))
+
+@pytest.fixture(scope='session')
+def second_main_client():
+    return APIClient(base_url=API_URL, token=get_token('second_main'))
+
+
+# Фикстура: возвращает авторизованного API клиента с токеном владельца
+@pytest.fixture(scope='session')
+def owner_client():
+    return APIClient(base_url=API_URL, token=get_token('owner'))
+
+
+@pytest.fixture(scope='session')
+def manager_client():
+    return APIClient(base_url=API_URL, token=get_token('manager'))
+
+
+@pytest.fixture(scope='session')
+def member_client():
+    return APIClient(base_url=API_URL, token=get_token('member'))
+
+
+@pytest.fixture(scope='session')
+def guest_client():
+    return APIClient(base_url=API_URL, token=get_token('guest'))
+
+
+# Пользователь не имеет доступ к spаce
+@pytest.fixture(scope='session')
+def foreign_client():
+    return APIClient(base_url=API_URL, token=get_token('foreign_client'))
+
+# Пользователь имеет доступ к spаce в роли member(и не имеет доступ к проекту и борде)
+@pytest.fixture(scope='session')
+def client_with_access_only_in_space():
+    return APIClient(base_url=API_URL, token=get_token('space_client'))
+
+
+# Пользователь имеет доступ к spаce и к проекту (и не имеет доступ к борде)
+@pytest.fixture(scope='session')
+def client_with_access_only_in_project():
+    return APIClient(base_url=API_URL, token=get_token('project_client'))
+
+
+@pytest.fixture(scope="session")
+def temp_client(db):
+    """
+    Регистрирует нового пользователя через AuthWithEmail → VerifyOtp,
+    возвращает готовый APIClient и ID спейса для тестов.
+    """
+    base_url = API_URL
+    timestamp = int(time.time())
+    email = f"space_{timestamp}@autotest.com"
+
+    # 1. AuthWithEmail — получаем tempToken
+    ep = auth_with_email_endpoint(email=email)
+    resp = requests.post(f"{base_url.rstrip('/')}{ep['path']}", json=ep['json'], headers=ep['headers'], timeout=10)
+    assert resp.status_code == 200, f"AuthWithEmail вернул {resp.status_code}: {short_resp(resp)}"
+
+    payload = resp.json().get("payload", {})
+    assert payload.get("needOTP") is True, f"Ожидался needOTP=true, получено: {payload}"
+    temp_token = payload["tempToken"]
+
+    # 2. Получаем OTP из MongoDB
+    token_payload = _json.loads(base64.urlsafe_b64decode(temp_token.split('.')[1] + '=='))
+    doc = db.confirmtokens.find_one({'_id': ObjectId(token_payload['id'])})
+    assert doc, f"Запись confirmtokens с _id={token_payload['id']} не найдена"
+    otp_code = doc.get('payload', {}).get('otpCode')
+    assert otp_code, "otpCode отсутствует в confirmtokens"
+
+    # 3. VerifyOtp — получаем authToken
+    ep = verify_otp_endpoint(temp_token=temp_token, otp=otp_code)
+    resp = requests.post(f"{base_url.rstrip('/')}{ep['path']}", json=ep['json'], headers=ep['headers'], timeout=10)
+    assert resp.status_code == 200, f"VerifyOtp вернул {resp.status_code}: {short_resp(resp)}"
+
+    auth_token = resp.json().get("payload", {}).get("authToken")
+    assert auth_token, "authToken отсутствует в ответе VerifyOtp"
+
+    # 4. Получаем space_id из GetSpaces
+    client = APIClient(base_url=base_url, token=auth_token)
+    spaces_resp = client.post(**get_spaces_endpoint())
+    assert spaces_resp.status_code == 200, f"GetSpaces вернул {spaces_resp.status_code}: {short_resp(spaces_resp)}"
+    spaces = spaces_resp.json().get("payload", {}).get("spaces", [])
+    assert spaces, "У нового пользователя нет спейсов"
+    space_id = spaces[0]["_id"]
+
+    return client, space_id
+
+
+# ---------------------------------------------------------------------------
+# Spaces
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope='session')
+def main_space(main_client) -> str:
+    """
+    Отличие этого спейса в том, что в  этом спейсе уже есть мемберы с разными ролями.
+    """
+
+    assert MAIN_SPACE_ID, 'Не задана переменная окружения MAIN_SPACE_ID'
+    resp = main_client.post(**get_space_endpoint(space_id=MAIN_SPACE_ID))
+    assert resp.status_code == 200, f'Space {MAIN_SPACE_ID} not found: {short_resp(resp)}'
+    return MAIN_SPACE_ID
+
+@pytest.fixture(scope='session')
+def second_space(main_client) -> str:
+    """
+    Отличие этого спейса в том, что в  этом спейсе уже есть мемберы с разными ролями(Дубликат).
+    """
+    assert SECOND_SPACE_ID, 'Не задана переменная окружения SECOND_SPACE_ID'
+    resp = main_client.post(**get_space_endpoint(space_id=SECOND_SPACE_ID))
+    assert resp.status_code == 200, f'Space {SECOND_SPACE_ID} not found: {short_resp(resp)}'
+    return SECOND_SPACE_ID
+
+
+# Фикстура: создает временный спейс и после прохождения тестов удаляет этот временный спейс
+@pytest.fixture(scope='session')
+def temp_space(main_client):
+    name = generate_space_name()
+    response = main_client.post(**create_space_endpoint(name=name))
+    assert response.status_code == 200
+    space_id = response.json()['payload']['space']['_id']
+
+    yield space_id
+
+    main_client.post(**remove_space_endpoint(space_id=space_id))
+
+
+@pytest.fixture(scope='session')
+def foreign_space(guest_client):
+    """Создаёт space от имени другого пользователя"""
+    response = guest_client.post(**create_space_endpoint(name='foreign space'))
+    assert response.status_code == 200
+    space_id = response.json()['payload']['space']['_id']
+
+    yield space_id
+
+    # Очистка
+    guest_client.post(**remove_space_endpoint(space_id=space_id))
+
+
+@pytest.fixture(scope='module')
+def space_id_module(main_client):
+    client = main_client
+    name = generate_space_name()
+    response = client.post(**create_space_endpoint(name=name))
+    assert response.status_code == 200
+    space_id = response.json()['payload']['space']['_id']
+
+    yield space_id
+
+    client.post(**remove_space_endpoint(space_id=space_id))
+
+
+@pytest.fixture(scope='function')
+def space_id_function(owner_client):
+    client = owner_client
+    name = generate_space_name()
+    response = client.post(**create_space_endpoint(name=name))
+    assert response.status_code == 200
+    space_id = response.json()['payload']['space']['_id']
+
+    yield space_id
+
+    client.post(**remove_space_endpoint(space_id=space_id))
+
+
+# ---------------------------------------------------------------------------
+# Projects
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope='session')
+def main_project(main_client, main_space):
+    assert MAIN_PROJECT_ID, 'Не задана переменная окружения MAIN_PROJECT_ID'
+    resp = main_client.post(**get_project_endpoint(project_id=MAIN_PROJECT_ID, space_id=main_space))
+    assert resp.status_code == 200, f'Space {MAIN_PROJECT_ID} not found: {short_resp(resp)}'
+    return MAIN_PROJECT_ID
+
+# Проект в котором есть пользователи с разными ролями, для разных сценариев (архивация, редактирования и пр)
+@pytest.fixture(scope='session')
+def main_project_2(main_client, main_space):
+    assert MAIN_PROJECT_2_ID, 'Не задана переменная окружения MAIN_PROJECT_2_ID'
+    resp = main_client.post(**get_project_endpoint(project_id=MAIN_PROJECT_2_ID, space_id=main_space))
+    assert resp.status_code == 200, f'Space {MAIN_PROJECT_2_ID} not found: {short_resp(resp)}'
+    return MAIN_PROJECT_2_ID
+
+
+_TEMP_MAIN_PROJECT_2 = "_temp_project_2"
+
+
+@pytest.fixture(scope='session')
+def temp_main_project_2(owner_client, main_space):
+    """Временный проект в main_space — замена main_project_2 для тестов,
+    которым нужен 'другой проект' без риска каскадных падений."""
+    # Cleanup: архивируем мусор от предыдущего прогона
+    resp = owner_client.post(**get_projects_endpoint(space_id=main_space))
+    if resp.status_code == 200:
+        for project in resp.json().get("payload", {}).get("projects", []):
+            if project.get("name") == _TEMP_MAIN_PROJECT_2:
+                owner_client.post(**archive_project_endpoint(
+                    project_id=project["_id"], space_id=main_space,
+                ))
+
+    slug = generate_slug()
+    resp = owner_client.post(**create_project_endpoint(
+        name=_TEMP_MAIN_PROJECT_2, slug=slug,
+        color='blue', icon='Dot',
+        description='temporary project 2',
+        space_id=main_space,
+    ))
+    assert resp.status_code == 200, f'Setup: не удалось создать temp_main_project_2: {short_resp(resp)}'
+    project_id = resp.json()['payload']['project']['_id']
+
+    yield project_id
+
+    owner_client.post(**archive_project_endpoint(
+        project_id=project_id, space_id=main_space,
+    ))
+
+
+@pytest.fixture(scope='session')
+def second_project(main_client, second_space):
+    assert SECOND_PROJECT_ID, 'Не задана переменная окружения MAIN_PROJECT_ID'
+    resp = main_client.post(**get_project_endpoint(project_id=SECOND_PROJECT_ID, space_id=second_space))
+    assert resp.status_code == 200, f'Space {SECOND_PROJECT_ID} not found: {short_resp(resp)}'
+    return SECOND_PROJECT_ID
+
+
+@pytest.fixture(scope='session')
+def temp_project(main_client, temp_space):
+    """Создаёт проект, который используется во всех тестах модуля."""
+    name = generate_project_name()
+    slug = generate_slug()
+    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': temp_space}
+    response = main_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+    assert response.status_code == 200
+    yield response.json()['payload']['project']['_id']
+
+
+@pytest.fixture(scope='module')
+def project_id_module(main_client, space_id_module):
+    name = generate_project_name()
+    slug = generate_slug()
+    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': space_id_module}
+    response = main_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+    assert response.status_code == 200
+    project_id = response.json()['payload']['project']['_id']
+
+    yield project_id
+
+@pytest.fixture(scope='function')
+def project_id_function(owner_client, space_id_function):
+    name = generate_project_name()
+    slug = generate_slug()
+    common_kwargs = {'color': 'blue', 'icon': 'Dot', 'description': 'temporary project', 'space_id': space_id_function}
+    response = owner_client.post(**create_project_endpoint(name=name, slug=slug, **common_kwargs))
+    assert response.status_code == 200
+    project_id = response.json()['payload']['project']['_id']
+
+    yield project_id
+
+
+# ---------------------------------------------------------------------------
+# Boards
+# ---------------------------------------------------------------------------
+
+# Доска в которой проверяются доступы для разных ролей
+@pytest.fixture(scope='session')
+def main_board(main_client, main_space):
+    assert MAIN_BOARD_ID, 'Не задана переменная окружения MAIN_BOARD_ID'
+    resp = main_client.post(**get_board_endpoint(board_id=MAIN_BOARD_ID, space_id=main_space))
+    assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {short_resp(resp)}'
+    return MAIN_BOARD_ID
+
+@pytest.fixture(scope='session')
+def second_board(main_client, second_space):
+    assert SECOND_BOARD_ID,'Не задана переменная окружения SECOND_BOARD_ID'
+    resp = main_client.post(**get_board_endpoint(board_id=SECOND_BOARD_ID, space_id=second_space))
+    assert resp.status_code == 200, f'Space {SECOND_BOARD_ID} not found: {short_resp(resp)}'
+    return SECOND_BOARD_ID
+
+# Доска с 10.000 тасок в main_space
+@pytest.fixture(scope='session')
+def board_with_10000_tasks(main_client, main_space):
+    assert BOARD_WITH_TASKS, 'Не задана переменная окружения MAIN_BOARD_ID'
+    resp = main_client.post(**get_board_endpoint(board_id=BOARD_WITH_TASKS, space_id=main_space))
+    assert resp.status_code == 200, f'Board {BOARD_WITH_TASKS} not found: {short_resp(resp)}'
+    return BOARD_WITH_TASKS
+
+# Доска в которой заготовлены таски для разных сценариев
+# (участвует в тестировании: creator, parentTask)
+@pytest.fixture(scope='session')
+def board_with_tasks(main_client, main_space):
+    assert BOARD_FOR_TEST, 'Не задана переменная окружения MAIN_BOARD_ID'
+    resp = main_client.post(**get_board_endpoint(board_id=BOARD_FOR_TEST, space_id=main_space))
+    assert resp.status_code == 200, f'Space {MAIN_BOARD_ID} not found: {short_resp(resp)}'
+    return BOARD_FOR_TEST
+
+
+TEMP_BOARD_NAME = "_autotest_temp_board"
+
+
+@pytest.fixture(scope='session')
+def temp_board_in_main(owner_client, main_space, main_project):
+    """
+    Временная борда в main_space/main_project.
+    Имя фиксированное — в setup удаляем мусорную борду от предыдущего прогона, если осталась.
+    """
+    # Setup: удаляем старую борду с таким же именем, если осталась
+    resp = owner_client.post(**get_boards_endpoint(space_id=main_space))
+    if resp.status_code == 200:
+        for board in resp.json().get("payload", {}).get("boards", []):
+            if board.get("name") == TEMP_BOARD_NAME:
+                owner_client.post(**delete_board_endpoint(
+                    board_id=board["_id"],
+                    board_name=TEMP_BOARD_NAME,
+                    space_id=main_space,
+                ))
+
+    # Создаём чистую борду
+    resp = owner_client.post(**create_board_endpoint(
+        name=TEMP_BOARD_NAME,
+        temp_project=main_project,
+        space_id=main_space,
+        groups=DEFAULT_BOARD_GROUPS,
+        typesList=typesList,
+        customFields=[],
+    ))
+    assert resp.status_code == 200, f"Ошибка создания борды: {resp.text}"
+    board_id = resp.json()["payload"]["board"]["_id"]
+
+    yield board_id
+
+    # Teardown
+    owner_client.post(**delete_board_endpoint(
+        board_id=board_id,
+        board_name=TEMP_BOARD_NAME,
+        space_id=main_space,
+    ))
+
+
+@pytest.fixture(scope='session')
+def temp_board(main_client, temp_project, temp_space):
+    """
+    Создаёт временную борду в указанном проекте и спейсе.
+    """
+    board_name = generate_board_name()
+    payload = create_board_endpoint(
+        name=board_name,
+        temp_project=temp_project,
+        space_id=temp_space,
+        groups=DEFAULT_BOARD_GROUPS,
+        typesList=[],
+        customFields=[],
+    )
+    response = main_client.post(**payload)
+    assert response.status_code == 200
+
+    yield response.json()['payload']['board']['_id']
+
+
+@pytest.fixture(scope='module')
+def board_id_module(main_client, project_id_module, space_id_module):
+    board_name = generate_board_name()
+    payload = create_board_endpoint(
+        name=board_name,
+        temp_project=project_id_module,
+        space_id=space_id_module,
+        groups=DEFAULT_BOARD_GROUPS,
+        typesList=[],
+        customFields=[],
+    )
+    response = main_client.post(**payload)
+    assert response.status_code == 200
+
+    yield response.json()['payload']['board']['_id']
+
+
+# ---------------------------------------------------------------------------
+# Members
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope='session')
+def main_personal(main_client, main_space):
+    """Возвращает персональные ID участников пространства по ролям."""
+    response = main_client.post(**get_space_members_endpoint(space_id=main_space))
+    response.raise_for_status()
+
+    members = response.json()['payload']['members']
+    roles = ['owner', 'manager', 'member', 'guest', 'main']
+
+    # Собираем _id участников для каждой роли по имени (или другому признаку)
+    member_id = {role: [m['_id'] for m in members if m.get('fullName') == role] for role in roles}
+    return member_id
+
+@pytest.fixture(scope='session')
+def random_main_personal_id(main_personal: dict) -> str:
+    """Возвращает случайный ID из словаря main_personal (из всех ролей)."""
+    ids = [member_id for ids_by_role in main_personal.values() for member_id in ids_by_role]
+    return random.choice(ids)
+
+# Фикстура: создает временный спейс и возвращает member_id после прохождения тестов удаляет этот временный спейс
+@pytest.fixture(scope='session')
+def temp_member(main_client, temp_space):
+    response = main_client.post(**get_space_members_endpoint(space_id=temp_space))
+    response.raise_for_status()
+
+    data = response.json()['payload']
+    member_id = data['members'][0]['_id']
+
+    yield member_id
+
+@pytest.fixture(scope='session')
+def temp_member_profile(main_client, temp_space):
+    """Получение id пользователя который создает задачу"""
+    resp = main_client.post(**get_profile_endpoint(space_id=temp_space))
+    resp.raise_for_status()
+    return resp.json()["payload"]["profile"]["memberId"]
+
+
+@pytest.fixture(scope='module')
+def member_id_module(main_client, space_id_module):
+    response = main_client.post(**get_space_members_endpoint(space_id=space_id_module))
+    response.raise_for_status()
+
+    data = response.json()['payload']
+    member_id = data['members'][0]['_id']
+
+    yield member_id
+
+
+@pytest.fixture(scope='function')
+def member_id_function(owner_client, space_id_function):
+    response = owner_client.post(**get_space_members_endpoint(space_id=space_id_function))
+    response.raise_for_status()
+
+    data = response.json()['payload']
+    member_id = data['members'][0]['_id']
+
+    yield member_id
+
+
+# ---------------------------------------------------------------------------
+# Tasks
+# ---------------------------------------------------------------------------
+
+# Возвращает tasks_ids с board_with_tasks == 10.000 тасок в main_space
+@pytest.fixture(scope='session')
+def task_id_list(owner_client, main_space, board_with_10000_tasks):
+    resp = owner_client.post(**get_tasks_endpoint(
+        space_id=main_space,
+        board=board_with_10000_tasks,
+        limit=30
+    ))
+    assert resp.status_code == 200
+    payload = resp.json().get("payload", {})
+    tasks = payload.get("tasks", [])
+    assert isinstance(tasks, list), "payload['tasks'] должен быть списком"
+
+    ids = [t.get("_id") for t in tasks if isinstance(t, dict)]
+    return [i for i in ids if i]
+
+@pytest.fixture
+def make_task_in_main(owner_client, main_space, main_board):
+    """
+    Фикстура-конструктор задачи.
+    Возвращает функцию create -> dict с данными созданной задачи.
+    В body передаются только необходимые для теста поля. После использования задача удаляется.
+    """
+    # Setup: удаляем задачи, оставшиеся от предыдущих прогонов
+    resp = owner_client.post(**get_tasks_endpoint(space_id=main_space, board=main_board))
+    if resp.status_code == 200:
+        for t in resp.json().get("payload", {}).get("tasks", []):
+            try:
+                owner_client.post(**delete_task_endpoint(task_id=t["_id"], space_id=main_space))
+            except Exception:
+                pass
+
+    created_ids = []
+
+    def _create_task(body_overrides: dict):
+        body = {
+            "space_id": main_space,
+            "board": main_board,
+        }
+        body.update(body_overrides)
+        resp = owner_client.post(**create_task_endpoint(**body))
+        assert resp.status_code == 200, short_resp(resp)
+        task = resp.json()["payload"]["task"]
+        created_ids.append(task["_id"])
+        return task
+
+    yield _create_task
+
+    # Teardown: удаление созданных задач
+    if created_ids:
+        for tid in created_ids:
+            try:
+                resp = owner_client.post(**delete_task_endpoint(task_id=tid, space_id=main_space))
+                if resp.status_code >= 400 and resp.status_code != 404:
+                    pass
+            except Exception:
+                pass
+
+
+@pytest.fixture
+def temp_task_on_temp_board(owner_client, main_space, temp_board_in_main):
+    """
+    Фикстура для создания временной задачи перед тестом и её удаления после теста.
+    Возвращает ID созданной задачи.
+    """
+    task_name = "Temp task for tests task events"
+
+    create_resp = owner_client.post(
+        **create_task_endpoint(
+            space_id=main_space,
+            board=temp_board_in_main,
+            name=task_name
+        ))
+    assert create_resp.status_code == 200, f"Ошибка создания задачи в фикстуре: {short_resp(create_resp)}"
+    task_id = create_resp.json()['payload']['task']['_id']
+
+    # Передаем ID задачи в сам тест
+    yield task_id
+
+    with allure.step("Teardown [Fixture]: Удаление временной задачи"):
+        delete_resp = owner_client.post(
+            **delete_task_endpoint(
+                space_id=main_space,
+                task_id=task_id
+            )
+        )
+        # Вместо жесткого assert == 200, мы допускаем, что задача уже удалена или конвертирована
+        if delete_resp.status_code not in (200, 400, 404):
+            pytest.fail(f"Ошибка при удалении задачи в фикстуре: {short_resp(delete_resp)}")
+
+
+# ---------------------------------------------------------------------------
+# Milestones
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def temp_milestone_on_temp_board(owner_client, main_space, temp_board_in_main, main_project):
+    """
+    Фикстура для создания временного майлстоуна перед тестом и его Архивация после теста.
+    Возвращает ID созданного майлстоуна.
+    """
+    with allure.step("Setup [Fixture]: Создание временного майлстоуна"):
+        milestone_name = "Temp Milestone " + generate_date()
+        create_resp = owner_client.post(
+            **create_milestone_endpoint(
+                space_id=main_space,
+                board=temp_board_in_main,
+                name=milestone_name,
+                project=main_project
+            )
+        )
+        assert create_resp.status_code == 200, f"Ошибка создания майлстоуна в фикстуре: {short_resp(create_resp)}"
+        milestone_id = create_resp.json()['payload']['milestone']['_id']
+
+    # Передаем ID майлстоуна в тест
+    yield milestone_id
+
+    with allure.step("Teardown [Fixture]: Архивация временного майлстоуна"):
+        archive_resp = owner_client.post(
+            **archive_milestone_endpoint(
+                space_id=main_space,
+                milestone_id=milestone_id
+            )
+        )
+        assert archive_resp.status_code == 200, f"Ошибка при архивации майлстоуна в фикстуре: {short_resp(archive_resp)}"
+
+
+# ---------------------------------------------------------------------------
+# Access Groups
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope='session')
+def temp_access_group(main_client, temp_space):
+    """
+    Создает временную группу доступа в temp_space.
+    """
+    group_name = f"Test Group {uuid.uuid4().hex[:4]}"
+    group_desc = "Temporary access group for testing"
+
+    response = main_client.post(**create_access_group_endpoint(
+        space_id=temp_space,
+        name=group_name,
+        description=group_desc
+    ))
+    assert response.status_code == 200, f"Ошибка создания группы: {short_resp(response)}"
+
+    group_id = response.json().get("payload", {}).get("accessGroup", {}).get("_id")
+    assert group_id, "В ответе не вернулся _id созданной группы доступа"
+
+    yield group_id
+
+
+@pytest.fixture(scope='module')
+def group_in_module(main_client, space_id_module):
+    """
+    Создает временную группу доступа в space_id_module.
+    """
+    group_name = f"Test Group {uuid.uuid4().hex[:4]}"
+    group_desc = "Temporary access group for testing"
+
+    response = main_client.post(**create_access_group_endpoint(
+        space_id=space_id_module,
+        name=group_name,
+        description=group_desc
+    ))
+    assert response.status_code == 200, f"Ошибка создания группы: {short_resp(response)}"
+
+    group_id = response.json().get("payload", {}).get("accessGroup", {}).get("_id")
+    assert group_id, "В ответе не вернулся _id созданной группы доступа"
+
+    yield group_id
+
+
+# ---------------------------------------------------------------------------
+# Documents
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def temp_document(main_client, request, kind, kind_id_fixture):
+    kind_id = request.getfixturevalue(kind_id_fixture)
+    space_id = request.getfixturevalue('temp_space')
+
+    response = main_client.post(
+        **create_document_endpoint(
+            kind=kind,
+            kind_id=kind_id,
+            space_id=space_id,
+            title='Документ для дублирования',
+        )
+    )
+
+    assert response.status_code == 200
+    doc_id = response.json()['payload']['document']
+
+    yield doc_id
+
+    main_client.post(**archive_document_endpoint(space_id=space_id, document_id=doc_id))
+
+
+@pytest.fixture
+def create_main_documents(request, main_space):
+    """
+    Фикстура для создания тестовых документов разными ролями в main_space
+    """
+    created_docs = []
+
+    def _create_docs(kind, kind_id, creator_roles):
+        """
+        Внутренняя функция для создания документов
+        Args:
+            kind (str): Тип документа (Space/Project/Member)
+            kind_id (str): ID контейнера (space_id/project_id/member_id)
+            creator_roles (dict): Словарь {fixture_name: role_name} для создания документов
+        """
+        with allure.step(f'Создание тестовых документов в {kind} разными ролями'):
+            for creator_fixture, creator_role in creator_roles.items():
+                creator_client = request.getfixturevalue(creator_fixture)
+
+                with allure.step(f'Создание документа пользователем {creator_role}'):
+                    title = f'{kind} doc by {creator_role} {datetime.datetime.now().strftime("%Y.%m.%d_%H:%M:%S")}'
+                    create_resp = creator_client.post(
+                        **create_document_endpoint(kind=kind, kind_id=kind_id, space_id=main_space, title=title)
+                    )
+                    assert create_resp.status_code == 200, (
+                        f'Ошибка при создании документа пользователем {creator_role}: '
+                        f'статус {create_resp.status_code}'
+                    )
+
+                    doc_id = create_resp.json()['payload']['document']['_id']
+                    created_docs.append(
+                        {'id': doc_id, 'title': title, 'creator': creator_client, 'creator_role': creator_role}
+                    )
+        return created_docs
+
+    yield _create_docs
+
+    # Очистка тестовых данных
+    with allure.step('Очистка тестовых данных'):
+        for doc in created_docs:
+            with allure.step(f'Удаление документа "{doc["title"]}" (создан {doc["creator_role"]})'):
+                doc['creator'].post(**archive_document_endpoint(space_id=main_space, document_id=doc['id']))
+
+
+@pytest.fixture(scope='session')
+def main_space_doc():
+    """
+    Возвращает ID документа MAIN_SPACE_DOC_ID из переменных окружения.
+    """
+    doc_id = os.getenv('MAIN_SPACE_DOC_ID')
+    assert doc_id, 'Переменная окружения MAIN_SPACE_DOC_ID не задана или пуста'
+    return doc_id
+
+
+@pytest.fixture(scope='session')
+def main_project_doc():
+    """
+    Возвращает ID документа MAIN_PROJECT_DOC_ID из переменных окружения.
+    """
+    doc_id = os.getenv('MAIN_PROJECT_DOC_ID')
+    assert doc_id, 'Переменная окружения MAIN_PROJECT_DOC_ID не задана или пуста'
+    return doc_id
+
+
+@pytest.fixture(scope='session')
+def main_personal_doc():
+    """
+    Возвращает ID документа MAIN_PERSONAL_DOC_ID из переменных окружения.
+    """
+    doc_id = os.getenv('MAIN_PERSONAL_DOC_ID')
+    assert doc_id, 'Переменная окружения MAIN_PERSONAL_DOC_ID не задана или пуста'
+    return doc_id

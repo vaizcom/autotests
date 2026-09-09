@@ -70,4 +70,4 @@ def test_edit_task_date_custom_field_roles(
         with allure.step("Verification: Проверка тела ошибки AccessDenied"):
             error = resp_edit.json().get("error", {})
             assert error.get("code") == "AccessDenied"
-            assert error.get("meta", {}).get("kind") == "Board"
+            assert error.get("meta", {}).get("kind") == "Task"

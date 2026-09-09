@@ -28,6 +28,8 @@ TASK_FULL_SCHEMA = {
     # "coverAR": (int, float, type(None)),
     # "coverColor": (str, type(None)),
     "customFields": list,
+    # APP-6030: multihoming — per-board fields (group, types, customFields) for tasks on multiple boards
+    "folders": dict,
 
     # Системные поля
     "creator": str,

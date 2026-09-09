@@ -4,8 +4,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 URL = os.getenv('URL')
-print('Loaded URL:', URL)
 
+# Загружает переменные окружения из .env
+# ID тестовых сущностей — спейсы, проекты, борды, майлстоуны, документы.
 CURRENT_SPACE_ID = os.getenv('CURRENT_SPACE_ID')
 MAIN_SPACE_ID = os.getenv('MAIN_SPACE_ID')
 SECOND_SPACE_ID = os.getenv('SECOND_SPACE_ID')
@@ -24,6 +25,7 @@ MAIN_SPACE_DOC_ID = os.getenv('MAIN_SPACE_DOC_ID')
 MAIN_PROJECT_DOC_ID = os.getenv('MAIN_PROJECT_DOC_ID')
 MAIN_PERSONAL_DOC_ID = os.getenv('MAIN_PERSONAL_DOC_ID')
 
+# Учётные данные по ролям — email и пароль для каждой роли в тестовом спейсе.
 USERS = {
     'project_client': {'email': os.getenv('PROJECT_CLIENT'), 'password': os.getenv('PASSWORD')},
     'space_client': {'email': SPACE_CLIENT, 'password': os.getenv('PASSWORD')},
@@ -38,6 +40,7 @@ USERS = {
 
 TEST_STAND_NAME = os.getenv('TEST_STAND_NAME', 'kuber_dev')
 
+# URL стенда — выбирается по TEST_STAND_NAME.
 API_URL = {
     'dev': 'https://api.vaiz.dev/v4',
     'local': 'https://api.vaiz.local:10000/v4',
@@ -45,6 +48,17 @@ API_URL = {
     'kuber_uat': 'https://vaiz-api-uat.vaiz.dev/v4',
 }[TEST_STAND_NAME]
 
+# Экспорт API_URL в CI — чтобы следующие шаги воркфлоу знали URL стенда.
+# CI вызывает `python -c "from config import settings"` до pytest (см. backend_tests.yml).
 if os.getenv('GITHUB_ENV'):
     with open(os.getenv('GITHUB_ENV'), 'a') as f:
         f.write(f'API_URL={API_URL}\n')
+
+PUBLIC_API_BASE_URL = os.getenv('PUBLIC_API_BASE_URL', 'https://api.vaiz.com')
+
+# ID тестовых сущностей для Public API
+PUBLIC_PROJECT_ID = os.getenv('PUBLIC_PROJECT_ID', '6a8d60e54c09ca59fa8e847a')
+PUBLIC_TASK_ID = os.getenv('PUBLIC_TASK_ID', '6a8d61164c09ca59fa8ebf96')
+PUBLIC_MILESTONE_ID = os.getenv('PUBLIC_MILESTONE_ID', '6a8d63164c09ca59fa913619')
+PUBLIC_DOCUMENT_ID = os.getenv('PUBLIC_DOCUMENT_ID', '6a8d61994c09ca59fa8f848a')
+

@@ -18,7 +18,7 @@ def wait_until(condition_func, timeout=10, poll_interval=0.5, error_msg="Пре�
 
     while time.time() - start_time < timeout:
         result = condition_func()
-        if result:
+        if result is not None:
             return result
         time.sleep(poll_interval)
 
