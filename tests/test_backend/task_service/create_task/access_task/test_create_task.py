@@ -5,8 +5,12 @@ import allure
 import pytest
 
 from api.task.task_endpoints import create_task_endpoint, get_task_endpoint, get_tasks_endpoint
-from test_backend.task_service.utils import validate_hrid, get_client, get_member_profile, create_task, get_random_type_id, get_random_group_id, \
-    get_current_timestamp, get_due_end, get_priority, get_assignee, get_milestone, assert_task_keys, delete_task_with_retry
+from test_backend.task_service.utils import get_client, create_task
+from api.board.board_helpers import get_random_group_id, get_random_type_id
+from api.member.member_helpers import get_assignee, get_member_profile
+from api.milestone.milestone_helpers import get_milestone
+from api.task.task_helpers import assert_task_keys, delete_task_with_retry, validate_hrid
+from config.generators import get_current_timestamp, get_due_end, get_priority
 
 pytestmark = [pytest.mark.backend]
 

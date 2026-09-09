@@ -4,7 +4,7 @@ import pytest
 from api.comment.comment_endpoints import create_comment_endpoint
 from api.comment.assert_comment_payload import assert_comment_payload
 from api.task.task_endpoints import get_task_endpoint
-from test_backend.task_service.utils import get_random_group_id
+from api.board.board_helpers import get_random_group_id
 
 pytestmark = [pytest.mark.backend]
 

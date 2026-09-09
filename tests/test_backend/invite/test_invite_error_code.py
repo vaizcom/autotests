@@ -5,7 +5,7 @@ from config import settings
 from api.invite.invite_endpoint import (
     invite_to_space_endpoint, deactivate_member_endpoint
 )
-from test_backend.task_service.utils import get_user_id
+from api.member.member_helpers import get_user_id
 
 pytestmark = [pytest.mark.backend]
 

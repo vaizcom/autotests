@@ -91,3 +91,20 @@ def generate_custom_field_description(min_len: int = 1, max_len=BOARD_CUSTOM_FIE
 
 def generate_object_id() -> str:
     return secrets.token_hex(12)
+
+
+def get_current_timestamp() -> str:
+    """Возвращает текущую дату и время в формате ISO 8601 с UTC."""
+    current_time = datetime.datetime.utcnow()
+    return current_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "+00:00"
+
+
+def get_due_end() -> str:
+    """Возвращает дату через неделю от текущего момента в формате ISO 8601 с UTC."""
+    due_end = datetime.datetime.utcnow() + datetime.timedelta(weeks=1)
+    return due_end.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "+00:00"
+
+
+def get_priority() -> int:
+    """Возвращает случайный priority от 0 до 3."""
+    return random.randint(0, 3)

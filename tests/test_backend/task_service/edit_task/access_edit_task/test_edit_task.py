@@ -3,8 +3,9 @@ import pytest
 
 from api.task.assert_task_payload import assert_task_payload
 from api.task.task_endpoints import edit_task_endpoint
-from test_backend.task_service.utils import get_assignee, get_current_timestamp, get_due_end, get_priority, \
-    get_random_type_id
+from api.board.board_helpers import get_random_type_id
+from api.member.member_helpers import get_assignee
+from config.generators import get_current_timestamp, get_due_end, get_priority
 
 pytestmark = [pytest.mark.backend]
 

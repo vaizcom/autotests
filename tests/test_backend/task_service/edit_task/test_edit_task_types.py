@@ -3,7 +3,7 @@ import pytest
 
 from api.task.assert_task_payload import assert_task_payload
 from api.task.task_endpoints import edit_task_endpoint
-from test_backend.task_service.utils import get_random_type_id
+from api.board.board_helpers import get_random_type_id
 
 pytestmark = [pytest.mark.backend]
 

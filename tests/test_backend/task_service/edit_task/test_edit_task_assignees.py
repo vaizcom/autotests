@@ -6,7 +6,7 @@ import pytest
 from api.task.assert_task_payload import assert_task_payload
 from api.task.task_endpoints import edit_task_endpoint
 from api.member.member_endpoints import get_space_members_endpoint
-from test_backend.task_service.utils import get_assignee
+from api.member.member_helpers import get_assignee
 
 pytestmark = [pytest.mark.backend]
 

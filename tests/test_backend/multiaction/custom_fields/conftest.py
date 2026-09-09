@@ -3,7 +3,7 @@ import uuid
 import pytest
 from config.generators import generate_object_id
 from api.board.board_endpoints import create_board_custom_field_endpoint
-from test_backend.task_service.utils import get_member_profile
+from api.member.member_helpers import get_member_profile
 
 
 @pytest.fixture(scope="module")

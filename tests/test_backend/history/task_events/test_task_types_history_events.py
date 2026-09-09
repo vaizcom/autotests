@@ -7,8 +7,8 @@ from api.history.history_utils import (
     assert_get_history_event,
     assert_get_history_no_event,
 )
-from test_backend.task_service.utils import get_two_random_types
 from api.multiaction.multiaction_asserts import assert_multiaction_response
+from api.board.board_helpers import get_two_random_types
 
 pytestmark = [pytest.mark.backend]
 

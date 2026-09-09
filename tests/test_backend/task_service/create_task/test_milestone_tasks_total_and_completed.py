@@ -8,7 +8,7 @@ from api.milestone.milestones_endpoints import (
     create_milestone_endpoint, get_milestone_endpoint, archive_milestone_endpoint,
     get_milestones_endpoint,
 )
-from test_backend.task_service.utils import delete_task_with_retry
+from api.task.task_helpers import delete_task_with_retry
 
 pytestmark = [pytest.mark.backend]
 
