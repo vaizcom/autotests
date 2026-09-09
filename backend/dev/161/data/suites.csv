@@ -1,0 +1,100 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Wed Sep 09 10:48:30 UTC 2026","Wed Sep 09 10:48:30 UTC 2026","182","Task Service","Edit Task Custom Field","Access Custom Fields","","","BOOLEAN manager_client: Edit Boolean Custom Field for Role: manager_client","
+    Boolean Custom Fields. Проверка доступа к редактированию чекбокса для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:34 UTC 2026","Wed Sep 09 10:48:34 UTC 2026","205","Task Service","Edit Task Custom Field","Access Custom Fields","","","NUMBER guest_client : Number Custom Fields. Проверка доступа для роли guest_client","
+    Number Custom Fields. Проверка доступа к редактированию числового поля для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:30 UTC 2026","Wed Sep 09 10:48:30 UTC 2026","219","Task Service","Edit Task Custom Field","Access Custom Fields","","","BOOLEAN member_client: Edit Boolean Custom Field for Role: member_client","
+    Boolean Custom Fields. Проверка доступа к редактированию чекбокса для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:18 UTC 2026","Wed Sep 09 10:48:19 UTC 2026","1028","Task Service","Create Task","Access Task","","","Create task with minimal payload: клиент=guest_client, ожидаемый статус=403","
+    Тест проверки создания задачи с минимальным набором полей в системе управления проектами под разными ролями.
+
+    Цель теста — убедиться, что можно успешно создать задачу, указав только минимально необходимые данные, и что поведение API зависит от прав пользователя (типа клиента).
+    В процессе теста дополнительно валидируются структура созданной задачи, значения по умолчанию, связи (creator, board и пр.), а также удаление задачи после проверки.
+    assert_task_keys обеспечивает падение теста при добавлении/удалении ключей с понятным сообщением.
+    "
+"passed","Wed Sep 09 10:48:33 UTC 2026","Wed Sep 09 10:48:33 UTC 2026","381","Task Service","Edit Task Custom Field","Access Custom Fields","","","MEMBER guest_client: Edit Member Custom Field for Role: guest_client","
+    Member Custom Fields. Проверка доступа к редактированию поля Member для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:26 UTC 2026","Wed Sep 09 10:48:28 UTC 2026","2693","Task Service","Create Task","Access Task","","","Проверка создания задачи с конкретным payload и структурой ответа : клиент=member_client, ожидаемый статус=200","
+    Данный тест проверяет возможность создания задачи с заранее определённым набором данных (payload) через API
+     управления задачами для различных ролей пользователей, а также корректность и полноту возвращаемого ответа.
+     Тест эмулирует действия разных типов клиентов (owner, менеджер, member, гость) и сравнивает фактический результат с ожидаемым HTTP-статусом.
+    "
+"passed","Wed Sep 09 10:48:32 UTC 2026","Wed Sep 09 10:48:33 UTC 2026","437","Task Service","Edit Task Custom Field","Access Custom Fields","","","MEMBER manager_client: Edit Member Custom Field for Role: manager_client","
+    Member Custom Fields. Проверка доступа к редактированию поля Member для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:30 UTC 2026","Wed Sep 09 10:48:30 UTC 2026","211","Task Service","Edit Task Custom Field","Access Custom Fields","","","BOOLEAN owner_client: Edit Boolean Custom Field for Role: owner_client","
+    Boolean Custom Fields. Проверка доступа к редактированию чекбокса для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:34 UTC 2026","Wed Sep 09 10:48:34 UTC 2026","200","Task Service","Edit Task Custom Field","Access Custom Fields","","","NUMBER member_client : Number Custom Fields. Проверка доступа для роли member_client","
+    Number Custom Fields. Проверка доступа к редактированию числового поля для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:32 UTC 2026","Wed Sep 09 10:48:32 UTC 2026","379","Task Service","Edit Task Custom Field","Access Custom Fields","","","MEMBER owner_client: Edit Member Custom Field for Role: owner_client","
+    Member Custom Fields. Проверка доступа к редактированию поля Member для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:31 UTC 2026","Wed Sep 09 10:48:31 UTC 2026","406","Task Service","Edit Task Custom Field","Access Custom Fields","","","DATE owner_client: Edit Date Custom Field for Role: owner_client","
+    Date Custom Fields. Проверка доступа к редактированию поля Date для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:33 UTC 2026","Wed Sep 09 10:48:33 UTC 2026","345","Task Service","Edit Task Custom Field","Access Custom Fields","","","MEMBER member_client: Edit Member Custom Field for Role: member_client","
+    Member Custom Fields. Проверка доступа к редактированию поля Member для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:31 UTC 2026","Wed Sep 09 10:48:31 UTC 2026","186","Task Service","Edit Task Custom Field","Access Custom Fields","","","DATE manager_client: Edit Date Custom Field for Role: manager_client","
+    Date Custom Fields. Проверка доступа к редактированию поля Date для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:16 UTC 2026","Wed Sep 09 10:48:18 UTC 2026","2005","Task Service","Create Task","Access Task","","","Create task with minimal payload: клиент=member_client, ожидаемый статус=200","
+    Тест проверки создания задачи с минимальным набором полей в системе управления проектами под разными ролями.
+
+    Цель теста — убедиться, что можно успешно создать задачу, указав только минимально необходимые данные, и что поведение API зависит от прав пользователя (типа клиента).
+    В процессе теста дополнительно валидируются структура созданной задачи, значения по умолчанию, связи (creator, board и пр.), а также удаление задачи после проверки.
+    assert_task_keys обеспечивает падение теста при добавлении/удалении ключей с понятным сообщением.
+    "
+"passed","Wed Sep 09 10:48:12 UTC 2026","Wed Sep 09 10:48:14 UTC 2026","2247","Task Service","Create Task","Access Task","","","Create task with minimal payload: клиент=owner_client, ожидаемый статус=200","
+    Тест проверки создания задачи с минимальным набором полей в системе управления проектами под разными ролями.
+
+    Цель теста — убедиться, что можно успешно создать задачу, указав только минимально необходимые данные, и что поведение API зависит от прав пользователя (типа клиента).
+    В процессе теста дополнительно валидируются структура созданной задачи, значения по умолчанию, связи (creator, board и пр.), а также удаление задачи после проверки.
+    assert_task_keys обеспечивает падение теста при добавлении/удалении ключей с понятным сообщением.
+    "
+"passed","Wed Sep 09 10:48:28 UTC 2026","Wed Sep 09 10:48:30 UTC 2026","1257","Task Service","Create Task","Access Task","","","Проверка создания задачи с конкретным payload и структурой ответа : клиент=guest_client, ожидаемый статус=403","
+    Данный тест проверяет возможность создания задачи с заранее определённым набором данных (payload) через API
+     управления задачами для различных ролей пользователей, а также корректность и полноту возвращаемого ответа.
+     Тест эмулирует действия разных типов клиентов (owner, менеджер, member, гость) и сравнивает фактический результат с ожидаемым HTTP-статусом.
+    "
+"passed","Wed Sep 09 10:48:34 UTC 2026","Wed Sep 09 10:48:34 UTC 2026","194","Task Service","Edit Task Custom Field","Access Custom Fields","","","NUMBER manager_client : Number Custom Fields. Проверка доступа для роли manager_client","
+    Number Custom Fields. Проверка доступа к редактированию числового поля для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:14 UTC 2026","Wed Sep 09 10:48:16 UTC 2026","2669","Task Service","Create Task","Access Task","","","Create task with minimal payload: клиент=manager_client, ожидаемый статус=200","
+    Тест проверки создания задачи с минимальным набором полей в системе управления проектами под разными ролями.
+
+    Цель теста — убедиться, что можно успешно создать задачу, указав только минимально необходимые данные, и что поведение API зависит от прав пользователя (типа клиента).
+    В процессе теста дополнительно валидируются структура созданной задачи, значения по умолчанию, связи (creator, board и пр.), а также удаление задачи после проверки.
+    assert_task_keys обеспечивает падение теста при добавлении/удалении ключей с понятным сообщением.
+    "
+"passed","Wed Sep 09 10:48:31 UTC 2026","Wed Sep 09 10:48:32 UTC 2026","209","Task Service","Edit Task Custom Field","Access Custom Fields","","","DATE member_client: Edit Date Custom Field for Role: member_client","
+    Date Custom Fields. Проверка доступа к редактированию поля Date для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:19 UTC 2026","Wed Sep 09 10:48:22 UTC 2026","2777","Task Service","Create Task","Access Task","","","Проверка создания задачи с конкретным payload и структурой ответа : клиент=owner_client, ожидаемый статус=200","
+    Данный тест проверяет возможность создания задачи с заранее определённым набором данных (payload) через API
+     управления задачами для различных ролей пользователей, а также корректность и полноту возвращаемого ответа.
+     Тест эмулирует действия разных типов клиентов (owner, менеджер, member, гость) и сравнивает фактический результат с ожидаемым HTTP-статусом.
+    "
+"passed","Wed Sep 09 10:48:22 UTC 2026","Wed Sep 09 10:48:26 UTC 2026","3455","Task Service","Create Task","Access Task","","","Проверка создания задачи с конкретным payload и структурой ответа : клиент=manager_client, ожидаемый статус=200","
+    Данный тест проверяет возможность создания задачи с заранее определённым набором данных (payload) через API
+     управления задачами для различных ролей пользователей, а также корректность и полноту возвращаемого ответа.
+     Тест эмулирует действия разных типов клиентов (owner, менеджер, member, гость) и сравнивает фактический результат с ожидаемым HTTP-статусом.
+    "
+"passed","Wed Sep 09 10:48:30 UTC 2026","Wed Sep 09 10:48:31 UTC 2026","554","Task Service","Edit Task Custom Field","Access Custom Fields","","","BOOLEAN guest_client: Edit Boolean Custom Field for Role: guest_client","
+    Boolean Custom Fields. Проверка доступа к редактированию чекбокса для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:33 UTC 2026","Wed Sep 09 10:48:34 UTC 2026","190","Task Service","Edit Task Custom Field","Access Custom Fields","","","NUMBER owner_client : Number Custom Fields. Проверка доступа для роли owner_client","
+    Number Custom Fields. Проверка доступа к редактированию числового поля для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:32 UTC 2026","Wed Sep 09 10:48:32 UTC 2026","166","Task Service","Edit Task Custom Field","Access Custom Fields","","","DATE guest_client: Edit Date Custom Field for Role: guest_client","
+    Date Custom Fields. Проверка доступа к редактированию поля Date для разных ролей.
+    "
+"passed","Wed Sep 09 10:48:35 UTC 2026","Wed Sep 09 10:48:35 UTC 2026","852","Task Service","Get Tasks","","","","GetTasks schema: Проверка структуры и типов полей задач в ответе","
+    Проверка структуры и типов полей задач только для owner_client.
+    "
