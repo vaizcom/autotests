@@ -7,8 +7,17 @@ import requests
 import urllib3
 
 
+# ---------------------------------------------------------------------------
+# Hooks
+# ---------------------------------------------------------------------------
+
 def pytest_configure(config):
-    """Разделяет allure-results для backend и frontend тестов (только локально)."""
+    """Хук pytest: вызывается при старте сессии, до сбора тестов.
+
+    Разделяет allure-results по сьютам (backend / frontend),
+    чтобы локальные отчёты не смешивались. В CI не применяется —
+    там папку задаёт воркфлоу.
+    """
     if os.getenv("CI"):
         return
     if not getattr(config.option, "allure_report_dir", None):

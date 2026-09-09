@@ -58,6 +58,13 @@ from test_backend.data.endpoints.milestone.milestones_endpoints import create_mi
 # ---------------------------------------------------------------------------
 
 def pytest_collection_finish(session):
+    """Хук pytest: вызывается после сбора тестов, до их запуска.
+    Хук с health check — проверка стенда до запуска, а не таймауты на каждом тесте.
+
+    Выводит название стенда и API URL, затем проверяет доступность стенда.
+    Если стенд не отвечает или возвращает 5xx — сессия завершается сразу,
+    чтобы не ждать таймаутов на каждом тесте.
+    """
     has_backend = any(item.get_closest_marker('backend') for item in session.items)
     if has_backend:
         print(f'\n🧪 Running on stand: {settings.TEST_STAND_NAME}')
@@ -119,6 +126,7 @@ def cleanup_stale_test_spaces():
             continue
 
 
+# api_client = APIClient(base_url=API_URL, token=get_token('main'))
 # ---------------------------------------------------------------------------
 # Clients
 # ---------------------------------------------------------------------------
