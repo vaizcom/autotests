@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import duplicate_task_endpoint
+from api.task.task_endpoints import duplicate_task_endpoint
 
 pytestmark = [pytest.mark.backend]
 

@@ -5,10 +5,16 @@ on:
     branches: [ main, master ]
     paths:
       - 'tests/test_public_api/**'
+      - 'api/**'
+      - 'config/**'
+      - 'core/**'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'tests/test_public_api/**'
+      - 'api/**'
+      - 'config/**'
+      - 'core/**'
   workflow_dispatch:
 
 concurrency:
@@ -31,7 +37,7 @@ jobs:
           fetch-depth: 0
 
       - name: Add tests to PYTHONPATH
-        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=$(pwd):$(pwd)/tests" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v4

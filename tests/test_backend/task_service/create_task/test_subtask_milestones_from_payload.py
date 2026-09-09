@@ -1,7 +1,7 @@
 import time
 import allure
 import pytest
-from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
+from api.task.task_endpoints import get_task_endpoint
 from test_backend.task_service.utils import get_subtask_ms_1, get_subtask_ms_2, delete_task_with_retry, \
     get_parent_ms_1, get_parent_ms_2
 

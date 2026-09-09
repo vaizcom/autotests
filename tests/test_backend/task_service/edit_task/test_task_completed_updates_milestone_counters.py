@@ -1,8 +1,8 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint, edit_task_endpoint
-from test_backend.data.endpoints.milestone.milestones_endpoints import get_milestone_endpoint
+from api.task.task_endpoints import get_task_endpoint, edit_task_endpoint
+from api.milestone.milestones_endpoints import get_milestone_endpoint
 
 pytestmark = [pytest.mark.backend]
 

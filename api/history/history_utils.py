@@ -1,7 +1,7 @@
 import time
 from typing import Optional
 
-from test_backend.data.endpoints.History.get_history_endpoint import get_history_endpoint
+from api.history.get_history_endpoint import get_history_endpoint
 from core.response_utils import short_resp
 
 

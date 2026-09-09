@@ -4,27 +4,27 @@ import pytest
 from config.settings import USERS, API_URL
 from core.auth import get_token
 from core.client import APIClient
-from test_backend.data.endpoints.Space.space_endpoints import (
+from api.space.space_endpoints import (
     create_space_endpoint,
     get_spaces_endpoint,
     remove_space_endpoint,
 )
-from test_backend.data.endpoints.invite.invite_endpoint import (
+from api.invite.invite_endpoint import (
     invite_to_space_endpoint,
     confirm_space_invite_endpoint,
 )
-from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
-from test_backend.data.endpoints.Project.project_endpoints import (
+from api.member.member_endpoints import get_space_members_endpoint
+from api.project.project_endpoints import (
     create_project_endpoint,
     create_board_endpoint,
 )
-from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS, typesList as DEFAULT_TYPES_LIST
-from test_backend.data.endpoints.access_group.access_group_endpoints import (
+from api.board.constants import DEFAULT_BOARD_GROUPS, typesList as DEFAULT_TYPES_LIST
+from api.access_group.access_group_endpoints import (
     update_access_group_rights_endpoint,
     create_access_group_endpoint,
     set_access_group_member_endpoint,
 )
-from test_backend.data.endpoints.access_group.access_group_helpers import get_member_access_group
+from api.access_group.access_group_helpers import get_member_access_group
 from config.generators import generate_slug
 
 _SPACE_NAME = "_autotest_access_group_space"

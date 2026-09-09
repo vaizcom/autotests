@@ -1,9 +1,9 @@
 import pytest
 import allure
 
-from test_backend.data.endpoints.access_group.access_group_helpers import get_member_access_group
-from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
-from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint
+from api.access_group.access_group_helpers import get_member_access_group
+from api.invite.assert_invite_payload import assert_invite_payload
+from api.invite.invite_endpoint import invite_to_space_endpoint
 
 pytestmark = [pytest.mark.backend]
 

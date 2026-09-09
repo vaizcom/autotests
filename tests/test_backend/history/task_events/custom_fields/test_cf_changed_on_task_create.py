@@ -3,11 +3,11 @@ import time
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import (
+from api.task.task_endpoints import (
     edit_task_custom_field_endpoint,
     duplicate_task_endpoint,
 )
-from test_backend.data.endpoints.History.history_utils import (
+from api.history.history_utils import (
     assert_get_history_event,
     assert_get_history_no_event,
     assert_history_event_count,

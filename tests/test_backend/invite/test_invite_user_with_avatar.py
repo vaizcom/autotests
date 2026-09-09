@@ -2,10 +2,10 @@ import uuid
 import allure
 import pytest
 
-from test_backend.data.endpoints.file.upload_avatar_endpoint import get_uploaded_avatar_url
-from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
-from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint
-from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
+from api.file.upload_avatar_endpoint import get_uploaded_avatar_url
+from api.invite.assert_invite_payload import assert_invite_payload
+from api.invite.invite_endpoint import invite_to_space_endpoint
+from api.member.member_endpoints import get_space_members_endpoint
 
 pytestmark = [pytest.mark.backend]
 

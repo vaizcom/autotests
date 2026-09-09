@@ -2,8 +2,8 @@ import allure
 import pytest
 
 from config.generators import generate_project_name, generate_slug
-from test_backend.data.endpoints.Project.constants import MAX_PROJECT_DESCRIPTION_LENGTH
-from test_backend.data.endpoints.Project.project_endpoints import create_project_endpoint
+from api.project.constants import MAX_PROJECT_DESCRIPTION_LENGTH
+from api.project.project_endpoints import create_project_endpoint
 
 pytestmark = [pytest.mark.backend]
 

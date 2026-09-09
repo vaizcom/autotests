@@ -1,8 +1,8 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.multiaction.multiaction_endpoints import multiple_edit_tasks_endpoint
-from test_backend.data.endpoints.multiaction.multiaction_asserts import assert_multiaction_response
+from api.multiaction.multiaction_endpoints import multiple_edit_tasks_endpoint
+from api.multiaction.multiaction_asserts import assert_multiaction_response
 
 pytestmark = [pytest.mark.backend]
 

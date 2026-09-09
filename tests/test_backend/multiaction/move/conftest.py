@@ -1,6 +1,6 @@
 import pytest
 
-from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
+from api.board.board_endpoints import get_board_endpoint
 
 
 @pytest.fixture(scope="module")

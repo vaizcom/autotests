@@ -1,9 +1,9 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Comment.comment_endpoints import create_comment_endpoint
-from test_backend.data.endpoints.Comment.assert_comment_payload import assert_comment_payload
-from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
+from api.comment.comment_endpoints import create_comment_endpoint
+from api.comment.assert_comment_payload import assert_comment_payload
+from api.task.task_endpoints import get_task_endpoint
 from test_backend.task_service.utils import get_random_group_id
 
 pytestmark = [pytest.mark.backend]

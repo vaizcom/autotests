@@ -1,8 +1,8 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Space.assert_space_payload import assert_space_payload
-from test_backend.data.endpoints.Space.space_endpoints import get_spaces_endpoint
+from api.space.assert_space_payload import assert_space_payload
+from api.space.space_endpoints import get_spaces_endpoint
 from test_backend.task_service.utils import get_client
 
 pytestmark = [pytest.mark.backend]

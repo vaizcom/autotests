@@ -1,7 +1,7 @@
 import allure
 
 from config.generators import generate_space_name
-from test_backend.data.endpoints.Space.space_endpoints import (
+from api.space.space_endpoints import (
     create_space_endpoint,
     get_space_endpoint,
     edit_space_endpoint,

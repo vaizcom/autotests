@@ -4,7 +4,7 @@ import time
 import pytest
 import allure
 
-from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
+from api.task.task_endpoints import get_tasks_endpoint
 from test_backend.task_service.utils import get_client, delete_task_with_retry
 
 pytestmark = [pytest.mark.backend]

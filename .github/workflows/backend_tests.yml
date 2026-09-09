@@ -5,10 +5,16 @@ on:
     branches: [ main, master ]
     paths:
       - 'tests/test_backend/**'
+      - 'api/**'
+      - 'config/**'
+      - 'core/**'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'tests/test_backend/**'
+      - 'api/**'
+      - 'config/**'
+      - 'core/**'
   workflow_dispatch:
     inputs:
       test_scope:
@@ -55,7 +61,7 @@ jobs:
 
       # ✅ Добавляем tests/ в PYTHONPATH (для from config import settings)
       - name: Add tests to PYTHONPATH
-        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/tests" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=$(pwd):$(pwd)/tests" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v4
