@@ -2,23 +2,23 @@ import pytest
 
 from config.generators import generate_date
 from core.response_utils import short_resp
-from test_backend.data.endpoints.access_group.access_group_endpoints import (
+from api.access_group.access_group_endpoints import (
     update_access_group_rights_endpoint,
 )
-from test_backend.data.endpoints.access_group.access_group_helpers import (
+from api.access_group.access_group_helpers import (
     get_member_access_group,
 )
-from test_backend.data.endpoints.Board.board_endpoints import (
+from api.board.board_endpoints import (
     get_boards_endpoint,
     delete_board_endpoint,
 )
-from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS, typesList
-from test_backend.data.endpoints.Project.project_endpoints import create_board_endpoint
-from test_backend.data.endpoints.Task.task_endpoints import (
+from api.board.constants import DEFAULT_BOARD_GROUPS, typesList
+from api.project.project_endpoints import create_board_endpoint
+from api.task.task_endpoints import (
     create_task_endpoint,
     delete_task_endpoint,
 )
-from test_backend.data.endpoints.milestone.milestones_endpoints import (
+from api.milestone.milestones_endpoints import (
     create_milestone_endpoint,
     archive_milestone_endpoint,
     get_milestones_endpoint,

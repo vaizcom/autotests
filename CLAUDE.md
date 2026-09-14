@@ -4,17 +4,18 @@
 Всегда общаться на русском.
 
 ## Структура проекта
+- `api/` — эндпоинты и хелперы API (по модулю на сущность), `api/public/` — public API
+- `config/` — настройки: `settings.py` (загрузка `.env` → `USERS`, `API_URL`), `generators.py`
+- `core/` — общая инфраструктура: `auth.py` (токены), `client.py` (HTTP-клиент с retry), `waiters.py`
 - `tests/test_frontend/` — Playwright E2E тесты (pytest + allure)
 - `tests/test_backend/` — API тесты (pytest + allure)
 - `tests/test_public_api/` — Public API тесты (PAT-авторизация)
 - `.github/workflows/` — CI воркфлоу (frontend_tests.yml, backend_tests.yml, public_api_tests.yml)
-- `tests/config/settings.py` — загрузка `.env` → `USERS`, `API_URL`
-- `tests/core/` — общая инфраструктура: `auth.py` (токены), `client.py` (HTTP-клиент с retry), `waiters.py`
 
 ## Backend-тесты: архитектура
 
 ### Эндпоинты
-- Лежат в `tests/test_backend/data/endpoints/` — по модулю на каждую сущность
+- Лежат в `api/` — по модулю на каждую сущность (task, board, history и т.д.)
 - Каждый эндпоинт — функция, возвращающая dict: `{"path": ..., "json": ..., "headers": ...}`
 - Вызываются через `client.post(**endpoint_function(...))`
 

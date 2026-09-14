@@ -1,7 +1,7 @@
 import pytest
 import allure
 
-from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
+from api.task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.backend]
 @allure.suite("Get Tasks")
 @allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks assignees: пустой массив — без фильтра по исполнителям")
-def test_get_tasks_assignees_empty(owner_client, main_space, board_with_10000_tasks):
+def test_get_tasks_assignees_empty(owner_client, main_space, board_with_tasks):
     """
     Сейчас пустой массив возвращает пустой список задач,
     (для наших нужд нет потребности выводить список тасок в котором нет асайни),
@@ -19,7 +19,7 @@ def test_get_tasks_assignees_empty(owner_client, main_space, board_with_10000_ta
     with allure.step("Выполнить POST /GetTasks с assignees=[]"):
         response = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_10000_tasks,
+            board=board_with_tasks,
             assignees=[]
         ))
     with allure.step("Проверить HTTP 200 и наличие пустого массива tasks"):

@@ -4,8 +4,8 @@ import allure
 import random
 
 from config.generators import generate_slug
-from test_backend.data.endpoints.Project.project_endpoints import create_project_endpoint
-from test_backend.data.endpoints.Document.document_endpoints import (
+from api.project.project_endpoints import create_project_endpoint
+from api.document.document_endpoints import (
     create_document_endpoint,
     get_documents_endpoint,
 )

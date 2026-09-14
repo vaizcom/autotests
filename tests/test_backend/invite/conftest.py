@@ -6,13 +6,13 @@ import pytest
 from config import settings
 from config.generators import generate_space_name, generate_project_name, generate_slug, generate_board_name
 from core.response_utils import short_resp
-from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
-from test_backend.data.endpoints.Project.project_endpoints import create_project_endpoint, create_board_endpoint
-from test_backend.data.endpoints.Space.space_endpoints import (
+from api.board.constants import DEFAULT_BOARD_GROUPS
+from api.project.project_endpoints import create_project_endpoint, create_board_endpoint
+from api.space.space_endpoints import (
     create_space_endpoint, remove_space_endpoint, get_space_endpoint, get_spaces_endpoint,
 )
-from test_backend.data.endpoints.access_group.access_group_endpoints import create_access_group_endpoint
-from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
+from api.access_group.access_group_endpoints import create_access_group_endpoint
+from api.invite.invite_endpoint import invite_to_space_endpoint, confirm_space_invite_endpoint
 
 
 # ── Rate-limit: skip remaining invite tests on 429 ─────────────────────────

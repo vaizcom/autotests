@@ -4,7 +4,7 @@ from datetime import timezone, timedelta, datetime
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import edit_task_custom_field_endpoint
+from api.task.task_endpoints import edit_task_custom_field_endpoint
 
 pytestmark = [pytest.mark.backend]
 

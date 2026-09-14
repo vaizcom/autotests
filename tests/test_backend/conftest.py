@@ -22,34 +22,34 @@ from config.settings import (
 from core.client import APIClient
 from core.auth import get_token
 from core.response_utils import short_resp
-from test_backend.data.endpoints.Auth.auth_with_email_endpoint import auth_with_email_endpoint
-from test_backend.data.endpoints.Auth.verify_otp_endpoint import verify_otp_endpoint
-from test_backend.data.endpoints.Board.board_endpoints import (
+from api.auth.auth_with_email_endpoint import auth_with_email_endpoint
+from api.auth.verify_otp_endpoint import verify_otp_endpoint
+from api.board.board_endpoints import (
     get_board_endpoint,
     get_boards_endpoint,
     delete_board_endpoint,
 )
-from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS, typesList
-from test_backend.data.endpoints.Document.document_endpoints import create_document_endpoint, archive_document_endpoint
-from test_backend.data.endpoints.Project.project_endpoints import (
+from api.board.constants import DEFAULT_BOARD_GROUPS, typesList
+from api.document.document_endpoints import create_document_endpoint, archive_document_endpoint
+from api.project.project_endpoints import (
     create_project_endpoint,
     create_board_endpoint,
     get_project_endpoint,
     get_projects_endpoint,
     archive_project_endpoint,
 )
-from test_backend.data.endpoints.Space.space_endpoints import (
+from api.space.space_endpoints import (
     create_space_endpoint,
     remove_space_endpoint,
     get_space_endpoint,
     get_spaces_endpoint,
 )
-from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint, create_task_endpoint, \
+from api.task.task_endpoints import get_tasks_endpoint, create_task_endpoint, \
     delete_task_endpoint
-from test_backend.data.endpoints.User.profile_endpoint import get_profile_endpoint
-from test_backend.data.endpoints.access_group.access_group_endpoints import create_access_group_endpoint
-from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
-from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint, \
+from api.user.profile_endpoint import get_profile_endpoint
+from api.access_group.access_group_endpoints import create_access_group_endpoint
+from api.member.member_endpoints import get_space_members_endpoint
+from api.milestone.milestones_endpoints import create_milestone_endpoint, \
     archive_milestone_endpoint
 
 

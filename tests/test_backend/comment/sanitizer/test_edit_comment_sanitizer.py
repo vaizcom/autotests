@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Comment.comment_endpoints import (
+from api.comment.comment_endpoints import (
     create_comment_endpoint,
     edit_comment_endpoint,
     get_comments_endpoint,

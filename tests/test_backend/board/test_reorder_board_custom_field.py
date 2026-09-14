@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Board.board_endpoints import (
+from api.board.board_endpoints import (
     create_board_custom_field_endpoint,
     get_board_endpoint,
     reorder_board_custom_field_endpoint,

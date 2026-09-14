@@ -3,7 +3,7 @@ import pytest
 
 from test_backend.project import MAX_PROJECT_SLUG_LENGTH
 from config.generators import generate_slug, generate_project_name
-from test_backend.data.endpoints.Project.project_endpoints import (
+from api.project.project_endpoints import (
     create_project_endpoint,
     is_project_slug_unique_endpoint
 )

@@ -1,6 +1,6 @@
 import pytest
 import allure
-from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
+from api.task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
@@ -50,9 +50,9 @@ def test_get_tasks_limit_zero(owner_client, main_space, board_with_tasks):
 @allure.suite("Get Tasks")
 @allure.sub_suite("Filtered by criteria")
 @allure.title("GetTasks limit: превышает доступное кол-во задач — возвращается не больше фактического")
-def test_get_tasks_limit_more_than_available(owner_client, main_space, board_with_10000_tasks):
+def test_get_tasks_limit_more_than_available(owner_client, main_space, board_with_tasks):
     with allure.step("Получить фактическое число задач без limit"):
-        resp_all = owner_client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_10000_tasks))
+        resp_all = owner_client.post(**get_tasks_endpoint(space_id=main_space, board=board_with_tasks))
         assert resp_all.status_code == 200
         all_tasks = resp_all.json().get("payload", {}).get("tasks", [])
         total = len(all_tasks)
@@ -61,7 +61,7 @@ def test_get_tasks_limit_more_than_available(owner_client, main_space, board_wit
         expected_limit = total + 10 if total > 0 else 10
         resp_limited = owner_client.post(**get_tasks_endpoint(
             space_id=main_space,
-            board=board_with_10000_tasks,
+            board=board_with_tasks,
             limit=expected_limit
         ))
 

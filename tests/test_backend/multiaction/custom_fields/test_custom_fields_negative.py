@@ -2,8 +2,8 @@ import allure
 import pytest
 
 from config.generators import generate_object_id
-from test_backend.data.endpoints.multiaction.multiaction_endpoints import multiple_edit_tasks_custom_field_endpoint
-from test_backend.data.endpoints.multiaction.multiaction_asserts import assert_multiaction_response
+from api.multiaction.multiaction_endpoints import multiple_edit_tasks_custom_field_endpoint
+from api.multiaction.multiaction_asserts import assert_multiaction_response
 
 pytestmark = [pytest.mark.backend]
 

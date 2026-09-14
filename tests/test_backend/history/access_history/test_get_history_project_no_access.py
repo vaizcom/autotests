@@ -27,16 +27,16 @@ import allure
 import pytest
 
 from core.response_utils import short_resp
-from test_backend.data.endpoints.History.get_history_endpoint import get_history_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_get_history_event
-from test_backend.data.endpoints.Document.document_endpoints import (
+from api.history.get_history_endpoint import get_history_endpoint
+from api.history.history_utils import assert_get_history_event
+from api.document.document_endpoints import (
     create_document_endpoint,
     archive_document_endpoint,
 )
-from test_backend.data.endpoints.Task.task_endpoints import (
+from api.task.task_endpoints import (
     create_task_endpoint, delete_task_endpoint,
 )
-from test_backend.data.endpoints.milestone.milestones_endpoints import (
+from api.milestone.milestones_endpoints import (
     create_milestone_endpoint, archive_milestone_endpoint,
 )
 

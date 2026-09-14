@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.assert_task_payload import TASK_FULL_SCHEMA
+from api.task.assert_task_payload import TASK_FULL_SCHEMA
 
 pytestmark = [pytest.mark.backend]
 

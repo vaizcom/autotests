@@ -3,7 +3,7 @@ import time
 import pytest
 
 from config.settings import PUBLIC_PROJECT_ID, PUBLIC_TASK_ID, PUBLIC_MILESTONE_ID, PUBLIC_DOCUMENT_ID
-from test_public_api.data.endpoints.public_history_endpoint import public_history_endpoint
+from api.public.public_history_endpoint import public_history_endpoint
 
 
 @pytest.fixture(scope="session")

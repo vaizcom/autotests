@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import allure
 import pytest
 
-from test_public_api.data.endpoints.public_history_endpoint import public_history_endpoint
+from api.public.public_history_endpoint import public_history_endpoint
 
 pytestmark = [
     pytest.mark.public_api,

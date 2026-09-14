@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.access_group.access_group_endpoints import update_access_group_rights_endpoint
+from api.access_group.access_group_endpoints import update_access_group_rights_endpoint
 from .helpers import create_custom_group
 
 pytestmark = [pytest.mark.backend]

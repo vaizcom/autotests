@@ -16,10 +16,10 @@ import allure
 import pytest
 
 from core.response_utils import short_resp
-from test_backend.data.endpoints.access_group.access_group_endpoints import (
+from api.access_group.access_group_endpoints import (
     update_access_group_rights_endpoint,
 )
-from test_backend.data.endpoints.History.history_utils import (
+from api.history.history_utils import (
     assert_get_history_event, assert_get_history_no_event,
 )
 

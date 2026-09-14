@@ -2,8 +2,8 @@ import allure
 import pytest
 
 from config.generators import generate_email
-from test_backend.data.endpoints.access_group.access_group_helpers import get_member_access_group
-from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, remove_invite_endpoint
+from api.access_group.access_group_helpers import get_member_access_group
+from api.invite.invite_endpoint import invite_to_space_endpoint, remove_invite_endpoint
 
 pytestmark = [pytest.mark.backend]
 

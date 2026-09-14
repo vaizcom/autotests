@@ -1,8 +1,8 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, remove_invite_endpoint
-from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
+from api.invite.invite_endpoint import invite_to_space_endpoint, remove_invite_endpoint
+from api.member.member_endpoints import get_space_members_endpoint
 
 
 pytestmark = [pytest.mark.backend, pytest.mark.skip(reason="TODO: продумать спейсы/пользователей для биллинг-тестов")]

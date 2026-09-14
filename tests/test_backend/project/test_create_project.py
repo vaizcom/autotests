@@ -2,8 +2,8 @@ import allure
 import pytest
 
 from config.generators import generate_project_name, generate_slug
-from test_backend.data.endpoints.Project.assert_project_output_payload import assert_project_payload
-from test_backend.data.endpoints.Project.project_endpoints import (
+from api.project.assert_project_output_payload import assert_project_payload
+from api.project.project_endpoints import (
     create_project_endpoint
 )
 

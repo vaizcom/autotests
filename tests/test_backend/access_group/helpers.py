@@ -1,10 +1,10 @@
 import allure
 
-from test_backend.data.endpoints.access_group.access_group_endpoints import (
+from api.access_group.access_group_endpoints import (
     create_access_group_endpoint,
     get_access_groups_endpoint,
 )
-from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
+from api.member.member_endpoints import get_space_members_endpoint
 
 
 def get_self_group_id(client, space_id, member_id):

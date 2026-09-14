@@ -2,8 +2,8 @@ import allure
 import pytest
 
 from config.generators import generate_email
-from test_backend.data.endpoints.invite.assert_invite_payload import assert_invite_payload
-from test_backend.data.endpoints.invite.invite_endpoint import invite_to_space_endpoint, resend_invite_endpoint, \
+from api.invite.assert_invite_payload import assert_invite_payload
+from api.invite.invite_endpoint import invite_to_space_endpoint, resend_invite_endpoint, \
     remove_invite_endpoint
 
 pytestmark = [pytest.mark.backend]

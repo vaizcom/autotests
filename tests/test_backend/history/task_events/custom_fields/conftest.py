@@ -3,8 +3,8 @@ import time
 import allure
 import pytest
 
-from test_backend.data.endpoints.Board.board_endpoints import create_board_custom_field_endpoint
-from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
+from api.board.board_endpoints import create_board_custom_field_endpoint
+from api.task.task_endpoints import create_task_endpoint, delete_task_endpoint
 
 _RETRYABLE_ERRORS = ("AccessDenied", "MemberDidNotFound")
 

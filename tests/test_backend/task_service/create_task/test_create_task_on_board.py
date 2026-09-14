@@ -2,9 +2,10 @@ import random
 import allure
 import pytest
 
-from test_backend.task_service.utils import get_client, delete_task_with_retry
-from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
-from test_backend.task_service.utils import get_random_group_id
+from test_backend.task_service.utils import get_client
+from api.board.board_endpoints import get_board_endpoint
+from api.board.board_helpers import get_random_group_id
+from api.task.task_helpers import delete_task_with_retry
 
 pytestmark = [pytest.mark.backend]
 

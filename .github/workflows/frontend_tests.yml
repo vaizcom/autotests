@@ -5,10 +5,14 @@ on:
     branches: [ main ]
     paths:
       - 'tests/test_frontend/**'
+      - 'config/**'
+      - 'core/**'
   pull_request:
     branches: [ main ]
     paths:
       - 'tests/test_frontend/**'
+      - 'config/**'
+      - 'core/**'
   workflow_dispatch:
     inputs:
       frontend_url:
@@ -72,7 +76,7 @@ jobs:
           python-version: '3.11'
 
       - name: Add tests to PYTHONPATH
-        run: echo "PYTHONPATH=$(pwd)/tests" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=$(pwd):$(pwd)/tests" >> $GITHUB_ENV
 
       - name: Cache pip
         uses: actions/cache@v4

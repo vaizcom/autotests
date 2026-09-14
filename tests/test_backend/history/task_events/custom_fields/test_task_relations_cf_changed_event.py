@@ -1,11 +1,11 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import (
+from api.task.task_endpoints import (
     edit_task_custom_field_endpoint,
     delete_task_endpoint,
 )
-from test_backend.data.endpoints.History.history_utils import assert_get_history_event
+from api.history.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend]
 

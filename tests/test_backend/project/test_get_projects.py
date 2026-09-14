@@ -1,8 +1,8 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Project.assert_project_output_payload import assert_project_payload
-from test_backend.data.endpoints.Project.project_endpoints import (
+from api.project.assert_project_output_payload import assert_project_payload
+from api.project.project_endpoints import (
     get_projects_endpoint
 )
 

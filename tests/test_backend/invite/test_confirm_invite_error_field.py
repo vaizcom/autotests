@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.invite.invite_endpoint import (
+from api.invite.invite_endpoint import (
     confirm_space_invite_endpoint
 )
 

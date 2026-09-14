@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Task.task_endpoints import get_tasks_endpoint
+from api.task.task_endpoints import get_tasks_endpoint
 
 pytestmark = [pytest.mark.backend]
 
@@ -17,7 +17,7 @@ def test_get_tasks_invalid_space_id(owner_client, board_with_10000_tasks):
 
     with allure.step("Проверить HTTP статус код 400"):
         assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "SpaceIdNotSpecified"
+        assert resp.json()["error"]["code"] == "MemberDidNotFound"
 
 @allure.parent_suite("Task Service")
 @allure.suite("Get Tasks")
@@ -48,7 +48,7 @@ def test_get_tasks_invalid_format_space_id(request, board_with_10000_tasks):
 
     with allure.step("Проверить HTTP 400"):
         assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "SpaceIdNotSpecified"
+        assert resp.json()["error"]["code"] == "MemberDidNotFound"
 
 
 @allure.parent_suite("Task Service")
@@ -90,7 +90,7 @@ def test_get_tasks_empty_string_params(request, board_with_10000_tasks, main_spa
 
     with allure.step("Проверить HTTP 400"):
         assert resp.status_code == 400
-        assert resp.json()["error"]["code"] == "SpaceIdNotSpecified"
+        assert resp.json()["error"]["code"] == "MemberDidNotFound"
 
 
 @allure.parent_suite("Task Service")

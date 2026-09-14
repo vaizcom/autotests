@@ -4,11 +4,11 @@ import allure
 import pytest
 
 from config.settings import USERS
-from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint, delete_task_endpoint
-from test_backend.data.endpoints.milestone.milestones_endpoints import create_milestone_endpoint, archive_milestone_endpoint
-from test_backend.data.endpoints.Project.project_endpoints import create_board_endpoint
-from test_backend.data.endpoints.Board.constants import DEFAULT_BOARD_GROUPS
-from test_backend.data.endpoints.member.member_endpoints import get_space_members_endpoint
+from api.task.task_endpoints import create_task_endpoint, delete_task_endpoint
+from api.milestone.milestones_endpoints import create_milestone_endpoint, archive_milestone_endpoint
+from api.project.project_endpoints import create_board_endpoint
+from api.board.constants import DEFAULT_BOARD_GROUPS
+from api.member.member_endpoints import get_space_members_endpoint
 
 
 @pytest.fixture

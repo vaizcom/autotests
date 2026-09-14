@@ -1,9 +1,9 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.archive.archive_task_endpoint import archive_task_endpoint
-from test_backend.data.endpoints.archive.unarchive_task_endpoint import unarchive_task_endpoint
-from test_backend.data.endpoints.History.history_utils import assert_get_history_event
+from api.archive.archive_task_endpoint import archive_task_endpoint
+from api.archive.unarchive_task_endpoint import unarchive_task_endpoint
+from api.history.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend]
 

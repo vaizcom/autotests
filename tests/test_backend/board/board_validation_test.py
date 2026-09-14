@@ -1,14 +1,14 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.Board.board_endpoints import (
+from api.board.board_endpoints import (
     create_board_custom_field_endpoint,
     create_board_group_endpoint,
 )
-from test_backend.data.endpoints.Board.custom_field_types import CustomFieldType
+from api.board.custom_field_types import CustomFieldType
 
-from test_backend.data.endpoints.Board.board_endpoints import create_board_endpoint
-from test_backend.data.endpoints.Board.constants import (
+from api.board.board_endpoints import create_board_endpoint
+from api.board.constants import (
     MAX_BOARD_NAME_LENGTH,
     BOARD_CUSTOM_FIELD_MAX_TITLE_LENGTH,
     BOARD_GROUP_LIMIT_MAX_VALUE,

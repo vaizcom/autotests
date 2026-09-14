@@ -1,10 +1,10 @@
 import allure
 import pytest
 
-from test_backend.data.endpoints.multiaction.multiaction_endpoints import multiple_edit_tasks_endpoint
-from test_backend.data.endpoints.multiaction.multiaction_asserts import assert_multiaction_response
-from test_backend.data.endpoints.Task.task_endpoints import get_task_endpoint
-from test_backend.data.endpoints.Task.constants import PRIORITY_GENERAL, PRIORITY_MEDIUM
+from api.multiaction.multiaction_endpoints import multiple_edit_tasks_endpoint
+from api.multiaction.multiaction_asserts import assert_multiaction_response
+from api.task.task_endpoints import get_task_endpoint
+from api.task.constants import PRIORITY_GENERAL, PRIORITY_MEDIUM
 
 pytestmark = [pytest.mark.backend]
 

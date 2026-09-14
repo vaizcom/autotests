@@ -1,9 +1,9 @@
 import pytest
 import allure
 
-from test_backend.data.endpoints.Task.task_endpoints import create_task_endpoint
-from test_backend.task_service.utils import delete_all_group_tasks
-from test_backend.data.endpoints.Board.board_endpoints import get_board_endpoint
+from api.task.task_endpoints import create_task_endpoint
+from api.board.board_endpoints import get_board_endpoint
+from api.task.task_helpers import delete_all_group_tasks
 
 pytestmark = [pytest.mark.backend]
 

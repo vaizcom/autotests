@@ -1,7 +1,7 @@
 import allure
 import pytest
 from config.generators import generate_custom_field_title
-from test_backend.data.endpoints.Board.board_endpoints import (
+from api.board.board_endpoints import (
     create_board_custom_field_endpoint,
     edit_board_custom_field_endpoint,
 )

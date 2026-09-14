@@ -5,8 +5,8 @@ import pytest
 import requests
 
 from config.settings import API_URL
-from test_backend.data.endpoints.Auth.auth_with_email_endpoint import auth_with_email_endpoint
-from test_backend.data.endpoints.Auth.verify_otp_endpoint import verify_otp_endpoint
+from api.auth.auth_with_email_endpoint import auth_with_email_endpoint
+from api.auth.verify_otp_endpoint import verify_otp_endpoint
 
 pytestmark = [pytest.mark.backend]
 

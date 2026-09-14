@@ -3,11 +3,11 @@ import uuid
 import allure
 import pytest
 
-from test_backend.data.endpoints.access_group.access_group_endpoints import (
+from api.access_group.access_group_endpoints import (
     create_access_group_endpoint,
     update_access_group_rights_endpoint,
 )
-from test_backend.data.endpoints.History.history_utils import assert_get_history_event
+from api.history.history_utils import assert_get_history_event
 
 pytestmark = [pytest.mark.backend]
 

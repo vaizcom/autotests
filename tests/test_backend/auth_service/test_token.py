@@ -2,7 +2,7 @@ import allure
 import pytest
 import requests
 from config.settings import API_URL, MAIN_SPACE_ID
-from test_backend.data.endpoints.Space.space_endpoints import get_space_endpoint
+from api.space.space_endpoints import get_space_endpoint
 
 pytestmark = [pytest.mark.backend]
 
